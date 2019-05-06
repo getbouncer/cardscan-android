@@ -1,6 +1,6 @@
 # CardScan
 
-CardScan iOS installation guide
+CardScan Android installation guide
 
 ## Contents
 
