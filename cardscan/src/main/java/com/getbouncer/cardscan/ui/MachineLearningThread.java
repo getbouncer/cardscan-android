@@ -11,10 +11,14 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.getbouncer.cardscan.CreditCard;
 import com.getbouncer.cardscan.DetectedBox;
 import com.getbouncer.cardscan.Expiry;
 import com.getbouncer.cardscan.ImageUtils;
 import com.getbouncer.cardscan.Ocr;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
@@ -42,9 +46,9 @@ public class MachineLearningThread implements Runnable {
     }
 
     private LinkedList<RunArguments> queue = new LinkedList<>();
-    public boolean mIsScanning = true;
+    boolean mIsScanning = true;
 
-    public synchronized void post(Image image, Semaphore semaphore, ImageView imageView,
+    synchronized void post(Image image, Semaphore semaphore, ImageView imageView,
                                   int sensorOrientation, Activity activity) {
         Log.d("Thread", "post");
         RunArguments args = new RunArguments(image, semaphore, imageView, sensorOrientation,
@@ -96,13 +100,19 @@ public class MachineLearningThread implements Runnable {
                 args.mImageView.setImageBitmap(ImageUtils.drawBoxesOnImage(bitmap, boxes,
                         expiryBox));
                 if (number != null && mIsScanning) {
-                    Intent intent = new Intent(activity, EnterCard.class);
-                    intent.putExtra("number", number);
-                    if (expiry != null) {
-                        intent.putExtra("expiryMonth", expiry.month);
-                        intent.putExtra("expiryYear", expiry.year);
+                    Intent intent = new Intent();
+                    JSONObject card = new JSONObject();
+                    try {
+                        card.put("number", number);
+                        if (expiry != null) {
+                            card.put("expiryMonth", expiry.month);
+                            card.put("expiryYear", expiry.year);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                    activity.startActivity(intent);
+                    intent.putExtra(ScanActivity.SCAN_RESULT, card.toString());
+                    activity.setResult(ScanActivity.RESULT_OK, intent);
                     activity.finish();
                     mIsScanning = false;
                 }

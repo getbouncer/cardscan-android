@@ -21,7 +21,11 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.getbouncer.cardscan.R;
 
-public class CameraActivity extends AppCompatActivity {
+public class ScanActivity extends AppCompatActivity {
+
+    public static final int RESULT_OK = 0;
+    public static final int RESULT_USER_CANCELLED = -1;
+    public static final String SCAN_RESULT = "creditCardJsonString";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

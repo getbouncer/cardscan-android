@@ -1,9 +1,8 @@
-package com.getbouncer.cardscan.ui;
+package com.example.testandroidocr;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import com.getbouncer.cardscan.R;
 import com.stripe.android.view.CardMultilineWidget;
 
 public class EnterCard extends AppCompatActivity {
