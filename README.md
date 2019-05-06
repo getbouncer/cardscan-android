@@ -42,7 +42,7 @@ get the results via the `onActivityResult` method:
 void scanCard() {
     Intent scanIntent = new Intent(this, ScanActivity.class);
     // the number '1234' can be anything, we just used the lock combo for my luggage
-    startActivityForResult(scanIntent, 1234);f
+    startActivityForResult(scanIntent, 1234);
 }
 
 @Override
