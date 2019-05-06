@@ -50,11 +50,24 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
    super.onActivityResult(requestCode, resultCode, data);
 
    if (requestCode == 1234) {
-       if (data != null && data.hasExtra(ScanActivity.EXTRA_SCAN_RESULT)) {
-           CreditCard scanResult = data.getParcelableExtra(ScanActivity.EXTRA_SCAN_RESULT);
-	   // at this point you have the scanned card number and optionally the expiry
-	   // use them in your app
-       }
+      if ( resultCode == ScanActivity.RESULT_OK && data != null &&
+      	 data.hasExtra(ScanActivity.SCAN_RESULT)) {
+
+         String resultString = data.getStringExtra(ScanActivity.SCAN_RESULT);
+         CreditCard scanResult = new CreditCard(resultString);
+
+	 // at this point pass the info to your app's enter card flow
+	 // this is how we do it in our example app
+         Intent intent = new Intent(this, EnterCard.class);
+         intent.putExtra("number", scanResult.number);
+
+         if (scanResult.expiryMonth != null) {
+            intent.putExtra("expiryMonth", Integer.parseInt(scanResult.expiryMonth));
+	    intent.putExtra("expiryYear", Integer.parseInt(scanResult.expiryYear));
+	 }
+
+         startActivity(intent);
+      }
    }
 }
 ```
