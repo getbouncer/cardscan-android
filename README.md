@@ -13,6 +13,7 @@ CardScan iOS installation guide
 ## Requirements
 
 * Android API level 15 or higher
+* We're not quite ready for production use yet, give us about a week to finish cleaning things up.
 
 ## Installation
 
