@@ -226,8 +226,13 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback {
                 new Thread(machineLearningThread).start();
             }
 
-            //machineLearningThread.post(reader.acquireNextImage(), mMachineLearningSemaphore,
-            //        mDebugImageView, mSensorOrientation, getActivity());
+            Camera.Parameters parameters = camera.getParameters();
+            int width = parameters.getPreviewSize().width;
+            int height = parameters.getPreviewSize().height;
+            int format = parameters.getPreviewFormat();
+
+            machineLearningThread.post(bytes, width, height, format, mMachineLearningSemaphore,
+                    this);
         }
     }
 

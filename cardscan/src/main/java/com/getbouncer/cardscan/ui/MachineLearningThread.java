@@ -1,33 +1,16 @@
 package com.getbouncer.cardscan.ui;
 
 import android.app.Activity;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.media.Image;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.widget.ImageView;
 
-import com.getbouncer.cardscan.CreditCard;
-import com.getbouncer.cardscan.DetectedBox;
-import com.getbouncer.cardscan.Expiry;
-import com.getbouncer.cardscan.ImageUtils;
-import com.getbouncer.cardscan.Ocr;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.nio.ByteBuffer;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.Semaphore;
 
 public class MachineLearningThread implements Runnable {
 
     class RunArguments {
+        /*
         private final Image mImage;
         private final Semaphore mSemaphore;
         private final ImageView mImageView;
@@ -41,13 +24,19 @@ public class MachineLearningThread implements Runnable {
             mImageView = imageView;
             mSensorOrientation = sensorOrientation;
             mActivity = activity;
-        }
+        }*/
 
     }
 
     private LinkedList<RunArguments> queue = new LinkedList<>();
     boolean mIsScanning = true;
 
+    synchronized void post(byte[] bytes, int width, int height, int format, Semaphore semaphore,
+                           Activity activity) {
+        semaphore.release();
+    }
+
+    /*
     synchronized void post(Image image, Semaphore semaphore, ImageView imageView,
                                   int sensorOrientation, Activity activity) {
         Log.d("Thread", "post");
@@ -55,8 +44,9 @@ public class MachineLearningThread implements Runnable {
                 activity);
         queue.push(args);
         notify();
-    }
+    }*/
 
+    /*
     private Bitmap getBitmap(Image image, int sensorOrientation) {
         ByteBuffer buffer = image.getPlanes()[0].getBuffer();
         byte[] imageBytes = new byte[buffer.remaining()];
@@ -71,7 +61,7 @@ public class MachineLearningThread implements Runnable {
         int x = 0;
         int y = (int) Math.round(((double) bm.getHeight()) * 0.5 - height * 0.5);
         return Bitmap.createBitmap(bm, x, y, (int) width, (int) height);
-    }
+    }*/
 
     private synchronized void runModel() {
         while (queue.size() == 0) {
@@ -84,6 +74,7 @@ public class MachineLearningThread implements Runnable {
 
         Log.d("Thread", "run");
 
+        /*
         final RunArguments args = queue.pop();
         final Bitmap bitmap = getBitmap(args.mImage, args.mSensorOrientation);
 
@@ -120,7 +111,7 @@ public class MachineLearningThread implements Runnable {
         });
 
         args.mImage.close();
-        args.mSemaphore.release();
+        args.mSemaphore.release();*/
     }
 
     @Override
