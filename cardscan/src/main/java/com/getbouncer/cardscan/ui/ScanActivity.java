@@ -17,13 +17,15 @@
 package com.getbouncer.cardscan.ui;
 
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -31,23 +33,21 @@ import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 
 import com.getbouncer.cardscan.R;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.UUID;
+import java.util.concurrent.Semaphore;
 
-public class ScanActivity extends Activity implements Camera.PictureCallback {
+
+public class ScanActivity extends Activity implements Camera.PreviewCallback {
 
     private Camera mCamera = null;
     private Uri mPictureUri = null;
     private OrientationEventListener mOrientationEventListener;
+    private static MachineLearningThread machineLearningThread = null;
+    private Semaphore mMachineLearningSemaphore = new Semaphore(1);
 
     public static final String SCAN_RESULT = "creditCardJsonString";
 
@@ -70,25 +70,36 @@ public class ScanActivity extends Activity implements Camera.PictureCallback {
             }
         }
 
-        ImageButton captureButton = (ImageButton) findViewById(R.id.button_capture);
-        final Camera.PictureCallback picture = this;
-        captureButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (mCamera != null) {
-                            mCamera.takePicture(null, null, picture);
-                        }
-                    }
-                }
-        );
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.CAMERA}, 110);
+            }
+        }
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults) {
+
+        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            // Now user should be able to use camera
+        } else {
+            finish();
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         if (mCamera != null) {
+            mCamera.stopPreview();
+            mCamera.setPreviewCallback(null);
             mCamera.release();
+        }
+
+        if (machineLearningThread != null) {
+            machineLearningThread.mIsScanning = false;
         }
 
         mOrientationEventListener.disable();
@@ -102,14 +113,19 @@ public class ScanActivity extends Activity implements Camera.PictureCallback {
             mOrientationEventListener.enable();
         }
 
+        if (machineLearningThread != null) {
+            machineLearningThread.mIsScanning = true;
+        }
+
         try {
             mCamera = Camera.open();
-            setPictureResolution(mCamera);
+            //setPictureResolution(mCamera);
             setCameraDisplayOrientation(this, Camera.CameraInfo.CAMERA_FACING_BACK, mCamera);
             // Create our Preview view and set it as the content of our activity.
             CameraPreview cameraPreview = new CameraPreview(this);
             FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
             preview.addView(cameraPreview);
+            mCamera.setPreviewCallback(this);
         } catch (Exception e){
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage("Another app is using the camera")
@@ -124,6 +140,7 @@ public class ScanActivity extends Activity implements Camera.PictureCallback {
         }
     }
 
+    /*
     private void setPictureResolution(Camera camera) {
         Camera.Parameters params = camera.getParameters();
         Camera.Size newSize = null;
@@ -147,7 +164,7 @@ public class ScanActivity extends Activity implements Camera.PictureCallback {
             Log.d("CameraCaptureActivity", "picture res " + newSize.width + "x" + newSize.height);
         }
 
-    }
+    }*/
 
     @Override
     protected void onDestroy() {
@@ -199,26 +216,19 @@ public class ScanActivity extends Activity implements Camera.PictureCallback {
         camera.setDisplayOrientation(result);
     }
 
+
     @Override
-    public void onPictureTaken(byte[] data, Camera camera) {
+    public void onPreviewFrame(byte[] bytes, Camera camera) {
+        if (mMachineLearningSemaphore.tryAcquire()) {
 
-        File dir = this.getDir("Pictures", Context.MODE_PRIVATE);
-        File file = new File(dir, UUID.randomUUID().toString() + ".jpg");
+            if (machineLearningThread == null) {
+                machineLearningThread = new MachineLearningThread();
+                new Thread(machineLearningThread).start();
+            }
 
-        try {
-            FileOutputStream fos = new FileOutputStream(file);
-            fos.write(data);
-            fos.close();
-        } catch (FileNotFoundException e) {
-            Log.d("CameraCaptureActivity", "File not found: " + e.getMessage());
-        } catch (IOException e) {
-            Log.d("CameraCaptureActivity", "Error accessing file: " + e.getMessage());
+            //machineLearningThread.post(reader.acquireNextImage(), mMachineLearningSemaphore,
+            //        mDebugImageView, mSensorOrientation, getActivity());
         }
-
-        Intent i = new Intent();
-        i.putExtra("picture_uri", file.toURI().toString());
-        setResult(RESULT_OK, i);
-        finish();
     }
 
     /** A basic Camera preview class */
