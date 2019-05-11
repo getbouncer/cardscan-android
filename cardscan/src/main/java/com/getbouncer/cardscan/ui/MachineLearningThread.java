@@ -1,6 +1,7 @@
 package com.getbouncer.cardscan.ui;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -11,8 +12,17 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.getbouncer.cardscan.DetectedBox;
+import com.getbouncer.cardscan.Expiry;
+import com.getbouncer.cardscan.ImageUtils;
+import com.getbouncer.cardscan.Ocr;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.ByteArrayOutputStream;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.Semaphore;
 
 public class MachineLearningThread implements Runnable {
@@ -89,17 +99,6 @@ public class MachineLearningThread implements Runnable {
         final Bitmap bitmap = getBitmap(args.mFrameBytes, args.mWidth, args.mHeight, args.mFormat,
                 args.mSensorOrientation);
 
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.post(new Runnable() {
-            public void run() {
-                args.mImageView.setImageBitmap(bitmap);
-            }
-        });
-
-        // XXX ONLY DO THIS WHEN WE"RE DONE
-        args.mSemaphore.release();
-
-        /*
         Ocr ocr = new Ocr();
         final String number = ocr.predict(bitmap, args.mActivity);
         final List<DetectedBox> boxes = ocr.digitBoxes;
@@ -132,8 +131,7 @@ public class MachineLearningThread implements Runnable {
             }
         });
 
-        args.mImage.close();
-        args.mSemaphore.release();*/
+        args.mSemaphore.release();
     }
 
     @Override
