@@ -34,6 +34,7 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import com.getbouncer.cardscan.R;
 
@@ -48,8 +49,11 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback {
     private OrientationEventListener mOrientationEventListener;
     private static MachineLearningThread machineLearningThread = null;
     private Semaphore mMachineLearningSemaphore = new Semaphore(1);
+    private ImageView mDebugImageView;
+    private int mRotation;
 
     public static final String SCAN_RESULT = "creditCardJsonString";
+    private boolean mIsPermissionCheckDone = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,9 +77,12 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback {
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{Manifest.permission.CAMERA}, 110);
+            } else {
+                mIsPermissionCheckDone = true;
             }
         }
 
+        mDebugImageView = findViewById(R.id.debugImageView);
     }
 
     @Override
@@ -83,7 +90,7 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback {
                                            int[] grantResults) {
 
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            // Now user should be able to use camera
+            mIsPermissionCheckDone = true;
         } else {
             finish();
         }
@@ -118,14 +125,16 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback {
         }
 
         try {
-            mCamera = Camera.open();
-            //setPictureResolution(mCamera);
-            setCameraDisplayOrientation(this, Camera.CameraInfo.CAMERA_FACING_BACK, mCamera);
-            // Create our Preview view and set it as the content of our activity.
-            CameraPreview cameraPreview = new CameraPreview(this);
-            FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-            preview.addView(cameraPreview);
-            mCamera.setPreviewCallback(this);
+            if (mIsPermissionCheckDone) {
+                mCamera = Camera.open();
+                //setPictureResolution(mCamera);
+                setCameraDisplayOrientation(this, Camera.CameraInfo.CAMERA_FACING_BACK, mCamera);
+                // Create our Preview view and set it as the content of our activity.
+                CameraPreview cameraPreview = new CameraPreview(this);
+                FrameLayout preview = (FrameLayout) findViewById(R.id.texture);
+                preview.addView(cameraPreview);
+                mCamera.setPreviewCallback(this);
+            }
         } catch (Exception e){
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage("Another app is using the camera")
@@ -139,32 +148,6 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback {
             dialog.show();
         }
     }
-
-    /*
-    private void setPictureResolution(Camera camera) {
-        Camera.Parameters params = camera.getParameters();
-        Camera.Size newSize = null;
-        for (Camera.Size size : params.getSupportedPictureSizes()) {
-            if (size.width <= 1024 && size.width <= 1024) {
-                if (newSize == null) {
-                    newSize = size;
-                } else if (newSize.width < size.width && newSize.height < size.height) {
-                    newSize = size;
-                }
-            }
-        }
-
-        if (newSize != null) {
-            Log.d("CameraCaptureActivity", "setting picture resolution " +
-                    newSize.width + "x" + newSize.height);
-            params.setPictureSize(newSize.width, newSize.height);
-            camera.setParameters(params);
-            params = camera.getParameters();
-            newSize = params.getPictureSize();
-            Log.d("CameraCaptureActivity", "picture res " + newSize.width + "x" + newSize.height);
-        }
-
-    }*/
 
     @Override
     protected void onDestroy() {
@@ -191,8 +174,8 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback {
         }
     }
 
-    public static void setCameraDisplayOrientation(Activity activity,
-                                                   int cameraId, android.hardware.Camera camera) {
+    public void setCameraDisplayOrientation(Activity activity,
+                                            int cameraId, android.hardware.Camera camera) {
         android.hardware.Camera.CameraInfo info =
                 new android.hardware.Camera.CameraInfo();
         android.hardware.Camera.getCameraInfo(cameraId, info);
@@ -214,6 +197,7 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback {
             result = (info.orientation - degrees + 360) % 360;
         }
         camera.setDisplayOrientation(result);
+        mRotation = result;
     }
 
 
@@ -231,8 +215,9 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback {
             int height = parameters.getPreviewSize().height;
             int format = parameters.getPreviewFormat();
 
-            machineLearningThread.post(bytes, width, height, format, mMachineLearningSemaphore,
-                    this);
+
+            machineLearningThread.post(bytes, width, height, format, mRotation,
+                    mMachineLearningSemaphore, this, mDebugImageView);
         }
     }
 
