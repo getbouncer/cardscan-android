@@ -5,13 +5,13 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.media.Image;
+import android.graphics.Rect;
+import android.graphics.YuvImage;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.widget.ImageView;
 
-import com.getbouncer.cardscan.CreditCard;
 import com.getbouncer.cardscan.DetectedBox;
 import com.getbouncer.cardscan.Expiry;
 import com.getbouncer.cardscan.ImageUtils;
@@ -20,7 +20,7 @@ import com.getbouncer.cardscan.Ocr;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.nio.ByteBuffer;
+import java.io.ByteArrayOutputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
@@ -28,49 +28,60 @@ import java.util.concurrent.Semaphore;
 public class MachineLearningThread implements Runnable {
 
     class RunArguments {
-        private final Image mImage;
+        private final byte[] mFrameBytes;
         private final Semaphore mSemaphore;
         private final ImageView mImageView;
-        private final int mSensorOrientation;
         private final Activity mActivity;
+        private final int mWidth;
+        private final int mHeight;
+        private final int mFormat;
+        private final int mSensorOrientation;
 
-        RunArguments(Image image, Semaphore semaphore, ImageView imageView,
-                            int sensorOrientation, Activity activity) {
-            mImage = image;
+        RunArguments(byte[] frameBytes, int width, int height, int format,
+                     int sensorOrientation, Semaphore semaphore, Activity activity,
+                     ImageView imageView) {
+            mFrameBytes = frameBytes;
+            mWidth = width;
+            mHeight = height;
+            mFormat = format;
             mSemaphore = semaphore;
             mImageView = imageView;
-            mSensorOrientation = sensorOrientation;
             mActivity = activity;
+            mSensorOrientation = sensorOrientation;
         }
-
     }
 
     private LinkedList<RunArguments> queue = new LinkedList<>();
     boolean mIsScanning = true;
 
-    synchronized void post(Image image, Semaphore semaphore, ImageView imageView,
-                                  int sensorOrientation, Activity activity) {
-        Log.d("Thread", "post");
-        RunArguments args = new RunArguments(image, semaphore, imageView, sensorOrientation,
-                activity);
+    synchronized void post(byte[] bytes, int width, int height, int format, int sensorOrientation,
+                           Semaphore semaphore, Activity activity, ImageView debugImageView) {
+        RunArguments args = new RunArguments(bytes, width, height, format, sensorOrientation,
+                semaphore, activity, debugImageView);
         queue.push(args);
         notify();
     }
 
-    private Bitmap getBitmap(Image image, int sensorOrientation) {
-        ByteBuffer buffer = image.getPlanes()[0].getBuffer();
-        byte[] imageBytes = new byte[buffer.remaining()];
-        buffer.get(imageBytes);
-        Bitmap b = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+    private Bitmap getBitmap(byte[] bytes, int width, int height, int format, int sensorOrientation) {
+        YuvImage yuv = new YuvImage(bytes, format, width, height, null);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        yuv.compressToJpeg(new Rect(0, 0, width, height), 50, out);
+
+        byte[] b = out.toByteArray();
+        final Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length);
+
         Matrix matrix = new Matrix();
         matrix.postRotate(sensorOrientation);
-        Bitmap bm = Bitmap.createBitmap(b, 0, 0, b.getWidth(), b.getHeight(),
+        Bitmap bm = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(),
                 matrix, true);
-        double width = bm.getWidth();
-        double height = 302.0 * width / 480.0;
+
+
+        double w = bm.getWidth();
+        double h = 302.0 * w / 480.0;
         int x = 0;
-        int y = (int) Math.round(((double) bm.getHeight()) * 0.5 - height * 0.5);
-        return Bitmap.createBitmap(bm, x, y, (int) width, (int) height);
+        int y = (int) Math.round(((double) bm.getHeight()) * 0.5 - h * 0.5);
+        return Bitmap.createBitmap(bm, x, y, (int) w, (int) h);
     }
 
     private synchronized void runModel() {
@@ -85,7 +96,8 @@ public class MachineLearningThread implements Runnable {
         Log.d("Thread", "run");
 
         final RunArguments args = queue.pop();
-        final Bitmap bitmap = getBitmap(args.mImage, args.mSensorOrientation);
+        final Bitmap bitmap = getBitmap(args.mFrameBytes, args.mWidth, args.mHeight, args.mFormat,
+                args.mSensorOrientation);
 
         Ocr ocr = new Ocr();
         final String number = ocr.predict(bitmap, args.mActivity);
@@ -119,7 +131,6 @@ public class MachineLearningThread implements Runnable {
             }
         });
 
-        args.mImage.close();
         args.mSemaphore.release();
     }
 
