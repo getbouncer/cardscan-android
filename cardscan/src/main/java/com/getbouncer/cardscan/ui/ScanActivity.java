@@ -33,6 +33,7 @@ import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -43,7 +44,7 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 
 
-public class ScanActivity extends Activity implements Camera.PreviewCallback {
+public class ScanActivity extends Activity implements Camera.PreviewCallback, View.OnClickListener {
 
     private Camera mCamera = null;
     private Uri mPictureUri = null;
@@ -82,6 +83,8 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback {
                 mIsPermissionCheckDone = true;
             }
         }
+
+        findViewById(R.id.flashlightButton).setOnClickListener(this);
 
         mDebugImageView = findViewById(R.id.debugImageView);
     }
@@ -220,6 +223,21 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback {
             machineLearningThread.post(bytes, width, height, format, mRotation,
                     mMachineLearningSemaphore, this, mDebugImageView);
         }
+    }
+
+    @Override
+    public void onClick(View view) {
+        if (mCamera != null) {
+            Camera.Parameters parameters = mCamera.getParameters();
+            if (parameters.getFlashMode().equals(Camera.Parameters.FLASH_MODE_TORCH)) {
+                parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+            } else {
+                parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+            }
+            mCamera.setParameters(parameters);
+            mCamera.startPreview();
+        }
+
     }
 
     /** A basic Camera preview class */
