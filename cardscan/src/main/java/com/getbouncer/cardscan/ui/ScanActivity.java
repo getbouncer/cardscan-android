@@ -23,8 +23,10 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Build;
@@ -98,10 +100,13 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback, Vi
             int[] xy = new int[2];
             View view = findViewById(R.id.view);
             view.getLocationOnScreen(xy);
-            RectF rect = new RectF(xy[0], xy[1], xy[0] + view.getWidth(),
+            // convert from DP to pixels
+            int radius = (int) (11 * Resources.getSystem().getDisplayMetrics().density);
+            RectF rect = new RectF(xy[0], xy[1],
+                    xy[0] + view.getWidth(),
                     xy[1] + view.getHeight());
             Overlay overlay = findViewById(R.id.shadedBackground);
-            overlay.setCircle(rect, 11);
+            overlay.setCircle(rect, radius);
         }
     }
 
