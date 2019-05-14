@@ -11,6 +11,8 @@ import android.view.View;
 
 import com.getbouncer.cardscan.R;
 
+// adapted from this: https://medium.com/@rgomez/android-how-to-draw-an-overlay-with-a-transparent-hole-471af6cf3953
+
 public class Overlay extends View {
 
     private RectF circleRect;
