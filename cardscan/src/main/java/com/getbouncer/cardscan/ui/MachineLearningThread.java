@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
@@ -66,7 +67,7 @@ public class MachineLearningThread implements Runnable {
         YuvImage yuv = new YuvImage(bytes, format, width, height, null);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        yuv.compressToJpeg(new Rect(0, 0, width, height), 50, out);
+        yuv.compressToJpeg(new Rect(0, 0, width, height), 100, out);
 
         byte[] b = out.toByteArray();
         final Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length);

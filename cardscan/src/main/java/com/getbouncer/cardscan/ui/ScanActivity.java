@@ -23,6 +23,8 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Build;
@@ -33,16 +35,19 @@ import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.getbouncer.cardscan.R;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.Semaphore;
 
 
-public class ScanActivity extends Activity implements Camera.PreviewCallback {
+public class ScanActivity extends Activity implements Camera.PreviewCallback, View.OnClickListener {
 
     private Camera mCamera = null;
     private Uri mPictureUri = null;
@@ -82,7 +87,22 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback {
             }
         }
 
+        findViewById(R.id.flashlightButton).setOnClickListener(this);
+        findViewById(R.id.view).getViewTreeObserver().addOnGlobalLayoutListener(new MyGlobalListenerClass());
         mDebugImageView = findViewById(R.id.debugImageView);
+    }
+
+    class MyGlobalListenerClass implements ViewTreeObserver.OnGlobalLayoutListener {
+        @Override
+        public void onGlobalLayout() {
+            int[] xy = new int[2];
+            View view = findViewById(R.id.view);
+            view.getLocationOnScreen(xy);
+            RectF rect = new RectF(xy[0], xy[1], xy[0] + view.getWidth(),
+                    xy[1] + view.getHeight());
+            Overlay overlay = findViewById(R.id.shadedBackground);
+            overlay.setCircle(rect, 11);
+        }
     }
 
     @Override
@@ -221,6 +241,21 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback {
         }
     }
 
+    @Override
+    public void onClick(View view) {
+        if (mCamera != null) {
+            Camera.Parameters parameters = mCamera.getParameters();
+            if (parameters.getFlashMode().equals(Camera.Parameters.FLASH_MODE_TORCH)) {
+                parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+            } else {
+                parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+            }
+            mCamera.setParameters(parameters);
+            mCamera.startPreview();
+        }
+
+    }
+
     /** A basic Camera preview class */
     public class CameraPreview extends SurfaceView implements Camera.AutoFocusCallback, SurfaceHolder.Callback {
         private SurfaceHolder mHolder;
@@ -236,7 +271,13 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback {
             mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
             Camera.Parameters params = mCamera.getParameters();
-            params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+            List<String> focusModes = params.getSupportedFocusModes();
+            if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+                params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+            } else if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
+                params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+            }
+            params.setRecordingHint(true);
             mCamera.setParameters(params);
         }
 
