@@ -61,14 +61,27 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/view" />
 
+    <ImageButton
+        android:id="@+id/flashlightButton"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:contentDescription="@string/flashlight_button"
+        app:layout_constraintBottom_toBottomOf="@+id/texture"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/positionCard"
+        app:srcCompat="@drawable/flashlight"
+        android:visibility="invisible"/>
+
     <ImageView
         android:id="@+id/debugImageView"
-        android:layout_width="240dp"
-        android:layout_height="151dp"
+        android:layout_width="120dp"
+        android:layout_height="75dp"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
         android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent"
+        android:contentDescription="@string/todo" />
 
 </android.support.constraint.ConstraintLayout>
