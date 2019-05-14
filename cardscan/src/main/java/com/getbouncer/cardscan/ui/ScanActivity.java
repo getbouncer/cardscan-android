@@ -39,6 +39,7 @@ import android.widget.ImageView;
 import com.getbouncer.cardscan.R;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.Semaphore;
 
 
@@ -236,7 +237,13 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback {
             mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
             Camera.Parameters params = mCamera.getParameters();
-            params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+            List<String> focusModes = params.getSupportedFocusModes();
+            if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+                params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+            } else if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
+                params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+            }
+            params.setRecordingHint(true);
             mCamera.setParameters(params);
         }
 

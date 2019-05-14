@@ -61,7 +61,7 @@ public class Ocr {
                 recognizedDigitsModel = new RecognizedDigitsModel(activity);
             }
 
-            findFour.useGpu();
+            //findFour.useGpu();
             //findFour.useNNAPI();
             findFour.classifyFrame(image);
             ArrayList<DetectedBox> boxes = detectBoxes(image);
