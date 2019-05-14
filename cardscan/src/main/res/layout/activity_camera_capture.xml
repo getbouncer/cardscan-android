@@ -11,8 +11,19 @@
         android:layout_height="match_parent"
         tools:layout_editor_absoluteX="0dp"
         tools:layout_editor_absoluteY="500dp">
-
     </FrameLayout>
+
+
+    <com.getbouncer.cardscan.ui.Overlay
+        android:id="@+id/shadedBackground"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="0dp"
+        app:layout_constraintBottom_toBottomOf="@+id/texture"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/texture" />
 
     <View
         android:id="@+id/view"
@@ -41,6 +52,7 @@
         android:gravity="center"
         android:text="@string/scan_card"
         android:textSize="36sp"
+        android:textColor="@android:color/white"
         app:layout_constraintBottom_toTopOf="@+id/view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"/>
@@ -57,6 +69,7 @@
         android:gravity="center"
         android:text="@string/positionCard"
         android:textSize="20sp"
+        android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/view" />

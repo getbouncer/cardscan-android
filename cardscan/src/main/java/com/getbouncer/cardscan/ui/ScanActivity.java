@@ -23,6 +23,8 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Build;
@@ -34,6 +36,7 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -85,8 +88,21 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback, Vi
         }
 
         findViewById(R.id.flashlightButton).setOnClickListener(this);
-
+        findViewById(R.id.view).getViewTreeObserver().addOnGlobalLayoutListener(new MyGlobalListenerClass());
         mDebugImageView = findViewById(R.id.debugImageView);
+    }
+
+    class MyGlobalListenerClass implements ViewTreeObserver.OnGlobalLayoutListener {
+        @Override
+        public void onGlobalLayout() {
+            int[] xy = new int[2];
+            View view = findViewById(R.id.view);
+            view.getLocationOnScreen(xy);
+            RectF rect = new RectF(xy[0], xy[1], xy[0] + view.getWidth(),
+                    xy[1] + view.getHeight());
+            Overlay overlay = findViewById(R.id.shadedBackground);
+            overlay.setCircle(rect, 11);
+        }
     }
 
     @Override
