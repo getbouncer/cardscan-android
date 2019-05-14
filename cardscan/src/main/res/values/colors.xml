@@ -2,4 +2,5 @@
 <resources>
     <color name="control_background">#cc4285f4</color>
     <color name="camera_background">#992F3542</color>
+    <color name="ios_green"> #4cd964</color>
 </resources>
