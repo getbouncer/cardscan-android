@@ -61,17 +61,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/view" />
 
-    <ImageButton
+    <Button
         android:id="@+id/flashlightButton"
+        android:drawableTop = "@drawable/flashlight"
+        android:background="@android:color/transparent"
+        android:paddingTop="8dp"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:contentDescription="@string/flashlight_button"
         app:layout_constraintBottom_toBottomOf="@+id/texture"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/positionCard"
-        app:srcCompat="@drawable/flashlight"
-        android:visibility="invisible"/>
+        app:layout_constraintTop_toBottomOf="@+id/positionCard" />
 
     <ImageView
         android:id="@+id/debugImageView"
