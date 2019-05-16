@@ -51,7 +51,7 @@ public class Ocr {
         return boxes;
     }
 
-    private String runModel(Bitmap image, Activity activity) {
+    private String runModel(Bitmap image) {
         findFour.classifyFrame(image);
         ArrayList<DetectedBox> boxes = detectBoxes(image);
         ArrayList<DetectedBox> expiryBoxes = detectExpiry(image);
@@ -120,11 +120,11 @@ public class Ocr {
             }
 
             try {
-                return runModel(image, activity);
+                return runModel(image);
             } catch (Exception e) {
                 findFour = new FindFourModel(activity);
                 findFour.useCPU();
-                return runModel(image, activity);
+                return runModel(image);
             }
 
 
