@@ -6,6 +6,6 @@
     <string name="scan_card">Scan Card</string>
     <string name="take_picture">take picture</string>
     <string name="positionCard">Position your card so the card number is visible</string>
-    <string name="flashlight_button">flashlight button</string>
+    <string name="flashlight_button">Toggle flashlight</string>
     <string name="todo">TODO</string>
 </resources>
