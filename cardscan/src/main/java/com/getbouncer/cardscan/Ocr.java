@@ -9,14 +9,13 @@ import java.util.Collections;
 import java.util.List;
 
 public class Ocr {
-    static FindFourModel findFour = null;
-    static RecognizedDigitsModel recognizedDigitsModel = null;
+    private static FindFourModel findFour = null;
+    private static RecognizedDigitsModel recognizedDigitsModel = null;
     public List<DetectedBox> digitBoxes = new ArrayList<>();
     public DetectedBox expiryBox = null;
     public Expiry expiry = null;
-    private boolean useCpu = false;
 
-    ArrayList<DetectedBox> detectBoxes(Bitmap image) {
+    private ArrayList<DetectedBox> detectBoxes(Bitmap image) {
         ArrayList<DetectedBox> boxes = new ArrayList<>();
         for (int row = 0; row < findFour.rows; row++) {
             for (int col = 0; col < findFour.cols; col++) {
@@ -34,7 +33,7 @@ public class Ocr {
         return boxes;
     }
 
-    ArrayList<DetectedBox> detectExpiry(Bitmap image) {
+    private ArrayList<DetectedBox> detectExpiry(Bitmap image) {
         ArrayList<DetectedBox> boxes = new ArrayList<>();
         for (int row = 0; row < findFour.rows; row++) {
             for (int col = 0; col < findFour.cols; col++) {
