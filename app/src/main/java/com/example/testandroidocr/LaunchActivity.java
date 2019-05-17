@@ -3,12 +3,15 @@ package com.example.testandroidocr;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import com.getbouncer.cardscan.CreditCard;
 import com.getbouncer.cardscan.ui.ScanActivity;
 
 public class LaunchActivity extends AppCompatActivity implements View.OnClickListener {
+
+    public static final String TAG = "LaunchActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,21 +33,22 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == 1234) {
-            if ( resultCode == ScanActivity.RESULT_OK && data != null &&
+            if (resultCode == ScanActivity.RESULT_OK && data != null &&
                     data.hasExtra(ScanActivity.SCAN_RESULT)) {
 
-                String resultString = data.getStringExtra(ScanActivity.SCAN_RESULT);
-                CreditCard scanResult = new CreditCard(resultString);
+                CreditCard scanResult = data.getParcelableExtra(ScanActivity.SCAN_RESULT);
 
                 Intent intent = new Intent(this, EnterCard.class);
                 intent.putExtra("number", scanResult.number);
 
-                if (scanResult.expiryMonth != null) {
+                if (scanResult.expiryMonth != null && scanResult.expiryYear != null) {
                     intent.putExtra("expiryMonth", Integer.parseInt(scanResult.expiryMonth));
                     intent.putExtra("expiryYear", Integer.parseInt(scanResult.expiryYear));
                 }
 
                 startActivity(intent);
+            } else if (resultCode == ScanActivity.RESULT_CANCELED) {
+                Log.d(TAG, "The user pressed the back button");
             }
         }
     }

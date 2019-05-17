@@ -51,11 +51,11 @@
         android:layout_marginBottom="20dp"
         android:gravity="center"
         android:text="@string/scan_card"
-        android:textSize="36sp"
         android:textColor="@android:color/white"
+        android:textSize="30sp"
         app:layout_constraintBottom_toTopOf="@+id/view"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/positionCard"
