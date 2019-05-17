@@ -1,23 +1,56 @@
 package com.getbouncer.cardscan;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
-public class CreditCard {
-    public String number;
-    public String expiryMonth;
-    public String expiryYear;
+public class CreditCard implements Parcelable {
+    @NonNull public final String number;
+    @Nullable public final String expiryMonth;
+    @Nullable public final String expiryYear;
 
-    public CreditCard(String jsonString) {
-        try {
-            JSONObject card = new JSONObject(jsonString);
-            this.number = card.getString("number");
-            if (card.has("expiryMonth")) {
-                this.expiryMonth = card.getInt("expiryMonth") + "";
-                this.expiryYear = card.getInt("expiryYear") + "";
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
+    public CreditCard(@NonNull String number, @Nullable String expiryMonth,
+                      @Nullable String expiryYear) {
+        this.number = number;
+        this.expiryMonth = expiryMonth;
+        this.expiryYear = expiryYear;
+    }
+
+    public CreditCard(Parcel in) {
+        String number = in.readString();
+        this.expiryMonth = in.readString();
+        this.expiryYear = in.readString();
+
+        if (number == null) {
+            // this should never happen, but makes the compiler happy
+            this.number = "";
+        } else {
+            this.number = number;
         }
+    }
+
+    public static final Creator<CreditCard> CREATOR = new Creator<CreditCard>() {
+        @Override
+        public CreditCard createFromParcel(Parcel in) {
+            return new CreditCard(in);
+        }
+
+        @Override
+        public CreditCard[] newArray(int size) {
+            return new CreditCard[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(number);
+        parcel.writeString(expiryMonth);
+        parcel.writeString(expiryYear);
     }
 }

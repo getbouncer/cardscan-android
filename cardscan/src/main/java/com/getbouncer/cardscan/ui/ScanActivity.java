@@ -22,16 +22,16 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.graphics.Rect;
+import android.graphics.Bitmap;
 import android.graphics.RectF;
-import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.text.TextUtils;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.OrientationEventListener;
 import android.view.Surface;
@@ -42,6 +42,10 @@ import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.getbouncer.cardscan.CreditCard;
+import com.getbouncer.cardscan.DetectedBox;
+import com.getbouncer.cardscan.Expiry;
+import com.getbouncer.cardscan.ImageUtils;
 import com.getbouncer.cardscan.R;
 
 import java.io.IOException;
@@ -52,14 +56,14 @@ import java.util.concurrent.Semaphore;
 public class ScanActivity extends Activity implements Camera.PreviewCallback, View.OnClickListener {
 
     private Camera mCamera = null;
-    private Uri mPictureUri = null;
     private OrientationEventListener mOrientationEventListener;
     private static MachineLearningThread machineLearningThread = null;
     private Semaphore mMachineLearningSemaphore = new Semaphore(1);
     private ImageView mDebugImageView;
     private int mRotation;
+    private boolean mSentResponse = false;
 
-    public static final String SCAN_RESULT = "creditCardJsonString";
+    public static final String SCAN_RESULT = "creditCard";
     private boolean mIsPermissionCheckDone = false;
 
     @Override
@@ -73,13 +77,6 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback, Vi
                 orientationChanged(orientation);
             }
         };
-
-        if (getIntent().hasExtra("picture_uri")) {
-            String pictureUriString = getIntent().getStringExtra("picture_uri");
-            if (!TextUtils.isEmpty(pictureUriString)) {
-                mPictureUri = Uri.parse(pictureUriString);
-            }
-        }
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -130,10 +127,6 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback, Vi
             mCamera.release();
         }
 
-        if (machineLearningThread != null) {
-            machineLearningThread.mIsScanning = false;
-        }
-
         mOrientationEventListener.disable();
     }
 
@@ -145,14 +138,9 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback, Vi
             mOrientationEventListener.enable();
         }
 
-        if (machineLearningThread != null) {
-            machineLearningThread.mIsScanning = true;
-        }
-
         try {
             if (mIsPermissionCheckDone) {
                 mCamera = Camera.open();
-                //setPictureResolution(mCamera);
                 setCameraDisplayOrientation(this, Camera.CameraInfo.CAMERA_FACING_BACK, mCamera);
                 // Create our Preview view and set it as the content of our activity.
                 CameraPreview cameraPreview = new CameraPreview(this);
@@ -240,9 +228,7 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback, Vi
             int height = parameters.getPreviewSize().height;
             int format = parameters.getPreviewFormat();
 
-
-            machineLearningThread.post(bytes, width, height, format, mRotation,
-                    mMachineLearningSemaphore, this, mDebugImageView);
+            machineLearningThread.post(bytes, width, height, format, mRotation, this);
         }
     }
 
@@ -259,6 +245,39 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback, Vi
             mCamera.startPreview();
         }
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (!mSentResponse) {
+            mSentResponse = true;
+            Intent intent = new Intent();
+            setResult(RESULT_CANCELED, intent);
+            finish();
+        }
+    }
+
+    void onPrediction(final String number, final Expiry expiry, final Bitmap bitmap,
+                      final List<DetectedBox> digitBoxes, final DetectedBox expiryBox) {
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(new Runnable() {
+            public void run() {
+                mDebugImageView.setImageBitmap(ImageUtils.drawBoxesOnImage(bitmap, digitBoxes,
+                        expiryBox));
+                if (number != null && !mSentResponse) {
+                    mSentResponse = true;
+                    Intent intent = new Intent();
+                    CreditCard card = new CreditCard(number, expiry.month + "",
+                            expiry.year + "");
+
+                    intent.putExtra(SCAN_RESULT, card);
+                    setResult(RESULT_OK, intent);
+                    finish();
+                }
+            }
+        });
+
+        mMachineLearningSemaphore.release();
     }
 
     /** A basic Camera preview class */

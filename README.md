@@ -53,20 +53,21 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
       if ( resultCode == ScanActivity.RESULT_OK && data != null &&
       	 data.hasExtra(ScanActivity.SCAN_RESULT)) {
 
-         String resultString = data.getStringExtra(ScanActivity.SCAN_RESULT);
-         CreditCard scanResult = new CreditCard(resultString);
+         CreditCard scanResult = data.getParcelableExtra(ScanActivity.SCAN_RESULT);
 
 	 // at this point pass the info to your app's enter card flow
 	 // this is how we do it in our example app
          Intent intent = new Intent(this, EnterCard.class);
          intent.putExtra("number", scanResult.number);
 
-         if (scanResult.expiryMonth != null) {
+         if (scanResult.expiryMonth != null && scanResult.expiryYear != null) {
             intent.putExtra("expiryMonth", Integer.parseInt(scanResult.expiryMonth));
 	    intent.putExtra("expiryYear", Integer.parseInt(scanResult.expiryYear));
 	 }
 
          startActivity(intent);
+      } else if ( resultCode == ScanActivity.RESULT_CANCELLED) {
+         // the user pressed the back button and cancelled the scan activity
       }
    }
 }
@@ -81,7 +82,7 @@ being passed into your payment form. This is what it looks like using a standard
 
 ## Authors
 
-Sam King
+Sam King and Rui Guo
 
 ## License
 
