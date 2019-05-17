@@ -33,7 +33,7 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == 1234) {
-            if ( resultCode == ScanActivity.RESULT_OK && data != null &&
+            if (resultCode == ScanActivity.RESULT_OK && data != null &&
                     data.hasExtra(ScanActivity.SCAN_RESULT)) {
 
                 CreditCard scanResult = data.getParcelableExtra(ScanActivity.SCAN_RESULT);
@@ -47,7 +47,7 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
                 }
 
                 startActivity(intent);
-            } else if ( resultCode == ScanActivity.RESULT_CANCELED) {
+            } else if (resultCode == ScanActivity.RESULT_CANCELED) {
                 Log.d(TAG, "The user pressed the back button");
             }
         }
