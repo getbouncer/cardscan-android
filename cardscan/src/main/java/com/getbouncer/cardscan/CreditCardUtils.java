@@ -1,6 +1,6 @@
 package com.getbouncer.cardscan;
 
-class CreditCardUtils {
+public class CreditCardUtils {
     // https://en.wikipedia.org/wiki/Luhn_algorithm#Java
     static boolean luhnCheck(String ccNumber) {
         if (ccNumber == null || ccNumber.length() == 0) {
@@ -24,6 +24,40 @@ class CreditCardUtils {
             alternate = !alternate;
         }
         return (sum % 10 == 0);
+    }
+
+    public static String format(String number) {
+        if (number.length() == 16) {
+            return format16(number);
+        } else if (number.length() == 15) {
+            return format15(number);
+        }
+
+        return number;
+    }
+
+    private static String format16(String number) {
+        StringBuilder result = new StringBuilder();
+        for (int idx = 0; idx < number.length(); idx++) {
+            if (idx == 4 || idx == 8 || idx == 12) {
+                result.append(" ");
+            }
+            result.append(number.charAt(idx));
+        }
+
+        return result.toString();
+    }
+
+    private static String format15(String number) {
+        StringBuilder result = new StringBuilder();
+        for (int idx = 0; idx < number.length(); idx++) {
+            if (idx == 4 || idx == 10) {
+                result.append(" ");
+            }
+            result.append(number.charAt(idx));
+        }
+
+        return result.toString();
     }
 
     private static boolean isValidBin(String number) {
