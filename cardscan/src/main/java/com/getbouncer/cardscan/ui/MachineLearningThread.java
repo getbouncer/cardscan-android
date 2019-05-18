@@ -1,10 +1,13 @@
 package com.getbouncer.cardscan.ui;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
+import android.os.Handler;
+import android.os.Looper;
 
 import com.getbouncer.cardscan.Ocr;
 
@@ -15,19 +18,21 @@ public class MachineLearningThread implements Runnable {
 
     class RunArguments {
         private final byte[] mFrameBytes;
-        private final ScanActivity mActivity;
+        private final OnScanListener mScanListener;
+        private final Context mContext;
         private final int mWidth;
         private final int mHeight;
         private final int mFormat;
         private final int mSensorOrientation;
 
         RunArguments(byte[] frameBytes, int width, int height, int format,
-                     int sensorOrientation, ScanActivity activity) {
+                     int sensorOrientation, OnScanListener scanListener, Context context) {
             mFrameBytes = frameBytes;
             mWidth = width;
             mHeight = height;
             mFormat = format;
-            mActivity = activity;
+            mScanListener = scanListener;
+            mContext = context;
             mSensorOrientation = sensorOrientation;
         }
     }
@@ -35,9 +40,9 @@ public class MachineLearningThread implements Runnable {
     private LinkedList<RunArguments> queue = new LinkedList<>();
 
     synchronized void post(byte[] bytes, int width, int height, int format, int sensorOrientation,
-                           ScanActivity activity) {
+                           OnScanListener scanListener, Context context) {
         RunArguments args = new RunArguments(bytes, width, height, format, sensorOrientation,
-                activity);
+                scanListener, context);
         queue.push(args);
         notify();
     }
@@ -77,9 +82,15 @@ public class MachineLearningThread implements Runnable {
         final Bitmap bitmap = getBitmap(args.mFrameBytes, args.mWidth, args.mHeight, args.mFormat,
                 args.mSensorOrientation);
 
-        Ocr ocr = new Ocr();
-        final String number = ocr.predict(bitmap, args.mActivity);
-        args.mActivity.onPrediction(number, ocr.expiry, bitmap, ocr.digitBoxes, ocr.expiryBox);
+        final Ocr ocr = new Ocr();
+        final String number = ocr.predict(bitmap, args.mContext);
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(new Runnable() {
+            public void run() {
+                args.mScanListener.onPrediction(number, ocr.expiry, bitmap, ocr.digitBoxes,
+                        ocr.expiryBox);
+            }
+        });
     }
 
     @Override

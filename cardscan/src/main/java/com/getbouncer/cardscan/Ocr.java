@@ -1,6 +1,7 @@
 package com.getbouncer.cardscan;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Bitmap;
 
 import java.io.IOException;
@@ -103,26 +104,26 @@ public class Ocr {
         return number;
     }
 
-    public synchronized String predict(Bitmap image, Activity activity) {
+    public synchronized String predict(Bitmap image, Context context) {
         try {
             if (findFour == null) {
-                findFour = new FindFourModel(activity);
+                findFour = new FindFourModel(context);
                 try {
                     findFour.useGpu();
                 } catch (Exception e) {
-                    findFour = new FindFourModel(activity);
+                    findFour = new FindFourModel(context);
                     findFour.useCPU();
                 }
             }
 
             if (recognizedDigitsModel == null) {
-                recognizedDigitsModel = new RecognizedDigitsModel(activity);
+                recognizedDigitsModel = new RecognizedDigitsModel(context);
             }
 
             try {
                 return runModel(image);
             } catch (Exception e) {
-                findFour = new FindFourModel(activity);
+                findFour = new FindFourModel(context);
                 findFour.useCPU();
                 return runModel(image);
             }

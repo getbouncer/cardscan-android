@@ -16,6 +16,7 @@ limitations under the License.
 package com.getbouncer.cardscan;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.os.SystemClock;
@@ -37,10 +38,6 @@ import org.tensorflow.lite.gpu.GpuDelegate;
  * Classifies images with Tensorflow Lite.
  */
 public abstract class ImageClassifier {
-    // Display preferences
-    private static final float GOOD_PROB_THRESHOLD = 0.3f;
-    private static final int SMALL_COLOR = 0xffddaa88;
-
     /** Tag for the {@link Log}. */
     private static final String TAG = "CardScan";
 
@@ -70,28 +67,13 @@ public abstract class ImageClassifier {
     /** A ByteBuffer to hold image data, to be feed into Tensorflow Lite as inputs. */
     protected ByteBuffer imgData = null;
 
-    /** multi-stage low pass filter * */
-    private float[][] filterLabelProbArray = null;
-
-    private static final int FILTER_STAGES = 3;
-    private static final float FILTER_FACTOR = 0.4f;
-
-    private PriorityQueue<Map.Entry<String, Float>> sortedLabels =
-            new PriorityQueue<>(
-                    RESULTS_TO_SHOW,
-                    new Comparator<Map.Entry<String, Float>>() {
-                        @Override
-                        public int compare(Map.Entry<String, Float> o1, Map.Entry<String, Float> o2) {
-                            return (o1.getValue()).compareTo(o2.getValue());
-                        }
-                    });
 
     /** holds a gpu delegate */
     GpuDelegate gpuDelegate = null;
 
     /** Initializes an {@code ImageClassifier}. */
-    ImageClassifier(Activity activity) throws IOException {
-        tfliteModel = loadModelFile(activity);
+    ImageClassifier(Context context) throws IOException {
+        tfliteModel = loadModelFile(context);
         tflite = new Interpreter(tfliteModel, tfliteOptions);
         imgData =
                 ByteBuffer.allocateDirect(
@@ -101,7 +83,6 @@ public abstract class ImageClassifier {
                                 * DIM_PIXEL_SIZE
                                 * getNumBytesPerChannel());
         imgData.order(ByteOrder.nativeOrder());
-        //filterLabelProbArray = new float[FILTER_STAGES][getNumLabels()];
         Log.d(TAG, "Created a Tensorflow Lite Image Classifier.");
     }
 
@@ -160,8 +141,8 @@ public abstract class ImageClassifier {
     }
 
     /** Memory-map the model file in Assets. */
-    private MappedByteBuffer loadModelFile(Activity activity) throws IOException {
-        AssetFileDescriptor fileDescriptor = activity.getResources()
+    private MappedByteBuffer loadModelFile(Context context) throws IOException {
+        AssetFileDescriptor fileDescriptor = context.getResources()
                 .openRawResourceFd(getModelResource());
         FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
         FileChannel fileChannel = inputStream.getChannel();
@@ -239,14 +220,4 @@ public abstract class ImageClassifier {
      * primitive data types.
      */
     protected abstract void runInference();
-
-    /**
-     * Get the total number of labels.
-     *
-     * @return
-     */
-    /*
-    protected int getNumLabels() {
-        return labelList.size();
-    }*/
 }

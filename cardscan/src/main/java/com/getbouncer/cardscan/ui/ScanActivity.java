@@ -34,6 +34,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.OrientationEventListener;
+import android.view.ScaleGestureDetector;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -53,7 +54,8 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 
 
-public class ScanActivity extends Activity implements Camera.PreviewCallback, View.OnClickListener {
+public class ScanActivity extends Activity implements Camera.PreviewCallback, View.OnClickListener,
+        OnScanListener {
 
     private Camera mCamera = null;
     private OrientationEventListener mOrientationEventListener;
@@ -62,6 +64,7 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback, Vi
     private ImageView mDebugImageView;
     private int mRotation;
     private boolean mSentResponse = false;
+    private boolean mIsActivityActive = false;
 
     public static final String SCAN_RESULT = "creditCard";
     private boolean mIsPermissionCheckDone = false;
@@ -128,12 +131,14 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback, Vi
         }
 
         mOrientationEventListener.disable();
+        mIsActivityActive = false;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
+        mIsActivityActive = true;
         if (mOrientationEventListener.canDetectOrientation()) {
             mOrientationEventListener.enable();
         }
@@ -228,7 +233,10 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback, Vi
             int height = parameters.getPreviewSize().height;
             int format = parameters.getPreviewFormat();
 
-            machineLearningThread.post(bytes, width, height, format, mRotation, this);
+            // Use the application context here because the machine learning thread's lifecycle
+            // is connected to the application and not this activity
+            machineLearningThread.post(bytes, width, height, format, mRotation, this,
+                    this.getApplicationContext());
         }
     }
 
@@ -249,7 +257,7 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback, Vi
 
     @Override
     public void onBackPressed() {
-        if (!mSentResponse) {
+        if (!mSentResponse && mIsActivityActive) {
             mSentResponse = true;
             Intent intent = new Intent();
             setResult(RESULT_CANCELED, intent);
@@ -257,25 +265,28 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback, Vi
         }
     }
 
-    void onPrediction(final String number, final Expiry expiry, final Bitmap bitmap,
-                      final List<DetectedBox> digitBoxes, final DetectedBox expiryBox) {
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.post(new Runnable() {
-            public void run() {
-                mDebugImageView.setImageBitmap(ImageUtils.drawBoxesOnImage(bitmap, digitBoxes,
-                        expiryBox));
-                if (number != null && !mSentResponse) {
-                    mSentResponse = true;
-                    Intent intent = new Intent();
-                    CreditCard card = new CreditCard(number, expiry.month + "",
-                            expiry.year + "");
+    @Override
+    public void onPrediction(final String number, final Expiry expiry, final Bitmap bitmap,
+                             final List<DetectedBox> digitBoxes, final DetectedBox expiryBox) {
 
-                    intent.putExtra(SCAN_RESULT, card);
-                    setResult(RESULT_OK, intent);
-                    finish();
-                }
+        mDebugImageView.setImageBitmap(ImageUtils.drawBoxesOnImage(bitmap, digitBoxes, expiryBox));
+        if (number != null && !mSentResponse && mIsActivityActive) {
+            mSentResponse = true;
+            Intent intent = new Intent();
+
+            String month = null;
+            String year = null;
+            if (expiry != null) {
+                month = Integer.toString(expiry.month);
+                year = Integer.toString(expiry.year);
             }
-        });
+
+            CreditCard card = new CreditCard(number, month, year);
+
+            intent.putExtra(SCAN_RESULT, card);
+            setResult(RESULT_OK, intent);
+            finish();
+        }
 
         mMachineLearningSemaphore.release();
     }
