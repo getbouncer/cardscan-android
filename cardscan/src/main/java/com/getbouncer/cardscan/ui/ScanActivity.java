@@ -30,11 +30,9 @@ import android.graphics.RectF;
 import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.OrientationEventListener;
-import android.view.ScaleGestureDetector;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -42,14 +40,17 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.getbouncer.cardscan.CreditCard;
+import com.getbouncer.cardscan.CreditCardUtils;
 import com.getbouncer.cardscan.DetectedBox;
 import com.getbouncer.cardscan.Expiry;
 import com.getbouncer.cardscan.ImageUtils;
 import com.getbouncer.cardscan.R;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
@@ -67,7 +68,11 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback, Vi
     private boolean mIsActivityActive = false;
 
     public static final String SCAN_RESULT = "creditCard";
+    public long errorCorrectionDurationMs = 1500;
     private boolean mIsPermissionCheckDone = false;
+    private HashMap<String, Integer> numberResults;
+    private HashMap<Expiry, Integer> expiryResults;
+    private long firstResultMs = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,6 +144,9 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback, Vi
         super.onResume();
 
         mIsActivityActive = true;
+        numberResults = new HashMap<>();
+        expiryResults = new HashMap<>();
+        firstResultMs = 0;
         if (mOrientationEventListener.canDetectOrientation()) {
             mOrientationEventListener.enable();
         }
@@ -265,27 +273,122 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback, Vi
         }
     }
 
+    private void increment(HashMap<String, Integer> map, String key) {
+        Integer currentValue = map.get(key);
+        if (currentValue == null) {
+            currentValue = 0;
+        }
+
+        map.put(key, currentValue + 1);
+    }
+
+    private void increment(HashMap<Expiry, Integer> map, Expiry key) {
+        Integer currentValue = map.get(key);
+        if (currentValue == null) {
+            currentValue = 0;
+        }
+
+        map.put(key, currentValue + 1);
+    }
+
+    // Ugg there has to be a better way
+    private String getNumberResult() {
+        String result = null;
+        int maxValue = 0;
+
+        for (String number: numberResults.keySet()) {
+            int value = 0;
+            Integer count = numberResults.get(number);
+            if (count != null) {
+                value = count;
+            }
+            if (value > maxValue) {
+                result = number;
+                maxValue = value;
+            }
+        }
+
+        return result;
+    }
+
+    private Expiry getExpiryResult() {
+        Expiry result = null;
+        int maxValue = 0;
+
+        for (Expiry expiry: expiryResults.keySet()) {
+            int value = 0;
+            Integer count = expiryResults.get(expiry);
+            if (count != null) {
+                value = count;
+            }
+            if (value > maxValue) {
+                result = expiry;
+                maxValue = value;
+            }
+        }
+
+        return result;
+    }
+
+    private void setValueAnimated(TextView textView, String value) {
+        if (textView.getVisibility() != View.VISIBLE) {
+            textView.setVisibility(View.VISIBLE);
+            textView.setAlpha(0.0f);
+            textView.animate().setDuration(400).alpha(1.0f);
+        }
+        textView.setText(value);
+    }
+
     @Override
     public void onPrediction(final String number, final Expiry expiry, final Bitmap bitmap,
                              final List<DetectedBox> digitBoxes, final DetectedBox expiryBox) {
 
         mDebugImageView.setImageBitmap(ImageUtils.drawBoxesOnImage(bitmap, digitBoxes, expiryBox));
-        if (number != null && !mSentResponse && mIsActivityActive) {
-            mSentResponse = true;
-            Intent intent = new Intent();
+        if (!mSentResponse && mIsActivityActive) {
 
-            String month = null;
-            String year = null;
-            if (expiry != null) {
-                month = Integer.toString(expiry.month);
-                year = Integer.toString(expiry.year);
+            if (number != null && firstResultMs == 0) {
+                firstResultMs = SystemClock.uptimeMillis();
             }
 
-            CreditCard card = new CreditCard(number, month, year);
+            if (number != null) {
+                increment(numberResults, number);
+            }
+            if (expiry != null) {
+                increment(expiryResults, expiry);
+            }
 
-            intent.putExtra(SCAN_RESULT, card);
-            setResult(RESULT_OK, intent);
-            finish();
+            long duration = SystemClock.uptimeMillis() - firstResultMs;
+
+            if (firstResultMs != 0) {
+                String numberResult = getNumberResult();
+                Expiry expiryResult = getExpiryResult();
+                TextView textView = findViewById(R.id.cardNumber);
+                setValueAnimated(textView, CreditCardUtils.format(numberResult));
+
+                if (expiryResult != null && duration >= (errorCorrectionDurationMs / 2)) {
+                    textView = findViewById(R.id.expiry);
+                    setValueAnimated(textView, expiryResult.format());
+                }
+            }
+
+            if (firstResultMs != 0 && duration >= errorCorrectionDurationMs) {
+                mSentResponse = true;
+                Intent intent = new Intent();
+                String numberResult = getNumberResult();
+                Expiry expiryResult = getExpiryResult();
+                String month = null;
+                String year = null;
+                if (expiryResult != null) {
+                    month = Integer.toString(expiryResult.month);
+                    year = Integer.toString(expiryResult.year);
+                }
+
+                CreditCard card = new CreditCard(numberResult, month, year);
+
+                intent.putExtra(SCAN_RESULT, card);
+                setResult(RESULT_OK, intent);
+                finish();
+            }
         }
 
         mMachineLearningSemaphore.release();
