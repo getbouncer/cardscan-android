@@ -1,6 +1,7 @@
 package com.getbouncer.cardscan;
 
 import android.app.Activity;
+import android.content.Context;
 
 import java.io.IOException;
 
@@ -17,13 +18,8 @@ class RecognizedDigitsModel extends ImageClassifier {
      */
     private float[][][][] labelProbArray = null;
 
-    /**
-     * Initializes an {@code ImageClassifierFloatMobileNet}.
-     *
-     * @param activity
-     */
-    RecognizedDigitsModel(Activity activity) throws IOException {
-        super(activity);
+    RecognizedDigitsModel(Context context) throws IOException {
+        super(context);
         labelProbArray = new float[1][1][kNumPredictions][classes];
     }
 

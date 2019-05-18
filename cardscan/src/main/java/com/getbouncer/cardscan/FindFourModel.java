@@ -16,6 +16,8 @@ limitations under the License.
 package com.getbouncer.cardscan;
 
 import android.app.Activity;
+import android.content.Context;
+
 import java.io.IOException;
 
 /** This classifier works with the float MobileNet model. */
@@ -38,10 +40,10 @@ public class FindFourModel extends ImageClassifier {
     /**
      * Initializes an {@code ImageClassifierFloatMobileNet}.
      *
-     * @param activity
+     * @param context
      */
-    FindFourModel(Activity activity) throws IOException {
-        super(activity);
+    FindFourModel(Context context) throws IOException {
+        super(context);
         labelProbArray = new float[1][rows][cols][classes];
     }
 
