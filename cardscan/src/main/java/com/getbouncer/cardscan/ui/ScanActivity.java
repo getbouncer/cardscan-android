@@ -330,6 +330,15 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback, Vi
         return result;
     }
 
+    private void setValueAnimated(TextView textView, String value) {
+        if (textView.getVisibility() != View.VISIBLE) {
+            textView.setVisibility(View.VISIBLE);
+            textView.setAlpha(0.0f);
+            textView.animate().setDuration(400).alpha(1.0f);
+        }
+        textView.setText(value);
+    }
+
     @Override
     public void onPrediction(final String number, final Expiry expiry, final Bitmap bitmap,
                              final List<DetectedBox> digitBoxes, final DetectedBox expiryBox) {
@@ -348,23 +357,21 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback, Vi
                 increment(expiryResults, expiry);
             }
 
-            long currentTime = SystemClock.uptimeMillis();
+            long duration = SystemClock.uptimeMillis() - firstResultMs;
 
             if (firstResultMs != 0) {
                 String numberResult = getNumberResult();
                 Expiry expiryResult = getExpiryResult();
                 TextView textView = findViewById(R.id.cardNumber);
-                textView.setText(CreditCardUtils.format(numberResult));
-                textView.setVisibility(View.VISIBLE);
+                setValueAnimated(textView, CreditCardUtils.format(numberResult));
 
-                if (expiryResult != null) {
+                if (expiryResult != null && duration >= (errorCorrectionDurationMs / 2)) {
                     textView = findViewById(R.id.expiry);
-                    textView.setText(expiryResult.format());
-                    textView.setVisibility(View.VISIBLE);
+                    setValueAnimated(textView, expiryResult.format());
                 }
             }
 
-            if (firstResultMs != 0 && (currentTime - firstResultMs) >= errorCorrectionDurationMs) {
+            if (firstResultMs != 0 && duration >= errorCorrectionDurationMs) {
                 mSentResponse = true;
                 Intent intent = new Intent();
                 String numberResult = getNumberResult();
