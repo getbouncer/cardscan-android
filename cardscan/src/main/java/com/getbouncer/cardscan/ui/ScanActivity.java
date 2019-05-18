@@ -31,6 +31,7 @@ import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import android.view.OrientationEventListener;
 import android.view.Surface;
@@ -70,8 +71,8 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback, Vi
     public static final String SCAN_RESULT = "creditCard";
     public long errorCorrectionDurationMs = 1500;
     private boolean mIsPermissionCheckDone = false;
-    private HashMap<String, Integer> numberResults;
-    private HashMap<Expiry, Integer> expiryResults;
+    private HashMap<String, Integer> numberResults = new HashMap<>();
+    private HashMap<Expiry, Integer> expiryResults = new HashMap<>();
     private long firstResultMs = 0;
 
     @Override
@@ -273,26 +274,29 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback, Vi
         }
     }
 
-    private void increment(HashMap<String, Integer> map, String key) {
-        Integer currentValue = map.get(key);
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    public void incrementNumber(String number) {
+        Integer currentValue = numberResults.get(number);
         if (currentValue == null) {
             currentValue = 0;
         }
 
-        map.put(key, currentValue + 1);
+        numberResults.put(number, currentValue + 1);
     }
 
-    private void increment(HashMap<Expiry, Integer> map, Expiry key) {
-        Integer currentValue = map.get(key);
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    public void incrementExpiry(Expiry expiry) {
+        Integer currentValue = expiryResults.get(expiry);
         if (currentValue == null) {
             currentValue = 0;
         }
 
-        map.put(key, currentValue + 1);
+        expiryResults.put(expiry, currentValue + 1);
     }
 
-    // Ugg there has to be a better way
-    private String getNumberResult() {
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    public String getNumberResult() {
+        // Ugg there has to be a better way
         String result = null;
         int maxValue = 0;
 
@@ -311,7 +315,8 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback, Vi
         return result;
     }
 
-    private Expiry getExpiryResult() {
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    public Expiry getExpiryResult() {
         Expiry result = null;
         int maxValue = 0;
 
@@ -351,10 +356,10 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback, Vi
             }
 
             if (number != null) {
-                increment(numberResults, number);
+                incrementNumber(number);
             }
             if (expiry != null) {
-                increment(expiryResults, expiry);
+                incrementExpiry(expiry);
             }
 
             long duration = SystemClock.uptimeMillis() - firstResultMs;
