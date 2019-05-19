@@ -17,21 +17,11 @@ CardScan Android installation guide
 
 ## Installation
 
-Add our bintray repository to your projects build.gradle file
-```gradle
-repositories {
-    google()
-    jcenter()
-    // Include this to resolve our library
-    maven { url  "https://dl.bintray.com/kingst/CardScan" }
-}
-```
-
-Then, add a dependency to your app's build.gradle file:
+We publish our library in the jcenter repository, so for most gradle configurations you only need to add the dependency to your app's build.gradle file:
 
 ```gradle
 dependencies {
-    implementation 'com.getbouncer:cardscan:1.0.4003'
+    implementation 'com.getbouncer:cardscan:1.0.4004'
 }
 ```
 
