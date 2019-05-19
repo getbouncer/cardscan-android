@@ -1,4 +1,4 @@
-package com.example.testandroidocr;
+package com.getgrowthmetrics.testcardscan;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
