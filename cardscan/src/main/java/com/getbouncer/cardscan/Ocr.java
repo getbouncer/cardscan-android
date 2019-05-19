@@ -1,6 +1,5 @@
 package com.getbouncer.cardscan;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 
@@ -9,6 +8,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * This class is not thread safe, make sure that all methods run on the same thread.
+ */
 public class Ocr {
     private static FindFourModel findFour = null;
     private static RecognizedDigitsModel recognizedDigitsModel = null;

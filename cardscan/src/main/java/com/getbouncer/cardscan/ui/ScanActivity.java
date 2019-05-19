@@ -67,6 +67,9 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback, Vi
     private int mRotation;
     private boolean mSentResponse = false;
     private boolean mIsActivityActive = false;
+    private boolean mInDebugMode = false;
+    private long mPredictionStartMs = 0;
+    private static final String TAG = "ScanActivity";
 
     public static final String SCAN_RESULT = "creditCard";
     public long errorCorrectionDurationMs = 1500;
@@ -98,6 +101,10 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback, Vi
         findViewById(R.id.flashlightButton).setOnClickListener(this);
         findViewById(R.id.view).getViewTreeObserver().addOnGlobalLayoutListener(new MyGlobalListenerClass());
         mDebugImageView = findViewById(R.id.debugImageView);
+        mInDebugMode = getIntent().getBooleanExtra("debug", false);
+        if (!mInDebugMode) {
+            mDebugImageView.setVisibility(View.INVISIBLE);
+        }
     }
 
     class MyGlobalListenerClass implements ViewTreeObserver.OnGlobalLayoutListener {
@@ -244,6 +251,7 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback, Vi
 
             // Use the application context here because the machine learning thread's lifecycle
             // is connected to the application and not this activity
+            mPredictionStartMs = SystemClock.uptimeMillis();
             machineLearningThread.post(bytes, width, height, format, mRotation, this,
                     this.getApplicationContext());
         }
@@ -348,7 +356,13 @@ public class ScanActivity extends Activity implements Camera.PreviewCallback, Vi
     public void onPrediction(final String number, final Expiry expiry, final Bitmap bitmap,
                              final List<DetectedBox> digitBoxes, final DetectedBox expiryBox) {
 
-        mDebugImageView.setImageBitmap(ImageUtils.drawBoxesOnImage(bitmap, digitBoxes, expiryBox));
+        if (mInDebugMode) {
+            mDebugImageView.setImageBitmap(ImageUtils.drawBoxesOnImage(bitmap, digitBoxes,
+                    expiryBox));
+            Log.d(TAG, "Prediction (ms): " +
+                    (SystemClock.uptimeMillis() - mPredictionStartMs));
+        }
+
         if (!mSentResponse && mIsActivityActive) {
 
             if (number != null && firstResultMs == 0) {

@@ -69,7 +69,7 @@ public class MachineLearningThread implements Runnable {
         return Bitmap.createBitmap(bm, x, y, (int) w, (int) h);
     }
 
-    private synchronized void runModel() {
+    private synchronized RunArguments getNextImage() {
         while (queue.size() == 0) {
             try {
                 wait();
@@ -78,7 +78,11 @@ public class MachineLearningThread implements Runnable {
             }
         }
 
-        final RunArguments args = queue.pop();
+        return queue.pop();
+    }
+
+    private synchronized void runModel() {
+        final RunArguments args = getNextImage();
         final Bitmap bitmap = getBitmap(args.mFrameBytes, args.mWidth, args.mHeight, args.mFormat,
                 args.mSensorOrientation);
 
@@ -87,8 +91,13 @@ public class MachineLearningThread implements Runnable {
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {
             public void run() {
-                args.mScanListener.onPrediction(number, ocr.expiry, bitmap, ocr.digitBoxes,
-                        ocr.expiryBox);
+                try {
+                    args.mScanListener.onPrediction(number, ocr.expiry, bitmap, ocr.digitBoxes,
+                            ocr.expiryBox);
+                } catch (Exception e) {
+                    // prevent callbacks from crashing the app, swallow it
+                    e.printStackTrace();
+                }
             }
         });
     }
@@ -96,7 +105,12 @@ public class MachineLearningThread implements Runnable {
     @Override
     public void run() {
         while (true) {
-            runModel();
+            try {
+                runModel();
+            } catch (Exception e) {
+                // center field exception handling, make sure that the ml thread keeps running
+                e.printStackTrace();
+            }
         }
     }
 }

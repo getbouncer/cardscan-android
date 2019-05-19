@@ -151,6 +151,7 @@ public abstract class ImageClassifier {
         MappedByteBuffer result = fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset,
                 declaredLength);
         inputStream.close();
+        fileDescriptor.close();
         return result;
     }
 
