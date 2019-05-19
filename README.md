@@ -17,20 +17,22 @@ CardScan Android installation guide
 
 ## Installation
 
-Download the cardscan.aar file and then import it into your project using `File -> New -> New Module -> Import .jar/.aar`
+Add our bintray repository to your projects build.gradle file
+```gradle
+repositories {
+    google()
+    jcenter()
+    // Include this to resolve our library
+    maven { url  "https://dl.bintray.com/kingst/CardScan" }
+}
+```
 
 Then, add a dependency to your app's build.gradle file:
 
 ```gradle
 dependencies {
-    implementation project(':cardscan')
+    implementation 'com.getbouncer:cardscan:1.0.4003'
 }
-```
-
-and in your settings.gradle file
-
-```gradle
-include 'app', ':cardscan'
 ```
 
 ## Using CardScan
