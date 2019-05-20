@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".EnterCard">
 
-    <com.stripe.android.view.CardMultilineWidget
+    <com.stripe.android.view.CardInputWidget
         android:id="@+id/card_input_widget"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
