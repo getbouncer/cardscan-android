@@ -3,4 +3,5 @@
     <string name="picture">Picture</string>
     <string name="description_info">Info</string>
     <string name="scan_card_debug">Scan Card (Debug)</string>
+    <string name="step_up">Step Up</string>
 </resources>

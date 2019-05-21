@@ -3,4 +3,9 @@
     <color name="control_background">#cc4285f4</color>
     <color name="camera_background">#992F3542</color>
     <color name="ios_green"> #4cd964</color>
+    <color name="white_background">#ffffffff</color>
+    <color name="white_background_transparent">#99ffffff</color>
+    <color name="gray">#88888888</color>
+    <color name="dark_gray">#aa222222</color>
+    <color name="food_red">#ffe30007</color>
 </resources>

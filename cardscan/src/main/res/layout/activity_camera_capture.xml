@@ -26,7 +26,7 @@
         app:layout_constraintTop_toTopOf="@+id/texture" />
 
     <View
-        android:id="@+id/view"
+        android:id="@+id/cardRectangle"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="16dp"
@@ -54,7 +54,7 @@
         android:textColor="@android:color/white"
         android:textSize="24sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/view"
+        app:layout_constraintBottom_toTopOf="@+id/cardRectangle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -73,7 +73,7 @@
         android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/view" />
+        app:layout_constraintTop_toBottomOf="@+id/cardRectangle" />
 
     <Button
         android:id="@+id/flashlightButton"
@@ -123,9 +123,9 @@
         app:autoSizeStepGranularity="2sp"
         android:textSize="30sp"
         android:maxLines="1"
-        app:layout_constraintEnd_toEndOf="@+id/view"
+        app:layout_constraintEnd_toEndOf="@+id/cardRectangle"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/view"
+        app:layout_constraintStart_toStartOf="@+id/cardRectangle"
         app:layout_constraintTop_toTopOf="@+id/guideline" />
 
     <TextView
@@ -143,9 +143,9 @@
         android:text="@string/_5_18"
         android:textSize="17sp"
         android:maxLines="1"
-        app:layout_constraintEnd_toEndOf="@+id/view"
+        app:layout_constraintEnd_toEndOf="@+id/cardRectangle"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/view"
+        app:layout_constraintStart_toStartOf="@+id/cardRectangle"
         app:layout_constraintTop_toBottomOf="@+id/cardNumber" />
 
 </android.support.constraint.ConstraintLayout>

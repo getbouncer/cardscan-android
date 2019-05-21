@@ -22,9 +22,20 @@ public class Overlay extends View {
     private int radius;
     private final Xfermode xfermode = new PorterDuffXfermode(PorterDuff.Mode.CLEAR);
 
+    //private Paint paintAntiAlias = new Paint(Paint.ANTI_ALIAS_FLAG);
+    //private Paint paint = new Paint();
+
     public Overlay(Context context, AttributeSet attrs) {
         super(context, attrs);
         setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+    }
+
+    protected int getBackgroundColorId() {
+        return R.color.camera_background;
+    }
+
+    protected int getCornerColorId() {
+        return R.color.ios_green;
     }
 
     public void setCircle(RectF rect, int radius) {
@@ -41,16 +52,16 @@ public class Overlay extends View {
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         if(rect != null) {
-            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            paint.setColor(getResources().getColor(R.color.camera_background));
-            paint.setStyle(Paint.Style.FILL);
-            canvas.drawPaint(paint);
+            Paint paintAntiAlias = new Paint(Paint.ANTI_ALIAS_FLAG);
+            paintAntiAlias.setColor(getResources().getColor(getBackgroundColorId()));
+            paintAntiAlias.setStyle(Paint.Style.FILL);
+            canvas.drawPaint(paintAntiAlias);
 
-            paint.setXfermode(xfermode);
-            canvas.drawRoundRect(rect, radius, radius, paint);
+            paintAntiAlias.setXfermode(xfermode);
+            canvas.drawRoundRect(rect, radius, radius, paintAntiAlias);
 
-            paint = new Paint();
-            paint.setColor(getResources().getColor(R.color.ios_green));
+            Paint paint = new Paint();
+            paint.setColor(getResources().getColor(getCornerColorId()));
             paint.setStyle(Paint.Style.STROKE);
             paint.setStrokeWidth(dpToPx(6));
 
