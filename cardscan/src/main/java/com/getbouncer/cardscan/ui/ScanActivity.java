@@ -32,6 +32,9 @@ public class ScanActivity extends ScanBaseActivity {
             } else {
                 mIsPermissionCheckDone = true;
             }
+        } else {
+            // no permission checks
+            mIsPermissionCheckDone = true;
         }
 
         mDebugImageView = findViewById(R.id.debugImageView);

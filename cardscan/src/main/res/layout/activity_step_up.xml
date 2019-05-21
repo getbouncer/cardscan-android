@@ -9,12 +9,13 @@
         android:id="@+id/texture"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/white_background"
         tools:layout_editor_absoluteX="0dp"
         tools:layout_editor_absoluteY="500dp">
     </FrameLayout>
 
 
-    <com.getbouncer.cardscan.ui.Overlay
+    <com.getbouncer.cardscan.ui.OverlayWhite
         android:id="@+id/shadedBackground"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -49,7 +50,7 @@
         android:layout_marginRight="8dp"
         android:gravity="center"
         android:text="@string/verify_your_card"
-        android:textColor="@android:color/white"
+        android:textColor="@android:color/primary_text_light"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -68,7 +69,7 @@
         android:layout_marginBottom="8dp"
         android:gravity="center"
         android:text="For you security, we want to make sure it's really you. Please scan your payment card for verification."
-        android:textColor="@android:color/white"
+        android:textColor="@android:color/tertiary_text_light"
         android:textSize="17sp"
         app:layout_constraintBottom_toTopOf="@+id/cardRectangle"
         app:layout_constraintEnd_toEndOf="parent"
@@ -101,7 +102,7 @@
         android:layout_marginBottom="8dp"
         android:gravity="center"
         android:text="We need these details only for verification. Your data is safe and will not be misused."
-        android:textColor="@android:color/white"
+        android:textColor="@android:color/tertiary_text_light"
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -141,7 +142,7 @@
     <TextView
         android:id="@+id/cardNumber"
         android:visibility="invisible"
-        android:textColor="@android:color/white"
+        android:textColor="@color/ios_green"
         android:gravity="center"
         android:layout_width="0dp"
         android:layout_height="48dp"
@@ -165,7 +166,7 @@
     <TextView
         android:id="@+id/expiry"
         android:visibility="invisible"
-        android:textColor="@android:color/white"
+        android:textColor="@color/ios_green"
         android:gravity="center"
         android:layout_width="0dp"
         android:layout_height="36dp"
@@ -193,7 +194,7 @@
         android:layout_marginRight="8dp"
         android:gravity="center"
         android:text="Payment card:"
-        android:textColor="@android:color/white"
+        android:textColor="@android:color/secondary_text_light"
         android:textSize="17sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -211,10 +212,33 @@
         android:drawableLeft="@android:drawable/ic_lock_lock"
         android:gravity="center"
         android:text="2354, 10/2022"
-        android:textColor="@android:color/white"
+        android:textColor="@android:color/tertiary_text_light"
         android:textSize="17sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView2" />
+
+    <Button
+        android:id="@+id/scanCardButton"
+        android:background="@android:color/transparent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        android:drawableLeft="@android:drawable/presence_video_online"
+        android:drawablePadding="8dp"
+        android:textAllCaps="false"
+        android:text="Scan card"
+        android:textColor="@color/food_red"
+        android:textSize="17sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/cardRectangle"
+        app:layout_constraintEnd_toEndOf="@+id/cardRectangle"
+        app:layout_constraintStart_toStartOf="@+id/cardRectangle"
+        app:layout_constraintTop_toTopOf="@+id/cardRectangle" />
 
 </android.support.constraint.ConstraintLayout>

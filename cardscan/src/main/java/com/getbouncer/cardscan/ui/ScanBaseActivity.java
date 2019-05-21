@@ -133,24 +133,7 @@ class ScanBaseActivity extends Activity implements Camera.PreviewCallback, View.
         }
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (mCamera != null) {
-            mCamera.stopPreview();
-            mCamera.setPreviewCallback(null);
-            mCamera.release();
-        }
-
-        mOrientationEventListener.disable();
-        mIsActivityActive = false;
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        mIsActivityActive = true;
+    protected void startCamera() {
         numberResults = new HashMap<>();
         expiryResults = new HashMap<>();
         firstResultMs = 0;
@@ -161,7 +144,8 @@ class ScanBaseActivity extends Activity implements Camera.PreviewCallback, View.
         try {
             if (mIsPermissionCheckDone) {
                 mCamera = Camera.open();
-                setCameraDisplayOrientation(this, Camera.CameraInfo.CAMERA_FACING_BACK, mCamera);
+                setCameraDisplayOrientation(this, Camera.CameraInfo.CAMERA_FACING_BACK,
+                        mCamera);
                 // Create our Preview view and set it as the content of our activity.
                 CameraPreview cameraPreview = new CameraPreview(this);
                 FrameLayout preview = findViewById(mTextureId);
@@ -180,6 +164,27 @@ class ScanBaseActivity extends Activity implements Camera.PreviewCallback, View.
             AlertDialog dialog = builder.create();
             dialog.show();
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mCamera != null) {
+            mCamera.stopPreview();
+            mCamera.setPreviewCallback(null);
+            mCamera.release();
+        }
+
+        mOrientationEventListener.disable();
+        mIsActivityActive = false;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        mIsActivityActive = true;
+        startCamera();
     }
 
 
