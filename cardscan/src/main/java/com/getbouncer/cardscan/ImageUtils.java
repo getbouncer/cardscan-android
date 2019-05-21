@@ -8,7 +8,7 @@ import android.graphics.Paint;
 
 import java.util.List;
 
-public class ImageUtils {
+class ImageUtils {
 
     public static Bitmap drawBoxesOnImage(Bitmap frame, List<DetectedBox> boxes,
                                           DetectedBox expiryBox) {

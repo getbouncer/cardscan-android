@@ -21,7 +21,7 @@ import android.content.Context;
 import java.io.IOException;
 
 /** This classifier works with the float MobileNet model. */
-public class FindFourModel extends ImageClassifier {
+class FindFourModel extends ImageClassifier {
 
     final int rows = 34;
     final int cols = 51;

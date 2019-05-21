@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 
 import java.util.Calendar;
 
-public class Expiry {
+class Expiry {
     public String string;
     public int month;
     public int year;

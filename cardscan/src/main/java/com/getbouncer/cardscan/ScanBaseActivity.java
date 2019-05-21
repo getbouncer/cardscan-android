@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.getbouncer.cardscan.ui;
+package com.getbouncer.cardscan;
 
 
 import android.app.Activity;
@@ -39,12 +39,6 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-
-import com.getbouncer.cardscan.CreditCard;
-import com.getbouncer.cardscan.CreditCardUtils;
-import com.getbouncer.cardscan.DetectedBox;
-import com.getbouncer.cardscan.Expiry;
-import com.getbouncer.cardscan.R;
 
 import java.io.IOException;
 import java.util.HashMap;

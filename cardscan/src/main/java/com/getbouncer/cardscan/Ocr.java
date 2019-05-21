@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * This class is not thread safe, make sure that all methods run on the same thread.
  */
-public class Ocr {
+class Ocr {
     private static FindFourModel findFour = null;
     private static RecognizedDigitsModel recognizedDigitsModel = null;
     public List<DetectedBox> digitBoxes = new ArrayList<>();
