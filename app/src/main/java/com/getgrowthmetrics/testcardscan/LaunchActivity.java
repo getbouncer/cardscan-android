@@ -8,6 +8,7 @@ import android.view.View;
 
 import com.getbouncer.cardscan.CreditCard;
 import com.getbouncer.cardscan.ui.ScanActivity;
+import com.getbouncer.cardscan.ui.ScanCardStepUpActivity;
 
 public class LaunchActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -20,16 +21,21 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
 
         findViewById(R.id.scan_button).setOnClickListener(this);
         findViewById(R.id.scanCardDebug).setOnClickListener(this);
+        findViewById(R.id.stepUp).setOnClickListener(this);
     }
 
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.scan_button) {
-            startActivityForResult(new Intent(this, ScanActivity.class), 1234);
+            startActivityForResult(new Intent(this, ScanActivity.class),
+                    1234);
         } else if (v.getId() == R.id.scanCardDebug) {
             Intent intent = new Intent(this, ScanActivity.class);
             intent.putExtra("debug", true);
             startActivityForResult(intent, 1234);
+        } else if (v.getId() == R.id.stepUp) {
+            startActivityForResult(new Intent(this, ScanCardStepUpActivity.class),
+                    1234);
         }
     }
 
