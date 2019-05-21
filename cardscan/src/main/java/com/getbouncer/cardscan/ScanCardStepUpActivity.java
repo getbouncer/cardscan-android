@@ -1,6 +1,8 @@
 package com.getbouncer.cardscan;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -8,6 +10,21 @@ import android.view.View;
 
 // WARNING WARNING WARNING DO NOT USE still very much WIP
 class ScanCardStepUpActivity extends ScanBaseActivity implements View.OnClickListener {
+    
+    private static final int REQUEST_CODE = 43215;
+
+    public static void start(Activity activity) {
+        ScanBaseActivity.getMachineLearningThread().warmUp(activity.getApplicationContext());
+        activity.startActivityForResult(new Intent(activity, ScanActivity.class), REQUEST_CODE);
+    }
+
+    public static void warmUp(Activity activity) {
+        ScanBaseActivity.getMachineLearningThread().warmUp(activity.getApplicationContext());
+    }
+
+    public static boolean isStepUpResult(int requestCode) {
+        return requestCode == REQUEST_CODE;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
