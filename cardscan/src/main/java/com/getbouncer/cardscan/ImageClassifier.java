@@ -37,7 +37,7 @@ import org.tensorflow.lite.gpu.GpuDelegate;
 /**
  * Classifies images with Tensorflow Lite.
  */
-public abstract class ImageClassifier {
+abstract class ImageClassifier {
     /** Tag for the {@link Log}. */
     private static final String TAG = "CardScan";
 

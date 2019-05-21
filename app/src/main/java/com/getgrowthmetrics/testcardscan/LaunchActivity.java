@@ -7,7 +7,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.getbouncer.cardscan.CreditCard;
-import com.getbouncer.cardscan.ui.ScanActivity;
+import com.getbouncer.cardscan.ScanActivity;
 
 public class LaunchActivity extends AppCompatActivity implements View.OnClickListener {
 

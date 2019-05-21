@@ -2,7 +2,7 @@ package com.getbouncer.cardscan;
 
 import android.support.annotation.NonNull;
 
-public class DetectedBox implements Comparable {
+class DetectedBox implements Comparable {
     CGRect rect;
     int row;
     int col;

@@ -1,14 +1,10 @@
-package com.getbouncer.cardscan.ui;
+package com.getbouncer.cardscan;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
-
-import com.getbouncer.cardscan.CreditCard;
-import com.getbouncer.cardscan.R;
-
 
 // WARNING WARNING WARNING DO NOT USE still very much WIP
 class ScanCardStepUpActivity extends ScanBaseActivity implements View.OnClickListener {

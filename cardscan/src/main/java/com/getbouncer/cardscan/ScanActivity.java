@@ -1,4 +1,4 @@
-package com.getbouncer.cardscan.ui;
+package com.getbouncer.cardscan;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -9,11 +9,6 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-
-import com.getbouncer.cardscan.DetectedBox;
-import com.getbouncer.cardscan.Expiry;
-import com.getbouncer.cardscan.ImageUtils;
-import com.getbouncer.cardscan.R;
 
 import java.util.List;
 

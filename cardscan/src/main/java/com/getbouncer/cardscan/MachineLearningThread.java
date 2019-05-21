@@ -1,4 +1,4 @@
-package com.getbouncer.cardscan.ui;
+package com.getbouncer.cardscan;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -9,12 +9,10 @@ import android.graphics.YuvImage;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.getbouncer.cardscan.Ocr;
-
 import java.io.ByteArrayOutputStream;
 import java.util.LinkedList;
 
-public class MachineLearningThread implements Runnable {
+class MachineLearningThread implements Runnable {
 
     class RunArguments {
         private final byte[] mFrameBytes;

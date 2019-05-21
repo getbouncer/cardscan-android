@@ -1,4 +1,4 @@
-package com.getbouncer.cardscan.ui;
+package com.getbouncer.cardscan;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -11,11 +11,9 @@ import android.graphics.Xfermode;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.getbouncer.cardscan.R;
-
 // adapted from this: https://medium.com/@rgomez/android-how-to-draw-an-overlay-with-a-transparent-hole-471af6cf3953
 
-public class Overlay extends View {
+class Overlay extends View {
 
     private RectF rect;
     private RectF oval = new RectF();

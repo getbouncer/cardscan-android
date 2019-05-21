@@ -15,7 +15,7 @@
     </FrameLayout>
 
 
-    <com.getbouncer.cardscan.ui.OverlayWhite
+    <com.getbouncer.cardscan.OverlayWhite
         android:id="@+id/shadedBackground"
         android:layout_width="0dp"
         android:layout_height="0dp"

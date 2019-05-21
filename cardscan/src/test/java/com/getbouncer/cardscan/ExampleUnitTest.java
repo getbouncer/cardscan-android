@@ -1,7 +1,5 @@
 package com.getbouncer.cardscan;
 
-import com.getbouncer.cardscan.ui.ScanActivity;
-
 import org.junit.Test;
 
 import static org.junit.Assert.*;

@@ -1,9 +1,6 @@
-package com.getbouncer.cardscan.ui;
+package com.getbouncer.cardscan;
 
 import android.graphics.Bitmap;
-
-import com.getbouncer.cardscan.DetectedBox;
-import com.getbouncer.cardscan.Expiry;
 
 import java.util.List;
 
