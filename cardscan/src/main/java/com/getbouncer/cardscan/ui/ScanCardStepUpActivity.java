@@ -9,9 +9,9 @@ import android.view.View;
 import com.getbouncer.cardscan.CreditCard;
 import com.getbouncer.cardscan.R;
 
-import java.util.List;
 
-public class ScanCardStepUpActivity extends ScanBaseActivity implements View.OnClickListener {
+// WARNING WARNING WARNING DO NOT USE still very much WIP
+class ScanCardStepUpActivity extends ScanBaseActivity implements View.OnClickListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
