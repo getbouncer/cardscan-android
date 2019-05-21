@@ -245,15 +245,19 @@ class ScanBaseActivity extends Activity implements Camera.PreviewCallback, View.
         mRotation = result;
     }
 
+    static MachineLearningThread getMachineLearningThread() {
+        if (machineLearningThread == null) {
+            machineLearningThread = new MachineLearningThread();
+            new Thread(machineLearningThread).start();
+        }
+
+        return machineLearningThread;
+    }
 
     @Override
     public void onPreviewFrame(byte[] bytes, Camera camera) {
         if (mMachineLearningSemaphore.tryAcquire()) {
-
-            if (machineLearningThread == null) {
-                machineLearningThread = new MachineLearningThread();
-                new Thread(machineLearningThread).start();
-            }
+            MachineLearningThread mlThread = getMachineLearningThread();
 
             Camera.Parameters parameters = camera.getParameters();
             int width = parameters.getPreviewSize().width;
@@ -263,7 +267,7 @@ class ScanBaseActivity extends Activity implements Camera.PreviewCallback, View.
             mPredictionStartMs = SystemClock.uptimeMillis();
             // Use the application context here because the machine learning thread's lifecycle
             // is connected to the application and not this activity
-            machineLearningThread.post(bytes, width, height, format, mRotation, this,
+            mlThread.post(bytes, width, height, format, mRotation, this,
                     this.getApplicationContext());
         }
     }

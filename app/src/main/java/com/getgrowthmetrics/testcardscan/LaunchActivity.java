@@ -23,18 +23,17 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
         findViewById(R.id.scan_button).setOnClickListener(this);
         findViewById(R.id.scanCardDebug).setOnClickListener(this);
         findViewById(R.id.stepUp).setOnClickListener(this);
+
+        ScanActivity.warmUp(this);
     }
 
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.scan_button) {
-            startActivityForResult(new Intent(this, ScanActivity.class),
-                    1234);
+            ScanActivity.start(this);
             isEnterCard = true;
         } else if (v.getId() == R.id.scanCardDebug) {
-            Intent intent = new Intent(this, ScanActivity.class);
-            intent.putExtra("debug", true);
-            startActivityForResult(intent, 1234);
+            ScanActivity.startDebug(this);
             isEnterCard = true;
         } else if (v.getId() == R.id.stepUp) {
             //startActivityForResult(new Intent(this, ScanCardStepUpActivity.class),
@@ -47,7 +46,7 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == 1234) {
+        if (ScanActivity.isScanResult(requestCode)) {
             if (resultCode == ScanActivity.RESULT_OK && data != null &&
                     data.hasExtra(ScanActivity.SCAN_RESULT)) {
 

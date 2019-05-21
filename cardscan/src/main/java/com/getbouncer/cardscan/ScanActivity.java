@@ -1,6 +1,8 @@
 package com.getbouncer.cardscan;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -16,6 +18,30 @@ public class ScanActivity extends ScanBaseActivity {
     private static final String TAG = "ScanActivity";
     private ImageView mDebugImageView;
     private boolean mInDebugMode = false;
+    private static long startTimeMs = 0;
+
+    private static final int REQUEST_CODE = 51234;
+
+    public static void start(Activity activity) {
+        ScanBaseActivity.getMachineLearningThread().warmUp(activity.getApplicationContext());
+        activity.startActivityForResult(new Intent(activity, ScanActivity.class), REQUEST_CODE);
+    }
+
+    public static void warmUp(Activity activity) {
+        ScanBaseActivity.getMachineLearningThread().warmUp(activity.getApplicationContext());
+    }
+
+    public static void startDebug(Activity activity) {
+        ScanBaseActivity.getMachineLearningThread().warmUp(activity.getApplicationContext());
+        startTimeMs = SystemClock.uptimeMillis();
+        Intent intent = new Intent(activity, ScanActivity.class);
+        intent.putExtra("debug", true);
+        activity.startActivityForResult(intent, REQUEST_CODE);
+    }
+
+    public static boolean isScanResult(int requestCode) {
+        return requestCode == REQUEST_CODE;
+    }
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +76,11 @@ public class ScanActivity extends ScanBaseActivity {
                     expiryBox));
             Log.d(TAG, "Prediction (ms): " +
                     (SystemClock.uptimeMillis() - mPredictionStartMs));
+            if (startTimeMs != 0) {
+                Log.d(TAG, "time to first prediction: " +
+                        (SystemClock.uptimeMillis() - startTimeMs));
+                startTimeMs = 0;
+            }
         }
 
         super.onPrediction(number, expiry, bitmap, digitBoxes, expiryBox);

@@ -3,7 +3,10 @@ package com.getbouncer.cardscan;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.os.Handler;
@@ -36,6 +39,16 @@ class MachineLearningThread implements Runnable {
     }
 
     private LinkedList<RunArguments> queue = new LinkedList<>();
+
+    synchronized void warmUp(Context context) {
+        if (Ocr.isInit() || !queue.isEmpty()) {
+            return;
+        }
+        RunArguments args = new RunArguments(null, 0, 0, 0,
+                90,null, context);
+        queue.push(args);
+        notify();
+    }
 
     synchronized void post(byte[] bytes, int width, int height, int format, int sensorOrientation,
                            OnScanListener scanListener, Context context) {
@@ -79,10 +92,22 @@ class MachineLearningThread implements Runnable {
         return queue.pop();
     }
 
-    private synchronized void runModel() {
+    private void runModel() {
         final RunArguments args = getNextImage();
-        final Bitmap bitmap = getBitmap(args.mFrameBytes, args.mWidth, args.mHeight, args.mFormat,
-                args.mSensorOrientation);
+
+        Bitmap bm;
+        if (args.mFrameBytes != null) {
+            bm = getBitmap(args.mFrameBytes, args.mWidth, args.mHeight, args.mFormat,
+                    args.mSensorOrientation);
+        } else {
+            bm = Bitmap.createBitmap(480, 302, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bm);
+            Paint paint = new Paint();
+            paint.setColor(Color.GRAY);
+            canvas.drawRect(0.0f, 0.0f, 480.0f, 302.0f, paint);
+        }
+
+        final Bitmap bitmap = bm;
 
         final Ocr ocr = new Ocr();
         final String number = ocr.predict(bitmap, args.mContext);
@@ -90,8 +115,10 @@ class MachineLearningThread implements Runnable {
         handler.post(new Runnable() {
             public void run() {
                 try {
-                    args.mScanListener.onPrediction(number, ocr.expiry, bitmap, ocr.digitBoxes,
-                            ocr.expiryBox);
+                    if (args.mScanListener != null) {
+                        args.mScanListener.onPrediction(number, ocr.expiry, bitmap, ocr.digitBoxes,
+                                ocr.expiryBox);
+                    }
                 } catch (Exception e) {
                     // prevent callbacks from crashing the app, swallow it
                     e.printStackTrace();
