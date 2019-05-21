@@ -110,6 +110,7 @@
 
     <Button
         android:id="@+id/flashlightButton"
+        android:visibility="invisible"
         android:layout_width="75dp"
         android:layout_height="75dp"
         android:layout_marginTop="8dp"
@@ -240,5 +241,20 @@
         app:layout_constraintEnd_toEndOf="@+id/cardRectangle"
         app:layout_constraintStart_toStartOf="@+id/cardRectangle"
         app:layout_constraintTop_toTopOf="@+id/cardRectangle" />
+
+    <ImageView
+        android:id="@+id/checkImage"
+        android:visibility="invisible"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:src="@android:drawable/checkbox_on_background"
+        app:layout_constraintBottom_toBottomOf="@+id/textView3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textView3"
+        app:layout_constraintTop_toTopOf="@+id/textView3" />
 
 </android.support.constraint.ConstraintLayout>

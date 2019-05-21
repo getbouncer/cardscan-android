@@ -81,6 +81,7 @@ class ScanBaseActivity extends Activity implements Camera.PreviewCallback, View.
     long mPredictionStartMs = 0;
     // Child classes must set to ensure proper flaslight handling
     boolean mIsPermissionCheckDone = false;
+    protected boolean mShowNumberAndExpiryAsScanning = true;
 
     public static final String SCAN_RESULT = "creditCard";
     public long errorCorrectionDurationMs = 1500;
@@ -368,6 +369,26 @@ class ScanBaseActivity extends Activity implements Camera.PreviewCallback, View.
         textView.setText(value);
     }
 
+    protected void onCardScanned(CreditCard card) {
+        Intent intent = new Intent();
+        intent.putExtra(SCAN_RESULT, card);
+        setResult(RESULT_OK, intent);
+        finish();
+    }
+
+    protected void setNumberAndExpiryAnimated() {
+        String numberResult = getNumberResult();
+        Expiry expiryResult = getExpiryResult();
+        TextView textView = findViewById(mCardNumberId);
+        setValueAnimated(textView, CreditCardUtils.format(numberResult));
+
+        long duration = SystemClock.uptimeMillis() - firstResultMs;
+        if (expiryResult != null && duration >= (errorCorrectionDurationMs / 2)) {
+            textView = findViewById(mExpiryId);
+            setValueAnimated(textView, expiryResult.format());
+        }
+    }
+
     @Override
     public void onPrediction(final String number, final Expiry expiry, final Bitmap bitmap,
                              final List<DetectedBox> digitBoxes, final DetectedBox expiryBox) {
@@ -387,21 +408,12 @@ class ScanBaseActivity extends Activity implements Camera.PreviewCallback, View.
 
             long duration = SystemClock.uptimeMillis() - firstResultMs;
 
-            if (firstResultMs != 0) {
-                String numberResult = getNumberResult();
-                Expiry expiryResult = getExpiryResult();
-                TextView textView = findViewById(mCardNumberId);
-                setValueAnimated(textView, CreditCardUtils.format(numberResult));
-
-                if (expiryResult != null && duration >= (errorCorrectionDurationMs / 2)) {
-                    textView = findViewById(mExpiryId);
-                    setValueAnimated(textView, expiryResult.format());
-                }
+            if (firstResultMs != 0 && mShowNumberAndExpiryAsScanning) {
+                setNumberAndExpiryAnimated();
             }
 
             if (firstResultMs != 0 && duration >= errorCorrectionDurationMs) {
                 mSentResponse = true;
-                Intent intent = new Intent();
                 String numberResult = getNumberResult();
                 Expiry expiryResult = getExpiryResult();
                 String month = null;
@@ -413,9 +425,7 @@ class ScanBaseActivity extends Activity implements Camera.PreviewCallback, View.
 
                 CreditCard card = new CreditCard(numberResult, month, year);
 
-                intent.putExtra(SCAN_RESULT, card);
-                setResult(RESULT_OK, intent);
-                finish();
+                onCardScanned(card);
             }
         }
 

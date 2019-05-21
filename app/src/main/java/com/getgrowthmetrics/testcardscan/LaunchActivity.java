@@ -14,6 +14,8 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
 
     public static final String TAG = "LaunchActivity";
 
+    private boolean isEnterCard = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,13 +31,16 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
         if (v.getId() == R.id.scan_button) {
             startActivityForResult(new Intent(this, ScanActivity.class),
                     1234);
+            isEnterCard = true;
         } else if (v.getId() == R.id.scanCardDebug) {
             Intent intent = new Intent(this, ScanActivity.class);
             intent.putExtra("debug", true);
             startActivityForResult(intent, 1234);
+            isEnterCard = true;
         } else if (v.getId() == R.id.stepUp) {
             startActivityForResult(new Intent(this, ScanCardStepUpActivity.class),
                     1234);
+            isEnterCard = false;
         }
     }
 
@@ -49,12 +54,18 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
 
                 CreditCard scanResult = data.getParcelableExtra(ScanActivity.SCAN_RESULT);
 
-                Intent intent = new Intent(this, EnterCard.class);
-                intent.putExtra("number", scanResult.number);
+                Intent intent;
 
-                if (scanResult.expiryMonth != null && scanResult.expiryYear != null) {
-                    intent.putExtra("expiryMonth", Integer.parseInt(scanResult.expiryMonth));
-                    intent.putExtra("expiryYear", Integer.parseInt(scanResult.expiryYear));
+                if (isEnterCard) {
+                    intent = new Intent(this, EnterCard.class);
+                    intent.putExtra("number", scanResult.number);
+
+                    if (scanResult.expiryMonth != null && scanResult.expiryYear != null) {
+                        intent.putExtra("expiryMonth", Integer.parseInt(scanResult.expiryMonth));
+                        intent.putExtra("expiryYear", Integer.parseInt(scanResult.expiryYear));
+                    }
+                } else {
+                    intent = new Intent(this, PlacingOrder.class);
                 }
 
                 startActivity(intent);
