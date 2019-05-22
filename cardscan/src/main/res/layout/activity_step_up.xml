@@ -35,7 +35,7 @@
         android:layout_marginTop="24dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:src="@android:drawable/ic_lock_lock"
+        android:src="@drawable/credit_card_top_icon"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -89,23 +89,6 @@
         app:layout_constraintTop_toBottomOf="@+id/textView3" />
 
 
-    <TextView
-        android:id="@+id/securityText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginLeft="24dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginRight="24dp"
-        android:layout_marginBottom="8dp"
-        android:gravity="center"
-        android:text="We need these details only for verification. Your data is safe and will not be misused."
-        android:textColor="@android:color/tertiary_text_light"
-        android:textSize="14sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
     <Button
         android:id="@+id/flashlightButton"
         android:layout_width="64dp"
@@ -115,7 +98,7 @@
         android:background="@drawable/button_states"
         android:contentDescription="@string/flashlight_button"
         android:visibility="invisible"
-        app:layout_constraintBottom_toTopOf="@+id/securityText"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cardRectangle" />
@@ -131,36 +114,30 @@
         app:layout_constraintStart_toStartOf="parent"
         android:contentDescription="@string/todo" />
 
-    <android.support.constraint.Guideline
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/guideline"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.5"/>
-
     <TextView
         android:id="@+id/cardNumber"
-        android:visibility="invisible"
-        android:textColor="@color/ios_green"
-        android:gravity="center"
         android:layout_width="0dp"
         android:layout_height="48dp"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
-        android:layout_marginTop="0dp"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
-        android:text="@string/_4242_4242_4242_4242"
-        app:autoSizeTextType="uniform"
-        app:autoSizeMinTextSize="12sp"
-        app:autoSizeMaxTextSize="100sp"
-        app:autoSizeStepGranularity="2sp"
-        android:textSize="30sp"
+        android:gravity="center"
         android:maxLines="1"
+        android:text="@string/_4242_4242_4242_4242"
+        android:textColor="@color/ios_green"
+        android:textSize="30sp"
+        android:visibility="invisible"
+        app:autoSizeMaxTextSize="100sp"
+        app:autoSizeMinTextSize="12sp"
+        app:autoSizeStepGranularity="2sp"
+        app:autoSizeTextType="uniform"
+        app:layout_constraintBottom_toBottomOf="@+id/cardRectangle"
         app:layout_constraintEnd_toEndOf="@+id/cardRectangle"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="@+id/cardRectangle"
-        app:layout_constraintTop_toTopOf="@+id/guideline" />
+        app:layout_constraintTop_toTopOf="@+id/cardRectangle"
+        app:layout_constraintVertical_bias="0.65" />
 
     <TextView
         android:id="@+id/expiry"
@@ -219,40 +196,40 @@
 
     <Button
         android:id="@+id/scanCardButton"
-        android:background="@android:color/transparent"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginLeft="32dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginRight="32dp"
         android:layout_marginBottom="8dp"
-        android:drawableLeft="@android:drawable/presence_video_online"
-        android:drawablePadding="8dp"
+        android:background="@drawable/scan_card_button"
+        android:text="Scan payment card"
         android:textAllCaps="false"
-        android:text="Scan card"
-        android:textColor="@color/food_red"
+        android:textColor="@android:color/white"
         android:textSize="17sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@+id/cardRectangle"
-        app:layout_constraintEnd_toEndOf="@+id/cardRectangle"
-        app:layout_constraintStart_toStartOf="@+id/cardRectangle"
-        app:layout_constraintTop_toTopOf="@+id/cardRectangle" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cardRectangle" />
 
     <ImageView
-        android:id="@+id/checkImage"
-        android:visibility="invisible"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:src="@android:drawable/checkbox_on_background"
-        app:layout_constraintBottom_toBottomOf="@+id/textView3"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/textView3"
-        app:layout_constraintTop_toTopOf="@+id/textView3" />
+        android:id="@+id/cardPreviewImage"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginLeft="32dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginRight="32dp"
+        android:layout_marginBottom="32dp"
+        app:layout_constraintBottom_toBottomOf="@+id/cardRectangle"
+        app:layout_constraintEnd_toEndOf="@+id/cardRectangle"
+        app:layout_constraintStart_toEndOf="@+id/expiry"
+        app:layout_constraintStart_toStartOf="@+id/cardRectangle"
+        app:layout_constraintTop_toTopOf="@+id/cardRectangle"
+        android:src="@drawable/credit_card_scan_placeholder" />
 
 </android.support.constraint.ConstraintLayout>

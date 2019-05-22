@@ -380,13 +380,12 @@ class ScanBaseActivity extends Activity implements Camera.PreviewCallback, View.
         finish();
     }
 
-    protected void setNumberAndExpiryAnimated() {
+    protected void setNumberAndExpiryAnimated(long duration) {
         String numberResult = getNumberResult();
         Expiry expiryResult = getExpiryResult();
         TextView textView = findViewById(mCardNumberId);
         setValueAnimated(textView, CreditCardUtils.format(numberResult));
 
-        long duration = SystemClock.uptimeMillis() - firstResultMs;
         if (expiryResult != null && duration >= (errorCorrectionDurationMs / 2)) {
             textView = findViewById(mExpiryId);
             setValueAnimated(textView, expiryResult.format());
@@ -411,9 +410,8 @@ class ScanBaseActivity extends Activity implements Camera.PreviewCallback, View.
             }
 
             long duration = SystemClock.uptimeMillis() - firstResultMs;
-
             if (firstResultMs != 0 && mShowNumberAndExpiryAsScanning) {
-                setNumberAndExpiryAnimated();
+                setNumberAndExpiryAnimated(duration);
             }
 
             if (firstResultMs != 0 && duration >= errorCorrectionDurationMs) {

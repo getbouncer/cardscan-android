@@ -20,10 +20,6 @@ public class ScanCardStepUpActivity extends ScanBaseActivity implements View.OnC
                 REQUEST_CODE);
     }
 
-    public static void warmUp(Activity activity) {
-        ScanBaseActivity.getMachineLearningThread().warmUp(activity.getApplicationContext());
-    }
-
     public static boolean isStepUpResult(int requestCode) {
         return requestCode == REQUEST_CODE;
     }
@@ -36,8 +32,6 @@ public class ScanCardStepUpActivity extends ScanBaseActivity implements View.OnC
         findViewById(R.id.scanCardButton).setOnClickListener(this);
         setViewIds(R.id.flashlightButton, R.id.cardRectangle, R.id.shadedBackground, R.id.texture,
                 R.id.cardNumber, R.id.expiry);
-        mShowNumberAndExpiryAsScanning = false;
-        errorCorrectionDurationMs = 0;
     }
 
     @Override
@@ -69,29 +63,7 @@ public class ScanCardStepUpActivity extends ScanBaseActivity implements View.OnC
 
     @Override
     protected void onCardScanned(final CreditCard card) {
-        // override for notifications after a successful scan
-        findViewById(R.id.checkImage).setVisibility(View.VISIBLE);
-        findViewById(R.id.checkImage).setAlpha(0.0f);
-        findViewById(R.id.checkImage).animate().setDuration(400).alpha(1.0f);
-        setNumberAndExpiryAnimated();
-
-        // XXX FIXME there has to be a better way
-        Thread thread = new Thread() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(400);
-                } catch (InterruptedException e) {
-                }
-
-                runOnUiThread(new Runnable() {
-                    public void run() {
-                        ScanCardStepUpActivity.super.onCardScanned(card);
-                    }
-                });
-            }
-        };
-        thread.start();
+        super.onCardScanned(card);
     }
 
     private void startCameraAfterInitialization() {
@@ -100,6 +72,7 @@ public class ScanCardStepUpActivity extends ScanBaseActivity implements View.OnC
         mIsPermissionCheckDone = true;
         findViewById(R.id.flashlightButton).setVisibility(View.VISIBLE);
         findViewById(R.id.scanCardButton).setVisibility(View.GONE);
+        findViewById(R.id.cardPreviewImage).setVisibility(View.GONE);
         OverlayWhite overlayWhite = findViewById(R.id.shadedBackground);
         overlayWhite.setColorIds(R.color.white_background_transparent, R.color.ios_green);
         startCamera();
