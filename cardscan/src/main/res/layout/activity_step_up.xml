@@ -49,7 +49,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:gravity="center"
-        android:text="@string/verify_your_card"
+        android:text="Verify your card"
         android:textColor="@android:color/primary_text_light"
         android:textSize="24sp"
         android:textStyle="bold"
@@ -86,7 +86,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView3" />
+        app:layout_constraintTop_toBottomOf="@+id/last4AndExpiry" />
 
 
     <Button
@@ -125,7 +125,7 @@
         android:gravity="center"
         android:maxLines="1"
         android:text="@string/_4242_4242_4242_4242"
-        android:textColor="@color/ios_green"
+        android:textColor="@android:color/white"
         android:textSize="30sp"
         android:visibility="invisible"
         app:autoSizeMaxTextSize="100sp"
@@ -142,7 +142,7 @@
     <TextView
         android:id="@+id/expiry"
         android:visibility="invisible"
-        android:textColor="@color/ios_green"
+        android:textColor="@android:color/white"
         android:gravity="center"
         android:layout_width="0dp"
         android:layout_height="36dp"
@@ -177,7 +177,7 @@
         app:layout_constraintTop_toBottomOf="@+id/textView" />
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/last4AndExpiry"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
