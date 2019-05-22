@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 
+
 // WARNING WARNING WARNING DO NOT USE still very much WIP
 public class ScanCardStepUpActivity extends ScanBaseActivity implements View.OnClickListener {
 
@@ -92,7 +93,6 @@ public class ScanCardStepUpActivity extends ScanBaseActivity implements View.OnC
         };
         thread.start();
     }
-
 
     private void startCameraAfterInitialization() {
         // XXX FIXME come up with a cleaner interface here

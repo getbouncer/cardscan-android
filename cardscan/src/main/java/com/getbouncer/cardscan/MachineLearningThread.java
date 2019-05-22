@@ -25,9 +25,11 @@ class MachineLearningThread implements Runnable {
         private final int mHeight;
         private final int mFormat;
         private final int mSensorOrientation;
+        private final float mRoiCenterYRatio;
 
         RunArguments(byte[] frameBytes, int width, int height, int format,
-                     int sensorOrientation, OnScanListener scanListener, Context context) {
+                     int sensorOrientation, OnScanListener scanListener, Context context,
+                     float roiCenterYRatio) {
             mFrameBytes = frameBytes;
             mWidth = width;
             mHeight = height;
@@ -35,6 +37,7 @@ class MachineLearningThread implements Runnable {
             mScanListener = scanListener;
             mContext = context;
             mSensorOrientation = sensorOrientation;
+            mRoiCenterYRatio = roiCenterYRatio;
         }
     }
 
@@ -45,20 +48,21 @@ class MachineLearningThread implements Runnable {
             return;
         }
         RunArguments args = new RunArguments(null, 0, 0, 0,
-                90,null, context);
+                90,null, context, 0.5f);
         queue.push(args);
         notify();
     }
 
     synchronized void post(byte[] bytes, int width, int height, int format, int sensorOrientation,
-                           OnScanListener scanListener, Context context) {
+                           OnScanListener scanListener, Context context, float roiCenterYRatio) {
         RunArguments args = new RunArguments(bytes, width, height, format, sensorOrientation,
-                scanListener, context);
+                scanListener, context, roiCenterYRatio);
         queue.push(args);
         notify();
     }
 
-    private Bitmap getBitmap(byte[] bytes, int width, int height, int format, int sensorOrientation) {
+    private Bitmap getBitmap(byte[] bytes, int width, int height, int format, int sensorOrientation,
+                             float roiCenterYRatio) {
         YuvImage yuv = new YuvImage(bytes, format, width, height, null);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -72,12 +76,16 @@ class MachineLearningThread implements Runnable {
         Bitmap bm = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(),
                 matrix, true);
 
-
         double w = bm.getWidth();
         double h = 302.0 * w / 480.0;
         int x = 0;
-        int y = (int) Math.round(((double) bm.getHeight()) * 0.5 - h * 0.5);
-        return Bitmap.createBitmap(bm, x, y, (int) w, (int) h);
+        int y = (int) Math.round(((double) bm.getHeight()) * roiCenterYRatio - h * 0.5);
+
+        Bitmap result = Bitmap.createBitmap(bm, x, y, (int) w, (int) h);
+        bitmap.recycle();
+        bm.recycle();
+
+        return result;
     }
 
     private synchronized RunArguments getNextImage() {
@@ -98,7 +106,7 @@ class MachineLearningThread implements Runnable {
         Bitmap bm;
         if (args.mFrameBytes != null) {
             bm = getBitmap(args.mFrameBytes, args.mWidth, args.mHeight, args.mFormat,
-                    args.mSensorOrientation);
+                    args.mSensorOrientation, args.mRoiCenterYRatio);
         } else {
             bm = Bitmap.createBitmap(480, 302, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(bm);
@@ -123,6 +131,7 @@ class MachineLearningThread implements Runnable {
                     // prevent callbacks from crashing the app, swallow it
                     e.printStackTrace();
                 }
+                bitmap.recycle();
             }
         });
     }

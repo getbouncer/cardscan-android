@@ -70,6 +70,7 @@ class ScanBaseActivity extends Activity implements Camera.PreviewCallback, View.
     private int mCardNumberId;
     private int mExpiryId;
     private int mTextureId;
+    private float mRoiCenterYRatio;
 
     // set when this activity posts to the machineLearningThread
     long mPredictionStartMs = 0;
@@ -107,6 +108,7 @@ class ScanBaseActivity extends Activity implements Camera.PreviewCallback, View.
             int[] xy = new int[2];
             View view = findViewById(cardRectangleId);
             view.getLocationOnScreen(xy);
+
             // convert from DP to pixels
             int radius = (int) (11 * Resources.getSystem().getDisplayMetrics().density);
             RectF rect = new RectF(xy[0], xy[1],
@@ -114,6 +116,9 @@ class ScanBaseActivity extends Activity implements Camera.PreviewCallback, View.
                     xy[1] + view.getHeight());
             Overlay overlay = findViewById(overlayId);
             overlay.setCircle(rect, radius);
+
+            ScanBaseActivity.this.mRoiCenterYRatio =
+                    (xy[1] + view.getHeight() * 0.5f) / overlay.getHeight();
         }
     }
 
@@ -194,6 +199,7 @@ class ScanBaseActivity extends Activity implements Camera.PreviewCallback, View.
         mTextureId = textureId;
         mCardNumberId = cardNumberId;
         mExpiryId = expiryId;
+        int mCardRectangleId = cardNumberId;
         findViewById(flashlightId).setOnClickListener(this);
         findViewById(cardRectangleId).getViewTreeObserver()
                 .addOnGlobalLayoutListener(new MyGlobalListenerClass(cardRectangleId, overlayId));
@@ -268,7 +274,7 @@ class ScanBaseActivity extends Activity implements Camera.PreviewCallback, View.
             // Use the application context here because the machine learning thread's lifecycle
             // is connected to the application and not this activity
             mlThread.post(bytes, width, height, format, mRotation, this,
-                    this.getApplicationContext());
+                    this.getApplicationContext(), mRoiCenterYRatio);
         }
     }
 
