@@ -14,7 +14,7 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.NoActionBar.FullScreen" />
         <activity
-            android:name=".ui.ScanCardStepUpActivity"
+            android:name=".ScanCardStepUpActivity"
             android:configChanges="orientation"
             android:label="@string/app_name"
             android:screenOrientation="portrait"

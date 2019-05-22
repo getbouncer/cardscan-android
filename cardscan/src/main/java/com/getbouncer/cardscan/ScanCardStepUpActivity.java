@@ -9,13 +9,14 @@ import android.os.Bundle;
 import android.view.View;
 
 // WARNING WARNING WARNING DO NOT USE still very much WIP
-class ScanCardStepUpActivity extends ScanBaseActivity implements View.OnClickListener {
-    
+public class ScanCardStepUpActivity extends ScanBaseActivity implements View.OnClickListener {
+
     private static final int REQUEST_CODE = 43215;
 
     public static void start(Activity activity) {
         ScanBaseActivity.getMachineLearningThread().warmUp(activity.getApplicationContext());
-        activity.startActivityForResult(new Intent(activity, ScanActivity.class), REQUEST_CODE);
+        activity.startActivityForResult(new Intent(activity, ScanCardStepUpActivity.class),
+                REQUEST_CODE);
     }
 
     public static void warmUp(Activity activity) {
@@ -100,7 +101,7 @@ class ScanCardStepUpActivity extends ScanBaseActivity implements View.OnClickLis
         findViewById(R.id.flashlightButton).setVisibility(View.VISIBLE);
         findViewById(R.id.scanCardButton).setVisibility(View.GONE);
         OverlayWhite overlayWhite = findViewById(R.id.shadedBackground);
-        overlayWhite.setColorIds(R.color.white_background_transparent, R.color.dark_gray);
+        overlayWhite.setColorIds(R.color.white_background_transparent, R.color.ios_green);
         startCamera();
     }
 }

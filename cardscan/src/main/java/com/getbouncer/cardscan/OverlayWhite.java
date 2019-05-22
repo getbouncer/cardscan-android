@@ -12,6 +12,7 @@ class OverlayWhite extends Overlay {
     public OverlayWhite(Context context, AttributeSet attrs) {
         super(context, attrs);
         setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        cornerDp = 3;
     }
 
     void setColorIds(int backgroundColorId, int cornerColorId) {

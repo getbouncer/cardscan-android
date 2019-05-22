@@ -8,12 +8,11 @@ import android.view.View;
 
 import com.getbouncer.cardscan.CreditCard;
 import com.getbouncer.cardscan.ScanActivity;
+import com.getbouncer.cardscan.ScanCardStepUpActivity;
 
 public class LaunchActivity extends AppCompatActivity implements View.OnClickListener {
 
     public static final String TAG = "LaunchActivity";
-
-    private boolean isEnterCard = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,14 +30,10 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
     public void onClick(View v) {
         if (v.getId() == R.id.scan_button) {
             ScanActivity.start(this);
-            isEnterCard = true;
         } else if (v.getId() == R.id.scanCardDebug) {
             ScanActivity.startDebug(this);
-            isEnterCard = true;
         } else if (v.getId() == R.id.stepUp) {
-            //startActivityForResult(new Intent(this, ScanCardStepUpActivity.class),
-            //        1234);
-            isEnterCard = false;
+            ScanCardStepUpActivity.start(this);
         }
     }
 
@@ -52,20 +47,23 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
 
                 CreditCard scanResult = data.getParcelableExtra(ScanActivity.SCAN_RESULT);
 
-                Intent intent;
+                Intent intent = new Intent(this, EnterCard.class);
+                intent.putExtra("number", scanResult.number);
 
-                if (isEnterCard) {
-                    intent = new Intent(this, EnterCard.class);
-                    intent.putExtra("number", scanResult.number);
-
-                    if (scanResult.expiryMonth != null && scanResult.expiryYear != null) {
-                        intent.putExtra("expiryMonth", Integer.parseInt(scanResult.expiryMonth));
-                        intent.putExtra("expiryYear", Integer.parseInt(scanResult.expiryYear));
-                    }
-                } else {
-                    intent = new Intent(this, PlacingOrder.class);
+                if (scanResult.expiryMonth != null && scanResult.expiryYear != null) {
+                    intent.putExtra("expiryMonth", Integer.parseInt(scanResult.expiryMonth));
+                    intent.putExtra("expiryYear", Integer.parseInt(scanResult.expiryYear));
                 }
 
+                startActivity(intent);
+            } else if (resultCode == ScanActivity.RESULT_CANCELED) {
+                Log.d(TAG, "The user pressed the back button");
+            }
+        } else if (ScanCardStepUpActivity.isStepUpResult(requestCode)) {
+            if (resultCode == ScanActivity.RESULT_OK && data != null &&
+                    data.hasExtra(ScanActivity.SCAN_RESULT)) {
+
+                Intent intent = new Intent(this, PlacingOrder.class);
                 startActivity(intent);
             } else if (resultCode == ScanActivity.RESULT_CANCELED) {
                 Log.d(TAG, "The user pressed the back button");
