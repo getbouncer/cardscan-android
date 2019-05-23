@@ -13,6 +13,7 @@ import com.getbouncer.cardscan.ScanCardStepUpActivity;
 public class LaunchActivity extends AppCompatActivity implements View.OnClickListener {
 
     public static final String TAG = "LaunchActivity";
+    CreditCard savedCard = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +34,13 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
         } else if (v.getId() == R.id.scanCardDebug) {
             ScanActivity.startDebug(this);
         } else if (v.getId() == R.id.stepUp) {
-            ScanCardStepUpActivity.start(this);
+            String number = this.savedCard.number;
+            String expiry = "";
+            if (savedCard.expiryMonth != null && savedCard.expiryMonth != null) {
+                expiry = savedCard.expiryMonth + "/" + savedCard.expiryYear;
+            }
+            ScanCardStepUpActivity.start(this, number.substring(number.length() - 4), expiry,
+                savedCard.network);
         }
     }
 
@@ -46,6 +53,10 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
                     data.hasExtra(ScanActivity.SCAN_RESULT)) {
 
                 CreditCard scanResult = data.getParcelableExtra(ScanActivity.SCAN_RESULT);
+                this.savedCard = scanResult;
+                if (this.savedCard != null) {
+                    findViewById(R.id.stepUp).setEnabled(true);
+                }
 
                 Intent intent = new Intent(this, EnterCard.class);
                 intent.putExtra("number", scanResult.number);

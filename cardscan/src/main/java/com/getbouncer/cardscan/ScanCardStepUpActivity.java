@@ -61,7 +61,11 @@ public class ScanCardStepUpActivity extends ScanBaseActivity implements View.OnC
         }
 
         // XXX FIXME
-        last4AndExpiry.setText(this.last4 + " Exp: " + this.expiry);
+        if (this.expiry != null && this.expiry.length() > 0) {
+            last4AndExpiry.setText(" " + this.last4 + "   Exp: " + this.expiry);
+        } else {
+            last4AndExpiry.setText(" " + this.last4);
+        }
 
         findViewById(R.id.scanCardButton).setOnClickListener(this);
         setViewIds(R.id.flashlightButton, R.id.cardRectangle, R.id.shadedBackground, R.id.texture,
