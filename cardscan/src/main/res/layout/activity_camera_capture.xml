@@ -77,8 +77,8 @@
 
     <Button
         android:id="@+id/flashlightButton"
-        android:layout_width="75dp"
-        android:layout_height="75dp"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
         android:background="@drawable/button_states"
         android:contentDescription="@string/flashlight_button"
         app:layout_constraintBottom_toBottomOf="@+id/texture"

@@ -18,6 +18,10 @@ class Ocr {
     public DetectedBox expiryBox = null;
     public Expiry expiry = null;
 
+    static boolean isInit() {
+        return findFour != null && recognizedDigitsModel != null;
+    }
+
     private ArrayList<DetectedBox> detectBoxes(Bitmap image) {
         ArrayList<DetectedBox> boxes = new ArrayList<>();
         for (int row = 0; row < findFour.rows; row++) {

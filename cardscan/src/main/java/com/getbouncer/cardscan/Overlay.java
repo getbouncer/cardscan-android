@@ -20,6 +20,8 @@ class Overlay extends View {
     private int radius;
     private final Xfermode xfermode = new PorterDuffXfermode(PorterDuff.Mode.CLEAR);
 
+    int cornerDp = 6;
+
     //private Paint paintAntiAlias = new Paint(Paint.ANTI_ALIAS_FLAG);
     //private Paint paint = new Paint();
 
@@ -61,7 +63,7 @@ class Overlay extends View {
             Paint paint = new Paint();
             paint.setColor(getResources().getColor(getCornerColorId()));
             paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(dpToPx(6));
+            paint.setStrokeWidth(dpToPx(cornerDp));
 
             // top left
             int lineLength = dpToPx(20);
