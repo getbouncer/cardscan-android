@@ -8,7 +8,6 @@ import android.view.View;
 
 import com.getbouncer.cardscan.CreditCard;
 import com.getbouncer.cardscan.ScanActivity;
-import com.getbouncer.cardscan.ScanCardStepUpActivity;
 
 public class LaunchActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -22,7 +21,6 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
 
         findViewById(R.id.scan_button).setOnClickListener(this);
         findViewById(R.id.scanCardDebug).setOnClickListener(this);
-        findViewById(R.id.stepUp).setOnClickListener(this);
 
         ScanActivity.warmUp(this);
     }
@@ -33,14 +31,6 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
             ScanActivity.start(this);
         } else if (v.getId() == R.id.scanCardDebug) {
             ScanActivity.startDebug(this);
-        } else if (v.getId() == R.id.stepUp) {
-            String number = this.savedCard.number;
-            String expiry = "";
-            if (savedCard.expiryMonth != null && savedCard.expiryMonth != null) {
-                expiry = savedCard.expiryMonth + "/" + savedCard.expiryYear;
-            }
-            ScanCardStepUpActivity.start(this, number.substring(number.length() - 4), expiry,
-                savedCard.network);
         }
     }
 
@@ -66,15 +56,6 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
                     intent.putExtra("expiryYear", Integer.parseInt(scanResult.expiryYear));
                 }
 
-                startActivity(intent);
-            } else if (resultCode == ScanActivity.RESULT_CANCELED) {
-                Log.d(TAG, "The user pressed the back button");
-            }
-        } else if (ScanCardStepUpActivity.isStepUpResult(requestCode)) {
-            if (resultCode == ScanActivity.RESULT_OK && data != null &&
-                    data.hasExtra(ScanActivity.SCAN_RESULT)) {
-
-                Intent intent = new Intent(this, PlacingOrder.class);
                 startActivity(intent);
             } else if (resultCode == ScanActivity.RESULT_CANCELED) {
                 Log.d(TAG, "The user pressed the back button");
