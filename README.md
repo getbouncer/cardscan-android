@@ -58,8 +58,8 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 	 }
 
          startActivity(intent);
-      } else if (resultCode == ScanActivity.RESULT_CANCELLED) {
-         // the user pressed the back button and cancelled the scan activity
+      } else if (resultCode == ScanActivity.RESULT_CANCELED) {
+         // the user pressed the back button and canceled the scan activity
       }
    }
 }
