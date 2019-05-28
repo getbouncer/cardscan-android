@@ -2,9 +2,13 @@ package com.getgrowthmetrics.testcardscan;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 
+import com.getbouncer.cardscan.CreditCard;
 import com.stripe.android.view.CardInputWidget;
 import com.stripe.android.view.CardMultilineWidget;
+
+import org.w3c.dom.Text;
 
 public class EnterCard extends AppCompatActivity {
 
@@ -15,15 +19,20 @@ public class EnterCard extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_enter_card);
 
-        String number = getIntent().getStringExtra("number");
-        int expiryMonth = getIntent().getIntExtra("expiryMonth", -1);
-        int expiryYear = getIntent().getIntExtra("expiryYear", -1);
+        CreditCard card = getIntent().getParcelableExtra("card");
+        String number = card.number;
+        int expiryMonth = -1;
+        if (!TextUtils.isEmpty(card.expiryMonth)) {
+            expiryMonth = Integer.parseInt(card.expiryMonth);
+        }
+        int expiryYear = -1;
+        if (!TextUtils.isEmpty(card.expiryYear)) {
+            expiryYear = Integer.parseInt(card.expiryYear);
+        }
 
 
         cardInputWidget = findViewById(R.id.card_input_widget);
-        if (number != null) {
-            cardInputWidget.setCardNumber(number);
-        }
+        cardInputWidget.setCardNumber(number);
 
         if (expiryMonth > 0 && expiryYear > 0) {
             cardInputWidget.setExpiryDate(expiryMonth, expiryYear);

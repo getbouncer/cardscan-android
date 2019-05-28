@@ -49,13 +49,7 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
                 }
 
                 Intent intent = new Intent(this, EnterCard.class);
-                intent.putExtra("number", scanResult.number);
-
-                if (scanResult.expiryMonth != null && scanResult.expiryYear != null) {
-                    intent.putExtra("expiryMonth", Integer.parseInt(scanResult.expiryMonth));
-                    intent.putExtra("expiryYear", Integer.parseInt(scanResult.expiryYear));
-                }
-
+                intent.putExtra("card", scanResult);
                 startActivity(intent);
             } else if (resultCode == ScanActivity.RESULT_CANCELED) {
                 Log.d(TAG, "The user pressed the back button");
