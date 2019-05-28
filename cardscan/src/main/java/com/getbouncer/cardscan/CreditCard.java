@@ -33,6 +33,18 @@ public class CreditCard implements Parcelable {
 
     }
 
+    @NonNull public String last4() {
+        return this.number.substring(this.number.length() - 4);
+    }
+
+    @Nullable public String expiryForDisplay() {
+        if (this.expiryMonth == null || this.expiryYear == null) {
+            return null;
+        }
+
+        return this.expiryMonth + "/" + this.expiryYear;
+    }
+
     private CreditCard(Parcel in) {
         String number = in.readString();
         this.expiryMonth = in.readString();
