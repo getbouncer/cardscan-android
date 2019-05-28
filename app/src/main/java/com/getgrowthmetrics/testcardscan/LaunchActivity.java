@@ -25,35 +25,35 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
         ScanActivity.warmUp(this);
     }
 
-@Override
-public void onClick(View v) {
-    if (v.getId() == R.id.scan_button) {
-        ScanActivity.start(this);
-    } else if (v.getId() == R.id.scanCardDebug) {
-        ScanActivity.startDebug(this);
-    }
-}
-
-@Override
-protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    super.onActivityResult(requestCode, resultCode, data);
-
-    if (ScanActivity.isScanResult(requestCode)) {
-        if (resultCode == ScanActivity.RESULT_OK && data != null &&
-                data.hasExtra(ScanActivity.SCAN_RESULT)) {
-
-            CreditCard scanResult = data.getParcelableExtra(ScanActivity.SCAN_RESULT);
-            this.savedCard = scanResult;
-            if (this.savedCard != null) {
-                findViewById(R.id.stepUp).setEnabled(true);
-            }
-
-            Intent intent = new Intent(this, EnterCard.class);
-            intent.putExtra("card", scanResult);
-            startActivity(intent);
-        } else if (resultCode == ScanActivity.RESULT_CANCELED) {
-            Log.d(TAG, "The user pressed the back button");
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == R.id.scan_button) {
+            ScanActivity.start(this);
+        } else if (v.getId() == R.id.scanCardDebug) {
+            ScanActivity.startDebug(this);
         }
     }
-}
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (ScanActivity.isScanResult(requestCode)) {
+            if (resultCode == ScanActivity.RESULT_OK && data != null &&
+                    data.hasExtra(ScanActivity.SCAN_RESULT)) {
+
+                CreditCard scanResult = data.getParcelableExtra(ScanActivity.SCAN_RESULT);
+                this.savedCard = scanResult;
+                if (this.savedCard != null) {
+                    findViewById(R.id.stepUp).setEnabled(true);
+                }
+
+                Intent intent = new Intent(this, EnterCard.class);
+                intent.putExtra("card", scanResult);
+                startActivity(intent);
+            } else if (resultCode == ScanActivity.RESULT_CANCELED) {
+                Log.d(TAG, "The user pressed the back button");
+            }
+        }
+    }
 }

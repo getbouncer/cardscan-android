@@ -43,10 +43,6 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
                 data.hasExtra(ScanActivity.SCAN_RESULT)) {
 
             CreditCard scanResult = data.getParcelableExtra(ScanActivity.SCAN_RESULT);
-            this.savedCard = scanResult;
-            if (this.savedCard != null) {
-                findViewById(R.id.stepUp).setEnabled(true);
-            }
 
 	    // at this point pass the info to your app's enter card flow
 	    // this is how we do it in our example app
