@@ -9,7 +9,7 @@ import static org.junit.Assert.*;
  *
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
-public class ExampleUnitTest {
+public class ScanCardUnitTest {
     @Test
     public void scanningErrorCorrection_isCorrect() {
         ScanActivity scanActivity = new ScanActivity();
@@ -52,7 +52,9 @@ public class ExampleUnitTest {
     }
 
     @Test
-    public void addition_isCorrect() {
-        assertEquals(4, 2 + 2);
+    public void expiryForDisplay_isCorrect() {
+        CreditCard card = new CreditCard("4242424242424242", "5", "1975");
+        String display = card.expiryForDisplay();
+        assertEquals(display, "05/75");
     }
 }
