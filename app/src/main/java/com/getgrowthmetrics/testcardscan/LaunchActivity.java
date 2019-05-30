@@ -12,7 +12,6 @@ import com.getbouncer.cardscan.ScanActivity;
 public class LaunchActivity extends AppCompatActivity implements View.OnClickListener {
 
     public static final String TAG = "LaunchActivity";
-    CreditCard savedCard = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,10 +42,6 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
                     data.hasExtra(ScanActivity.SCAN_RESULT)) {
 
                 CreditCard scanResult = data.getParcelableExtra(ScanActivity.SCAN_RESULT);
-                this.savedCard = scanResult;
-                if (this.savedCard != null) {
-                    findViewById(R.id.stepUp).setEnabled(true);
-                }
 
                 Intent intent = new Intent(this, EnterCard.class);
                 intent.putExtra("card", scanResult);
