@@ -42,7 +42,16 @@ public class CreditCard implements Parcelable {
             return null;
         }
 
-        return this.expiryMonth + "/" + this.expiryYear;
+        String month = this.expiryMonth;
+        if (month.length() == 1) {
+            month = "0" + month;
+        }
+        String year = this.expiryYear;
+        if (year.length() == 4) {
+            year = year.substring(2);
+        }
+
+        return month + "/" + year;
     }
 
     private CreditCard(Parcel in) {
