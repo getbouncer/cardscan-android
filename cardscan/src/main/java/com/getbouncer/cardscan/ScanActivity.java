@@ -8,9 +8,12 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.util.List;
 
@@ -26,15 +29,32 @@ public class ScanActivity extends ScanBaseActivity {
     private static long startTimeMs = 0;
 
     private static final int REQUEST_CODE = 51234;
+    private static final String SCAN_CARD_TEXT = "scanCardText";
+    private static final String POSITION_CARD_TEXT = "positionCardText";
 
     /**
      * Starts a ScanActivity activity, using {@param activity} as a parent.
      *
      * @param activity the parent activity that is waiting for the result of the ScanActivity
      */
-    public static void start(Activity activity) {
+    public static void start(@NonNull Activity activity) {
         ScanBaseActivity.getMachineLearningThread().warmUp(activity.getApplicationContext());
         activity.startActivityForResult(new Intent(activity, ScanActivity.class), REQUEST_CODE);
+    }
+
+    /**
+     * Starts a scan activity and customizes the test that it displays.
+     *
+     * @param activity the parent activity that is waiting for the result of the ScanActivity
+     * @param scanCardText the large text above the card rectangle
+     * @param positionCardText the small text below the card rectangle
+     */
+    public static void start(@NonNull Activity activity, String scanCardText, String positionCardText) {
+        ScanBaseActivity.getMachineLearningThread().warmUp(activity.getApplicationContext());
+        Intent intent = new Intent(activity, ScanActivity.class);
+        intent.putExtra(SCAN_CARD_TEXT, scanCardText);
+        intent.putExtra(POSITION_CARD_TEXT, positionCardText);
+        activity.startActivityForResult(intent, REQUEST_CODE);
     }
 
     /**
@@ -50,7 +70,7 @@ public class ScanActivity extends ScanBaseActivity {
      * @param activity the activity that invokes this method, which the library uses to get
      *                 an application context.
      */
-    public static void warmUp(Activity activity) {
+    public static void warmUp(@NonNull Activity activity) {
         ScanBaseActivity.getMachineLearningThread().warmUp(activity.getApplicationContext());
     }
 
@@ -62,7 +82,7 @@ public class ScanActivity extends ScanBaseActivity {
      *
      * @param activity the parent activity that is waiting for the result of the ScanActivity
      */
-    public static void startDebug(Activity activity) {
+    public static void startDebug(@NonNull Activity activity) {
         ScanBaseActivity.getMachineLearningThread().warmUp(activity.getApplicationContext());
         startTimeMs = SystemClock.uptimeMillis();
         Intent intent = new Intent(activity, ScanActivity.class);
@@ -83,7 +103,18 @@ public class ScanActivity extends ScanBaseActivity {
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_camera_capture);
+        setContentView(R.layout.activity_scan_card);
+
+        String scanCardText = getIntent().getStringExtra(SCAN_CARD_TEXT);
+        if (!TextUtils.isEmpty(scanCardText)) {
+            ((TextView) findViewById(R.id.scanCard)).setText(scanCardText);
+        }
+
+        String positionCardText = getIntent().getStringExtra(POSITION_CARD_TEXT);
+        if (!TextUtils.isEmpty(positionCardText)) {
+            ((TextView) findViewById(R.id.positionCard)).setText(positionCardText);
+        }
+
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {

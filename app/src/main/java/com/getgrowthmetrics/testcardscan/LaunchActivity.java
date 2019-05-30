@@ -20,6 +20,7 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
 
         findViewById(R.id.scan_button).setOnClickListener(this);
         findViewById(R.id.scanCardDebug).setOnClickListener(this);
+        findViewById(R.id.scanCardAltText).setOnClickListener(this);
 
         ScanActivity.warmUp(this);
     }
@@ -30,6 +31,9 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
             ScanActivity.start(this);
         } else if (v.getId() == R.id.scanCardDebug) {
             ScanActivity.startDebug(this);
+        } else if (v.getId() == R.id.scanCardAltText) {
+            ScanActivity.start(this, "New Scan Card",
+                    "Place your card here");
         }
     }
 

@@ -3,5 +3,6 @@
     <string name="picture">Picture</string>
     <string name="description_info">Info</string>
     <string name="scan_card_debug">Scan Card (Debug)</string>
+    <string name="scan_card_alt_text">Scan Card (Alt Text)</string>
     <string name="step_up">Step Up</string>
 </resources>

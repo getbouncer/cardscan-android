@@ -51,7 +51,7 @@ import java.util.concurrent.Semaphore;
  * (1) set mIsPermissionCheckDone after the permission check is done, which should be sometime
  *     before "onResume" is called
  *
- * (2) Call setFlashlightAndOverlayId to set these resource IDs and initalize appropriate handlers
+ * (2) Call setViewIds to set these resource IDs and initalize appropriate handlers
  */
 class ScanBaseActivity extends Activity implements Camera.PreviewCallback, View.OnClickListener,
         OnScanListener {
