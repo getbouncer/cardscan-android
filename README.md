@@ -60,7 +60,7 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 When added to your app successfully, you should see the card numbers
 being passed into your payment form. This is what it looks like using a standard Stripe mobile payment form:
 
-![alt text](https://raw.githubusercontent.com/getbouncer/cardscan-ios/master/card_scan.gif "Card Scan Gif")
+![alt text](https://raw.githubusercontent.com/getbouncer/cardscan-android/master/android_card_scan.gif "Card Scan Gif")
 
 ## Authors
 
