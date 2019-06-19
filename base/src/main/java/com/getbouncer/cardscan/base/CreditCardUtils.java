@@ -1,4 +1,4 @@
-package com.getbouncer.cardscan;
+package com.getbouncer.cardscan.base;
 
 public class CreditCardUtils {
     // https://en.wikipedia.org/wiki/Luhn_algorithm#Java

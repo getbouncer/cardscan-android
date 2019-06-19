@@ -1,4 +1,4 @@
-package com.getbouncer.cardscan;
+package com.getbouncer.cardscan.base;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -11,6 +11,7 @@ import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.Display;
 
 import java.io.ByteArrayOutputStream;
 import java.util.LinkedList;
@@ -42,6 +43,12 @@ class MachineLearningThread implements Runnable {
     }
 
     private LinkedList<RunArguments> queue = new LinkedList<>();
+    private final ModelFactory modelFactory;
+
+    MachineLearningThread(ModelFactory modelFactory) {
+        super();
+        this.modelFactory = modelFactory;
+    }
 
     synchronized void warmUp(Context context) {
         if (Ocr.isInit() || !queue.isEmpty()) {
@@ -117,7 +124,7 @@ class MachineLearningThread implements Runnable {
 
         final Bitmap bitmap = bm;
 
-        final Ocr ocr = new Ocr();
+        final Ocr ocr = new Ocr(modelFactory);
         final String number = ocr.predict(bitmap, args.mContext);
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {

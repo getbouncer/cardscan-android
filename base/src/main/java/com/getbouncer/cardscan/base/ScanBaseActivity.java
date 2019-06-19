@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.getbouncer.cardscan;
+package com.getbouncer.cardscan.base;
 
 
 import android.app.Activity;
@@ -53,7 +53,7 @@ import java.util.concurrent.Semaphore;
  *
  * (2) Call setViewIds to set these resource IDs and initalize appropriate handlers
  */
-class ScanBaseActivity extends Activity implements Camera.PreviewCallback, View.OnClickListener,
+public class ScanBaseActivity extends Activity implements Camera.PreviewCallback, View.OnClickListener,
         OnScanListener {
 
     private Camera mCamera = null;
@@ -73,13 +73,14 @@ class ScanBaseActivity extends Activity implements Camera.PreviewCallback, View.
     private float mRoiCenterYRatio;
 
     // set when this activity posts to the machineLearningThread
-    long mPredictionStartMs = 0;
+    public long mPredictionStartMs = 0;
     // Child classes must set to ensure proper flaslight handling
-    boolean mIsPermissionCheckDone = false;
+    public boolean mIsPermissionCheckDone = false;
     protected boolean mShowNumberAndExpiryAsScanning = true;
 
     public static final String SCAN_RESULT = "creditCard";
     public long errorCorrectionDurationMs = 1500;
+    public static ModelFactory modelFactory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -193,7 +194,7 @@ class ScanBaseActivity extends Activity implements Camera.PreviewCallback, View.
         super.onDestroy();
     }
 
-    void setViewIds(int flashlightId, int cardRectangleId, int overlayId, int textureId,
+    public void setViewIds(int flashlightId, int cardRectangleId, int overlayId, int textureId,
                     int cardNumberId, int expiryId) {
         mFlashlightId = flashlightId;
         mTextureId = textureId;
@@ -251,9 +252,14 @@ class ScanBaseActivity extends Activity implements Camera.PreviewCallback, View.
         mRotation = result;
     }
 
-    static MachineLearningThread getMachineLearningThread() {
+    static public void warmUp(Context context, ModelFactory modelFactory) {
+        ScanBaseActivity.modelFactory = modelFactory;
+        getMachineLearningThread().warmUp(context);
+    }
+
+    static public MachineLearningThread getMachineLearningThread() {
         if (machineLearningThread == null) {
-            machineLearningThread = new MachineLearningThread();
+            machineLearningThread = new MachineLearningThread(modelFactory);
             new Thread(machineLearningThread).start();
         }
 
@@ -373,7 +379,7 @@ class ScanBaseActivity extends Activity implements Camera.PreviewCallback, View.
         textView.setText(value);
     }
 
-    protected void onCardScanned(CreditCard card) {
+    protected void onCardScanned(CreditCardBase card) {
         Intent intent = new Intent();
         intent.putExtra(SCAN_RESULT, card);
         setResult(RESULT_OK, intent);
@@ -425,7 +431,7 @@ class ScanBaseActivity extends Activity implements Camera.PreviewCallback, View.
                     year = Integer.toString(expiryResult.year);
                 }
 
-                CreditCard card = new CreditCard(numberResult, month, year);
+                CreditCardBase card = new CreditCardBase(numberResult, month, year);
 
                 onCardScanned(card);
             }

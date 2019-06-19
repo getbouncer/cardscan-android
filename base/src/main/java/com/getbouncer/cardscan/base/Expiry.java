@@ -1,10 +1,10 @@
-package com.getbouncer.cardscan;
+package com.getbouncer.cardscan.base;
 
 import android.graphics.Bitmap;
 
 import java.util.Calendar;
 
-class Expiry {
+public class Expiry {
     public String string;
     public int month;
     public int year;

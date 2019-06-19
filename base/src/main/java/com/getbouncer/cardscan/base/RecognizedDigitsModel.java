@@ -1,9 +1,9 @@
-package com.getbouncer.cardscan;
+package com.getbouncer.cardscan.base;
 
-import android.app.Activity;
 import android.content.Context;
 
 import java.io.IOException;
+import java.nio.MappedByteBuffer;
 
 class RecognizedDigitsModel extends ImageClassifier {
 
@@ -11,6 +11,7 @@ class RecognizedDigitsModel extends ImageClassifier {
     private final int kImageHeight = 36;
     static final int kNumPredictions = 17;
     private final int classes = 11;
+    private final ModelFactory modelFactory;
 
     /**
      * An array to hold inference results, to be feed into Tensorflow Lite as outputs. This isn't part
@@ -18,9 +19,10 @@ class RecognizedDigitsModel extends ImageClassifier {
      */
     private float[][][][] labelProbArray = null;
 
-    RecognizedDigitsModel(Context context) throws IOException {
+    RecognizedDigitsModel(Context context, ModelFactory modelFactory) throws IOException {
         super(context);
         labelProbArray = new float[1][1][kNumPredictions][classes];
+        this.modelFactory = modelFactory;
     }
 
     class ArgMaxAndConfidence {
@@ -47,11 +49,8 @@ class RecognizedDigitsModel extends ImageClassifier {
     }
 
     @Override
-    protected int getModelResource() {
-        // you can download this file from
-        // see build.gradle for where to obtain this file. It should be auto
-        // downloaded into assets.
-        return R.raw.fourrecognize;
+    MappedByteBuffer loadModelFile(Context context) throws IOException {
+        return this.modelFactory.loadRecognizeDigitsFile(context);
     }
 
     @Override

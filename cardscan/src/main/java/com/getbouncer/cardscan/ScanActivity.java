@@ -15,6 +15,12 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.getbouncer.cardscan.base.DetectedBox;
+import com.getbouncer.cardscan.base.Expiry;
+import com.getbouncer.cardscan.base.ImageUtils;
+import com.getbouncer.cardscan.base.ModelFactory;
+import com.getbouncer.cardscan.base.ScanBaseActivity;
+
 import java.util.List;
 
 /**
@@ -31,6 +37,9 @@ public class ScanActivity extends ScanBaseActivity {
     private static final int REQUEST_CODE = 51234;
     private static final String SCAN_CARD_TEXT = "scanCardText";
     private static final String POSITION_CARD_TEXT = "positionCardText";
+    public static final String SCAN_RESULT = ScanBaseActivity.SCAN_RESULT;
+
+    private static final ModelFactory modelFactory = new ResourceModelFactory();
 
     /**
      * Starts a ScanActivity activity, using {@param activity} as a parent.
@@ -38,7 +47,7 @@ public class ScanActivity extends ScanBaseActivity {
      * @param activity the parent activity that is waiting for the result of the ScanActivity
      */
     public static void start(@NonNull Activity activity) {
-        ScanBaseActivity.getMachineLearningThread().warmUp(activity.getApplicationContext());
+        ScanBaseActivity.warmUp(activity.getApplicationContext(), modelFactory);
         activity.startActivityForResult(new Intent(activity, ScanActivity.class), REQUEST_CODE);
     }
 
@@ -50,7 +59,7 @@ public class ScanActivity extends ScanBaseActivity {
      * @param positionCardText the small text below the card rectangle
      */
     public static void start(@NonNull Activity activity, String scanCardText, String positionCardText) {
-        ScanBaseActivity.getMachineLearningThread().warmUp(activity.getApplicationContext());
+        ScanBaseActivity.warmUp(activity.getApplicationContext(), modelFactory);
         Intent intent = new Intent(activity, ScanActivity.class);
         intent.putExtra(SCAN_CARD_TEXT, scanCardText);
         intent.putExtra(POSITION_CARD_TEXT, positionCardText);
@@ -71,7 +80,7 @@ public class ScanActivity extends ScanBaseActivity {
      *                 an application context.
      */
     public static void warmUp(@NonNull Activity activity) {
-        ScanBaseActivity.getMachineLearningThread().warmUp(activity.getApplicationContext());
+        ScanBaseActivity.warmUp(activity.getApplicationContext(), modelFactory);
     }
 
     /**
@@ -83,7 +92,7 @@ public class ScanActivity extends ScanBaseActivity {
      * @param activity the parent activity that is waiting for the result of the ScanActivity
      */
     public static void startDebug(@NonNull Activity activity) {
-        ScanBaseActivity.getMachineLearningThread().warmUp(activity.getApplicationContext());
+        ScanBaseActivity.warmUp(activity.getApplicationContext(), modelFactory);
         startTimeMs = SystemClock.uptimeMillis();
         Intent intent = new Intent(activity, ScanActivity.class);
         intent.putExtra("debug", true);
@@ -104,6 +113,10 @@ public class ScanActivity extends ScanBaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan_card);
+
+        if (ScanBaseActivity.modelFactory == null) {
+            ScanBaseActivity.modelFactory = modelFactory;
+        }
 
         String scanCardText = getIntent().getStringExtra(SCAN_CARD_TEXT);
         if (!TextUtils.isEmpty(scanCardText)) {

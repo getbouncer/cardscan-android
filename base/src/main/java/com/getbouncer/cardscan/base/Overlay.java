@@ -1,4 +1,4 @@
-package com.getbouncer.cardscan;
+package com.getbouncer.cardscan.base;
 
 import android.content.Context;
 import android.content.res.Resources;

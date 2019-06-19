@@ -1,4 +1,4 @@
-package com.getbouncer.cardscan;
+package com.getbouncer.cardscan.base;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -17,6 +17,11 @@ class Ocr {
     public List<DetectedBox> digitBoxes = new ArrayList<>();
     public DetectedBox expiryBox = null;
     public Expiry expiry = null;
+    private final ModelFactory modelFactory;
+
+    public Ocr(ModelFactory modelFactory) {
+        this.modelFactory = modelFactory;
+    }
 
     static boolean isInit() {
         return findFour != null && recognizedDigitsModel != null;
@@ -113,23 +118,23 @@ class Ocr {
     public synchronized String predict(Bitmap image, Context context) {
         try {
             if (findFour == null) {
-                findFour = new FindFourModel(context);
+                findFour = new FindFourModel(context, modelFactory);
                 try {
                     findFour.useGpu();
                 } catch (Exception e) {
-                    findFour = new FindFourModel(context);
+                    findFour = new FindFourModel(context, modelFactory);
                     findFour.useCPU();
                 }
             }
 
             if (recognizedDigitsModel == null) {
-                recognizedDigitsModel = new RecognizedDigitsModel(context);
+                recognizedDigitsModel = new RecognizedDigitsModel(context, modelFactory);
             }
 
             try {
                 return runModel(image);
             } catch (Exception e) {
-                findFour = new FindFourModel(context);
+                findFour = new FindFourModel(context, modelFactory);
                 findFour.useCPU();
                 return runModel(image);
             }

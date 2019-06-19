@@ -1,8 +1,8 @@
-package com.getbouncer.cardscan;
+package com.getbouncer.cardscan.base;
 
 import android.support.annotation.NonNull;
 
-class DetectedBox implements Comparable {
+public class DetectedBox implements Comparable {
     CGRect rect;
     int row;
     int col;

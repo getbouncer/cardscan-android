@@ -13,12 +13,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-package com.getbouncer.cardscan;
+package com.getbouncer.cardscan.base;
 
-import android.app.Activity;
 import android.content.Context;
 
 import java.io.IOException;
+import java.nio.MappedByteBuffer;
 
 /** This classifier works with the float MobileNet model. */
 class FindFourModel extends ImageClassifier {
@@ -30,6 +30,7 @@ class FindFourModel extends ImageClassifier {
     private final int classes = 3;
     private final int digitClass = 1;
     private final int expiryClass = 2;
+    private final ModelFactory modelFactory;
 
     /**
      * An array to hold inference results, to be feed into Tensorflow Lite as outputs. This isn't part
@@ -42,9 +43,10 @@ class FindFourModel extends ImageClassifier {
      *
      * @param context
      */
-    FindFourModel(Context context) throws IOException {
+    FindFourModel(Context context, ModelFactory modelFactory) throws IOException {
         super(context);
         labelProbArray = new float[1][rows][cols][classes];
+        this.modelFactory = modelFactory;
     }
 
     boolean hasDigits(int row, int col) {
@@ -63,11 +65,8 @@ class FindFourModel extends ImageClassifier {
     }
 
     @Override
-    protected int getModelResource() {
-        // you can download this file from
-        // see build.gradle for where to obtain this file. It should be auto
-        // downloaded into assets.
-        return R.raw.findfour;
+    MappedByteBuffer loadModelFile(Context context) throws IOException {
+        return this.modelFactory.loadFindFourFile(context);
     }
 
     @Override

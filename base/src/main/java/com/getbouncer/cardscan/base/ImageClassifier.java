@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-package com.getbouncer.cardscan;
+package com.getbouncer.cardscan.base;
 
 import android.app.Activity;
 import android.content.Context;
@@ -141,19 +141,7 @@ abstract class ImageClassifier {
     }
 
     /** Memory-map the model file in Assets. */
-    private MappedByteBuffer loadModelFile(Context context) throws IOException {
-        AssetFileDescriptor fileDescriptor = context.getResources()
-                .openRawResourceFd(getModelResource());
-        FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
-        FileChannel fileChannel = inputStream.getChannel();
-        long startOffset = fileDescriptor.getStartOffset();
-        long declaredLength = fileDescriptor.getDeclaredLength();
-        MappedByteBuffer result = fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset,
-                declaredLength);
-        inputStream.close();
-        fileDescriptor.close();
-        return result;
-    }
+    abstract MappedByteBuffer loadModelFile(Context context) throws IOException;
 
     /** Writes Image data into a {@code ByteBuffer}. */
     private void convertBitmapToByteBuffer(Bitmap bitmap) {
@@ -177,13 +165,6 @@ abstract class ImageClassifier {
         long endTime = SystemClock.uptimeMillis();
         //Log.d(TAG, "Timecost to put values into ByteBuffer: " + Long.toString(endTime - startTime));
     }
-
-    /**
-     * Get the name of the model file stored in Assets.
-     *
-     * @return
-     */
-    protected abstract int getModelResource();
 
     /**
      * Get the image size along the x axis.

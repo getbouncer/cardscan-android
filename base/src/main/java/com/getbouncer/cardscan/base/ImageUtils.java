@@ -1,4 +1,4 @@
-package com.getbouncer.cardscan;
+package com.getbouncer.cardscan.base;
 
 
 import android.graphics.Bitmap;
@@ -8,7 +8,7 @@ import android.graphics.Paint;
 
 import java.util.List;
 
-class ImageUtils {
+public class ImageUtils {
 
     public static Bitmap drawBoxesOnImage(Bitmap frame, List<DetectedBox> boxes,
                                           DetectedBox expiryBox) {
