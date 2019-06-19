@@ -73,13 +73,13 @@ public class CreditCardUtils {
         return result;
     }
 
-    static boolean isAmex(String number) {
+    public static boolean isAmex(String number) {
         int prefix = Integer.parseInt(prefix(number,2));
 
         return number.length() == 15 && (prefix == 34 || prefix == 37);
     }
 
-    static boolean isDiscover(String number) {
+    public static boolean isDiscover(String number) {
         int prefix2 = Integer.parseInt(prefix(number,2));
         int prefix4 = Integer.parseInt(prefix(number, 4));
         int prefix6 = Integer.parseInt(prefix(number, 6));
@@ -90,7 +90,7 @@ public class CreditCardUtils {
                 (prefix6 >= 628200 && prefix6 <= 628899);
     }
 
-    static boolean isMastercard(String number) {
+    public static boolean isMastercard(String number) {
         int prefix2 = Integer.parseInt(prefix(number, 2));
         int prefix4 = Integer.parseInt(prefix(number, 4));
 
@@ -101,7 +101,7 @@ public class CreditCardUtils {
         return (prefix2 >= 51 && prefix2 <= 55) || (prefix4 >= 2221 && prefix4 <= 2720);
     }
 
-    static boolean isVisa(String number) {
+    public static boolean isVisa(String number) {
         return (number.length() == 16) && number.startsWith("4");
     }
 }

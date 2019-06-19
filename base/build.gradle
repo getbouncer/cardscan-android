@@ -33,3 +33,112 @@ dependencies {
     implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly'
     implementation 'org.tensorflow:tensorflow-lite-gpu:0.0.0-nightly'
 }
+
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+
+ext {
+    bintrayRepo = 'CardScanBase'
+    bintrayName = 'CardScanBase'
+
+    publishedGroupId = 'com.getbouncer'
+    libraryName = 'base'
+    artifact = 'base'
+
+    libraryDescription = 'This library provides an Activity that you can use to scan credit and debit cards.'
+
+    siteUrl = 'https://github.com/getbouncer/cardscan-android'
+    gitUrl = 'https://github.com/getbouncer/cardscan-android.git'
+
+    libraryVersion = '1.0.4012'
+
+    developerId = 'kingst'
+    developerName = 'Sam King'
+    developerEmail = 'kingst@gmail.com'
+
+    licenseName = 'BSD 3-Clause'
+    licenseUrl = 'http://opensource.org/licenses/BSD-3-Clause'
+    allLicenses = ["BSD 3-Clause"]
+}
+
+
+group = publishedGroupId
+version = libraryVersion
+
+install {
+    repositories.mavenInstaller {
+        pom.project {
+            packaging 'aar'
+            groupId publishedGroupId
+            artifactId artifact
+
+            name libraryName
+            description libraryDescription
+            url siteUrl
+
+            licenses {
+                license {
+                    name licenseName
+                    url licenseUrl
+                }
+            }
+            developers {
+                developer {
+                    id developerId
+                    name developerName
+                    email developerEmail
+                }
+            }
+            scm {
+                connection gitUrl
+                developerConnection gitUrl
+                url siteUrl
+            }
+        }
+    }
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
+task javadoc(type: Javadoc) {
+    //source = android.sourceSets.main.java.srcDirs
+    //classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+
+    configurations = ['archives']
+    pkg {
+        repo = bintrayRepo
+        name = bintrayName
+        desc = libraryDescription
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        licenses = allLicenses
+        dryRun = false
+        publish = true
+        override = false
+        publicDownloadNumbers = true
+        version {
+            desc = libraryDescription
+        }
+    }
+}

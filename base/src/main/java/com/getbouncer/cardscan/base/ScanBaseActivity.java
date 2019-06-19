@@ -53,7 +53,7 @@ import java.util.concurrent.Semaphore;
  *
  * (2) Call setViewIds to set these resource IDs and initalize appropriate handlers
  */
-public class ScanBaseActivity extends Activity implements Camera.PreviewCallback, View.OnClickListener,
+public abstract class ScanBaseActivity extends Activity implements Camera.PreviewCallback, View.OnClickListener,
         OnScanListener {
 
     private Camera mCamera = null;
@@ -379,12 +379,7 @@ public class ScanBaseActivity extends Activity implements Camera.PreviewCallback
         textView.setText(value);
     }
 
-    protected void onCardScanned(CreditCardBase card) {
-        Intent intent = new Intent();
-        intent.putExtra(SCAN_RESULT, card);
-        setResult(RESULT_OK, intent);
-        finish();
-    }
+    protected abstract void onCardScanned(String numberResult, String month, String year);
 
     protected void setNumberAndExpiryAnimated(long duration) {
         String numberResult = getNumberResult();
@@ -431,9 +426,7 @@ public class ScanBaseActivity extends Activity implements Camera.PreviewCallback
                     year = Integer.toString(expiryResult.year);
                 }
 
-                CreditCardBase card = new CreditCardBase(numberResult, month, year);
-
-                onCardScanned(card);
+                onCardScanned(numberResult, month, year);
             }
         }
 

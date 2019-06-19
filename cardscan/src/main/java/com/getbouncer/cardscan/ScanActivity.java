@@ -38,6 +38,8 @@ public class ScanActivity extends ScanBaseActivity {
     private static final String SCAN_CARD_TEXT = "scanCardText";
     private static final String POSITION_CARD_TEXT = "positionCardText";
     public static final String SCAN_RESULT = ScanBaseActivity.SCAN_RESULT;
+    public static final int RESULT_CANCELED = ScanBaseActivity.RESULT_CANCELED;
+    public static final int RESULT_OK = ScanBaseActivity.RESULT_OK;
 
     private static final ModelFactory modelFactory = new ResourceModelFactory();
 
@@ -147,6 +149,15 @@ public class ScanActivity extends ScanBaseActivity {
         }
         setViewIds(R.id.flashlightButton, R.id.cardRectangle, R.id.shadedBackground, R.id.texture,
                 R.id.cardNumber, R.id.expiry);
+    }
+
+    @Override
+    protected void onCardScanned(String numberResult, String month, String year) {
+        CreditCard card = new CreditCard(numberResult, month, year);
+        Intent intent = new Intent();
+        intent.putExtra(SCAN_RESULT, card);
+        setResult(RESULT_OK, intent);
+        finish();
     }
 
     @Override
