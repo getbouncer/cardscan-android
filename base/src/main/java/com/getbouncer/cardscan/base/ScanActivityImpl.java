@@ -1,4 +1,4 @@
-package com.getbouncer.cardscan;
+package com.getbouncer.cardscan.base;
 
 import android.Manifest;
 import android.app.Activity;
@@ -21,12 +21,7 @@ import com.getbouncer.cardscan.base.ScanBaseActivity;
 
 import java.util.List;
 
-/**
- * The ScanActivity class provides the main interface to the scanning functionality. To use this
- * activity, call the {@link ScanActivity#start(Activity)} method and override
- * {@link Activity#onActivityResult(int, int, Intent)} to get the result of the scan.
- */
-class ScanActivityImpl extends ScanBaseActivity {
+public class ScanActivityImpl extends ScanBaseActivity {
     private static final String TAG = "ScanActivityImpl";
     private ImageView mDebugImageView;
     private boolean mInDebugMode = false;

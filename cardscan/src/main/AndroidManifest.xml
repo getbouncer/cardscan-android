@@ -1,18 +1,4 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.getbouncer.cardscan">
 
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.FLASHLIGHT"/>
-    <uses-feature android:name="android.hardware.camera" />
-    <uses-feature android:name="android.hardware.camera.autofocus" />
-
-    <application>
-        <activity
-            android:name=".ScanActivity"
-            android:configChanges="orientation"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.NoActionBar.FullScreen" />
-    </application>
-
 </manifest>

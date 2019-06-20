@@ -5,9 +5,9 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 
 import com.getbouncer.cardscan.base.ModelFactory;
+import com.getbouncer.cardscan.base.ScanActivityImpl;
 import com.getbouncer.cardscan.base.ScanBaseActivity;
 
-import java.util.List;
 
 /**
  * The ScanActivity class provides the main interface to the scanning functionality. To use this
