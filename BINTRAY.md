@@ -2,6 +2,12 @@
 
 * For a new build, make sure you bump the libraryVersion
 
-* ./gradlew install
+* We have two libraries in this project and we have to build and
+  upload them separately.
 
-* ./gradlew bintrayUpload
+  $ ./gradlew base:install
+  $ ./gradlew base:bintrayUpload
+  $ ./gradlew cardscan:install
+  $ ./gradlew cardscan:bintrayUpload
+
+

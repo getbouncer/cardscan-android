@@ -28,8 +28,7 @@ dependencies {
     implementation 'com.android.support:support-annotations:28.0.0'
     implementation "com.android.support:appcompat-v7:28.0.0"
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
-    //implementation 'com.getbouncer:base:1.0.4012'
-    implementation project(":base")
+    implementation 'com.getbouncer:base:1.0.4014'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
@@ -51,7 +50,7 @@ ext {
     siteUrl = 'https://github.com/getbouncer/cardscan-android'
     gitUrl = 'https://github.com/getbouncer/cardscan-android.git'
 
-    libraryVersion = '1.0.4012'
+    libraryVersion = '1.0.4014'
 
     developerId = 'kingst'
     developerName = 'Sam King'
