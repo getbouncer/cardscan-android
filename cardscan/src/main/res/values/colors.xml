@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <color name="control_background">#cc4285f4</color>
-    <color name="white_background_transparent">#e8ffffff</color>
-    <color name="dark_gray">#aa222222</color>
-    <color name="food_red">#ffe30007</color>
-    <color name="button_green">#ff2dd060</color>
-</resources>

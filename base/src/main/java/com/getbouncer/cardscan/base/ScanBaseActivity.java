@@ -78,9 +78,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     public boolean mIsPermissionCheckDone = false;
     protected boolean mShowNumberAndExpiryAsScanning = true;
 
-    public static final String SCAN_RESULT = "creditCard";
     public long errorCorrectionDurationMs = 1500;
-    public static ModelFactory modelFactory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -252,14 +250,13 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         mRotation = result;
     }
 
-    static public void warmUp(Context context, ModelFactory modelFactory) {
-        ScanBaseActivity.modelFactory = modelFactory;
+    static public void warmUp(Context context) {
         getMachineLearningThread().warmUp(context);
     }
 
     static public MachineLearningThread getMachineLearningThread() {
         if (machineLearningThread == null) {
-            machineLearningThread = new MachineLearningThread(modelFactory);
+            machineLearningThread = new MachineLearningThread();
             new Thread(machineLearningThread).start();
         }
 

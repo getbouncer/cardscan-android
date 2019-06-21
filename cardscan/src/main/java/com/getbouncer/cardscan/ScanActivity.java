@@ -3,6 +3,8 @@ package com.getbouncer.cardscan;
 import android.app.Activity;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import com.getbouncer.cardscan.base.ModelFactory;
 import com.getbouncer.cardscan.base.ScanActivityImpl;
@@ -17,12 +19,13 @@ import com.getbouncer.cardscan.base.ScanBaseActivity;
 public class ScanActivity {
     private static final String TAG = "ScanActivity";
 
+    static {
+        ModelFactory.sharedInstance = new ResourceModelFactory();
+    }
+
     private static final int REQUEST_CODE = 51234;
-    public static final String SCAN_RESULT = ScanActivityImpl.SCAN_RESULT;
     public static final int RESULT_CANCELED = ScanActivityImpl.RESULT_CANCELED;
     public static final int RESULT_OK = ScanActivityImpl.RESULT_OK;
-
-    private static final ModelFactory modelFactory = new ResourceModelFactory();
 
     /**
      * Starts a ScanActivityImpl activity, using {@param activity} as a parent.
@@ -30,7 +33,7 @@ public class ScanActivity {
      * @param activity the parent activity that is waiting for the result of the ScanActivity
      */
     public static void start(@NonNull Activity activity) {
-        ScanBaseActivity.warmUp(activity.getApplicationContext(), modelFactory);
+        ScanBaseActivity.warmUp(activity.getApplicationContext());
         activity.startActivityForResult(new Intent(activity, ScanActivityImpl.class), REQUEST_CODE);
     }
 
@@ -44,7 +47,7 @@ public class ScanActivity {
     public static void start(@NonNull Activity activity, String scanCardText,
                              String positionCardText) {
 
-        ScanBaseActivity.warmUp(activity.getApplicationContext(), modelFactory);
+        ScanBaseActivity.warmUp(activity.getApplicationContext());
         Intent intent = new Intent(activity, ScanActivityImpl.class);
         intent.putExtra(ScanActivityImpl.SCAN_CARD_TEXT, scanCardText);
         intent.putExtra(ScanActivityImpl.POSITION_CARD_TEXT, positionCardText);
@@ -65,7 +68,7 @@ public class ScanActivity {
      *                 an application context.
      */
     public static void warmUp(@NonNull Activity activity) {
-        ScanBaseActivity.warmUp(activity.getApplicationContext(), modelFactory);
+        ScanBaseActivity.warmUp(activity.getApplicationContext());
     }
 
     /**
@@ -77,7 +80,7 @@ public class ScanActivity {
      * @param activity the parent activity that is waiting for the result of the ScanActivity
      */
     public static void startDebug(@NonNull Activity activity) {
-        ScanBaseActivity.warmUp(activity.getApplicationContext(), modelFactory);
+        ScanBaseActivity.warmUp(activity.getApplicationContext());
         Intent intent = new Intent(activity, ScanActivityImpl.class);
         intent.putExtra("debug", true);
         activity.startActivityForResult(intent, REQUEST_CODE);
@@ -92,5 +95,17 @@ public class ScanActivity {
      */
     public static boolean isScanResult(int requestCode) {
         return requestCode == REQUEST_CODE;
+    }
+
+    public static @Nullable CreditCard creditCardFromResult(Intent intent) {
+        String number = intent.getStringExtra(ScanActivityImpl.RESULT_CARD_NUMBER);
+        String month = intent.getStringExtra(ScanActivityImpl.RESULT_EXPIRY_MONTH);
+        String year = intent.getStringExtra(ScanActivityImpl.RESULT_EXPIRY_YEAR);
+
+        if (TextUtils.isEmpty(number)) {
+            return null;
+        }
+
+        return new CreditCard(number, month, year);
     }
 }

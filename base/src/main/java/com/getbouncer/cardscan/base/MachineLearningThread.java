@@ -43,11 +43,9 @@ class MachineLearningThread implements Runnable {
     }
 
     private LinkedList<RunArguments> queue = new LinkedList<>();
-    private final ModelFactory modelFactory;
 
-    MachineLearningThread(ModelFactory modelFactory) {
+    MachineLearningThread() {
         super();
-        this.modelFactory = modelFactory;
     }
 
     synchronized void warmUp(Context context) {
@@ -124,7 +122,7 @@ class MachineLearningThread implements Runnable {
 
         final Bitmap bitmap = bm;
 
-        final Ocr ocr = new Ocr(modelFactory);
+        final Ocr ocr = new Ocr();
         final String number = ocr.predict(bitmap, args.mContext);
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {

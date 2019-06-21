@@ -42,10 +42,8 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
         super.onActivityResult(requestCode, resultCode, data);
 
         if (ScanActivity.isScanResult(requestCode)) {
-            if (resultCode == ScanActivity.RESULT_OK && data != null &&
-                    data.hasExtra(ScanActivity.SCAN_RESULT)) {
-
-                CreditCard scanResult = data.getParcelableExtra(ScanActivity.SCAN_RESULT);
+            if (resultCode == ScanActivity.RESULT_OK && data != null) {
+                CreditCard scanResult = ScanActivity.creditCardFromResult(data);
 
                 Intent intent = new Intent(this, EnterCard.class);
                 intent.putExtra("card", scanResult);

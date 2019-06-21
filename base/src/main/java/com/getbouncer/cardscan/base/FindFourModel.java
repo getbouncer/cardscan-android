@@ -16,6 +16,7 @@ limitations under the License.
 package com.getbouncer.cardscan.base;
 
 import android.content.Context;
+import android.view.Display;
 
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
@@ -30,7 +31,6 @@ class FindFourModel extends ImageClassifier {
     private final int classes = 3;
     private final int digitClass = 1;
     private final int expiryClass = 2;
-    private final ModelFactory modelFactory;
 
     /**
      * An array to hold inference results, to be feed into Tensorflow Lite as outputs. This isn't part
@@ -43,10 +43,9 @@ class FindFourModel extends ImageClassifier {
      *
      * @param context
      */
-    FindFourModel(Context context, ModelFactory modelFactory) throws IOException {
+    FindFourModel(Context context) throws IOException {
         super(context);
         labelProbArray = new float[1][rows][cols][classes];
-        this.modelFactory = modelFactory;
     }
 
     boolean hasDigits(int row, int col) {
@@ -66,7 +65,7 @@ class FindFourModel extends ImageClassifier {
 
     @Override
     MappedByteBuffer loadModelFile(Context context) throws IOException {
-        return this.modelFactory.loadFindFourFile(context);
+        return ModelFactory.sharedInstance.loadFindFourFile(context);
     }
 
     @Override
