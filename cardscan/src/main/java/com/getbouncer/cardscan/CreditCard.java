@@ -5,30 +5,32 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-public class CreditCard implements Parcelable {
+import com.getbouncer.cardscan.base.CreditCardUtils;
+
+public class CreditCard  implements Parcelable {
     @NonNull public final String number;
-    @NonNull public final Network network;
+    @NonNull public final CreditCard.Network network;
     @Nullable public final String expiryMonth;
     @Nullable public final String expiryYear;
 
     public enum Network {VISA, MASTERCARD, AMEX, DISCOVER, UNKNOWN};
 
     CreditCard(@NonNull String number, @Nullable String expiryMonth,
-                      @Nullable String expiryYear) {
+                          @Nullable String expiryYear) {
         this.number = number;
         this.expiryMonth = expiryMonth;
         this.expiryYear = expiryYear;
 
         if (CreditCardUtils.isVisa(number)) {
-            this.network = Network.VISA;
+            this.network = CreditCard.Network.VISA;
         } else if (CreditCardUtils.isAmex(number)) {
-            this.network = Network.AMEX;
+            this.network = CreditCard.Network.AMEX;
         } else if (CreditCardUtils.isDiscover(number)) {
-            this.network = Network.DISCOVER;
+            this.network = CreditCard.Network.DISCOVER;
         } else if (CreditCardUtils.isMastercard(number)) {
-            this.network = Network.MASTERCARD;
+            this.network = CreditCard.Network.MASTERCARD;
         } else {
-            this.network = Network.UNKNOWN;
+            this.network = CreditCard.Network.UNKNOWN;
         }
 
     }
@@ -58,7 +60,7 @@ public class CreditCard implements Parcelable {
         String number = in.readString();
         this.expiryMonth = in.readString();
         this.expiryYear = in.readString();
-        Network network = (Network) in.readSerializable();
+        CreditCard.Network network = (CreditCard.Network) in.readSerializable();
 
         if (number == null) {
             // this should never happen, but makes the compiler happy
@@ -68,7 +70,7 @@ public class CreditCard implements Parcelable {
         }
 
         if (network == null) {
-            this.network = Network.UNKNOWN;
+            this.network = CreditCard.Network.UNKNOWN;
         } else {
             this.network = network;
         }

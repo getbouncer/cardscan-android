@@ -6,9 +6,6 @@ import android.text.TextUtils;
 
 import com.getbouncer.cardscan.CreditCard;
 import com.stripe.android.view.CardInputWidget;
-import com.stripe.android.view.CardMultilineWidget;
-
-import org.w3c.dom.Text;
 
 public class EnterCard extends AppCompatActivity {
 
