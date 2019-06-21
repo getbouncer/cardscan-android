@@ -20,7 +20,7 @@ We publish our library in the jcenter repository, so for most gradle configurati
 
 ```gradle
 dependencies {
-    implementation 'com.getbouncer:cardscan:1.0.4011'
+    implementation 'com.getbouncer:cardscan:1.0.4015'
 }
 ```
 
@@ -38,10 +38,8 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
 
     if (ScanActivity.isScanResult(requestCode)) {
-        if (resultCode == ScanActivity.RESULT_OK && data != null &&
-                data.hasExtra(ScanActivity.SCAN_RESULT)) {
-
-            CreditCard scanResult = data.getParcelableExtra(ScanActivity.SCAN_RESULT);
+        if (resultCode == ScanActivity.RESULT_OK && data != null) {
+            CreditCard scanResult = ScanActivity.creditCardFromResult(data);
 
 	    // at this point pass the info to your app's enter card flow
 	    // this is how we do it in our example app
