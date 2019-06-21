@@ -6,8 +6,8 @@ android {
         applicationId "com.getgrowthmetrics.testcardscan"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 10
-        versionName "1.0.4014"
+        versionCode 4015
+        versionName "1.0.4015"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
