@@ -48,7 +48,7 @@ class MachineLearningThread implements Runnable {
         super();
     }
 
-    synchronized void warmUp(Context context) {
+    public synchronized void warmUp(Context context) {
         if (Ocr.isInit() || !queue.isEmpty()) {
             return;
         }
