@@ -4,7 +4,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 
-class OverlayWhite extends Overlay {
+public class OverlayWhite extends Overlay {
 
     int backgroundColorId = R.color.white_background;
     int cornerColorId = R.color.gray;
