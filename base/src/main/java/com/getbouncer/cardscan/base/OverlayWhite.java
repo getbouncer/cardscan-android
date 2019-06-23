@@ -15,7 +15,7 @@ public class OverlayWhite extends Overlay {
         cornerDp = 3;
     }
 
-    void setColorIds(int backgroundColorId, int cornerColorId) {
+    public void setColorIds(int backgroundColorId, int cornerColorId) {
         this.backgroundColorId = backgroundColorId;
         this.cornerColorId = cornerColorId;
         postInvalidate();
