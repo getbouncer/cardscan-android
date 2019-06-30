@@ -146,7 +146,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
                 setCameraDisplayOrientation(this, Camera.CameraInfo.CAMERA_FACING_BACK,
                         mCamera);
                 // Create our Preview view and set it as the content of our activity.
-                CameraPreview cameraPreview = new CameraPreview(this);
+                CameraPreview cameraPreview = new CameraPreview(this, this);
                 FrameLayout preview = findViewById(mTextureId);
                 preview.addView(cameraPreview);
                 mCamera.setPreviewCallback(this);
@@ -433,9 +433,12 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     /** A basic Camera preview class */
     public class CameraPreview extends SurfaceView implements Camera.AutoFocusCallback, SurfaceHolder.Callback {
         private SurfaceHolder mHolder;
+        private Camera.PreviewCallback mPreviewCallback;
 
-        public CameraPreview(Context context) {
+        public CameraPreview(Context context, Camera.PreviewCallback previewCallback) {
             super(context);
+
+            mPreviewCallback = previewCallback;
 
             // Install a SurfaceHolder.Callback so we get notified when the
             // underlying surface is created and destroyed.
@@ -496,6 +499,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             // start preview with new settings
             try {
                 mCamera.setPreviewDisplay(mHolder);
+                mCamera.setPreviewCallback(mPreviewCallback);
                 mCamera.startPreview();
             } catch (Exception e){
                 Log.d("CameraCaptureActivity", "Error starting camera preview: " + e.getMessage());

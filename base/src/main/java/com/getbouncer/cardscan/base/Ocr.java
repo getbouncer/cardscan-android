@@ -2,6 +2,7 @@ package com.getbouncer.cardscan.base;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -116,8 +117,9 @@ class Ocr {
             if (findFour == null) {
                 findFour = new FindFourModel(context);
                 try {
-                    findFour.useGpu();
+                    findFour.useNNAPI();
                 } catch (Exception e) {
+                    Log.e("Ocr", "findFour NNAPI exception", e);
                     findFour = new FindFourModel(context);
                     findFour.useCPU();
                 }
@@ -125,13 +127,23 @@ class Ocr {
 
             if (recognizedDigitsModel == null) {
                 recognizedDigitsModel = new RecognizedDigitsModel(context);
+                try {
+                    recognizedDigitsModel.useNNAPI();
+                } catch (Exception e) {
+                    Log.e("Ocr", "recognizeDigits NNAPI exception", e);
+                    recognizedDigitsModel = new RecognizedDigitsModel(context);
+                    recognizedDigitsModel.useCPU();
+                }
             }
 
             try {
                 return runModel(image);
             } catch (Exception e) {
+                Log.e("Ocr", "runModel exception", e);
                 findFour = new FindFourModel(context);
                 findFour.useCPU();
+                recognizedDigitsModel = new RecognizedDigitsModel(context);
+                recognizedDigitsModel.useCPU();
                 return runModel(image);
             }
 
