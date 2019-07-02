@@ -26,6 +26,7 @@ public class ScanActivity {
     private static final int REQUEST_CODE = 51234;
     public static final int RESULT_CANCELED = ScanActivityImpl.RESULT_CANCELED;
     public static final int RESULT_OK = ScanActivityImpl.RESULT_OK;
+    public static TestingImageReader testingImageReader = null;
 
     /**
      * Starts a ScanActivityImpl activity, using {@param activity} as a parent.
@@ -80,6 +81,14 @@ public class ScanActivity {
      * @param activity the parent activity that is waiting for the result of the ScanActivity
      */
     public static void startDebug(@NonNull Activity activity) {
+        startDebug(activity, null);
+    }
+
+    public static void startDebug(@NonNull Activity activity,
+                                  @Nullable TestingImageReader imageReader) {
+        if (imageReader != null) {
+            ScanBaseActivity.sTestingImageReader = new TestingImageBridge(imageReader);
+        }
         ScanBaseActivity.warmUp(activity.getApplicationContext());
         Intent intent = new Intent(activity, ScanActivityImpl.class);
         intent.putExtra("debug", true);

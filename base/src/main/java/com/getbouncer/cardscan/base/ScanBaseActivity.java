@@ -72,6 +72,11 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     private int mTextureId;
     private float mRoiCenterYRatio;
 
+    // This is a hack to enable us to inject images to use for testing. There is probably a better
+    // way to do this than using a static variable, but it works for now.
+    static public TestingImageReaderInternal sTestingImageReader = null;
+    private TestingImageReaderInternal mTestingImageReader = null;
+
     // set when this activity posts to the machineLearningThread
     public long mPredictionStartMs = 0;
     // Child classes must set to ensure proper flaslight handling
@@ -83,6 +88,9 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mTestingImageReader = sTestingImageReader;
+        sTestingImageReader = null;
 
 
         mOrientationEventListener = new OrientationEventListener(this) {
@@ -274,10 +282,19 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             int format = parameters.getPreviewFormat();
 
             mPredictionStartMs = SystemClock.uptimeMillis();
-            // Use the application context here because the machine learning thread's lifecycle
-            // is connected to the application and not this activity
-            mlThread.post(bytes, width, height, format, mRotation, this,
-                    this.getApplicationContext(), mRoiCenterYRatio);
+
+            if (mTestingImageReader == null) {
+                // Use the application context here because the machine learning thread's lifecycle
+                // is connected to the application and not this activity
+                mlThread.post(bytes, width, height, format, mRotation, this,
+                        this.getApplicationContext(), mRoiCenterYRatio);
+            } else {
+                Bitmap bm = mTestingImageReader.nextImage();
+                mlThread.post(bm, this, this.getApplicationContext());
+                if (bm == null) {
+                    mTestingImageReader = null;
+                }
+            }
         }
     }
 
