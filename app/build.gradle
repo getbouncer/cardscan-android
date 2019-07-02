@@ -28,7 +28,6 @@ dependencies {
     androidTestImplementation 'com.android.support.test:rules:1.0.2'
     implementation project(":cardscan")
     implementation 'com.stripe:stripe-android:8.7.0'
-    implementation 'com.github.wseemann:FFmpegMediaMetadataRetriever:1.0.14'
 }
 
 // Ugg, who knows: https://github.com/facebook/flipper/issues/146

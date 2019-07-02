@@ -33,37 +33,6 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
         ScanActivity.warmUp(this);
     }
 
-    private String copyResourceToFile(int resourceId) {
-        File outFileName = new File(getFilesDir(), "test_video.mov");
-
-        if (outFileName.exists()) {
-            return outFileName.getAbsolutePath();
-        }
-
-        FileDescriptor fd = getResources().openRawResourceFd(resourceId).getFileDescriptor();
-        FileInputStream inputStream = new FileInputStream(fd);
-        try {
-            FileOutputStream out = new FileOutputStream(outFileName);
-
-            byte[] data = new byte[4096];
-            int n;
-            do {
-                n = inputStream.read(data);
-                if (n > 0) {
-                    out.write(data, 0, n);
-                }
-            } while (n > 0);
-            out.flush();
-            out.close();
-
-            return outFileName.getAbsolutePath();
-        } catch (IOException ioe) {
-            ioe.printStackTrace();
-            outFileName.delete();
-            return null;
-        }
-    }
-
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.scan_button) {
