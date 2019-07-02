@@ -52,7 +52,7 @@ public class ExampleInstrumentedTest {
         onView(withId(R.id.scan_video))
                 .perform(click());
 
-        waitForDisplayed(R.id.cardNumberForTesting, 10000);
+        waitForDisplayed(R.id.cardNumberForTesting, 60000);
 
         onView(withId(R.id.cardNumberForTesting))
                 .check(matches(withText("4557095462268383")));

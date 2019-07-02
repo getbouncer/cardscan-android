@@ -13,7 +13,7 @@ public class TestResourceImages implements TestingImageReader {
     private MediaMetadataRetriever retriever;
     private int time;
     private LinkedList<Bitmap> bitmapQueue = new LinkedList<>();
-    private final int queueSize = 5;
+    private final int queueSize = 3;
 
     public TestResourceImages(AssetFileDescriptor fd) {
         retriever = new MediaMetadataRetriever();
@@ -29,7 +29,6 @@ public class TestResourceImages implements TestingImageReader {
 
     private synchronized void producer() {
         time = 0;
-
         while (true) {
             while (bitmapQueue.size() >= queueSize) {
                 try {
@@ -39,7 +38,8 @@ public class TestResourceImages implements TestingImageReader {
                 }
             }
 
-            Bitmap bm = retriever.getFrameAtTime(time, retriever.OPTION_CLOSEST);
+            Bitmap bm = retriever.getFrameAtTime(time, retriever.OPTION_CLOSEST_SYNC);
+
             time += 250000;
             bitmapQueue.push(bm);
             notify();
