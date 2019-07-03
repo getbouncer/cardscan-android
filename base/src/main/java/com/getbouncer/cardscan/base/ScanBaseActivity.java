@@ -30,6 +30,7 @@ import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.VisibleForTesting;
+import android.support.test.espresso.idling.CountingIdlingResource;
 import android.util.Log;
 import android.view.OrientationEventListener;
 import android.view.Surface;
@@ -76,6 +77,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     // way to do this than using a static variable, but it works for now.
     static public TestingImageReaderInternal sTestingImageReader = null;
     private TestingImageReaderInternal mTestingImageReader = null;
+    private CountingIdlingResource mScanningIdleResource = null;
 
     // set when this activity posts to the machineLearningThread
     public long mPredictionStartMs = 0;
@@ -89,9 +91,15 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // XXX FIXME move to dependency injection
         mTestingImageReader = sTestingImageReader;
         sTestingImageReader = null;
+        mScanningIdleResource = IdleResourceManager.scanningIdleResource;
+        IdleResourceManager.scanningIdleResource = null;
 
+        if (mScanningIdleResource != null) {
+            mScanningIdleResource.increment();
+        }
 
         mOrientationEventListener = new OrientationEventListener(this) {
             @Override
@@ -320,6 +328,10 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             Intent intent = new Intent();
             setResult(RESULT_CANCELED, intent);
             finish();
+
+            if (mScanningIdleResource != null) {
+                mScanningIdleResource.decrement();
+            }
         }
     }
 
@@ -441,6 +453,10 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
                 }
 
                 onCardScanned(numberResult, month, year);
+
+                if (mScanningIdleResource != null) {
+                    mScanningIdleResource.decrement();
+                }
             }
         }
 

@@ -4,8 +4,10 @@ import android.app.Activity;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.test.espresso.idling.CountingIdlingResource;
 import android.text.TextUtils;
 
+import com.getbouncer.cardscan.base.IdleResourceManager;
 import com.getbouncer.cardscan.base.ModelFactory;
 import com.getbouncer.cardscan.base.ScanActivityImpl;
 import com.getbouncer.cardscan.base.ScanBaseActivity;
@@ -116,5 +118,14 @@ public class ScanActivity {
         }
 
         return new CreditCard(number, month, year);
+    }
+
+    /**
+     * Used for getting idle resources that register during card scanning when testing.
+     * Only use this as part of your Espresso tests, don't call this for production
+     * code.
+     */
+    public static CountingIdlingResource getScanningIdleResource() {
+        return IdleResourceManager.getScanningIdleResource();
     }
 }
