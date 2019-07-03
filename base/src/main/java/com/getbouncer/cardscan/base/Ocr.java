@@ -116,24 +116,10 @@ class Ocr {
         try {
             if (findFour == null) {
                 findFour = new FindFourModel(context);
-                try {
-                    findFour.useNNAPI();
-                } catch (Exception e) {
-                    Log.e("Ocr", "findFour NNAPI exception", e);
-                    findFour = new FindFourModel(context);
-                    findFour.useCPU();
-                }
             }
 
             if (recognizedDigitsModel == null) {
                 recognizedDigitsModel = new RecognizedDigitsModel(context);
-                try {
-                    recognizedDigitsModel.useNNAPI();
-                } catch (Exception e) {
-                    Log.e("Ocr", "recognizeDigits NNAPI exception", e);
-                    recognizedDigitsModel = new RecognizedDigitsModel(context);
-                    recognizedDigitsModel.useCPU();
-                }
             }
 
             try {

@@ -20,6 +20,7 @@ class MachineLearningThread implements Runnable {
 
     class RunArguments {
         private final byte[] mFrameBytes;
+        private final Bitmap mBitmap;
         private final OnScanListener mScanListener;
         private final Context mContext;
         private final int mWidth;
@@ -32,6 +33,7 @@ class MachineLearningThread implements Runnable {
                      int sensorOrientation, OnScanListener scanListener, Context context,
                      float roiCenterYRatio) {
             mFrameBytes = frameBytes;
+            mBitmap = null;
             mWidth = width;
             mHeight = height;
             mFormat = format;
@@ -39,6 +41,19 @@ class MachineLearningThread implements Runnable {
             mContext = context;
             mSensorOrientation = sensorOrientation;
             mRoiCenterYRatio = roiCenterYRatio;
+        }
+
+        // this should only be used for testing
+        RunArguments(Bitmap bitmap, OnScanListener scanListener, Context context) {
+            mFrameBytes = null;
+            mBitmap = bitmap;
+            mWidth = bitmap == null ? 0 : bitmap.getWidth();
+            mHeight = bitmap == null ? 0 : bitmap.getHeight();
+            mFormat = 0;
+            mScanListener = scanListener;
+            mContext = context;
+            mSensorOrientation = 0;
+            mRoiCenterYRatio = 0;
         }
     }
 
@@ -54,6 +69,12 @@ class MachineLearningThread implements Runnable {
         }
         RunArguments args = new RunArguments(null, 0, 0, 0,
                 90,null, context, 0.5f);
+        queue.push(args);
+        notify();
+    }
+
+    synchronized void post(Bitmap bitmap, OnScanListener scanListener, Context context) {
+        RunArguments args = new RunArguments(bitmap, scanListener, context);
         queue.push(args);
         notify();
     }
@@ -112,6 +133,8 @@ class MachineLearningThread implements Runnable {
         if (args.mFrameBytes != null) {
             bm = getBitmap(args.mFrameBytes, args.mWidth, args.mHeight, args.mFormat,
                     args.mSensorOrientation, args.mRoiCenterYRatio);
+        } else if (args.mBitmap != null) {
+            bm = args.mBitmap;
         } else {
             bm = Bitmap.createBitmap(480, 302, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(bm);

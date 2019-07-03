@@ -1,8 +1,9 @@
-package com.getgrowthmetrics.testcardscan;
+package com.getbouncer.example;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.widget.TextView;
 
 import com.getbouncer.cardscan.CreditCard;
 import com.stripe.android.view.CardInputWidget;
@@ -34,6 +35,9 @@ public class EnterCard extends AppCompatActivity {
         if (expiryMonth > 0 && expiryYear > 0) {
             cardInputWidget.setExpiryDate(expiryMonth, expiryYear);
         }
+
+        TextView textView = findViewById(R.id.cardNumberForTesting);
+        textView.setText(number);
     }
 
     @Override

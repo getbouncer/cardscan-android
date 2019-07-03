@@ -1,6 +1,7 @@
-package com.getgrowthmetrics.testcardscan;
+package com.getbouncer.example;
 
 import android.content.Intent;
+import android.content.res.AssetFileDescriptor;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,6 +9,12 @@ import android.view.View;
 
 import com.getbouncer.cardscan.CreditCard;
 import com.getbouncer.cardscan.ScanActivity;
+
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class LaunchActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -21,6 +28,7 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
         findViewById(R.id.scan_button).setOnClickListener(this);
         findViewById(R.id.scanCardDebug).setOnClickListener(this);
         findViewById(R.id.scanCardAltText).setOnClickListener(this);
+        findViewById(R.id.scan_video).setOnClickListener(this);
 
         ScanActivity.warmUp(this);
     }
@@ -34,6 +42,8 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
         } else if (v.getId() == R.id.scanCardAltText) {
             ScanActivity.start(this, "New Scan Card",
                     "Place your card here");
+        } else if (v.getId() == R.id.scan_video) {
+            ScanActivity.startDebug(this, new TestResourceImages(getResources()));
         }
     }
 
