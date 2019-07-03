@@ -1,8 +1,8 @@
 package com.getbouncer.example;
 
-import android.content.res.AssetFileDescriptor;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.media.MediaMetadataRetriever;
+import android.graphics.BitmapFactory;
 
 import com.getbouncer.cardscan.TestingImageReader;
 
@@ -10,65 +10,33 @@ import java.util.LinkedList;
 
 
 public class TestResourceImages implements TestingImageReader {
-    private MediaMetadataRetriever retriever;
-    private int time;
-    private LinkedList<Bitmap> bitmapQueue = new LinkedList<>();
-    private final int queueSize = 3;
+    private LinkedList<Integer> frames = new LinkedList<>();
+    private Resources resources;
 
-    public TestResourceImages(AssetFileDescriptor fd) {
-        retriever = new MediaMetadataRetriever();
-        retriever.setDataSource(fd.getFileDescriptor(), fd.getStartOffset(), fd.getLength());
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                producer();
-            }
-        }).start();
-    }
-
-    private synchronized void producer() {
-        time = 0;
-        while (true) {
-            while (bitmapQueue.size() >= queueSize) {
-                try {
-                    wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            Bitmap bm = retriever.getFrameAtTime(time, retriever.OPTION_CLOSEST_SYNC);
-
-            time += 250000;
-            bitmapQueue.push(bm);
-            notify();
-
-            if (bm == null) {
-                return;
-            }
-        }
-    }
-
-    private synchronized Bitmap consumer() {
-        while (bitmapQueue.size() == 0) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        notify();
-        return bitmapQueue.pop();
+    public TestResourceImages(Resources resources) {
+        this.resources = resources;
+        frames.push(R.drawable.frame0);
+        frames.push(R.drawable.frame19);
+        frames.push(R.drawable.frame38);
+        frames.push(R.drawable.frame57);
+        frames.push(R.drawable.frame73);
+        frames.push(R.drawable.frame76);
+        frames.push(R.drawable.frame95);
+        frames.push(R.drawable.frame99);
+        frames.push(R.drawable.frame114);
+        frames.push(R.drawable.frame133);
     }
 
     @Override
     public Bitmap nextImage() {
-        Bitmap bm = consumer();
-        if (bm == null) {
+        if (frames.size() == 0) {
             return null;
         }
+
+        int resourceId = frames.pop();
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inScaled = false;
+        Bitmap bm = BitmapFactory.decodeResource(resources, resourceId, options);
 
         double width = bm.getWidth();
         double height = 302.0 * width / 480.0;

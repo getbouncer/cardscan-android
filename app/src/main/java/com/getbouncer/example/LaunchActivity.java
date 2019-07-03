@@ -43,8 +43,7 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
             ScanActivity.start(this, "New Scan Card",
                     "Place your card here");
         } else if (v.getId() == R.id.scan_video) {
-            AssetFileDescriptor fd = getResources().openRawResourceFd(R.raw.card_video);
-            ScanActivity.startDebug(this, new TestResourceImages(fd));
+            ScanActivity.startDebug(this, new TestResourceImages(getResources()));
         }
     }
 
