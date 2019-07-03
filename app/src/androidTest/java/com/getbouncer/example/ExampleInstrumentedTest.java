@@ -1,5 +1,7 @@
 package com.getbouncer.example;
 
+import android.support.test.espresso.IdlingPolicies;
+import android.support.test.espresso.IdlingPolicy;
 import android.support.test.espresso.IdlingRegistry;
 import android.support.test.espresso.idling.CountingIdlingResource;
 import android.support.test.runner.AndroidJUnit4;
@@ -13,6 +15,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.concurrent.TimeUnit;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
@@ -37,6 +41,8 @@ public class ExampleInstrumentedTest {
     public void registerIdleResource() {
         countingIdlingResource = ScanActivity.getScanningIdleResource();
         IdlingRegistry.getInstance().register(countingIdlingResource);
+        IdlingPolicies.setMasterPolicyTimeout(3, TimeUnit.MINUTES);
+        IdlingPolicies.setIdlingResourceTimeout(3, TimeUnit.MINUTES);
     }
 
     @After
