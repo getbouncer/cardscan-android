@@ -23,6 +23,7 @@ public class ScanActivityImpl extends ScanBaseActivity {
 
     public static final String SCAN_CARD_TEXT = "scanCardText";
     public static final String POSITION_CARD_TEXT = "positionCardText";
+    public static final String API_KEY = "apiKey";
 
     public static final String RESULT_CARD_NUMBER = "cardNumber";
     public static final String RESULT_EXPIRY_MONTH = "expiryMonth";
@@ -42,6 +43,10 @@ public class ScanActivityImpl extends ScanBaseActivity {
             ((TextView) findViewById(R.id.positionCard)).setText(positionCardText);
         }
 
+        String apiKey = getIntent().getStringExtra(API_KEY);
+        if (!TextUtils.isEmpty(apiKey)) {
+            Api.apiKey = apiKey;
+        }
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
