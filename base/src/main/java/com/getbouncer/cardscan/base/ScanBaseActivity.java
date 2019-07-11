@@ -73,6 +73,8 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     private int mTextureId;
     private float mRoiCenterYRatio;
 
+    private ScanStats scanStats;
+
     // This is a hack to enable us to inject images to use for testing. There is probably a better
     // way to do this than using a static variable, but it works for now.
     static public TestingImageReaderInternal sTestingImageReader = null;
@@ -100,6 +102,8 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         if (mScanningIdleResource != null) {
             mScanningIdleResource.increment();
         }
+
+        this.scanStats = new ScanStats();
 
         mOrientationEventListener = new OrientationEventListener(this) {
             @Override
@@ -282,6 +286,8 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     @Override
     public void onPreviewFrame(byte[] bytes, Camera camera) {
         if (mMachineLearningSemaphore.tryAcquire()) {
+            this.scanStats.incrementScans();
+
             MachineLearningThread mlThread = getMachineLearningThread();
 
             Camera.Parameters parameters = camera.getParameters();
@@ -324,6 +330,9 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     @Override
     public void onBackPressed() {
         if (!mSentResponse && mIsActivityActive) {
+            this.scanStats.setSuccess(false);
+            Api.fraudCheck(this, this.scanStats);
+
             mSentResponse = true;
             Intent intent = new Intent();
             setResult(RESULT_CANCELED, intent);
@@ -451,6 +460,9 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
                     month = Integer.toString(expiryResult.month);
                     year = Integer.toString(expiryResult.year);
                 }
+
+                this.scanStats.setSuccess(true);
+                Api.fraudCheck(this, this.scanStats);
 
                 onCardScanned(numberResult, month, year);
 

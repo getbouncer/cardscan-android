@@ -29,6 +29,7 @@ public class ScanActivity {
     public static final int RESULT_CANCELED = ScanActivityImpl.RESULT_CANCELED;
     public static final int RESULT_OK = ScanActivityImpl.RESULT_OK;
     public static TestingImageReader testingImageReader = null;
+    public static String apiKey;
 
     /**
      * Starts a ScanActivityImpl activity, using {@param activity} as a parent.
@@ -37,7 +38,9 @@ public class ScanActivity {
      */
     public static void start(@NonNull Activity activity) {
         ScanBaseActivity.warmUp(activity.getApplicationContext());
-        activity.startActivityForResult(new Intent(activity, ScanActivityImpl.class), REQUEST_CODE);
+        Intent intent = new Intent(activity, ScanActivityImpl.class);
+        intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
+        activity.startActivityForResult(intent, REQUEST_CODE);
     }
 
     /**
@@ -54,6 +57,7 @@ public class ScanActivity {
         Intent intent = new Intent(activity, ScanActivityImpl.class);
         intent.putExtra(ScanActivityImpl.SCAN_CARD_TEXT, scanCardText);
         intent.putExtra(ScanActivityImpl.POSITION_CARD_TEXT, positionCardText);
+        intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
         activity.startActivityForResult(intent, REQUEST_CODE);
     }
 
@@ -94,6 +98,7 @@ public class ScanActivity {
         ScanBaseActivity.warmUp(activity.getApplicationContext());
         Intent intent = new Intent(activity, ScanActivityImpl.class);
         intent.putExtra("debug", true);
+        intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
         activity.startActivityForResult(intent, REQUEST_CODE);
     }
 
