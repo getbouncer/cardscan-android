@@ -75,6 +75,8 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
 
     private ScanStats scanStats;
 
+    public static String RESULT_FATAL_ERROR = "result_fatal_error";
+
     // This is a hack to enable us to inject images to use for testing. There is probably a better
     // way to do this than using a static variable, but it works for now.
     static public TestingImageReaderInternal sTestingImageReader = null;
@@ -426,6 +428,14 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             textView = findViewById(mExpiryId);
             setValueAnimated(textView, expiryResult.format());
         }
+    }
+
+    @Override
+    public void onFatalError() {
+        Intent intent = new Intent();
+        intent.putExtra(RESULT_FATAL_ERROR, true);
+        setResult(RESULT_CANCELED, intent);
+        finish();
     }
 
     @Override

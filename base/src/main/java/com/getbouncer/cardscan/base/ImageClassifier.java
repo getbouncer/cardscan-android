@@ -22,16 +22,12 @@ import android.graphics.Bitmap;
 import android.os.SystemClock;
 import android.util.Log;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.PriorityQueue;
 import org.tensorflow.lite.Interpreter;
+import org.tensorflow.lite.gpu.GpuDelegate;
 
 /**
  * Classifies images with Tensorflow Lite.
@@ -39,9 +35,6 @@ import org.tensorflow.lite.Interpreter;
 abstract class ImageClassifier {
     /** Tag for the {@link Log}. */
     private static final String TAG = "CardScan";
-
-    /** Number of results to show in the UI. */
-    private static final int RESULTS_TO_SHOW = 3;
 
     /** Dimensions of inputs. */
     private static final int DIM_BATCH_SIZE = 1;
@@ -60,11 +53,11 @@ abstract class ImageClassifier {
     /** An instance of the driver class to run model inference with Tensorflow Lite. */
     protected Interpreter tflite;
 
-    /** Labels corresponding to the output of the vision model. */
-    //private List<String> labelList;
-
     /** A ByteBuffer to hold image data, to be feed into Tensorflow Lite as inputs. */
     protected ByteBuffer imgData = null;
+
+    /** holds a gpu delegate */
+    GpuDelegate gpuDelegate = null;
 
 
     /** Initializes an {@code ImageClassifier}. */
@@ -107,6 +100,14 @@ abstract class ImageClassifier {
         recreateInterpreter();
     }
 
+    public void useGpu() {
+        if (gpuDelegate == null) {
+            gpuDelegate = new GpuDelegate();
+            tfliteOptions.addDelegate(gpuDelegate);
+            recreateInterpreter();
+        }
+    }
+
     public void useNNAPI() {
         tfliteOptions.setUseNNAPI(true);
         recreateInterpreter();
@@ -121,6 +122,10 @@ abstract class ImageClassifier {
     public void close() {
         tflite.close();
         tflite = null;
+        if (gpuDelegate != null) {
+            gpuDelegate.close();
+            gpuDelegate = null;
+        }
         tfliteModel = null;
     }
 

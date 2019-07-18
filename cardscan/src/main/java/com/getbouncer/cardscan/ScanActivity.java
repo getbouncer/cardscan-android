@@ -28,6 +28,7 @@ public class ScanActivity {
     private static final int REQUEST_CODE = 51234;
     public static final int RESULT_CANCELED = ScanActivityImpl.RESULT_CANCELED;
     public static final int RESULT_OK = ScanActivityImpl.RESULT_OK;
+    public static String RESULT_FATAL_ERROR = ScanBaseActivity.RESULT_FATAL_ERROR;
     public static TestingImageReader testingImageReader = null;
     public static String apiKey;
 

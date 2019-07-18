@@ -59,7 +59,13 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
                 intent.putExtra("card", scanResult);
                 startActivity(intent);
             } else if (resultCode == ScanActivity.RESULT_CANCELED) {
-                Log.d(TAG, "The user pressed the back button");
+                boolean fatalError = data.getBooleanExtra(ScanActivity.RESULT_FATAL_ERROR,
+                        false);
+                if (fatalError) {
+                    Log.d(TAG, "fatal error");
+                } else {
+                    Log.d(TAG, "The user pressed the back button");
+                }
             }
         }
     }

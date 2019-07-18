@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -15,9 +14,10 @@ import java.util.List;
 class Ocr {
     private static FindFourModel findFour = null;
     private static RecognizedDigitsModel recognizedDigitsModel = null;
-    public List<DetectedBox> digitBoxes = new ArrayList<>();
-    public DetectedBox expiryBox = null;
-    public Expiry expiry = null;
+    List<DetectedBox> digitBoxes = new ArrayList<>();
+    DetectedBox expiryBox = null;
+    Expiry expiry = null;
+    boolean hadUnrecoverableException = false;
 
 
     static boolean isInit() {
@@ -116,6 +116,12 @@ class Ocr {
         try {
             if (findFour == null) {
                 findFour = new FindFourModel(context);
+                try {
+                    findFour.useGpu();
+                } catch (Error | Exception e) {
+                    Log.i("Ocr", "useGpu exception, falling back to CPU", e);
+                    findFour = new FindFourModel(context);
+                }
             }
 
             if (recognizedDigitsModel == null) {
@@ -124,18 +130,14 @@ class Ocr {
 
             try {
                 return runModel(image);
-            } catch (Exception e) {
-                Log.e("Ocr", "runModel exception", e);
+            } catch (Error | Exception e) {
+                Log.i("Ocr", "runModel exception, retry prediction", e);
                 findFour = new FindFourModel(context);
-                findFour.useCPU();
-                recognizedDigitsModel = new RecognizedDigitsModel(context);
-                recognizedDigitsModel.useCPU();
                 return runModel(image);
             }
-
-
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Error | Exception e) {
+            Log.e("Ocr", "unrecoverable exception on Ocr", e);
+            hadUnrecoverableException = true;
             return null;
         }
     }
