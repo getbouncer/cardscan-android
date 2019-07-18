@@ -147,15 +147,20 @@ class MachineLearningThread implements Runnable {
 
         final Ocr ocr = new Ocr();
         final String number = ocr.predict(bitmap, args.mContext);
+        final boolean hadUnrecoverableException = ocr.hadUnrecoverableException;
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {
             public void run() {
                 try {
                     if (args.mScanListener != null) {
-                        args.mScanListener.onPrediction(number, ocr.expiry, bitmap, ocr.digitBoxes,
-                                ocr.expiryBox);
+                        if (hadUnrecoverableException) {
+                            args.mScanListener.onFatalError();
+                        } else {
+                            args.mScanListener.onPrediction(number, ocr.expiry, bitmap, ocr.digitBoxes,
+                                    ocr.expiryBox);
+                        }
                     }
-                } catch (Exception e) {
+                } catch (Error | Exception e) {
                     // prevent callbacks from crashing the app, swallow it
                     e.printStackTrace();
                 }
@@ -169,7 +174,7 @@ class MachineLearningThread implements Runnable {
         while (true) {
             try {
                 runModel();
-            } catch (Exception e) {
+            } catch (Error | Exception e) {
                 // center field exception handling, make sure that the ml thread keeps running
                 e.printStackTrace();
             }
