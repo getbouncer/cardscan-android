@@ -205,6 +205,15 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         super.onResume();
 
         mIsActivityActive = true;
+        this.scanStats = new ScanStats();
+        firstResultMs = 0;
+        numberResults = new HashMap<>();
+        expiryResults = new HashMap<>();
+        mSentResponse = false;
+
+        findViewById(mCardNumberId).setVisibility(View.INVISIBLE);
+        findViewById(mExpiryId).setVisibility(View.INVISIBLE);
+
         startCamera();
     }
 
