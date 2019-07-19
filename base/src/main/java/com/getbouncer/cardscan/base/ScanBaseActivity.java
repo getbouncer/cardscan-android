@@ -55,7 +55,7 @@ import java.util.concurrent.Semaphore;
  * (2) Call setViewIds to set these resource IDs and initalize appropriate handlers
  */
 public abstract class ScanBaseActivity extends Activity implements Camera.PreviewCallback, View.OnClickListener,
-        OnScanListener {
+        OnScanListener, OnCameraOpenListener {
 
     private Camera mCamera = null;
     private OrientationEventListener mOrientationEventListener;
@@ -72,6 +72,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     private int mExpiryId;
     private int mTextureId;
     private float mRoiCenterYRatio;
+    private CameraThread mCameraThread = null;
 
     private ScanStats scanStats;
 
@@ -154,6 +155,23 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         }
     }
 
+    @Override
+    public void onCameraOpen(Camera camera) {
+        if (!mIsActivityActive) {
+            camera.release();
+        } else {
+            mCamera = camera;
+            setCameraDisplayOrientation(this, Camera.CameraInfo.CAMERA_FACING_BACK,
+                    mCamera);
+            // Create our Preview view and set it as the content of our activity.
+            CameraPreview cameraPreview = new CameraPreview(this, this);
+            FrameLayout preview = findViewById(mTextureId);
+            preview.addView(cameraPreview);
+            mCamera.setPreviewCallback(this);
+        }
+    }
+
+
     protected void startCamera() {
         numberResults = new HashMap<>();
         expiryResults = new HashMap<>();
@@ -164,14 +182,12 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
 
         try {
             if (mIsPermissionCheckDone) {
-                mCamera = Camera.open();
-                setCameraDisplayOrientation(this, Camera.CameraInfo.CAMERA_FACING_BACK,
-                        mCamera);
-                // Create our Preview view and set it as the content of our activity.
-                CameraPreview cameraPreview = new CameraPreview(this, this);
-                FrameLayout preview = findViewById(mTextureId);
-                preview.addView(cameraPreview);
-                mCamera.setPreviewCallback(this);
+                if (mCameraThread == null) {
+                    mCameraThread = new CameraThread();
+                    mCameraThread.start();
+                }
+
+                mCameraThread.startCamera(this);
             }
         } catch (Exception e){
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
