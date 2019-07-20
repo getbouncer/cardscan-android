@@ -29,6 +29,7 @@ import android.graphics.RectF;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.test.espresso.idling.CountingIdlingResource;
 import android.util.Log;
@@ -77,6 +78,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     private ScanStats scanStats;
 
     public static String RESULT_FATAL_ERROR = "result_fatal_error";
+    public static String RESULT_CAMERA_OPEN_ERROR = "result_camera_open_error";
 
     // This is a hack to enable us to inject images to use for testing. There is probably a better
     // way to do this than using a static variable, but it works for now.
@@ -156,8 +158,13 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     }
 
     @Override
-    public void onCameraOpen(Camera camera) {
-        if (!mIsActivityActive) {
+    public void onCameraOpen(@Nullable Camera camera) {
+        if (camera == null) {
+            Intent intent = new Intent();
+            intent.putExtra(RESULT_CAMERA_OPEN_ERROR, true);
+            setResult(RESULT_CANCELED, intent);
+            finish();
+        } else if (!mIsActivityActive) {
             camera.release();
         } else {
             mCamera = camera;
@@ -210,6 +217,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             mCamera.stopPreview();
             mCamera.setPreviewCallback(null);
             mCamera.release();
+            mCamera = null;
         }
 
         mOrientationEventListener.disable();

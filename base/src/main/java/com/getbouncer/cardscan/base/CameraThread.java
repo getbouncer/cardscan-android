@@ -3,6 +3,7 @@ package com.getbouncer.cardscan.base;
 import android.hardware.Camera;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 class CameraThread extends Thread {
     private OnCameraOpenListener listener;
@@ -30,12 +31,21 @@ class CameraThread extends Thread {
     public void run() {
         while (true) {
             final OnCameraOpenListener listener = waitForOpenRequest();
-            final Camera camera = Camera.open();
+
+            Camera camera = null;
+            try {
+                camera = Camera.open();
+            } catch (Exception e) {
+                Log.e("CameraThread", "failed to open Camera");
+                e.printStackTrace();
+            }
+
+            final Camera resultCamera = camera;
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    listener.onCameraOpen(camera);
+                    listener.onCameraOpen(resultCamera);
                 }
             });
         }
