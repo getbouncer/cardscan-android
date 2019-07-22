@@ -51,7 +51,7 @@ ext {
     siteUrl = 'https://github.com/getbouncer/cardscan-android'
     gitUrl = 'https://github.com/getbouncer/cardscan-android.git'
 
-    libraryVersion = '1.0.4026'
+    libraryVersion = '1.0.4027'
 
     developerId = 'kingst'
     developerName = 'Sam King'

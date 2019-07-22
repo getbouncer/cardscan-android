@@ -84,7 +84,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     // way to do this than using a static variable, but it works for now.
     static public TestingImageReaderInternal sTestingImageReader = null;
     private TestingImageReaderInternal mTestingImageReader = null;
-    private CountingIdlingResource mScanningIdleResource = null;
+    protected CountingIdlingResource mScanningIdleResource = null;
 
     // set when this activity posts to the machineLearningThread
     public long mPredictionStartMs = 0;
