@@ -11,12 +11,12 @@ import java.util.List;
 /**
  * This class is not thread safe, make sure that all methods run on the same thread.
  */
-class Ocr {
+public class Ocr {
     private static FindFourModel findFour = null;
     private static RecognizedDigitsModel recognizedDigitsModel = null;
-    List<DetectedBox> digitBoxes = new ArrayList<>();
-    DetectedBox expiryBox = null;
-    Expiry expiry = null;
+    public List<DetectedBox> digitBoxes = new ArrayList<>();
+    public DetectedBox expiryBox = null;
+    public Expiry expiry = null;
     boolean hadUnrecoverableException = false;
 
 
