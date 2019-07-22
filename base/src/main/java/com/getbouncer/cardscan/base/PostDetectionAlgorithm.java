@@ -27,17 +27,22 @@ class PostDetectionAlgorithm {
     private final int numRows;
     private final int numCols;
 
+    // Copied from the Android source code for older version compatibility
+    private static int integerCompare(int x, int y) {
+        return (x < y) ? -1 : ((x == y) ? 0 : 1);
+    }
+
     private static Comparator<DetectedBox> colCompare = new Comparator<DetectedBox>() {
         @Override
         public int compare(DetectedBox o1, DetectedBox o2) {
-            return Integer.compare(o1.col, o2.col);
+            return integerCompare(o1.col, o2.col);
         }
     };
 
     private static Comparator<DetectedBox> rowCompare = new Comparator<DetectedBox>() {
         @Override
         public int compare(DetectedBox o1, DetectedBox o2) {
-            return Integer.compare(o1.row, o2.row);
+            return integerCompare(o1.row, o2.row);
         }
     };
 

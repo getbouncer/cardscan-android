@@ -1,5 +1,6 @@
 package com.getbouncer.cardscan.base;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -45,12 +46,13 @@ public class Api {
         return response;
     }
 
-    static @NonNull void fraudCheck(Context context, ScanStats scanStats) {
+    static void fraudCheck(Context context, ScanStats scanStats) {
         try {
             JSONObject args = new JSONObject();
             args.put("platform", "android");
-            String ssaid = Settings.Secure.getString(context.getContentResolver(),
-                    Settings.Secure.ANDROID_ID);
+            @SuppressLint("HardwareIds") String ssaid =
+                    Settings.Secure.getString(context.getContentResolver(),
+                            Settings.Secure.ANDROID_ID);
             args.put("vendor_id", ssaid);
             args.put("safety_net", null);
             args.put("scan_stats", scanStats.toJson());
