@@ -104,10 +104,6 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         mScanningIdleResource = IdleResourceManager.scanningIdleResource;
         IdleResourceManager.scanningIdleResource = null;
 
-        if (mScanningIdleResource != null) {
-            mScanningIdleResource.increment();
-        }
-
         this.scanStats = new ScanStats();
 
         mOrientationEventListener = new OrientationEventListener(this) {
@@ -189,6 +185,10 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
 
         try {
             if (mIsPermissionCheckDone) {
+                if (mScanningIdleResource != null) {
+                    mScanningIdleResource.increment();
+                }
+
                 if (mCameraThread == null) {
                     mCameraThread = new CameraThread();
                     mCameraThread.start();
