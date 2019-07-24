@@ -23,22 +23,36 @@ import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Vector;
 
 
 class SSDDetect extends ImageClassifier {
+    /** We normalized the images with mean 127.5 and std 128.5 during training */
 
     private static final float IMAGE_MEAN = 127.5f;
     private static final float IMAGE_STD = 128.5f;
-    private static final int CROP_SIZE = 300;
-    private static final int NUM_THREADS = 4;
 
+   /** the model takes a 300x300 sample images as input */
+
+    private static final int CROP_SIZE = 300;
+
+    /** To be  used later */
+    private static final int NUM_THREADS = 4;
     private boolean isModelQuantized; // TODO later
 
+    /** We use the output from last two layers with feature maps 19x19 and 10x10
+     * and for each feature map activation we have 6 priors, so total priors are
+     * 19x19x6 + 10x10x6 = 2766
+     */
     static final int NUM_OF_PRIORS = 2766;
-
+    /** We can detect a total of 7 objects plus the background class */
     static final int NUM_OF_CLASSES = 8;
+
+    /** Each prior or bounding box can be represented by 4 co-ordinates
+     * XMin, YMin, XMax, YMax.
+      */
     static final int NUM_OF_CORDINATES = 4;
+
+    /** Represents the total number of datapoints for locations and classes */
 
     static final int NUM_LOC = NUM_OF_CORDINATES * NUM_OF_PRIORS;
     static final int NUM_CLASS = NUM_OF_CLASSES * NUM_OF_PRIORS;
@@ -50,14 +64,24 @@ class SSDDetect extends ImageClassifier {
 
     private int[] intValues;
 
-    // outputLocations corresponds to the values of four co-ordinates of
-    // all the priors
+    /** outputLocations corresponds to the values of four co-ordinates of
+     * all the priors, this is equal to NUM_OF_CORDINATES x NUM_OF_PRIORS
+     * But this is reshaped by the model to 1 x [NUM_OF_CORDINATES x NUM_OF_PRIORS] */
+
     float[][] outputLocations;
 
-    // outputClasses corresponds to the values of the NUM_OF_CLASSES for all priors
-    float[][] outputClasses;
+    /** outputClasses corresponds to the values of the NUM_OF_CLASSES for all priors
+     *  this is equal to NUM_OF_CLASSES x NUM_OF_PRIORS
+     *  but this is reshaped by the model to 1 x [NUM_OF_CLASSES x NUM_OF_PRIORS]
+     */
 
-    // This datastructure will be populated by the Interpreter
+     float[][] outputClasses;
+
+    /** This datastructure will be populated by the Interpreter
+     * Since the model outputs multiple output types, we need to create the
+     * HashMap<> with outputLocations and outputClasses to be populated by running
+     * the SSD Model
+     */
 
     private Map<Integer, Object> outputMap = new HashMap<>();
 
@@ -69,8 +93,12 @@ class SSDDetect extends ImageClassifier {
      */
     SSDDetect(Context context) throws IOException {
         super(context);
+
+        /** The model reshapes all the data to 1 x [All Data Points]
+         */
         outputLocations = new float[1][NUM_LOC];
         outputClasses = new float[1][NUM_CLASS];
+
         outputMap.put(0, outputClasses);
         outputMap.put(1, outputLocations);
 
@@ -100,6 +128,9 @@ class SSDDetect extends ImageClassifier {
 
     @Override
     protected void addPixelValue(int pixelValue) {
+
+        /** Normalize each pixel with MEAN and STD from training */
+
         imgData.putFloat((((pixelValue >> 16) & 0xFF) - IMAGE_MEAN) / IMAGE_STD);
         imgData.putFloat((((pixelValue >> 8) & 0xFF) - IMAGE_MEAN) / IMAGE_STD);
         imgData.putFloat(((pixelValue & 0xFF) - IMAGE_MEAN) / IMAGE_MEAN);

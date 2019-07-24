@@ -514,7 +514,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
 
     @Override
     public void onPrediction(final String number, final Expiry expiry, final Bitmap bitmap,
-                             final List<DetectedBox> digitBoxes, final DetectedBox expiryBox, List<DetectedSSDBox> objectBoxes) {
+                             final List<DetectedBox> digitBoxes, final DetectedBox expiryBox , List<DetectedSSDBox> objectBoxes) {
 
         if (!mSentResponse && mIsActivityActive) {
 
