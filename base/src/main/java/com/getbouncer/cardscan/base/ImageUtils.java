@@ -34,9 +34,9 @@ public class ImageUtils {
     }
     public static Bitmap drawSSDBoxesOnImage(Bitmap frame, List<DetectedSSDBox> objectBoxes) {
         Paint paint = new Paint(0);
-        paint.setColor(Color.GREEN);
+        paint.setColor(Color.BLACK);
         paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(3);
+        paint.setStrokeWidth(10);
 
         Bitmap mutableBitmap = frame.copy(Bitmap.Config.ARGB_8888, true);
         Canvas canvas = new Canvas(mutableBitmap);
