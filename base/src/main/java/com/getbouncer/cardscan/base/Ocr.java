@@ -6,6 +6,12 @@ import android.content.pm.ConfigurationInfo;
 import android.graphics.Bitmap;
 import android.util.Log;
 
+import com.getbouncer.cardscan.base.ssd.ArrUtils;
+import com.getbouncer.cardscan.base.ssd.DetectedSSDBox;
+import com.getbouncer.cardscan.base.ssd.PredictionAPI;
+import com.getbouncer.cardscan.base.ssd.PriorsGen;
+import com.getbouncer.cardscan.base.ssd.Result;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -16,14 +22,16 @@ import java.util.List;
 public class Ocr {
     private static FindFourModel findFour = null;
     private static RecognizedDigitsModel recognizedDigitsModel = null;
+    private static SSDDetect ssdDetect = null;
     public List<DetectedBox> digitBoxes = new ArrayList<>();
     public DetectedBox expiryBox = null;
     public Expiry expiry = null;
+    public List<DetectedSSDBox> objectBoxes = new ArrayList<>();
     boolean hadUnrecoverableException = false;
     public static boolean USE_GPU = false;
 
     static boolean isInit() {
-        return findFour != null && recognizedDigitsModel != null;
+        return findFour != null && recognizedDigitsModel != null && ssdDetect != null;
     }
 
     private ArrayList<DetectedBox> detectBoxes(Bitmap image) {
@@ -62,8 +70,48 @@ public class Ocr {
         return boxes;
     }
 
+    private Result ssdOutputToPredictions(Bitmap image){
+        ArrUtils arrUtils = new ArrUtils();
+        int[] featureMapSizes = {19, 10};
+        float[][] priorsCombined = PriorsGen.combinePriors();
+
+        float[][] k_boxes = arrUtils.rearrangeArray(ssdDetect.outputLocations, featureMapSizes, 6, ssdDetect.NUM_OF_CORDINATES);
+        k_boxes = arrUtils.reshape(k_boxes, ssdDetect.NUM_OF_PRIORS, ssdDetect.NUM_OF_CORDINATES);
+        k_boxes = arrUtils.convertLocationsToBoxes(k_boxes, priorsCombined, 0.1f, 0.2f);
+        k_boxes = arrUtils.centerFormToCornerForm(k_boxes);
+        float[][] k_scores = arrUtils.rearrangeArray(ssdDetect.outputClasses, featureMapSizes, 6, ssdDetect.NUM_OF_CLASSES);
+        k_scores = arrUtils.reshape(k_scores, ssdDetect.NUM_OF_PRIORS, ssdDetect.NUM_OF_CLASSES);
+        k_scores = arrUtils.softmax2D(k_scores);
+        float probThreshold = 0.2f;
+        float iouThreshold = 0.45f;
+        int candidateSize = 200;
+        int topK = 10;
+        PredictionAPI predAPI = new PredictionAPI();
+        Result result = predAPI.predictionAPI(k_scores, k_boxes, probThreshold, iouThreshold, candidateSize, topK);
+        if (result.pickedBoxProbs.size() != 0 && result.pickedLabels.size() != 0)
+        {
+            for (int i = 0; i < result.pickedBoxProbs.size(); ++i){
+                DetectedSSDBox ssdBox = new DetectedSSDBox(
+                        result.pickedBoxes.get(i)[0], result.pickedBoxes.get(i)[1],
+                        result.pickedBoxes.get(i)[2], result.pickedBoxes.get(i)[3],result.pickedBoxProbs.get(i),
+                        image.getWidth(), image.getHeight(),"Test");
+                objectBoxes.add(ssdBox);
+            }
+        }
+
+        return result;
+
+
+    }
+
     private String runModel(Bitmap image) {
         findFour.classifyFrame(image);
+        // Run SSD Model
+        ssdDetect.classifyFrame(image);
+        // pass the output through the prediction API
+        Result result = ssdOutputToPredictions(image);
+        Log.e("After SSD Post Process", String.valueOf(result.pickedLabels) + image.getWidth());
+
         ArrayList<DetectedBox> boxes = detectBoxes(image);
         ArrayList<DetectedBox> expiryBoxes = detectExpiry(image);
         PostDetectionAlgorithm postDetection = new PostDetectionAlgorithm(boxes, findFour);
@@ -152,6 +200,15 @@ public class Ocr {
                     findFour = new FindFourModel(context);
                     recognizedDigitsModel = new RecognizedDigitsModel(context);
                 }
+            }
+
+
+            try{
+                if (ssdDetect == null){
+                ssdDetect = new SSDDetect(context);
+                }
+            } catch (Error | Exception e){
+                Log.e("SSD", "Couldn't load ssd", e);
             }
 
 

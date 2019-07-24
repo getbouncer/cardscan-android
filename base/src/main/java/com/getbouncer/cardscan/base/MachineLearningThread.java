@@ -215,7 +215,7 @@ class MachineLearningThread implements Runnable {
                             args.mScanListener.onFatalError();
                         } else {
                             args.mScanListener.onPrediction(number, ocr.expiry, bitmap, ocr.digitBoxes,
-                                    ocr.expiryBox);
+                                    ocr.expiryBox, ocr.objectBoxes);
                         }
                     }
                 } catch (Error | Exception e) {
