@@ -4,6 +4,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ConfigurationInfo;
 import android.graphics.Bitmap;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.getbouncer.cardscan.base.ssd.ArrUtils;
@@ -23,6 +24,7 @@ public class Ocr {
     private static FindFourModel findFour = null;
     private static RecognizedDigitsModel recognizedDigitsModel = null;
     private static SSDDetect ssdDetect = null;
+    private  static float[][] priors = null;
     public List<DetectedBox> digitBoxes = new ArrayList<>();
     public DetectedBox expiryBox = null;
     public Expiry expiry = null;
@@ -70,14 +72,14 @@ public class Ocr {
         return boxes;
     }
 
-    private Result ssdOutputToPredictions(Bitmap image){
+    private void ssdOutputToPredictions(Bitmap image){
         ArrUtils arrUtils = new ArrUtils();
         int[] featureMapSizes = {19, 10};
-        float[][] priorsCombined = PriorsGen.combinePriors();
+        //float[][] priorsCombined = PriorsGen.combinePriors();
 
         float[][] k_boxes = arrUtils.rearrangeArray(ssdDetect.outputLocations, featureMapSizes, 6, ssdDetect.NUM_OF_CORDINATES);
         k_boxes = arrUtils.reshape(k_boxes, ssdDetect.NUM_OF_PRIORS, ssdDetect.NUM_OF_CORDINATES);
-        k_boxes = arrUtils.convertLocationsToBoxes(k_boxes, priorsCombined, 0.1f, 0.2f);
+        k_boxes = arrUtils.convertLocationsToBoxes(k_boxes, priors, 0.1f, 0.2f);
         k_boxes = arrUtils.centerFormToCornerForm(k_boxes);
         float[][] k_scores = arrUtils.rearrangeArray(ssdDetect.outputClasses, featureMapSizes, 6, ssdDetect.NUM_OF_CLASSES);
         k_scores = arrUtils.reshape(k_scores, ssdDetect.NUM_OF_PRIORS, ssdDetect.NUM_OF_CLASSES);
@@ -99,18 +101,20 @@ public class Ocr {
             }
         }
 
-        return result;
-
 
     }
 
     private String runModel(Bitmap image) {
         findFour.classifyFrame(image);
-        // Run SSD Model
+
+        final long startTime = SystemClock.uptimeMillis();
+
+        /**Run SSD Model and use the prediction API to post process
+         * the model output */
+
         ssdDetect.classifyFrame(image);
-        // pass the output through the prediction API
-        Result result = ssdOutputToPredictions(image);
-        Log.e("After SSD Post Process", String.valueOf(result.pickedLabels) + image.getWidth());
+        ssdOutputToPredictions(image);
+        Log.e("After SSD Post Process", String.valueOf(SystemClock.uptimeMillis() - startTime));
 
         ArrayList<DetectedBox> boxes = detectBoxes(image);
         ArrayList<DetectedBox> expiryBoxes = detectExpiry(image);
@@ -206,6 +210,13 @@ public class Ocr {
             try{
                 if (ssdDetect == null){
                 ssdDetect = new SSDDetect(context);
+                    /** Since all the frames use the same set of priors
+                     * We generate these once and use for all the frame
+                     */
+                if ( priors == null){
+                    priors = PriorsGen.combinePriors();
+                }
+
                 }
             } catch (Error | Exception e){
                 Log.e("SSD", "Couldn't load ssd", e);
