@@ -1,6 +1,15 @@
 package com.getbouncer.cardscan.base.ssd;
 
 public class PriorsGen{
+
+    /** A utility class used to generate priors for initializing SSD
+    * Since we use the output feature maps of only two layers
+    * We call genPriors twice and combine the information.
+    * The specification is followed as in the original paper
+    * https://arxiv.org/abs/1512.02325 by Wei Liu Et al.
+
+    */
+
     public static float[][] genPriors(int featureMapSize, int shrinkage, int boxSizeMin, int boxSizeMax, int aspecRatioOne, int aspectRatioTwo, int noOfPriors){
         float[][] boxes = new float[featureMapSize*featureMapSize*noOfPriors][4];
         float x_center, y_center;

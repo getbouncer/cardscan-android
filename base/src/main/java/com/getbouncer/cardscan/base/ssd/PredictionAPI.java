@@ -11,6 +11,13 @@ public class PredictionAPI{
 
     public Result predictionAPI(float[][] k_scores, float[][] k_boxes, float probThreshold, float iouThreshold,
                                 int candidateSize, int topK){
+
+        /**
+         * A utitliy class that applies non-max supression to each class
+         * picks out the remaining boxes, the class probabilities for classes
+         * that are kept and composes all the information in one place to be returned as
+         * an object.
+         */
         pickedBoxProbs = new ArrayList<Float>();
         pickedLabels = new ArrayList<Integer>();
         pickedBoxes = new ArrayList<float[]>();

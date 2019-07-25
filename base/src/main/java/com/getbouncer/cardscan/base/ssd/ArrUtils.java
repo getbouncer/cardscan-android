@@ -30,7 +30,6 @@ public class ArrUtils {
         return result;
     }
 
-
     public float[][] rearrangeLayer(float[][] locations, int steps, int noOfPriors, int locationsPerPrior){
         /** The model outputs a particular location or a particular class of each prior before moving on to the
          * next prior. For instance, the model will output probabilities for background class corresponding
