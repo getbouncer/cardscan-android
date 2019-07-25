@@ -3,6 +3,16 @@ package com.getbouncer.cardscan.base.ssd;
 
 public class NMSUtil{
     public static float IOUOf(float[] currentBox, float[] nextBox){
+
+        /** Return intersection-over-union (Jaccard index) of boxes.
+
+        * Args:
+        * boxes0 (N, 4): ground truth boxes.
+        *        boxes1 (N or 1, 4): predicted boxes.
+        * eps: a small number to avoid 0 as denominator.
+        * Returns: iou (N): IOU values
+        */
+
         float eps = 0.00001f;
         float overlapArea;
         float area0;
@@ -39,6 +49,17 @@ public class NMSUtil{
 
     }
     public static float AreaOf(float[] leftTop, float[] rightBottom){
+        /** Compute the areas of rectangles given two corners.
+
+        * Args:
+        * left_top (N, 2): left top corner.
+        *        right_bottom (N, 2): right bottom corner.
+
+        *        Returns:
+        * area (N): return the area. */
+
+
+
         float left, right;
         left = rightBottom[0] - leftTop[0];
         left = (float) ArrUtils.clamp(left, 0.0f, 1000.0f);

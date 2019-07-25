@@ -6,6 +6,9 @@ import java.util.Arrays;
 
 public class ArrUtils {
 
+    /** Basic Matrix handling utilities needed for SSD Framework
+     */
+
     public float[][] reshape(float[][] nums, int r, int c) {
         int totalElements = nums.length * nums[0].length;
         if (totalElements != r * c || totalElements % r != 0) {
@@ -29,6 +32,12 @@ public class ArrUtils {
 
 
     public float[][] rearrangeLayer(float[][] locations, int steps, int noOfPriors, int locationsPerPrior){
+        /** The model outputs a particular location or a particular class of each prior before moving on to the
+         * next prior. For instance, the model will output probabilities for background class corresponding
+         * to all priors before outputting the probability of next class for the first prior.
+         * This method serves to rearrange the output if you are using outputs from a single layer.
+         * If you use outputs from multiple layers use the next method defined below
+         */
         int totalNumberOfLocationsForAllPriors = steps * steps * noOfPriors * locationsPerPrior;
         float[][] rearranged = new float[1][totalNumberOfLocationsForAllPriors];
         int stepsForLoop = steps - 1;
@@ -52,6 +61,13 @@ public class ArrUtils {
 
     public float[][] rearrangeArray(float[][] locations, int[] featureMapSizes,
                                      int noOfPriors, int locationsPerPrior){
+        /** The model outputs a particular location or a particular class of each prior before moving on to the
+         * next prior. For instance, the model will output probabilities for background class corresponding
+         * to all priors before outputting the probability of next class for the first prior.
+         * This method serves to rearrange the output if you are using outputs from multiple layers
+         * If you use outputs from single layer use the method defined above
+         */
+
         int totalLocationsForAllLayers = 0;
 
         for (int size : featureMapSizes){
@@ -84,6 +100,11 @@ public class ArrUtils {
     }
 
     public float[][] convertLocationsToBoxes(float[][] locations, float[][] priors, float centerVariance, float sizeVariance){
+
+        /** Convert regressional location results of
+           SSD into boxes in the form of (center_x, center_y, h, w)
+         */
+
         float[][] boxes = new float[locations.length][locations[0].length];
         for (int i = 0; i< locations.length; i++){
             for(int j = 0; j < 2 ; j++){
@@ -97,6 +118,11 @@ public class ArrUtils {
     }
 
     public float[][] centerFormToCornerForm(float[][] locations){
+
+        /** Convert center from (center_x, center_y, h, w) to
+         * corner form XMin, YMin, XMax, YMax
+         */
+
         float[][] boxes = new float[locations.length][locations[0].length];
         for(int i = 0; i < locations.length; i++){
             for (int j = 0; j < 2; j++){
@@ -122,12 +148,21 @@ public class ArrUtils {
     }
 
     public static float clamp(float val, float min, float max) {
+        /** Clamp the value between min and max
+         */
+
         return Math.max(min, Math.min(max, val));
     }
 
 
 
     public float[][] softmax2D(float[][] scores){
+
+        /** compute softmax for each row
+         * Will replace each row value with a value normalized by the sum of
+         * all the values in the same row.
+         */
+
         float[][] normalizedScores = new float[scores.length][scores[0].length];
         float rowSum;
         for(int i = 0; i < scores.length; i++){
