@@ -1,6 +1,6 @@
 package com.getbouncer.cardscan.base.ssd;
 
-
+import android.util.Log;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -133,17 +133,18 @@ public class ArrUtils {
     }
 
     public void print(float[][] arr){
-        System.out.println(Arrays.deepToString(arr));
+        Log.d("ArrUtils for float[][]", Arrays.toString(arr));
     }
 
     public static void printArrayList(ArrayList<float[]> alist)
     {
-        System.out.println(Arrays.deepToString(alist.toArray()));
+        Log.d("ArrUtils for ArrayList", Arrays.deepToString(alist.toArray()));
     }
 
 
     public static void print(float[] arr){
-        System.out.println(Arrays.toString(arr));
+
+        Log.d("ArrUtils for float[]", Arrays.toString(arr));
     }
 
     public static float clamp(float val, float min, float max) {
