@@ -12,7 +12,7 @@ public abstract class ModelFactory {
     public abstract MappedByteBuffer loadFindFourFile(Context context) throws IOException;
     public abstract MappedByteBuffer loadRecognizeDigitsFile(Context context) throws IOException;
 
-    public static ModelFactory sharedInstance;
+    private static ModelFactory sharedInstance;
 
     public MappedByteBuffer loadModelFromResource(Context context, int resource) throws IOException {
         AssetFileDescriptor fileDescriptor = context.getResources()
@@ -26,5 +26,13 @@ public abstract class ModelFactory {
         inputStream.close();
         fileDescriptor.close();
         return result;
+    }
+
+    public static ModelFactory getSharedInstance() {
+        if (sharedInstance == null) {
+            sharedInstance = new ResourceModelFactory();
+        }
+
+        return sharedInstance;
     }
 }

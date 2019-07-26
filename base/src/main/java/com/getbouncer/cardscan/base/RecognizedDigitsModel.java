@@ -48,7 +48,7 @@ class RecognizedDigitsModel extends ImageClassifier {
 
     @Override
     MappedByteBuffer loadModelFile(Context context) throws IOException {
-        return ModelFactory.sharedInstance.loadRecognizeDigitsFile(context);
+        return ModelFactory.getSharedInstance().loadRecognizeDigitsFile(context);
     }
 
     @Override
