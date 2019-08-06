@@ -4,7 +4,7 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.getgrowthmetrics.testcardscan"
-        minSdkVersion 18
+        minSdkVersion 19
         targetSdkVersion 28
         versionCode 4015
         versionName "1.0.4015"

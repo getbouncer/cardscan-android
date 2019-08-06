@@ -40,7 +40,6 @@ gcloud firebase test android run \
   --device model=lt02wifi,version=19,locale=en,orientation=portrait \
   --device model=lucye,version=24,locale=en,orientation=portrait \
   --device model=lv0,version=23,locale=en,orientation=portrait \
-  --device model=m0,version=18,locale=en,orientation=portrait \
   --device model=mata,version=25,locale=en,orientation=portrait \
   --device model=mlv1,version=23,locale=en,orientation=portrait \
   --device model=potter,version=24,locale=en,orientation=portrait \

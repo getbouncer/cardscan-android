@@ -65,7 +65,7 @@ class FindFourModel extends ImageClassifier {
 
     @Override
     MappedByteBuffer loadModelFile(Context context) throws IOException {
-        return ModelFactory.sharedInstance.loadFindFourFile(context);
+        return ModelFactory.getSharedInstance().loadFindFourFile(context);
     }
 
     @Override

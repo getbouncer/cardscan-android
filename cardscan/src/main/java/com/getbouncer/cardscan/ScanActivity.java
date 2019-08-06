@@ -21,10 +21,6 @@ import com.getbouncer.cardscan.base.ScanBaseActivity;
 public class ScanActivity {
     private static final String TAG = "ScanActivity";
 
-    static {
-        ModelFactory.sharedInstance = new ResourceModelFactory();
-    }
-
     private static final int REQUEST_CODE = 51234;
     public static final int RESULT_CANCELED = ScanActivityImpl.RESULT_CANCELED;
     public static final int RESULT_OK = ScanActivityImpl.RESULT_OK;

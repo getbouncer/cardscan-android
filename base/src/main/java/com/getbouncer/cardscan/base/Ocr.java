@@ -1,6 +1,8 @@
 package com.getbouncer.cardscan.base;
 
+import android.app.ActivityManager;
 import android.content.Context;
+import android.content.pm.ConfigurationInfo;
 import android.graphics.Bitmap;
 import android.util.Log;
 
@@ -112,27 +114,50 @@ public class Ocr {
         return number;
     }
 
+    private boolean hasOpenGl31(Context context) {
+        int openGlVersion = 0x00030001;
+        ActivityManager activityManager =
+                (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        ConfigurationInfo configInfo = activityManager.getDeviceConfigurationInfo();
+        if (configInfo.reqGlEsVersion != ConfigurationInfo.GL_ES_VERSION_UNDEFINED) {
+            return configInfo.reqGlEsVersion >= openGlVersion;
+        } else {
+            return false;
+        }
+    }
+
     public synchronized String predict(Bitmap image, Context context) {
         try {
+            boolean createdNewModel = false;
+
             if (findFour == null) {
                 findFour = new FindFourModel(context);
-                try {
-                    findFour.useGpu();
-                } catch (Error | Exception e) {
-                    Log.i("Ocr", "useGpu exception, falling back to CPU", e);
-                    findFour = new FindFourModel(context);
-                }
+                createdNewModel = true;
             }
 
             if (recognizedDigitsModel == null) {
                 recognizedDigitsModel = new RecognizedDigitsModel(context);
+                createdNewModel = true;
             }
+
+            if (createdNewModel && hasOpenGl31(context)) {
+                try {
+                    findFour.useGpu();
+                    recognizedDigitsModel.useGpu();
+                } catch (Error | Exception e) {
+                    Log.i("Ocr", "useGpu exception, falling back to CPU", e);
+                    findFour = new FindFourModel(context);
+                    recognizedDigitsModel = new RecognizedDigitsModel(context);
+                }
+            }
+
 
             try {
                 return runModel(image);
             } catch (Error | Exception e) {
                 Log.i("Ocr", "runModel exception, retry prediction", e);
                 findFour = new FindFourModel(context);
+                recognizedDigitsModel = new RecognizedDigitsModel(context);
                 return runModel(image);
             }
         } catch (Error | Exception e) {
