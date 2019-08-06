@@ -1,7 +1,6 @@
 package com.getbouncer.example;
 
 import android.content.Intent;
-import android.content.res.AssetFileDescriptor;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,11 +9,6 @@ import android.view.View;
 import com.getbouncer.cardscan.CreditCard;
 import com.getbouncer.cardscan.ScanActivity;
 
-import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 
 public class LaunchActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -29,7 +23,6 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
         findViewById(R.id.scanCardDebug).setOnClickListener(this);
         findViewById(R.id.scanCardAltText).setOnClickListener(this);
         findViewById(R.id.scan_video).setOnClickListener(this);
-
         ScanActivity.warmUp(this);
     }
 
