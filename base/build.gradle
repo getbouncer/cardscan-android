@@ -33,7 +33,6 @@ dependencies {
     implementation 'com.android.support.test.espresso:espresso-idling-resource:3.0.2'
     implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly'
     implementation 'org.tensorflow:tensorflow-lite-gpu:0.0.0-nightly'
-    //implementation 'org.tensorflow:tensorflow-lite:1.13.1'
 }
 
 apply plugin: 'com.github.dcendents.android-maven'

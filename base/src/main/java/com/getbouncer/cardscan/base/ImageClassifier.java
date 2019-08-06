@@ -15,9 +15,7 @@ limitations under the License.
 
 package com.getbouncer.cardscan.base;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.os.SystemClock;
 import android.util.Log;
