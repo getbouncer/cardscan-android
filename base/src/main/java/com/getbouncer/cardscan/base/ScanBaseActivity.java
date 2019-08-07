@@ -366,7 +366,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     public void onBackPressed() {
         if (!mSentResponse && mIsActivityActive) {
             this.scanStats.setSuccess(false);
-            Api.fraudCheck(this, this.scanStats);
+            Api.scanStats(this, this.scanStats);
 
             mSentResponse = true;
             Intent intent = new Intent();
@@ -505,7 +505,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
                 }
 
                 this.scanStats.setSuccess(true);
-                Api.fraudCheck(this, this.scanStats);
+                Api.scanStats(this, this.scanStats);
 
                 onCardScanned(numberResult, month, year);
 

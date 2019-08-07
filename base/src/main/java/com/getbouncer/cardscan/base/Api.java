@@ -46,18 +46,13 @@ public class Api {
         return response;
     }
 
-    static void fraudCheck(Context context, ScanStats scanStats) {
+    static void scanStats(Context context, ScanStats scanStats) {
         try {
             JSONObject args = new JSONObject();
             args.put("platform", "android");
-            @SuppressLint("HardwareIds") String ssaid =
-                    Settings.Secure.getString(context.getContentResolver(),
-                            Settings.Secure.ANDROID_ID);
-            args.put("vendor_id", ssaid);
-            args.put("safety_net", null);
             args.put("scan_stats", scanStats.toJson());
 
-            makeApiCallPost(Api.baseUrl + "/fraud_check", args);
+            makeApiCallPost(Api.baseUrl + "/scan_stats", args);
         } catch (JSONException e) {
             e.printStackTrace();
         }
