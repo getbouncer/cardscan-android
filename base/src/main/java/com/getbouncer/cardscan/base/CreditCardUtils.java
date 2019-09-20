@@ -61,7 +61,8 @@ public class CreditCardUtils {
     }
 
     private static boolean isValidBin(String number) {
-        return isAmex(number) || isDiscover(number) || isVisa(number) || isMastercard(number);
+        return isAmex(number) || isDiscover(number) || isVisa(number) || isMastercard(number)
+                || isUnionPay(number);
     }
 
     private static String prefix(String s, int n) {
@@ -79,15 +80,25 @@ public class CreditCardUtils {
         return number.length() == 15 && (prefix == 34 || prefix == 37);
     }
 
+    public static boolean isUnionPay(String number) {
+        int prefix2 = Integer.parseInt(prefix(number,2));
+
+        if (number.length() != 16) {
+            return false;
+        }
+
+        return prefix2 == 62;
+    }
+
     public static boolean isDiscover(String number) {
         int prefix2 = Integer.parseInt(prefix(number,2));
         int prefix4 = Integer.parseInt(prefix(number, 4));
-        int prefix6 = Integer.parseInt(prefix(number, 6));
 
-        return prefix2 == 64 || prefix2 == 65 || prefix4 == 6011 ||
-                (prefix6 >= 622126 && prefix6 <= 622925) ||
-                (prefix6 >= 624000 && prefix6 <= 626999) ||
-                (prefix6 >= 628200 && prefix6 <= 628899);
+        if (number.length() != 16) {
+            return false;
+        }
+
+        return prefix2 == 64 || prefix2 == 65 || prefix4 == 6011;
     }
 
     public static boolean isMastercard(String number) {
