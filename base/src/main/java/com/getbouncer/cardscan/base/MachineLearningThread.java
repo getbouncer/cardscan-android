@@ -164,7 +164,6 @@ class MachineLearningThread implements Runnable {
                     // prevent callbacks from crashing the app, swallow it
                     e.printStackTrace();
                 }
-                bitmap.recycle();
             }
         });
     }
