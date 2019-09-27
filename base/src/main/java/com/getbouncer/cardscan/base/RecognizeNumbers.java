@@ -104,7 +104,6 @@ class RecognizeNumbers {
         for (ArrayList<DetectedBox> line: lines) {
             String candidateNumber = recognizeAmexDigits(model, line);
             if (candidateNumber != null) {
-                Log.d("asdf", candidateNumber);
                 return candidateNumber;
             }
         }
