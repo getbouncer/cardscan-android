@@ -1,0 +1,12 @@
+<resources>
+    <!--Translation type: Machine-->
+    <string name="card_scan_scan_card">بطاقة المسح الضوئي</string>
+    <!--Translation type: Machine-->
+    <string name="card_scan_position_card">ضع بطاقتك في الإطار بحيث يكون رقم البطاقة مرئيًا</string>
+    <!--Translation type: Machine-->
+    <string name="card_scan_deny_permission_title">تحتاج الوصول إلى الكاميرا</string>
+    <!--Translation type: Machine-->
+    <string name="card_scan_deny_permission_message">يرجى السماح بالوصول إلى الكاميرا لمسح بطاقتك</string>
+    <!--Translation type: Machine-->
+    <string name="card_scan_deny_permission_button">حسنا</string>
+</resources>

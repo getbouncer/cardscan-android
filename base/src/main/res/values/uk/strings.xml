@@ -1,0 +1,12 @@
+<resources>
+    <!--Translation type: Machine-->
+    <string name="card_scan_scan_card">Сканування картки</string>
+    <!--Translation type: Machine-->
+    <string name="card_scan_position_card">Розмістіть свою карту в кадрі, щоб номер картки був видно</string>
+    <!--Translation type: Machine-->
+    <string name="card_scan_deny_permission_title">Потрібен доступ до камери</string>
+    <!--Translation type: Machine-->
+    <string name="card_scan_deny_permission_message">Будь ласка, дозвольте доступ до камери для сканування вашої картки</string>
+    <!--Translation type: Machine-->
+    <string name="card_scan_deny_permission_button">гаразд</string>
+</resources>

@@ -1,0 +1,12 @@
+<resources>
+    <!--Translation type: Machine-->
+    <string name="card_scan_scan_card">Carte de numérisation</string>
+    <!--Translation type: Machine-->
+    <string name="card_scan_position_card">Placez votre carte dans le cadre de sorte que le numéro de carte soit visible</string>
+    <!--Translation type: Machine-->
+    <string name="card_scan_deny_permission_title">Besoin d\'un accès à la caméra</string>
+    <!--Translation type: Machine-->
+    <string name="card_scan_deny_permission_message">Veuillez autoriser l\'accès à l\'appareil photo pour scanner votre carte</string>
+    <!--Translation type: Machine-->
+    <string name="card_scan_deny_permission_button">D\'accord</string>
+</resources>
