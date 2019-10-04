@@ -35,7 +35,7 @@ class Overlay extends View {
     }
 
     protected int getCornerColorId() {
-        return R.color.card_scan_ios_green;
+        return R.color.card_scan_corner_color;
     }
 
     public void setCircle(RectF rect, int radius) {
