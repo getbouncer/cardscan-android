@@ -80,6 +80,9 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     public static String RESULT_FATAL_ERROR = "result_fatal_error";
     public static String RESULT_CAMERA_OPEN_ERROR = "result_camera_open_error";
     public boolean wasPermissionDenied = false;
+    public String denyPermissionTitle = "Need camera accesss";
+    public String denyPermissionMessage = "Please allow camera access to scan your card";
+    public String denyPermissionButton = "Ok";
 
     // This is a hack to enable us to inject images to use for testing. There is probably a better
     // way to do this than using a static variable, but it works for now.
@@ -152,9 +155,9 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         } else {
             wasPermissionDenied = true;
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("Please allow camera access to scan your card")
-                    .setTitle("Need camera accesss");
-            builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            builder.setMessage(this.denyPermissionMessage)
+                    .setTitle(this.denyPermissionTitle);
+            builder.setPositiveButton(this.denyPermissionButton, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     // just let the user click on the back button manually
                     //onBackPressed();
@@ -285,9 +288,14 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         }
 
         if (mCamera != null) {
-            Camera.Parameters params = mCamera.getParameters();
-            params.setRotation(rotation);
-            mCamera.setParameters(params);
+            try {
+                Camera.Parameters params = mCamera.getParameters();
+                params.setRotation(rotation);
+                mCamera.setParameters(params);
+            } catch (Exception | Error e) {
+                // This gets called often so we can just swallow it and wait for the next one
+                e.printStackTrace();
+            }
         }
     }
 
