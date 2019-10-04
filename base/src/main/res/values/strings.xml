@@ -3,11 +3,14 @@
     <string name="request_permission">This sample needs camera permission.</string>
     <string name="camera_error">This device doesn\'t support Camera2 API.</string>
     <string name="testocr">TestOcr</string>
-    <string name="scan_card">Scan Card</string>
     <string name="take_picture">take picture</string>
-    <string name="positionCard">Position your card in the frame so the card number is visible</string>
     <string name="flashlight_button">Toggle flashlight</string>
     <string name="todo">TODO</string>
     <string name="_4242_4242_4242_4242">4242 4242 4242 4242</string>
     <string name="_5_18">5/18</string>
+    <string name="card_scan_scan_card">Scan Card</string>
+    <string name="card_scan_position_card">Position your card in the frame so the card number is visible</string>
+    <string name="card_scan_deny_permission_title">Need camera access</string>
+    <string name="card_scan_deny_permission_message">Please allow camera access to scan your card</string>
+    <string name="card_scan_deny_permission_button">OK</string>
 </resources>
