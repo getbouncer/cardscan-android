@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- To override the default torch button change the name of this file to
+     card_scan_torch_button_button.xml and set the states appropriately. Currently
+     we flipped pressed and non-pressed images just to show that it works. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true" android:drawable="@drawable/flashlight" />
+    <item android:state_pressed="false" android:drawable="@drawable/flashlight_pressed" />
+</selector>

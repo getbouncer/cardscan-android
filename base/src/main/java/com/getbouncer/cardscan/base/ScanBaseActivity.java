@@ -80,9 +80,9 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     public static String RESULT_FATAL_ERROR = "result_fatal_error";
     public static String RESULT_CAMERA_OPEN_ERROR = "result_camera_open_error";
     public boolean wasPermissionDenied = false;
-    public String denyPermissionTitle = "Need camera accesss";
-    public String denyPermissionMessage = "Please allow camera access to scan your card";
-    public String denyPermissionButton = "Ok";
+    public String denyPermissionTitle;
+    public String denyPermissionMessage;
+    public String denyPermissionButton;
 
     // This is a hack to enable us to inject images to use for testing. There is probably a better
     // way to do this than using a static variable, but it works for now.
@@ -101,6 +101,10 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        denyPermissionTitle = getString(R.string.card_scan_deny_permission_title);
+        denyPermissionMessage = getString(R.string.card_scan_deny_permission_message);
+        denyPermissionButton = getString(R.string.card_scan_deny_permission_button);
 
         // XXX FIXME move to dependency injection
         mTestingImageReader = sTestingImageReader;

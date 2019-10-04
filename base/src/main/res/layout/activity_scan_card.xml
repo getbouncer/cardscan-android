@@ -10,8 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="500dp">
-    </FrameLayout>
+        tools:layout_editor_absoluteY="500dp"/>
 
 
     <com.getbouncer.cardscan.base.Overlay
@@ -24,6 +23,17 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/texture" />
+
+    <Button
+        android:id="@+id/closeButton"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/card_scan_close_button"
+        android:contentDescription="@string/close_button"
+        app:layout_constraintTop_toTopOf="@+id/texture"
+        app:layout_constraintStart_toStartOf="@+id/texture" />
 
     <View
         android:id="@+id/cardRectangle"
@@ -50,7 +60,7 @@
         android:layout_marginRight="8dp"
         android:layout_marginBottom="20dp"
         android:gravity="center"
-        android:text="@string/scan_card"
+        android:text="@string/card_scan_scan_card"
         android:textColor="@android:color/white"
         android:textSize="24sp"
         android:textStyle="bold"
@@ -68,7 +78,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="16dp"
         android:gravity="center"
-        android:text="@string/positionCard"
+        android:text="@string/card_scan_position_card"
         android:textSize="17sp"
         android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
@@ -79,7 +89,7 @@
         android:id="@+id/flashlightButton"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:background="@drawable/button_states"
+        android:background="@drawable/card_scan_torch_button"
         android:contentDescription="@string/flashlight_button"
         app:layout_constraintBottom_toBottomOf="@+id/texture"
         app:layout_constraintEnd_toEndOf="parent"
@@ -91,11 +101,10 @@
         android:layout_width="120dp"
         android:layout_height="75dp"
         android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:contentDescription="@string/todo" />
+        android:contentDescription="@string/an_image_used_only_for_debugging_and_testing" />
 
     <android.support.constraint.Guideline
         android:layout_width="wrap_content"

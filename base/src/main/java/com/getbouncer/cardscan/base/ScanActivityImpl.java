@@ -59,6 +59,13 @@ public class ScanActivityImpl extends ScanBaseActivity {
             mIsPermissionCheckDone = true;
         }
 
+        findViewById(R.id.closeButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+
         mDebugImageView = findViewById(R.id.debugImageView);
         mInDebugMode = getIntent().getBooleanExtra("debug", false);
         if (!mInDebugMode) {
