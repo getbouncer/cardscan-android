@@ -1,0 +1,12 @@
+<resources>
+    <!--Translation type: Machine-->
+    <string name="card_scan_scan_card">扫描卡</string>
+    <!--Translation type: Machine-->
+    <string name="card_scan_position_card">将您的卡放在框架中，以便看到卡号</string>
+    <!--Translation type: Machine-->
+    <string name="card_scan_deny_permission_title">需要摄像头访问</string>
+    <!--Translation type: Machine-->
+    <string name="card_scan_deny_permission_message">请允许相机访问以扫描您的卡</string>
+    <!--Translation type: Machine-->
+    <string name="card_scan_deny_permission_button">好</string>
+</resources>

@@ -1,0 +1,12 @@
+<resources>
+    <!--Translation type: Machine-->
+    <string name="card_scan_scan_card">Digitalizar cartão</string>
+    <!--Translation type: Machine-->
+    <string name="card_scan_position_card">Posicione seu cartão no quadro para que o número do cartão fique visível</string>
+    <!--Translation type: Machine-->
+    <string name="card_scan_deny_permission_title">Precisa de acesso à câmera</string>
+    <!--Translation type: Machine-->
+    <string name="card_scan_deny_permission_message">Permita o acesso da câmera para digitalizar seu cartão</string>
+    <!--Translation type: Machine-->
+    <string name="card_scan_deny_permission_button">Está bem</string>
+</resources>

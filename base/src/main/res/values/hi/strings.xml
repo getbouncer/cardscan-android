@@ -1,0 +1,12 @@
+<resources>
+    <!--Translation type: Machine-->
+    <string name="card_scan_scan_card">स्कैन कार्ड</string>
+    <!--Translation type: Machine-->
+    <string name="card_scan_position_card">अपने कार्ड को फ्रेम में रखें ताकि कार्ड नंबर दिखाई दे</string>
+    <!--Translation type: Machine-->
+    <string name="card_scan_deny_permission_title">कैमरा एक्सेस की जरूरत है</string>
+    <!--Translation type: Machine-->
+    <string name="card_scan_deny_permission_message">कृपया अपने कार्ड को स्कैन करने के लिए कैमरा एक्सेस की अनुमति दें</string>
+    <!--Translation type: Machine-->
+    <string name="card_scan_deny_permission_button">ठीक</string>
+</resources>
