@@ -24,6 +24,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/texture" />
 
+    <Button
+        android:id="@+id/closeButton"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/card_scan_close_button"
+        android:contentDescription="@string/close_button"
+        app:layout_constraintTop_toTopOf="@+id/texture"
+        app:layout_constraintStart_toStartOf="@+id/texture" />
+
     <View
         android:id="@+id/cardRectangle"
         android:layout_width="0dp"
@@ -93,7 +104,7 @@
         android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:contentDescription="@string/todo" />
+        android:contentDescription="@string/an_image_used_only_for_debugging_and_testing" />
 
     <android.support.constraint.Guideline
         android:layout_width="wrap_content"
