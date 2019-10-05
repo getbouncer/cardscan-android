@@ -135,7 +135,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         public void onGlobalLayout() {
             int[] xy = new int[2];
             View view = findViewById(cardRectangleId);
-            view.getLocationOnScreen(xy);
+            view.getLocationInWindow(xy);
 
             // convert from DP to pixels
             int radius = (int) (11 * Resources.getSystem().getDisplayMetrics().density);
