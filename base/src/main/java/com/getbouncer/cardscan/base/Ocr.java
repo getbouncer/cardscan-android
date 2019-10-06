@@ -20,7 +20,7 @@ public class Ocr {
     public DetectedBox expiryBox = null;
     public Expiry expiry = null;
     boolean hadUnrecoverableException = false;
-
+    public static boolean USE_GPU = false;
 
     static boolean isInit() {
         return findFour != null && recognizedDigitsModel != null;
@@ -127,20 +127,23 @@ public class Ocr {
     }
 
     public synchronized String predict(Bitmap image, Context context) {
+        final int NUM_THREADS = 4;
         try {
             boolean createdNewModel = false;
 
             if (findFour == null) {
                 findFour = new FindFourModel(context);
+                findFour.setNumThreads(NUM_THREADS);
                 createdNewModel = true;
             }
 
             if (recognizedDigitsModel == null) {
                 recognizedDigitsModel = new RecognizedDigitsModel(context);
+                recognizedDigitsModel.setNumThreads(NUM_THREADS);
                 createdNewModel = true;
             }
 
-            if (createdNewModel && hasOpenGl31(context)) {
+            if (createdNewModel && hasOpenGl31(context) && USE_GPU) {
                 try {
                     findFour.useGpu();
                     recognizedDigitsModel.useGpu();
