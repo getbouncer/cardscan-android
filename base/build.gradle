@@ -33,12 +33,10 @@ dependencies {
     implementation 'com.android.support.test.espresso:espresso-idling-resource:3.0.2'
     implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly'
     implementation 'org.tensorflow:tensorflow-lite-gpu:0.0.0-nightly'
-    implementation 'gradle.plugin.co.langapi:cli:1.3'
 }
 
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
-apply plugin: "co.langapi.langplugin"
 
 ext {
     bintrayRepo = 'CardScanBase'
@@ -53,7 +51,7 @@ ext {
     siteUrl = 'https://github.com/getbouncer/cardscan-android'
     gitUrl = 'https://github.com/getbouncer/cardscan-android.git'
 
-    libraryVersion = '1.0.5101'
+    libraryVersion = '1.0.5102'
 
     developerId = 'kingst'
     developerName = 'Sam King'
