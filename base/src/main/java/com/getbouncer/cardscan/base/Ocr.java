@@ -75,7 +75,6 @@ public class Ocr {
     private void ssdOutputToPredictions(Bitmap image){
         ArrUtils arrUtils = new ArrUtils();
         int[] featureMapSizes = {19, 10};
-        //float[][] priorsCombined = PriorsGen.combinePriors();
 
         float[][] k_boxes = arrUtils.rearrangeArray(ssdDetect.outputLocations, featureMapSizes, 6, ssdDetect.NUM_OF_CORDINATES);
         k_boxes = arrUtils.reshape(k_boxes, ssdDetect.NUM_OF_PRIORS, ssdDetect.NUM_OF_CORDINATES);
