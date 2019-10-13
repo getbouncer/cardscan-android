@@ -108,7 +108,7 @@ class SSDDetect extends ImageClassifier {
 
     @Override
     MappedByteBuffer loadModelFile(Context context) throws IOException {
-        return ModelFactory.sharedInstance.loadSSDDetectModelFile(context);
+        return ModelFactory.getSharedInstance().loadSSDDetectModelFile(context);
     }
 
     @Override
