@@ -4,14 +4,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ConfigurationInfo;
 import android.graphics.Bitmap;
-import android.os.SystemClock;
 import android.util.Log;
-
-import com.getbouncer.cardscan.base.ssd.ArrUtils;
-import com.getbouncer.cardscan.base.ssd.DetectedSSDBox;
-import com.getbouncer.cardscan.base.ssd.PredictionAPI;
-import com.getbouncer.cardscan.base.ssd.PriorsGen;
-import com.getbouncer.cardscan.base.ssd.Result;
 
 import java.util.ArrayList;
 import java.util.Collections;
