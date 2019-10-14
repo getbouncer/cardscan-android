@@ -19,6 +19,9 @@ import android.content.Context;
 import android.util.Log;
 
 
+import com.getbouncer.cardscan.base.ImageClassifier;
+import com.getbouncer.cardscan.base.ModelFactory;
+
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.util.HashMap;
@@ -30,6 +33,7 @@ class SSDDetect extends ImageClassifier {
 
     private static final float IMAGE_MEAN = 127.5f;
     private static final float IMAGE_STD = 128.5f;
+
 
    /** the model takes a 300x300 sample images as input */
 
@@ -44,7 +48,13 @@ class SSDDetect extends ImageClassifier {
      * 19x19x6 + 10x10x6 = 2766
      */
     static final int NUM_OF_PRIORS = 2766;
-    /** We can detect a total of 7 objects plus the background class */
+
+    /** For each activation in our feature map, we have predictions for 6 bounding boxes
+     *   of different aspect ratios
+     */
+    static final int NUM_OF_PRIORS_PER_ACTIVATION = 6;
+
+    /** We can detect a total of 12 objects plus the background class */
     static final int NUM_OF_CLASSES = 13;
 
     /** Each prior or bounding box can be represented by 4 co-ordinates
@@ -57,6 +67,14 @@ class SSDDetect extends ImageClassifier {
     static final int NUM_LOC = NUM_OF_CORDINATES * NUM_OF_PRIORS;
     static final int NUM_CLASS = NUM_OF_CLASSES * NUM_OF_PRIORS;
 
+    static final float PROB_THRESHOLD = 0.2f;
+    static final float IOU_THRESHOLD = 0.45f;
+    static final float CENTER_VARIANCE = 0.1f;
+    static final float SIZE_VARIANCE = 0.2f;
+    static final int CANDIDATE_SIZE = 200;
+    static final int TOP_K = 10;
+
+    static final int[] featureMapSizes = {19, 10};
 
     // Config values.
     private int inputSize;
@@ -91,7 +109,7 @@ class SSDDetect extends ImageClassifier {
      *
      * @param context
      */
-    SSDDetect(Context context) throws IOException {
+    public SSDDetect(Context context) throws IOException {
         super(context);
 
         /** The model reshapes all the data to 1 x [All Data Points]
