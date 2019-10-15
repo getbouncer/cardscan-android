@@ -12,13 +12,13 @@ public class NMS{
          * I highly recommend checkout SOFT NMS Implementation of Facebook Detectron Framework
          *
          *  Args:
-         *  box_scores (N, 5): boxes in corner-form and probabilities.
-         *  iou_threshold: intersection over union threshold.
-         *  top_k: keep top_k results. If k <= 0, keep all the results.
-         *  candidate_size: only consider the candidates with the highest scores.
+         *  subsetBoxes (N, 4): boxes in corner-form and probabilities.
+         *  iouThreshold: intersection over union threshold.
+         *  topK: keep top_k results. If k <= 0, keep all the results.
+         *  candidateSize: only consider the candidates with the highest scores.
          *
          *  Returns:
-         *  picked: a list of indexes of the kept boxes
+         *  pickedIndices: a list of indexes of the kept boxes
          */
 
         float iou ;
@@ -26,15 +26,17 @@ public class NMS{
         ArrayIndexComparator comparator = new ArrayIndexComparator(prob);
         Integer[] indexes = comparator.createIndexArray();
         Arrays.sort(indexes, comparator);
+
+        if(indexes.length > 200){  // Exceptional Situation
+            indexes = Arrays.copyOfRange(indexes, 0, 200);
+        }
         ArrayList<Integer> Indexes = new ArrayList<>(Arrays.asList(indexes));
+
         int current = 0;
         float[] currentBox;
         ArrayList<Integer> pickedIndices = new ArrayList<Integer>();
 
-        if(indexes.length > 200){  // Exceptional Situation
-            System.out.println("Greater than 200");
-            System.exit(1); // TODO fix this soon
-        }
+
         while(Indexes.size() > 0){
             current = Indexes.get(0);
             pickedIndices.add(current);

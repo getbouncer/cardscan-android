@@ -6,12 +6,13 @@ import android.graphics.RectF;
 public class DetectedSSDBox {
     float XMin, YMin, XMax, YMax;
     float confidence;
-    String label;
+    int label;
 
     public RectF rect;
 
 
-    public DetectedSSDBox(float XMin, float YMin, float XMax, float YMax, float confidence, int ImageWidth, int ImageHeight, String label) {
+    public DetectedSSDBox(float XMin, float YMin, float XMax, float YMax, float confidence,
+                          int ImageWidth, int ImageHeight, int label) {
 
         this.XMin = XMin * ImageWidth;
         this.XMax = XMax * ImageWidth;

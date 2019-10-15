@@ -23,6 +23,8 @@ public class ObjectDetect {
 
     public List<DetectedSSDBox> objectBoxes = new ArrayList<>();
     boolean hadUnrecoverableException = false;
+
+    /** We don't use the following two for now */
     public static boolean USE_GPU = false;
 
     static boolean isInit() {
@@ -52,7 +54,7 @@ public class ObjectDetect {
                 DetectedSSDBox ssdBox = new DetectedSSDBox(
                         result.pickedBoxes.get(i)[0], result.pickedBoxes.get(i)[1],
                         result.pickedBoxes.get(i)[2], result.pickedBoxes.get(i)[3],result.pickedBoxProbs.get(i),
-                        image.getWidth(), image.getHeight(),"Test");
+                        image.getWidth(), image.getHeight(),result.pickedLabels.get(i));
                 objectBoxes.add(ssdBox);
             }
         }
@@ -67,6 +69,7 @@ public class ObjectDetect {
          * the model output */
 
         ssdDetect.classifyFrame(image);
+        Log.e("Before SSD Post Process", String.valueOf(SystemClock.uptimeMillis() - startTime));
         ssdOutputToPredictions(image);
         Log.e("After SSD Post Process", String.valueOf(SystemClock.uptimeMillis() - startTime));
 
