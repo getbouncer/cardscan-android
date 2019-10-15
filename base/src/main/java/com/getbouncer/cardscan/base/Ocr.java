@@ -62,10 +62,8 @@ public class Ocr {
         return boxes;
     }
 
-
     private String runModel(Bitmap image) {
         findFour.classifyFrame(image);
-
         ArrayList<DetectedBox> boxes = detectBoxes(image);
         ArrayList<DetectedBox> expiryBoxes = detectExpiry(image);
         PostDetectionAlgorithm postDetection = new PostDetectionAlgorithm(boxes, findFour);

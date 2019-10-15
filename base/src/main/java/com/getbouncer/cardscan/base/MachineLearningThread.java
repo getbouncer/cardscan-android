@@ -11,7 +11,6 @@ import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.Display;
 
 import java.io.ByteArrayOutputStream;
@@ -206,9 +205,6 @@ class MachineLearningThread implements Runnable {
     private void runOcrModel(final Bitmap bitmap, final RunArguments args) {
         final Ocr ocr = new Ocr();
         final String number = ocr.predict(bitmap, args.mContext);
-        final ObjectDetect objectDetect = new ObjectDetect();
-        final String status = objectDetect.predict(bitmap, args.mContext);
-        Log.e("Object Detect", "runModel: Ran object detect ");
         final boolean hadUnrecoverableException = ocr.hadUnrecoverableException;
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {
@@ -219,7 +215,7 @@ class MachineLearningThread implements Runnable {
                             args.mScanListener.onFatalError();
                         } else {
                             args.mScanListener.onPrediction(number, ocr.expiry, bitmap, ocr.digitBoxes,
-                                    ocr.expiryBox, objectDetect.objectBoxes);
+                                    ocr.expiryBox);
                         }
                     }
                 } catch (Error | Exception e) {

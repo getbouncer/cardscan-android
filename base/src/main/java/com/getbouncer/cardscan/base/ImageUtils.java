@@ -6,8 +6,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 
-import com.getbouncer.cardscan.base.ssd.DetectedSSDBox;
-
 import java.util.List;
 
 public class ImageUtils {
@@ -32,23 +30,4 @@ public class ImageUtils {
 
         return mutableBitmap;
     }
-    public static Bitmap drawSSDBoxesOnImage(Bitmap frame, List<DetectedSSDBox> objectBoxes) {
-        Paint paint = new Paint(0);
-        paint.setColor(Color.BLACK);
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(10);
-
-        Bitmap mutableBitmap = frame.copy(Bitmap.Config.ARGB_8888, true);
-        Canvas canvas = new Canvas(mutableBitmap);
-
-        if(objectBoxes != null) {
-            for (DetectedSSDBox box : objectBoxes) {
-                canvas.drawRect(box.rect, paint);
-            }
-        }
-
-
-        return mutableBitmap;
-    }
-
 }

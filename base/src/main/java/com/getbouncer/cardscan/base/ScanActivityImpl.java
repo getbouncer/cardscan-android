@@ -13,8 +13,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.getbouncer.cardscan.base.ssd.DetectedSSDBox;
-
 import java.util.List;
 
 public class ScanActivityImpl extends ScanBaseActivity {
@@ -89,10 +87,11 @@ public class ScanActivityImpl extends ScanBaseActivity {
 
     @Override
     public void onPrediction(final String number, final Expiry expiry, final Bitmap bitmap,
-                             final List<DetectedBox> digitBoxes, final DetectedBox expiryBox, final List<DetectedSSDBox> objectBoxes) {
+                             final List<DetectedBox> digitBoxes, final DetectedBox expiryBox) {
 
         if (mInDebugMode) {
-            mDebugImageView.setImageBitmap(ImageUtils.drawSSDBoxesOnImage(bitmap, objectBoxes));
+            mDebugImageView.setImageBitmap(ImageUtils.drawBoxesOnImage(bitmap, digitBoxes,
+                    expiryBox));
             Log.d(TAG, "Prediction (ms): " +
                     (SystemClock.uptimeMillis() - mPredictionStartMs));
             if (startTimeMs != 0) {
@@ -102,7 +101,7 @@ public class ScanActivityImpl extends ScanBaseActivity {
             }
         }
 
-        super.onPrediction(number, expiry, bitmap, digitBoxes, expiryBox, objectBoxes);
+        super.onPrediction(number, expiry, bitmap, digitBoxes, expiryBox);
     }
 
 }
