@@ -55,8 +55,8 @@ import java.util.concurrent.Semaphore;
  *
  * (2) Call setViewIds to set these resource IDs and initalize appropriate handlers
  */
-public abstract class ScanBaseActivity extends Activity implements Camera.PreviewCallback, View.OnClickListener,
-        OnScanListener, OnCameraOpenListener {
+public abstract class ScanBaseActivity extends Activity implements Camera.PreviewCallback,
+        View.OnClickListener, OnScanListener, OnObjectListener, OnCameraOpenListener {
 
     private Camera mCamera = null;
     private OrientationEventListener mOrientationEventListener;
@@ -74,9 +74,11 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     private int mTextureId;
     private float mRoiCenterYRatio;
     private CameraThread mCameraThread = null;
+    private boolean mIsOcr = true;
 
     private ScanStats scanStats;
 
+    public static String IS_OCR = "is_ocr";
     public static String RESULT_FATAL_ERROR = "result_fatal_error";
     public static String RESULT_CAMERA_OPEN_ERROR = "result_camera_open_error";
     public boolean wasPermissionDenied = false;
@@ -113,6 +115,8 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         IdleResourceManager.scanningIdleResource = null;
 
         this.scanStats = new ScanStats();
+
+        mIsOcr = getIntent().getBooleanExtra(IS_OCR, true);
 
         mOrientationEventListener = new OrientationEventListener(this) {
             @Override
@@ -272,8 +276,10 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         mTextureId = textureId;
         mCardNumberId = cardNumberId;
         mExpiryId = expiryId;
-        int mCardRectangleId = cardNumberId;
-        findViewById(flashlightId).setOnClickListener(this);
+        View flashlight = findViewById(flashlightId);
+        if (flashlight != null) {
+            flashlight.setOnClickListener(this);
+        }
         findViewById(cardRectangleId).getViewTreeObserver()
                 .addOnGlobalLayoutListener(new MyGlobalListenerClass(cardRectangleId, overlayId));
     }
@@ -359,11 +365,20 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             if (mTestingImageReader == null) {
                 // Use the application context here because the machine learning thread's lifecycle
                 // is connected to the application and not this activity
-                mlThread.post(bytes, width, height, format, mRotation, this,
-                        this.getApplicationContext(), mRoiCenterYRatio);
+                if (mIsOcr) {
+                    mlThread.post(bytes, width, height, format, mRotation, (OnScanListener) this,
+                            this.getApplicationContext(), mRoiCenterYRatio);
+                } else {
+                    mlThread.post(bytes, width, height, format, mRotation, (OnObjectListener) this,
+                            this.getApplicationContext(), mRoiCenterYRatio);
+                }
             } else {
                 Bitmap bm = mTestingImageReader.nextImage();
-                mlThread.post(bm, this, this.getApplicationContext());
+                if (mIsOcr) {
+                    mlThread.post(bm, (OnScanListener) this, this.getApplicationContext());
+                } else {
+                    mlThread.post(bm, (OnObjectListener) this, this.getApplicationContext());
+                }
                 if (bm == null) {
                     mTestingImageReader = null;
                 }
@@ -539,6 +554,20 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             }
         }
 
+        mMachineLearningSemaphore.release();
+    }
+
+    @Override
+    public void onObjectFatalError() {
+        Log.d("ScanBaseActivity", "onObjectFatalError for object detection");
+    }
+
+    @Override
+    public void onPrediction(Bitmap bm) {
+        if (!mSentResponse && mIsActivityActive) {
+            // do something with the prediction
+            Log.d("ScanBaseActivity", "onPrediction for object detection");
+        }
         mMachineLearningSemaphore.release();
     }
 
