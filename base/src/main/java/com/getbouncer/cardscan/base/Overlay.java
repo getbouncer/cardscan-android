@@ -22,6 +22,8 @@ class Overlay extends View {
 
     int cornerDp = 6;
 
+    boolean drawCorners = true;
+
     //private Paint paintAntiAlias = new Paint(Paint.ANTI_ALIAS_FLAG);
     //private Paint paint = new Paint();
 
@@ -59,6 +61,10 @@ class Overlay extends View {
 
             paintAntiAlias.setXfermode(xfermode);
             canvas.drawRoundRect(rect, radius, radius, paintAntiAlias);
+
+            if (!drawCorners) {
+                return;
+            }
 
             Paint paint = new Paint();
             paint.setColor(getResources().getColor(getCornerColorId()));
