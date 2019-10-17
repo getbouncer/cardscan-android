@@ -174,23 +174,41 @@ class MachineLearningThread implements Runnable {
     private Bitmap getBitmap(byte[] bytes, int width, int height, int format, int sensorOrientation,
                              float roiCenterYRatio, boolean isOcr, Context ctx) {
         long startTime = SystemClock.uptimeMillis();
+        roiCenterYRatio = 0.5f;
 
         final Bitmap bitmap = YUV_toRGB(bytes, width, height, ctx);
         long decode = SystemClock.uptimeMillis();
         Log.d("MLThread", "decode -> " + ((decode - startTime) / 1000.0));
 
+        double h_ = bitmap.getHeight();
+        double w_ = 302.0 * h_ / 480.0;
+        int x_ = 0;
+        int y_ = (int) Math.round(((double) bitmap.getHeight()) * roiCenterYRatio - h_ * 0.5);
+
+        Bitmap result1 = Bitmap.createBitmap(bitmap, x_, y_, (int) w_, (int) h_);
+
+        long crop = SystemClock.uptimeMillis();
+        Log.d("MLThread", "crop -> " + ((crop - decode) / 1000.0));
+
         Matrix matrix = new Matrix();
         matrix.postRotate(sensorOrientation);
-        Bitmap bm = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(),
+        Bitmap bm = Bitmap.createBitmap(result1, 0, 0, result1.getWidth(), result1.getHeight(),
                 matrix, true);
 
-        long rotate = SystemClock.uptimeMillis();
-        Log.d("MLThread", "rotate -> " + ((rotate - decode) / 1000.0));
 
+        long rotate = SystemClock.uptimeMillis();
+        Log.d("MLThread", "rotate -> " + ((rotate - crop) / 1.0));
+
+        result1.recycle();
+        bitmap.recycle();
+
+
+        /**
         if (!isOcr) {
             return bm;
         }
-
+         */
+        /**
         double w = bm.getWidth();
         double h = 302.0 * w / 480.0;
         int x = 0;
@@ -202,8 +220,8 @@ class MachineLearningThread implements Runnable {
 
         long crop = SystemClock.uptimeMillis();
         Log.d("MLThread", "crop -> " + ((crop - rotate) / 1000.0));
-
-        return result;
+        */
+        return bm;
     }
 
     private synchronized RunArguments getNextImage() {
