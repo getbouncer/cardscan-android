@@ -12,11 +12,16 @@ import android.graphics.YuvImage;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicYuvToRGB;
+import android.renderscript.Type;
 import android.util.Log;
-import android.view.Display;
 
 import java.io.ByteArrayOutputStream;
 import java.util.LinkedList;
+
 
 class MachineLearningThread implements Runnable {
 
@@ -141,23 +146,38 @@ class MachineLearningThread implements Runnable {
         notify();
     }
 
+    // from https://stackoverflow.com/questions/43623817/android-yuv-nv12-to-rgb-conversion-with-renderscript
+    // interestingly the question had the right algorithm for our format (yuv nv21)
+    public Bitmap YUV_toRGB(byte[] yuvByteArray,int W,int H, Context ctx) {
+        RenderScript rs = RenderScript.create(ctx);
+        ScriptIntrinsicYuvToRGB yuvToRgbIntrinsic = ScriptIntrinsicYuvToRGB.create(rs,
+                Element.U8_4(rs));
+
+        Type.Builder yuvType = new Type.Builder(rs, Element.U8(rs)).setX(yuvByteArray.length);
+        Allocation in = Allocation.createTyped(rs, yuvType.create(), Allocation.USAGE_SCRIPT);
+
+        Type.Builder rgbaType = new Type.Builder(rs, Element.RGBA_8888(rs)).setX(W).setY(H);
+        Allocation out = Allocation.createTyped(rs, rgbaType.create(), Allocation.USAGE_SCRIPT);
+
+        in.copyFrom(yuvByteArray);
+
+        yuvToRgbIntrinsic.setInput(in);
+        yuvToRgbIntrinsic.forEach(out);
+        Bitmap bmp = Bitmap.createBitmap(W, H, Bitmap.Config.ARGB_8888);
+        out.copyTo(bmp);
+
+        yuvToRgbIntrinsic.destroy();
+        rs.destroy();
+        return bmp;
+    }
 
     private Bitmap getBitmap(byte[] bytes, int width, int height, int format, int sensorOrientation,
-                             float roiCenterYRatio, boolean isOcr) {
+                             float roiCenterYRatio, boolean isOcr, Context ctx) {
         long startTime = SystemClock.uptimeMillis();
 
-        YuvImage yuv = new YuvImage(bytes, format, width, height, null);
-
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        yuv.compressToJpeg(new Rect(0, 0, width, height), 100, out);
-
-        long toJpeg = SystemClock.uptimeMillis();
-        Log.d("MLThread", "to jpeg -> " + ((toJpeg - startTime) / 1000.0));
-        byte[] b = out.toByteArray();
-        final Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length);
-
+        final Bitmap bitmap = YUV_toRGB(bytes, width, height, ctx);
         long decode = SystemClock.uptimeMillis();
-        Log.d("MLThread", "decode -> " + ((decode - toJpeg) / 1000.0));
+        Log.d("MLThread", "decode -> " + ((decode - startTime) / 1000.0));
 
         Matrix matrix = new Matrix();
         matrix.postRotate(sensorOrientation);
@@ -247,7 +267,7 @@ class MachineLearningThread implements Runnable {
         Bitmap bm;
         if (args.mFrameBytes != null) {
             bm = getBitmap(args.mFrameBytes, args.mWidth, args.mHeight, args.mFormat,
-                    args.mSensorOrientation, args.mRoiCenterYRatio, args.mIsOcr);
+                    args.mSensorOrientation, args.mRoiCenterYRatio, args.mIsOcr, args.mContext);
         } else if (args.mBitmap != null) {
             bm = args.mBitmap;
         } else {
