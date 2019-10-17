@@ -11,6 +11,7 @@ import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.Display;
 
@@ -31,6 +32,7 @@ class MachineLearningThread implements Runnable {
         private final int mSensorOrientation;
         private final float mRoiCenterYRatio;
         private final boolean mIsOcr;
+        private final long mStartTime = SystemClock.uptimeMillis();
 
         RunArguments(byte[] frameBytes, int width, int height, int format,
                      int sensorOrientation, OnScanListener scanListener, Context context,
@@ -142,18 +144,28 @@ class MachineLearningThread implements Runnable {
 
     private Bitmap getBitmap(byte[] bytes, int width, int height, int format, int sensorOrientation,
                              float roiCenterYRatio, boolean isOcr) {
+        long startTime = SystemClock.uptimeMillis();
+
         YuvImage yuv = new YuvImage(bytes, format, width, height, null);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         yuv.compressToJpeg(new Rect(0, 0, width, height), 100, out);
 
+        long toJpeg = SystemClock.uptimeMillis();
+        Log.d("MLThread", "to jpeg -> " + ((toJpeg - startTime) / 1000.0));
         byte[] b = out.toByteArray();
         final Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length);
+
+        long decode = SystemClock.uptimeMillis();
+        Log.d("MLThread", "decode -> " + ((decode - toJpeg) / 1000.0));
 
         Matrix matrix = new Matrix();
         matrix.postRotate(sensorOrientation);
         Bitmap bm = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(),
                 matrix, true);
+
+        long rotate = SystemClock.uptimeMillis();
+        Log.d("MLThread", "rotate -> " + ((rotate - decode) / 1000.0));
 
         if (!isOcr) {
             return bm;

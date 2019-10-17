@@ -84,6 +84,7 @@ public class ObjectDetect {
             try{
                 if (ssdDetect == null){
                     ssdDetect = new SSDDetect(context);
+                    ssdDetect.setNumThreads(NUM_THREADS);
                     /** Since all the frames use the same set of priors
                      * We generate these once and use for all the frame
                      */
@@ -110,5 +111,4 @@ public class ObjectDetect {
             return null;
         }
     }
-
-    }
+}
