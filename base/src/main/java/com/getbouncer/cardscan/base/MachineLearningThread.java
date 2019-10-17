@@ -200,6 +200,9 @@ class MachineLearningThread implements Runnable {
         bitmap.recycle();
         bm.recycle();
 
+        long crop = SystemClock.uptimeMillis();
+        Log.d("MLThread", "crop -> " + ((crop - rotate) / 1000.0));
+
         return result;
     }
 
