@@ -11,6 +11,7 @@ import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.Display;
 
 import java.io.ByteArrayOutputStream;
@@ -140,7 +141,7 @@ class MachineLearningThread implements Runnable {
 
 
     private Bitmap getBitmap(byte[] bytes, int width, int height, int format, int sensorOrientation,
-                             float roiCenterYRatio) {
+                             float roiCenterYRatio, boolean isOcr) {
         YuvImage yuv = new YuvImage(bytes, format, width, height, null);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -153,6 +154,10 @@ class MachineLearningThread implements Runnable {
         matrix.postRotate(sensorOrientation);
         Bitmap bm = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(),
                 matrix, true);
+
+        if (!isOcr) {
+            return bm;
+        }
 
         double w = bm.getWidth();
         double h = 302.0 * w / 480.0;
@@ -179,20 +184,18 @@ class MachineLearningThread implements Runnable {
     }
 
     private void runObjectModel(final Bitmap bitmap, final RunArguments args) {
-        // don't do anything for now
+        final ObjectDetect detect = new ObjectDetect();
+        final String result = detect.predict(bitmap, args.mContext);
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {
             public void run() {
                 try {
                     if (args.mObjectListener != null) {
-                        /*
-                        if (hadUnrecoverableException) {
-                            args.mScanListener.onFatalError();
+                        if (detect.hadUnrecoverableException) {
+                            args.mObjectListener.onObjectFatalError();
                         } else {
-                            args.mScanListener.onPrediction(number, ocr.expiry, bitmap, ocr.digitBoxes,
-                                    ocr.expiryBox);
-                        }*/
-                        args.mObjectListener.onPrediction(bitmap);
+                            args.mObjectListener.onPrediction(bitmap, detect.objectBoxes);
+                        }
                     }
                 } catch (Error | Exception e) {
                     // prevent callbacks from crashing the app, swallow it
@@ -232,7 +235,7 @@ class MachineLearningThread implements Runnable {
         Bitmap bm;
         if (args.mFrameBytes != null) {
             bm = getBitmap(args.mFrameBytes, args.mWidth, args.mHeight, args.mFormat,
-                    args.mSensorOrientation, args.mRoiCenterYRatio);
+                    args.mSensorOrientation, args.mRoiCenterYRatio, args.mIsOcr);
         } else if (args.mBitmap != null) {
             bm = args.mBitmap;
         } else {

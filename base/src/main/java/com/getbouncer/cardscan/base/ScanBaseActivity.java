@@ -42,6 +42,8 @@ import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.getbouncer.cardscan.base.ssd.DetectedSSDBox;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -567,7 +569,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     }
 
     @Override
-    public void onPrediction(Bitmap bm) {
+    public void onPrediction(Bitmap bm, List<DetectedSSDBox> boxes) {
         if (!mSentResponse && mIsActivityActive) {
             // do something with the prediction
             Log.d("ScanBaseActivity", "onPrediction for object detection");

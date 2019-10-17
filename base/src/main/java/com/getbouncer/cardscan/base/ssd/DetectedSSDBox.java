@@ -5,8 +5,8 @@ import android.graphics.RectF;
 
 public class DetectedSSDBox {
     float XMin, YMin, XMax, YMax;
-    float confidence;
-    int label;
+    public float confidence;
+    public int label;
 
     public RectF rect;
 
