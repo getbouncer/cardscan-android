@@ -174,53 +174,34 @@ class MachineLearningThread implements Runnable {
     private Bitmap getBitmap(byte[] bytes, int width, int height, int format, int sensorOrientation,
                              float roiCenterYRatio, boolean isOcr, Context ctx) {
         long startTime = SystemClock.uptimeMillis();
-        roiCenterYRatio = 0.5f;
 
         final Bitmap bitmap = YUV_toRGB(bytes, width, height, ctx);
         long decode = SystemClock.uptimeMillis();
         Log.d("MLThread", "decode -> " + ((decode - startTime) / 1000.0));
 
-        double h_ = bitmap.getHeight();
-        double w_ = 302.0 * h_ / 480.0;
-        int x_ = 0;
-        int y_ = (int) Math.round(((double) bitmap.getHeight()) * roiCenterYRatio - h_ * 0.5);
+        double h = bitmap.getHeight();
+        double w = 302.0 * h/ 480.0;
 
-        Bitmap result1 = Bitmap.createBitmap(bitmap, x_, y_, (int) w_, (int) h_);
+        int x = (int) Math.round(((double) bitmap.getWidth()) * roiCenterYRatio - w* roiCenterYRatio);
+        int y = (int) Math.round(((double) bitmap.getHeight()) * roiCenterYRatio - h* roiCenterYRatio);
+
+        Bitmap croppedBitmap = Bitmap.createBitmap(bitmap, x, y, (int) w, (int) h);
 
         long crop = SystemClock.uptimeMillis();
         Log.d("MLThread", "crop -> " + ((crop - decode) / 1000.0));
 
         Matrix matrix = new Matrix();
         matrix.postRotate(sensorOrientation);
-        Bitmap bm = Bitmap.createBitmap(result1, 0, 0, result1.getWidth(), result1.getHeight(),
+        Bitmap bm = Bitmap.createBitmap(croppedBitmap, 0, 0, croppedBitmap.getWidth(), croppedBitmap.getHeight(),
                 matrix, true);
 
 
         long rotate = SystemClock.uptimeMillis();
-        Log.d("MLThread", "rotate -> " + ((rotate - crop) / 1.0));
+        Log.d("MLThread", "rotate -> " + ((rotate - crop) / 1000.0));
 
-        result1.recycle();
+        croppedBitmap.recycle();
         bitmap.recycle();
 
-
-        /**
-        if (!isOcr) {
-            return bm;
-        }
-         */
-        /**
-        double w = bm.getWidth();
-        double h = 302.0 * w / 480.0;
-        int x = 0;
-        int y = (int) Math.round(((double) bm.getHeight()) * roiCenterYRatio - h * 0.5);
-
-        Bitmap result = Bitmap.createBitmap(bm, x, y, (int) w, (int) h);
-        bitmap.recycle();
-        bm.recycle();
-
-        long crop = SystemClock.uptimeMillis();
-        Log.d("MLThread", "crop -> " + ((crop - rotate) / 1000.0));
-        */
         return bm;
     }
 
