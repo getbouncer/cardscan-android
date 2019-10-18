@@ -168,11 +168,13 @@ class MachineLearningThread implements Runnable {
 
         yuvToRgbIntrinsic.destroy();
         rs.destroy();
+        in.destroy();
+        out.destroy();
         return bmp;
     }
 
     private Bitmap getBitmap(byte[] bytes, int width, int height, int format, int sensorOrientation,
-                             float roiCenterYRatio, boolean isOcr, Context ctx) {
+                             float roiCenterYRatio, Context ctx) {
         long startTime = SystemClock.uptimeMillis();
 
         final Bitmap bitmap = YUV_toRGB(bytes, width, height, ctx);
@@ -269,7 +271,7 @@ class MachineLearningThread implements Runnable {
         Bitmap bm;
         if (args.mFrameBytes != null) {
             bm = getBitmap(args.mFrameBytes, args.mWidth, args.mHeight, args.mFormat,
-                    args.mSensorOrientation, args.mRoiCenterYRatio, args.mIsOcr, args.mContext);
+                    args.mSensorOrientation, args.mRoiCenterYRatio, args.mContext);
         } else if (args.mBitmap != null) {
             bm = args.mBitmap;
         } else {
