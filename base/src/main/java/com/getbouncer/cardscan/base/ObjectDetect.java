@@ -11,6 +11,7 @@ import com.getbouncer.cardscan.base.ssd.PredictionAPI;
 import com.getbouncer.cardscan.base.ssd.PriorsGen;
 import com.getbouncer.cardscan.base.ssd.Result;
 
+import java.io.File;
 import java.util.List;
 
 import java.util.ArrayList;
@@ -20,6 +21,8 @@ public class ObjectDetect {
     private static SSDDetect ssdDetect = null;
     private static float[][] priors = null;
 
+    private final File ssdModelFile;
+
     public List<DetectedSSDBox> objectBoxes = new ArrayList<>();
     boolean hadUnrecoverableException = false;
 
@@ -28,6 +31,10 @@ public class ObjectDetect {
 
     static boolean isInit() {
         return ssdDetect != null;
+    }
+
+    public ObjectDetect(File modelFile) {
+        this.ssdModelFile = modelFile;
     }
 
     private void ssdOutputToPredictions(Bitmap image){
@@ -86,7 +93,7 @@ public class ObjectDetect {
 
             try{
                 if (ssdDetect == null){
-                    ssdDetect = new SSDDetect(context);
+                    ssdDetect = new SSDDetect(context, ssdModelFile);
                     ssdDetect.setNumThreads(NUM_THREADS);
                     /** Since all the frames use the same set of priors
                      * We generate these once and use for all the frame
@@ -105,7 +112,7 @@ public class ObjectDetect {
                 return runModel(image);
             } catch (Error | Exception e) {
                 Log.i("ObjectDetect", "runModel exception, retry object detection", e);
-                ssdDetect = new SSDDetect(context);
+                ssdDetect = new SSDDetect(context, ssdModelFile);
                 return runModel(image);
             }
         } catch (Error | Exception e) {
