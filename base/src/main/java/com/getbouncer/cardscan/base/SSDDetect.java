@@ -157,7 +157,7 @@ class SSDDetect extends ImageClassifier {
     @Override
     protected void runInference() {
         Object[] inputArray = {imgData};
-        Log.d("SSD Inference", "Running inference on image ");
+        //Log.d("SSD Inference", "Running inference on image ");
         //final long startTime = SystemClock.uptimeMillis();
         tflite.runForMultipleInputsOutputs(inputArray, outputMap);
         //Log.d("SSD Inference", "Inference time: " + Long.toString(SystemClock.uptimeMillis() - startTime) );
