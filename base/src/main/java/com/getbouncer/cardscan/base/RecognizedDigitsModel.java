@@ -1,6 +1,8 @@
 package com.getbouncer.cardscan.base;
 
 import android.content.Context;
+import android.os.SystemClock;
+import android.util.Log;
 
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
@@ -75,6 +77,9 @@ class RecognizedDigitsModel extends ImageClassifier {
 
     @Override
     protected void runInference() {
+        //long startTime = SystemClock.uptimeMillis();
         tflite.run(imgData, labelProbArray);
+        //long duration = SystemClock.uptimeMillis() - startTime;
+        //Log.d("RecognizeDigitsModel", "Recognize time (ms) -> " + duration);
     }
 }

@@ -11,10 +11,17 @@ import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.Display;
+import android.os.SystemClock;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicYuvToRGB;
+import android.renderscript.Type;
+import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.util.LinkedList;
+
 
 class MachineLearningThread implements Runnable {
 
@@ -30,6 +37,7 @@ class MachineLearningThread implements Runnable {
         private final int mSensorOrientation;
         private final float mRoiCenterYRatio;
         private final boolean mIsOcr;
+        private final long mStartTime = SystemClock.uptimeMillis();
 
         RunArguments(byte[] frameBytes, int width, int height, int format,
                      int sensorOrientation, OnScanListener scanListener, Context context,
@@ -138,32 +146,65 @@ class MachineLearningThread implements Runnable {
         notify();
     }
 
+    // from https://stackoverflow.com/questions/43623817/android-yuv-nv12-to-rgb-conversion-with-renderscript
+    // interestingly the question had the right algorithm for our format (yuv nv21)
+    public Bitmap YUV_toRGB(byte[] yuvByteArray,int W,int H, Context ctx) {
+        RenderScript rs = RenderScript.create(ctx);
+        ScriptIntrinsicYuvToRGB yuvToRgbIntrinsic = ScriptIntrinsicYuvToRGB.create(rs,
+                Element.U8_4(rs));
+
+        Type.Builder yuvType = new Type.Builder(rs, Element.U8(rs)).setX(yuvByteArray.length);
+        Allocation in = Allocation.createTyped(rs, yuvType.create(), Allocation.USAGE_SCRIPT);
+
+        Type.Builder rgbaType = new Type.Builder(rs, Element.RGBA_8888(rs)).setX(W).setY(H);
+        Allocation out = Allocation.createTyped(rs, rgbaType.create(), Allocation.USAGE_SCRIPT);
+
+        in.copyFrom(yuvByteArray);
+
+        yuvToRgbIntrinsic.setInput(in);
+        yuvToRgbIntrinsic.forEach(out);
+        Bitmap bmp = Bitmap.createBitmap(W, H, Bitmap.Config.ARGB_8888);
+        out.copyTo(bmp);
+
+        yuvToRgbIntrinsic.destroy();
+        rs.destroy();
+        in.destroy();
+        out.destroy();
+        return bmp;
+    }
 
     private Bitmap getBitmap(byte[] bytes, int width, int height, int format, int sensorOrientation,
-                             float roiCenterYRatio) {
-        YuvImage yuv = new YuvImage(bytes, format, width, height, null);
+                             float roiCenterYRatio, Context ctx) {
+        long startTime = SystemClock.uptimeMillis();
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        yuv.compressToJpeg(new Rect(0, 0, width, height), 100, out);
+        final Bitmap bitmap = YUV_toRGB(bytes, width, height, ctx);
+        long decode = SystemClock.uptimeMillis();
+        Log.d("MLThread", "decode -> " + ((decode - startTime) / 1000.0));
 
-        byte[] b = out.toByteArray();
-        final Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length);
+        double h = bitmap.getHeight();
+        double w = 302.0 * h/ 480.0;
+
+        int x = (int) Math.round(((double) bitmap.getWidth()) * roiCenterYRatio - w* roiCenterYRatio);
+        int y = (int) Math.round(((double) bitmap.getHeight()) * roiCenterYRatio - h* roiCenterYRatio);
+
+        Bitmap croppedBitmap = Bitmap.createBitmap(bitmap, x, y, (int) w, (int) h);
+
+        long crop = SystemClock.uptimeMillis();
+        Log.d("MLThread", "crop -> " + ((crop - decode) / 1000.0));
 
         Matrix matrix = new Matrix();
         matrix.postRotate(sensorOrientation);
-        Bitmap bm = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(),
+        Bitmap bm = Bitmap.createBitmap(croppedBitmap, 0, 0, croppedBitmap.getWidth(), croppedBitmap.getHeight(),
                 matrix, true);
 
-        double w = bm.getWidth();
-        double h = 302.0 * w / 480.0;
-        int x = 0;
-        int y = (int) Math.round(((double) bm.getHeight()) * roiCenterYRatio - h * 0.5);
 
-        Bitmap result = Bitmap.createBitmap(bm, x, y, (int) w, (int) h);
+        long rotate = SystemClock.uptimeMillis();
+        Log.d("MLThread", "rotate -> " + ((rotate - crop) / 1000.0));
+
+        croppedBitmap.recycle();
         bitmap.recycle();
-        bm.recycle();
 
-        return result;
+        return bm;
     }
 
     private synchronized RunArguments getNextImage() {
@@ -179,20 +220,18 @@ class MachineLearningThread implements Runnable {
     }
 
     private void runObjectModel(final Bitmap bitmap, final RunArguments args) {
-        // don't do anything for now
+        final ObjectDetect detect = new ObjectDetect();
+        final String result = detect.predict(bitmap, args.mContext);
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {
             public void run() {
                 try {
                     if (args.mObjectListener != null) {
-                        /*
-                        if (hadUnrecoverableException) {
-                            args.mScanListener.onFatalError();
+                        if (detect.hadUnrecoverableException) {
+                            args.mObjectListener.onObjectFatalError();
                         } else {
-                            args.mScanListener.onPrediction(number, ocr.expiry, bitmap, ocr.digitBoxes,
-                                    ocr.expiryBox);
-                        }*/
-                        args.mObjectListener.onPrediction(bitmap);
+                            args.mObjectListener.onPrediction(bitmap, detect.objectBoxes);
+                        }
                     }
                 } catch (Error | Exception e) {
                     // prevent callbacks from crashing the app, swallow it
@@ -232,7 +271,7 @@ class MachineLearningThread implements Runnable {
         Bitmap bm;
         if (args.mFrameBytes != null) {
             bm = getBitmap(args.mFrameBytes, args.mWidth, args.mHeight, args.mFormat,
-                    args.mSensorOrientation, args.mRoiCenterYRatio);
+                    args.mSensorOrientation, args.mRoiCenterYRatio, args.mContext);
         } else if (args.mBitmap != null) {
             bm = args.mBitmap;
         } else {
