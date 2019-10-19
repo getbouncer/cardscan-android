@@ -115,7 +115,8 @@ class SSDDetect extends ImageClassifier {
      * @param context
      */
     public SSDDetect(Context context, File modelFile) throws IOException {
-        super(context);
+        this.modelFile = modelFile;
+        init(context);
 
         /** The model reshapes all the data to 1 x [All Data Points]
          */
@@ -124,8 +125,6 @@ class SSDDetect extends ImageClassifier {
 
         outputMap.put(0, outputClasses);
         outputMap.put(1, outputLocations);
-
-        this.modelFile = modelFile;
     }
 
 
