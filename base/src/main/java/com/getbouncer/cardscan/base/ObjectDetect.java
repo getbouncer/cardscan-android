@@ -20,7 +20,6 @@ public class ObjectDetect {
     private static SSDDetect ssdDetect = null;
     private static float[][] priors = null;
 
-
     public List<DetectedSSDBox> objectBoxes = new ArrayList<>();
     boolean hadUnrecoverableException = false;
 
@@ -69,9 +68,13 @@ public class ObjectDetect {
          * the model output */
 
         ssdDetect.classifyFrame(image);
-        Log.e("Before SSD Post Process", String.valueOf(SystemClock.uptimeMillis() - startTime));
+        if (GlobalConfig.PRINT_TIMING) {
+            Log.e("Before SSD Post Process", String.valueOf(SystemClock.uptimeMillis() - startTime));
+        }
         ssdOutputToPredictions(image);
-        Log.e("After SSD Post Process", String.valueOf(SystemClock.uptimeMillis() - startTime));
+        if (GlobalConfig.PRINT_TIMING) {
+            Log.e("After SSD Post Process", String.valueOf(SystemClock.uptimeMillis() - startTime));
+        }
 
         return "Success";
     }

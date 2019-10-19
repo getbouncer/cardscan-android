@@ -2,13 +2,10 @@ package com.getbouncer.cardscan.base;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.YuvImage;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
@@ -19,7 +16,6 @@ import android.renderscript.ScriptIntrinsicYuvToRGB;
 import android.renderscript.Type;
 import android.util.Log;
 
-import java.io.ByteArrayOutputStream;
 import java.util.LinkedList;
 
 
@@ -37,7 +33,6 @@ class MachineLearningThread implements Runnable {
         private final int mSensorOrientation;
         private final float mRoiCenterYRatio;
         private final boolean mIsOcr;
-        private final long mStartTime = SystemClock.uptimeMillis();
 
         RunArguments(byte[] frameBytes, int width, int height, int format,
                      int sensorOrientation, OnScanListener scanListener, Context context,
@@ -179,18 +174,46 @@ class MachineLearningThread implements Runnable {
 
         final Bitmap bitmap = YUV_toRGB(bytes, width, height, ctx);
         long decode = SystemClock.uptimeMillis();
-        Log.d("MLThread", "decode -> " + ((decode - startTime) / 1000.0));
 
-        double h = bitmap.getHeight();
-        double w = 302.0 * h/ 480.0;
+        if (GlobalConfig.PRINT_TIMING) {
+            Log.d("MLThread", "decode -> " + ((decode - startTime) / 1000.0));
+        }
 
-        int x = (int) Math.round(((double) bitmap.getWidth()) * roiCenterYRatio - w* roiCenterYRatio);
-        int y = (int) Math.round(((double) bitmap.getHeight()) * roiCenterYRatio - h* roiCenterYRatio);
+        sensorOrientation = sensorOrientation % 360;
+
+        double h;
+        double w;
+        int x;
+        int y;
+
+        if (sensorOrientation == 0) {
+            w = bitmap.getWidth();
+            h = w * 302.0 / 480.0;
+            x = 0;
+            y = (int) Math.round(((double) bitmap.getHeight()) * roiCenterYRatio - h * 0.5);
+        } else if (sensorOrientation == 90) {
+            h = bitmap.getHeight();
+            w = h * 302.0 / 480.0;
+            y = 0;
+            x = (int) Math.round(((double) bitmap.getWidth()) * roiCenterYRatio - w * 0.5);
+        } else if (sensorOrientation == 180) {
+            w = bitmap.getWidth();
+            h = w * 302.0 / 480.0;
+            x = 0;
+            y = (int) Math.round(((double) bitmap.getHeight()) * (1.0 - roiCenterYRatio) - h * 0.5);
+        } else {
+            h = bitmap.getHeight();
+            w = h * 302.0 / 480.0;
+            x = (int) Math.round(((double) bitmap.getWidth()) * (1.0 - roiCenterYRatio) - w * 0.5);
+            y = 0;
+        }
 
         Bitmap croppedBitmap = Bitmap.createBitmap(bitmap, x, y, (int) w, (int) h);
 
         long crop = SystemClock.uptimeMillis();
-        Log.d("MLThread", "crop -> " + ((crop - decode) / 1000.0));
+        if (GlobalConfig.PRINT_TIMING) {
+            Log.d("MLThread", "crop -> " + ((crop - decode) / 1000.0));
+        }
 
         Matrix matrix = new Matrix();
         matrix.postRotate(sensorOrientation);
@@ -199,7 +222,9 @@ class MachineLearningThread implements Runnable {
 
 
         long rotate = SystemClock.uptimeMillis();
-        Log.d("MLThread", "rotate -> " + ((rotate - crop) / 1000.0));
+        if (GlobalConfig.PRINT_TIMING) {
+            Log.d("MLThread", "rotate -> " + ((rotate - crop) / 1000.0));
+        }
 
         croppedBitmap.recycle();
         bitmap.recycle();

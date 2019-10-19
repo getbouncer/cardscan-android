@@ -70,7 +70,6 @@ abstract class ImageClassifier {
                                 * DIM_PIXEL_SIZE
                                 * getNumBytesPerChannel());
         imgData.order(ByteOrder.nativeOrder());
-        Log.d(TAG, "Created a Tensorflow Lite Image Classifier.");
     }
 
     /** Classifies a frame from the preview stream. */
