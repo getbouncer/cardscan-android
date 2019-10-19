@@ -22,8 +22,12 @@ import android.util.Log;
 import com.getbouncer.cardscan.base.ImageClassifier;
 import com.getbouncer.cardscan.base.ModelFactory;
 
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -103,14 +107,16 @@ class SSDDetect extends ImageClassifier {
 
     private Map<Integer, Object> outputMap = new HashMap<>();
 
+    private File modelFile = null;
 
     /**
      * Initializes an {@code ImageClassifierFloatMobileNet}.
      *
      * @param context
      */
-    public SSDDetect(Context context) throws IOException {
-        super(context);
+    public SSDDetect(Context context, File modelFile) throws IOException {
+        this.modelFile = modelFile;
+        init(context);
 
         /** The model reshapes all the data to 1 x [All Data Points]
          */
@@ -119,14 +125,19 @@ class SSDDetect extends ImageClassifier {
 
         outputMap.put(0, outputClasses);
         outputMap.put(1, outputLocations);
-
-
     }
 
 
     @Override
     MappedByteBuffer loadModelFile(Context context) throws IOException {
-        return ModelFactory.getSharedInstance().loadSSDDetectModelFile(context);
+        FileInputStream inputStream = new FileInputStream(modelFile);
+        FileChannel fileChannel = inputStream.getChannel();
+        long startOffset = 0;
+        long declaredLength = modelFile.length();
+        MappedByteBuffer result = fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset,
+                declaredLength);
+        inputStream.close();
+        return result;
     }
 
     @Override

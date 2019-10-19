@@ -11,7 +11,6 @@ import java.nio.channels.FileChannel;
 public abstract class ModelFactory {
     public abstract MappedByteBuffer loadFindFourFile(Context context) throws IOException;
     public abstract MappedByteBuffer loadRecognizeDigitsFile(Context context) throws IOException;
-    public abstract MappedByteBuffer loadSSDDetectModelFile(Context context) throws IOException;
 
     private static ModelFactory sharedInstance;
 

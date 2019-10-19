@@ -16,6 +16,10 @@ import android.renderscript.ScriptIntrinsicYuvToRGB;
 import android.renderscript.Type;
 import android.util.Log;
 
+import com.getbouncer.cardscan.base.ssd.DetectedSSDBox;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.util.LinkedList;
 
 
@@ -33,6 +37,7 @@ class MachineLearningThread implements Runnable {
         private final int mSensorOrientation;
         private final float mRoiCenterYRatio;
         private final boolean mIsOcr;
+        private final File mObjectDetectFile;
 
         RunArguments(byte[] frameBytes, int width, int height, int format,
                      int sensorOrientation, OnScanListener scanListener, Context context,
@@ -48,11 +53,12 @@ class MachineLearningThread implements Runnable {
             mRoiCenterYRatio = roiCenterYRatio;
             mIsOcr = true;
             mObjectListener = null;
+            mObjectDetectFile = null;
         }
 
         RunArguments(byte[] frameBytes, int width, int height, int format,
                      int sensorOrientation, OnObjectListener objectListener, Context context,
-                     float roiCenterYRatio) {
+                     float roiCenterYRatio, File objectDetectFile) {
             mFrameBytes = frameBytes;
             mBitmap = null;
             mWidth = width;
@@ -64,6 +70,7 @@ class MachineLearningThread implements Runnable {
             mRoiCenterYRatio = roiCenterYRatio;
             mIsOcr = false;
             mObjectListener = objectListener;
+            mObjectDetectFile = objectDetectFile;
         }
 
         // this should only be used for testing
@@ -79,10 +86,12 @@ class MachineLearningThread implements Runnable {
             mRoiCenterYRatio = 0;
             mIsOcr = true;
             mObjectListener = null;
+            mObjectDetectFile = null;
         }
 
         // this should only be used for testing
-        RunArguments(Bitmap bitmap, OnObjectListener objectListener, Context context) {
+        RunArguments(Bitmap bitmap, OnObjectListener objectListener, Context context,
+                     File objectDetectFile) {
             mFrameBytes = null;
             mBitmap = bitmap;
             mWidth = bitmap == null ? 0 : bitmap.getWidth();
@@ -94,6 +103,7 @@ class MachineLearningThread implements Runnable {
             mRoiCenterYRatio = 0;
             mIsOcr = false;
             mObjectListener = objectListener;
+            mObjectDetectFile = objectDetectFile;
         }
     }
 
@@ -127,16 +137,18 @@ class MachineLearningThread implements Runnable {
         notify();
     }
 
-    synchronized void post(Bitmap bitmap, OnObjectListener objectListener, Context context) {
-        RunArguments args = new RunArguments(bitmap, objectListener, context);
+    synchronized void post(Bitmap bitmap, OnObjectListener objectListener, Context context,
+                           File objectDetectFile) {
+        RunArguments args = new RunArguments(bitmap, objectListener, context, objectDetectFile);
         queue.push(args);
         notify();
     }
 
     synchronized void post(byte[] bytes, int width, int height, int format, int sensorOrientation,
-                           OnObjectListener objectListener, Context context, float roiCenterYRatio) {
+                           OnObjectListener objectListener, Context context, float roiCenterYRatio,
+                           File objectDetectFile) {
         RunArguments args = new RunArguments(bytes, width, height, format, sensorOrientation,
-                objectListener, context, roiCenterYRatio);
+                objectListener, context, roiCenterYRatio, objectDetectFile);
         queue.push(args);
         notify();
     }
@@ -245,7 +257,20 @@ class MachineLearningThread implements Runnable {
     }
 
     private void runObjectModel(final Bitmap bitmap, final RunArguments args) {
-        final ObjectDetect detect = new ObjectDetect();
+        if (args.mObjectDetectFile == null) {
+            Handler handler = new Handler(Looper.getMainLooper());
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (args.mObjectListener != null) {
+                        args.mObjectListener.onPrediction(bitmap, new LinkedList<DetectedSSDBox>());
+                    }
+                }
+            });
+            return;
+        }
+
+        final ObjectDetect detect = new ObjectDetect(args.mObjectDetectFile);
         final String result = detect.predict(bitmap, args.mContext);
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {

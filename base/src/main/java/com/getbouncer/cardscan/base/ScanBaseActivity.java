@@ -44,6 +44,7 @@ import android.widget.TextView;
 
 import com.getbouncer.cardscan.base.ssd.DetectedSSDBox;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -99,6 +100,8 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     // Child classes must set to ensure proper flaslight handling
     public boolean mIsPermissionCheckDone = false;
     protected boolean mShowNumberAndExpiryAsScanning = true;
+
+    protected File objectDetectFile;
 
     public long errorCorrectionDurationMs = 1500;
 
@@ -372,18 +375,19 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
                 // Use the application context here because the machine learning thread's lifecycle
                 // is connected to the application and not this activity
                 if (mIsOcr) {
-                    mlThread.post(bytes, width, height, format, mRotation, (OnScanListener) this,
+                    mlThread.post(bytes, width, height, format, mRotation, this,
                             this.getApplicationContext(), mRoiCenterYRatio);
                 } else {
-                    mlThread.post(bytes, width, height, format, mRotation, (OnObjectListener) this,
-                            this.getApplicationContext(), mRoiCenterYRatio);
+                    mlThread.post(bytes, width, height, format, mRotation,this,
+                            this.getApplicationContext(), mRoiCenterYRatio, objectDetectFile);
                 }
             } else {
                 Bitmap bm = mTestingImageReader.nextImage();
                 if (mIsOcr) {
-                    mlThread.post(bm, (OnScanListener) this, this.getApplicationContext());
+                    mlThread.post(bm, this, this.getApplicationContext());
                 } else {
-                    mlThread.post(bm, (OnObjectListener) this, this.getApplicationContext());
+                    mlThread.post(bm, this, this.getApplicationContext(),
+                            objectDetectFile);
                 }
                 if (bm == null) {
                     mTestingImageReader = null;

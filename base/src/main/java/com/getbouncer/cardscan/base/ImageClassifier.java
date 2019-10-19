@@ -60,6 +60,14 @@ abstract class ImageClassifier {
 
     /** Initializes an {@code ImageClassifier}. */
     ImageClassifier(Context context) throws IOException {
+        init(context);
+    }
+
+    ImageClassifier() {
+        // don't do anything, but make sure that you call init later
+    }
+
+    void init(Context context) throws IOException {
         tfliteModel = loadModelFile(context);
         tflite = new Interpreter(tfliteModel, tfliteOptions);
         imgData =
