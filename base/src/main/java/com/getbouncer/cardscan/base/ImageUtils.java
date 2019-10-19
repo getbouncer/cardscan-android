@@ -34,27 +34,4 @@ public class ImageUtils {
 
         return mutableBitmap;
     }
-
-    public static Bitmap drawBoxesOnImage(Bitmap frame, List<DetectedSSDBox> boxes) {
-        Paint paint = new Paint(0);
-        paint.setColor(Color.RED);
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(3);
-
-        Bitmap mutableBitmap = frame.copy(Bitmap.Config.ARGB_8888, true);
-        Canvas canvas = new Canvas(mutableBitmap);
-        for (DetectedSSDBox box:boxes) {
-
-            if (box.label == 3) {
-                paint.setColor(Color.RED);
-                Log.d("ImageUtils", "Confidence for card -> " + box.confidence);
-                canvas.drawRect(box.rect, paint);
-            } else {
-                paint.setColor(Color.GREEN);
-                canvas.drawRect(box.rect, paint);
-            }
-        }
-
-        return mutableBitmap;
-    }
 }
