@@ -181,7 +181,7 @@ class MachineLearningThread implements Runnable {
     }
 
     private Bitmap getBitmap(byte[] bytes, int width, int height, int format, int sensorOrientation,
-                             float roiCenterYRatio, Context ctx) {
+                             float roiCenterYRatio, Context ctx, boolean isOcr) {
         long startTime = SystemClock.uptimeMillis();
 
         final Bitmap bitmap = YUV_toRGB(bytes, width, height, ctx);
@@ -200,23 +200,30 @@ class MachineLearningThread implements Runnable {
 
         if (sensorOrientation == 0) {
             w = bitmap.getWidth();
-            h = w * 302.0 / 480.0;
+            h = isOcr ? w * 302.0 / 480.0 : w;
             x = 0;
             y = (int) Math.round(((double) bitmap.getHeight()) * roiCenterYRatio - h * 0.5);
         } else if (sensorOrientation == 90) {
             h = bitmap.getHeight();
-            w = h * 302.0 / 480.0;
+            w = isOcr ? h * 302.0 / 480.0 : h;
             y = 0;
             x = (int) Math.round(((double) bitmap.getWidth()) * roiCenterYRatio - w * 0.5);
         } else if (sensorOrientation == 180) {
             w = bitmap.getWidth();
-            h = w * 302.0 / 480.0;
+            h = isOcr ? w * 302.0 / 480.0 : w;
             x = 0;
             y = (int) Math.round(((double) bitmap.getHeight()) * (1.0 - roiCenterYRatio) - h * 0.5);
         } else {
             h = bitmap.getHeight();
-            w = h * 302.0 / 480.0;
+            w = isOcr ? h * 302.0 / 480.0 : h;
             x = (int) Math.round(((double) bitmap.getWidth()) * (1.0 - roiCenterYRatio) - w * 0.5);
+            y = 0;
+        }
+
+        if (x < 0) {
+            x = 0;
+        }
+        if (y < 0) {
             y = 0;
         }
 
@@ -321,7 +328,7 @@ class MachineLearningThread implements Runnable {
         Bitmap bm;
         if (args.mFrameBytes != null) {
             bm = getBitmap(args.mFrameBytes, args.mWidth, args.mHeight, args.mFormat,
-                    args.mSensorOrientation, args.mRoiCenterYRatio, args.mContext);
+                    args.mSensorOrientation, args.mRoiCenterYRatio, args.mContext, args.mIsOcr);
         } else if (args.mBitmap != null) {
             bm = args.mBitmap;
         } else {
