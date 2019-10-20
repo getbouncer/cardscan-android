@@ -220,11 +220,18 @@ class MachineLearningThread implements Runnable {
             y = 0;
         }
 
+        // make sure that our crop stays within the image
         if (x < 0) {
             x = 0;
         }
         if (y < 0) {
             y = 0;
+        }
+        if ((x+w) > bitmap.getWidth()) {
+            x = bitmap.getWidth() - (int) w;
+        }
+        if ((y+h) > bitmap.getHeight()) {
+            y = bitmap.getHeight() - (int) h;
         }
 
         Bitmap croppedBitmap = Bitmap.createBitmap(bitmap, x, y, (int) w, (int) h);
