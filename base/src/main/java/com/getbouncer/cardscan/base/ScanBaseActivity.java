@@ -573,10 +573,10 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     }
 
     @Override
-    public void onPrediction(Bitmap bm, List<DetectedSSDBox> boxes) {
+    public void onPrediction(Bitmap bm, List<DetectedSSDBox> boxes, int imageWidth,
+                             int imageHeight) {
         if (!mSentResponse && mIsActivityActive) {
             // do something with the prediction
-            Log.d("ScanBaseActivity", "onPrediction for object detection");
         }
         mMachineLearningSemaphore.release();
     }

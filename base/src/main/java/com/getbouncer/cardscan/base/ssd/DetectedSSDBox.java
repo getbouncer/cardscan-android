@@ -2,6 +2,9 @@ package com.getbouncer.cardscan.base.ssd;
 
 import android.graphics.RectF;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 
 public class DetectedSSDBox {
     float XMin, YMin, XMax, YMax;
@@ -12,15 +15,31 @@ public class DetectedSSDBox {
 
 
     public DetectedSSDBox(float XMin, float YMin, float XMax, float YMax, float confidence,
-                          int ImageWidth, int ImageHeight, int label) {
+                          int imageWidth, int imageHeight, int label) {
 
-        this.XMin = XMin * ImageWidth;
-        this.XMax = XMax * ImageWidth;
-        this.YMin = YMin * ImageHeight;
-        this.YMax = YMax * ImageHeight;
+        this.XMin = XMin * imageWidth;
+        this.XMax = XMax * imageWidth;
+        this.YMin = YMin * imageHeight;
+        this.YMax = YMax * imageHeight;
         this.confidence = confidence;
         this.label = label;
         this.rect = new RectF(this.XMin, this.YMin, this.XMax, this.YMax);
+    }
+
+    public JSONObject toJson() {
+        try {
+            JSONObject result = new JSONObject();
+            result.put("x_min", this.XMin);
+            result.put("y_min", this.YMin);
+            result.put("width", this.XMax - this.XMin);
+            result.put("height", this.YMax - this.YMin);
+            result.put("label", this.label);
+            result.put("confidence", this.confidence);
+            return result;
+        } catch (JSONException je) {
+            je.printStackTrace();
+            return new JSONObject();
+        }
     }
 }
 

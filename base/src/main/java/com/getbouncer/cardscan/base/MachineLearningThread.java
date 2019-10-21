@@ -277,7 +277,8 @@ class MachineLearningThread implements Runnable {
                 @Override
                 public void run() {
                     if (args.mObjectListener != null) {
-                        args.mObjectListener.onPrediction(bitmap, new LinkedList<DetectedSSDBox>());
+                        args.mObjectListener.onPrediction(bitmap, new LinkedList<DetectedSSDBox>(),
+                                bitmap.getWidth(), bitmap.getHeight());
                     }
                 }
             });
@@ -294,7 +295,8 @@ class MachineLearningThread implements Runnable {
                         if (detect.hadUnrecoverableException) {
                             args.mObjectListener.onObjectFatalError();
                         } else {
-                            args.mObjectListener.onPrediction(bitmap, detect.objectBoxes);
+                            args.mObjectListener.onPrediction(bitmap, detect.objectBoxes,
+                                    bitmap.getWidth(), bitmap.getHeight());
                         }
                     }
                 } catch (Error | Exception e) {
