@@ -10,6 +10,7 @@ public class DetectedSSDBox {
     float XMin, YMin, XMax, YMax;
     public float confidence;
     public int label;
+    int imageWidth, imageHeight;
 
     public RectF rect;
 
@@ -23,16 +24,18 @@ public class DetectedSSDBox {
         this.YMax = YMax * imageHeight;
         this.confidence = confidence;
         this.label = label;
+        this.imageWidth = imageWidth;
+        this.imageHeight = imageHeight;
         this.rect = new RectF(this.XMin, this.YMin, this.XMax, this.YMax);
     }
 
     public JSONObject toJson() {
         try {
             JSONObject result = new JSONObject();
-            result.put("x_min", this.XMin);
-            result.put("y_min", this.YMin);
-            result.put("width", this.XMax - this.XMin);
-            result.put("height", this.YMax - this.YMin);
+            result.put("x_min", this.XMin / imageWidth);
+            result.put("y_min", this.YMin / imageHeight);
+            result.put("width", (this.XMax - this.XMin) / imageWidth);
+            result.put("height", (this.YMax - this.YMin) / imageHeight);
             result.put("label", this.label);
             result.put("confidence", this.confidence);
             return result;
