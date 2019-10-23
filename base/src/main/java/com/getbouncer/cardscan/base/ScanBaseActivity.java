@@ -116,8 +116,6 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         // XXX FIXME move to dependency injection
         mTestingImageReader = sTestingImageReader;
         sTestingImageReader = null;
-        mScanningIdleResource = IdleResourceManager.scanningIdleResource;
-        IdleResourceManager.scanningIdleResource = null;
 
         this.scanStats = new ScanStats();
 
@@ -213,6 +211,8 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
 
         try {
             if (mIsPermissionCheckDone) {
+                mScanningIdleResource = IdleResourceManager.scanningIdleResource;
+                IdleResourceManager.scanningIdleResource = null;
                 if (mScanningIdleResource != null) {
                     mScanningIdleResource.increment();
                 }
