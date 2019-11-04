@@ -200,22 +200,22 @@ class MachineLearningThread implements Runnable {
 
         if (sensorOrientation == 0) {
             w = bitmap.getWidth();
-            h = isOcr ? w * 302.0 / 480.0 : w;
+            h = w;
             x = 0;
             y = (int) Math.round(((double) bitmap.getHeight()) * roiCenterYRatio - h * 0.5);
         } else if (sensorOrientation == 90) {
             h = bitmap.getHeight();
-            w = isOcr ? h * 302.0 / 480.0 : h;
+            w = h;
             y = 0;
             x = (int) Math.round(((double) bitmap.getWidth()) * roiCenterYRatio - w * 0.5);
         } else if (sensorOrientation == 180) {
             w = bitmap.getWidth();
-            h = isOcr ? w * 302.0 / 480.0 : w;
+            h = w;
             x = 0;
             y = (int) Math.round(((double) bitmap.getHeight()) * (1.0 - roiCenterYRatio) - h * 0.5);
         } else {
             h = bitmap.getHeight();
-            w = isOcr ? h * 302.0 / 480.0 : h;
+            w = h;
             x = (int) Math.round(((double) bitmap.getWidth()) * (1.0 - roiCenterYRatio) - w * 0.5);
             y = 0;
         }
@@ -307,7 +307,8 @@ class MachineLearningThread implements Runnable {
         });
     }
 
-    private void runOcrModel(final Bitmap bitmap, final RunArguments args) {
+    private void runOcrModel(final Bitmap bitmap, final RunArguments args,
+                             final Bitmap bitmapForObjectDetection) {
         final Ocr ocr = new Ocr();
         final String number = ocr.predict(bitmap, args.mContext);
         final boolean hadUnrecoverableException = ocr.hadUnrecoverableException;
@@ -320,7 +321,7 @@ class MachineLearningThread implements Runnable {
                             args.mScanListener.onFatalError();
                         } else {
                             args.mScanListener.onPrediction(number, ocr.expiry, bitmap, ocr.digitBoxes,
-                                    ocr.expiryBox);
+                                    ocr.expiryBox, bitmapForObjectDetection);
                         }
                     }
                 } catch (Error | Exception e) {
@@ -341,15 +342,22 @@ class MachineLearningThread implements Runnable {
         } else if (args.mBitmap != null) {
             bm = args.mBitmap;
         } else {
-            bm = Bitmap.createBitmap(480, 302, Bitmap.Config.ARGB_8888);
+            bm = Bitmap.createBitmap(480, 480, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(bm);
             Paint paint = new Paint();
             paint.setColor(Color.GRAY);
-            canvas.drawRect(0.0f, 0.0f, 480.0f, 302.0f, paint);
+            canvas.drawRect(0.0f, 0.0f, 480.0f, 480.0f, paint);
         }
 
         if (args.mIsOcr) {
-            runOcrModel(bm, args);
+            float width = bm.getWidth();
+            float height = width * 302.0f / 480.0f;
+            float y = (bm.getHeight() - height) / 2.0f;
+            float x = 0.0f;
+            Bitmap croppedBitmap = Bitmap.createBitmap(bm, (int) x, (int) y, (int) width,
+                    (int) height);
+
+            runOcrModel(croppedBitmap, args, bm);
         } else {
             runObjectModel(bm, args);
         }

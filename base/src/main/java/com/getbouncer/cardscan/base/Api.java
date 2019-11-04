@@ -1,9 +1,6 @@
 package com.getbouncer.cardscan.base;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.provider.Settings;
-import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import org.json.JSONException;
