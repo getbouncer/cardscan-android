@@ -86,7 +86,7 @@ public class ObjectDetect {
         return "Success";
     }
 
-    public synchronized String predict(Bitmap image, Context context) {
+    public synchronized String predictOnCpu(Bitmap image, Context context) {
         final int NUM_THREADS = 4;
         try {
             boolean createdNewModel = false;

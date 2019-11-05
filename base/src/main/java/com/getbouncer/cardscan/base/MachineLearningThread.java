@@ -286,7 +286,7 @@ class MachineLearningThread implements Runnable {
         }
 
         final ObjectDetect detect = new ObjectDetect(args.mObjectDetectFile);
-        final String result = detect.predict(bitmap, args.mContext);
+        final String result = detect.predictOnCpu(bitmap, args.mContext);
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {
             public void run() {
