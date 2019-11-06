@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.ImageFormat;
 import android.graphics.RectF;
 import android.hardware.Camera;
 import android.os.Bundle;
@@ -32,6 +33,7 @@ import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.test.espresso.idling.CountingIdlingResource;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.OrientationEventListener;
 import android.view.Surface;
@@ -78,6 +80,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     private float mRoiCenterYRatio;
     private CameraThread mCameraThread = null;
     private boolean mIsOcr = true;
+    private byte[] machineLearningFrame = null;
 
     private ScanStats scanStats;
 
@@ -196,8 +199,70 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             CameraPreview cameraPreview = new CameraPreview(this, this);
             FrameLayout preview = findViewById(mTextureId);
             preview.addView(cameraPreview);
-            mCamera.setPreviewCallback(this);
+            //mCamera.setPreviewCallback(this);
+            int format = ImageFormat.NV21;
+            Camera.Parameters parameters = camera.getParameters();
+            parameters.setPreviewFormat(format);
+
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+            int width, height;
+            if (displayMetrics.heightPixels > displayMetrics.widthPixels) {
+                width = 500;
+                height = displayMetrics.heightPixels * width / displayMetrics.widthPixels;
+            } else {
+                height = 500;
+                width = displayMetrics.widthPixels * height / displayMetrics.heightPixels;
+            }
+
+            Camera.Size previewSize = getOptimalPreviewSize(parameters.getSupportedPreviewSizes(),
+                    width, height);
+            parameters.setPreviewSize(previewSize.width, previewSize.height);
+            camera.setParameters(parameters);
+            Camera.Size size = parameters.getPreviewSize();
+            Log.d("ScanBaseActivity", size.width + "x" + size.height);
+            int bufSize = size.width * size.height * ImageFormat.getBitsPerPixel(format) / 8;
+            for (int i = 0; i < 3; i++) {
+                camera.addCallbackBuffer(new byte[bufSize]);
+            }
+            camera.setPreviewCallbackWithBuffer(this);
         }
+    }
+
+    // https://stackoverflow.com/a/17804792
+    private Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes, int w, int h) {
+        final double ASPECT_TOLERANCE = 0.1;
+        double targetRatio = (double) w/h;
+
+        if (sizes==null) return null;
+
+        Camera.Size optimalSize = null;
+
+        double minDiff = Double.MAX_VALUE;
+
+        int targetHeight = h;
+
+        // Find size
+        for (Camera.Size size : sizes) {
+            double ratio = (double) size.width / size.height;
+            if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) continue;
+            //if (Math.abs(size.height - targetHeight) < minDiff && size.height >= targetHeight) {
+            if (size.height >= targetHeight) {
+                optimalSize = size;
+                minDiff = Math.abs(size.height - targetHeight);
+            }
+        }
+
+        if (optimalSize == null) {
+            minDiff = Double.MAX_VALUE;
+            for (Camera.Size size : sizes) {
+                if (Math.abs(size.height - targetHeight) < minDiff && size.height >= targetHeight) {
+                    optimalSize = size;
+                    minDiff = Math.abs(size.height - targetHeight);
+                }
+            }
+        }
+        return optimalSize;
     }
 
 
@@ -243,7 +308,8 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         super.onPause();
         if (mCamera != null) {
             mCamera.stopPreview();
-            mCamera.setPreviewCallback(null);
+            //mCamera.setPreviewCallback(null);
+            mCamera.setPreviewCallbackWithBuffer(null);
             mCamera.release();
             mCamera = null;
         }
@@ -360,6 +426,10 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     @Override
     public void onPreviewFrame(byte[] bytes, Camera camera) {
         if (mMachineLearningSemaphore.tryAcquire()) {
+            if (machineLearningFrame != null) {
+                mCamera.addCallbackBuffer(machineLearningFrame);
+            }
+            machineLearningFrame = bytes;
             this.scanStats.incrementScans();
 
             MachineLearningThread mlThread = getMachineLearningThread();
@@ -393,6 +463,8 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
                     mTestingImageReader = null;
                 }
             }
+        } else {
+            mCamera.addCallbackBuffer(bytes);
         }
     }
 
