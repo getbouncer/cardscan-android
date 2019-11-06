@@ -20,8 +20,8 @@ We publish our library in the jcenter repository, so for most gradle configurati
 
 ```gradle
 dependencies {
-    implementation 'com.getbouncer:base:1.0.5104'
-    implementation 'com.getbouncer:cardscan:1.0.5104'
+    implementation 'com.getbouncer:base:1.0.5105'
+    implementation 'com.getbouncer:cardscan:1.0.5105'
 }
 ```
 
@@ -63,7 +63,7 @@ being passed into your payment form. This is what it looks like using a standard
 
 ## Authors
 
-Sam King and Rui Guo
+Sam King, Rui Guo, and Zain ul Abi Din
 
 ## License
 
