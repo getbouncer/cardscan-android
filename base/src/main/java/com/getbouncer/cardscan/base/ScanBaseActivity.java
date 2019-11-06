@@ -100,7 +100,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
 
     // set when this activity posts to the machineLearningThread
     public long mPredictionStartMs = 0;
-    // Child classes must set to ensure proper flaslight handling
+    // Child classes must set to ensure proper flashlight handling
     public boolean mIsPermissionCheckDone = false;
     protected boolean mShowNumberAndExpiryAsScanning = true;
 
@@ -205,7 +205,6 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             CameraPreview cameraPreview = new CameraPreview(this, this);
             FrameLayout preview = findViewById(mTextureId);
             preview.addView(cameraPreview);
-            //mCamera.setPreviewCallback(this);
             int format = ImageFormat.NV21;
             Camera.Parameters parameters = camera.getParameters();
             parameters.setPreviewFormat(format);
@@ -314,7 +313,6 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         super.onPause();
         if (mCamera != null) {
             mCamera.stopPreview();
-            //mCamera.setPreviewCallback(null);
             mCamera.setPreviewCallbackWithBuffer(null);
             mCamera.release();
             mCamera = null;
