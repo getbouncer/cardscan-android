@@ -108,6 +108,12 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
 
     public long errorCorrectionDurationMs = 1500;
 
+    // This value sets the minimum width or height for any images we use for machine learning.
+    // Make sure that it is equal to or larger than the width of the largest expected image
+    // size. Our image pipeline will resize images to be memory efficient and will make sure that
+    // the width or height of any of our images never goes below this value.
+    public static int MIN_IMAGE_EDGE = 500;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -208,10 +214,10 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
             int width, height;
             if (displayMetrics.heightPixels > displayMetrics.widthPixels) {
-                width = 500;
+                width = MIN_IMAGE_EDGE;
                 height = displayMetrics.heightPixels * width / displayMetrics.widthPixels;
             } else {
-                height = 500;
+                height = MIN_IMAGE_EDGE;
                 width = displayMetrics.widthPixels * height / displayMetrics.heightPixels;
             }
 

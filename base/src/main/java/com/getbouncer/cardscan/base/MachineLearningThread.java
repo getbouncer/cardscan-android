@@ -18,7 +18,6 @@ import android.util.Log;
 
 import com.getbouncer.cardscan.base.ssd.DetectedSSDBox;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.LinkedList;
 
@@ -170,14 +169,28 @@ class MachineLearningThread implements Runnable {
 
         yuvToRgbIntrinsic.setInput(in);
         yuvToRgbIntrinsic.forEach(out);
-        Bitmap bmp = Bitmap.createBitmap(W, H, Bitmap.Config.ARGB_8888);
-        out.copyTo(bmp);
+        Bitmap fullImage = Bitmap.createBitmap(W, H, Bitmap.Config.ARGB_8888);
+
+        out.copyTo(fullImage);
 
         yuvToRgbIntrinsic.destroy();
         rs.destroy();
         in.destroy();
         out.destroy();
-        return bmp;
+
+        int width, height;
+        if (W > H) {
+            height = ScanBaseActivity.MIN_IMAGE_EDGE;
+            width = W * height / H;
+        } else {
+            width = ScanBaseActivity.MIN_IMAGE_EDGE;
+            height = H * width / W;
+        }
+        Bitmap resizedImage = Bitmap.createScaledBitmap(fullImage, width, height, false);
+        fullImage.recycle();
+        fullImage = null;
+
+        return resizedImage;
     }
 
     private Bitmap getBitmap(byte[] bytes, int width, int height, int format, int sensorOrientation,
