@@ -5,11 +5,13 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import java.lang.ref.WeakReference;
+
 class CameraThread extends Thread {
-    private OnCameraOpenListener listener;
+    private WeakReference<OnCameraOpenListener> listener;
 
     synchronized void startCamera(OnCameraOpenListener listener) {
-        this.listener = listener;
+        this.listener = new WeakReference<>(listener);
         notify();
     }
 
@@ -22,32 +24,34 @@ class CameraThread extends Thread {
             }
         }
 
-        OnCameraOpenListener listener = this.listener;
-        this.listener = null;
-        return listener;
+        return listener.get();
     }
 
     @Override
     public void run() {
-        while (true) {
-            final OnCameraOpenListener listener = waitForOpenRequest();
+        final OnCameraOpenListener listener = waitForOpenRequest();
+        if (listener == null) {
+            this.listener.clear();
+            return;
+        }
 
-            Camera camera = null;
-            try {
-                camera = Camera.open();
-            } catch (Exception e) {
-                Log.e("CameraThread", "failed to open Camera");
-                e.printStackTrace();
-            }
+        Camera camera = null;
+        try {
+            camera = Camera.open();
+        } catch (Exception e) {
+            Log.e("CameraThread", "failed to open Camera");
+            e.printStackTrace();
+        }
 
-            final Camera resultCamera = camera;
-            Handler handler = new Handler(Looper.getMainLooper());
-            handler.post(new Runnable() {
+        final Camera resultCamera = camera;
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(new Runnable() {
                 @Override
                 public void run() {
                     listener.onCameraOpen(resultCamera);
+                    CameraThread.this.listener.clear();
+                    CameraThread.this.listener = null;
                 }
             });
-        }
     }
 }
