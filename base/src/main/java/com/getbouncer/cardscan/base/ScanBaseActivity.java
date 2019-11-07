@@ -78,7 +78,6 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     private int mExpiryId;
     private int mTextureId;
     private float mRoiCenterYRatio;
-    private CameraThread mCameraThread = null;
     private boolean mIsOcr = true;
     private byte[] machineLearningFrame = null;
 
@@ -188,6 +187,43 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         }
     }
 
+    private void setCameraParameters(Camera camera, Camera.Parameters parameters) {
+        try {
+            camera.setParameters(parameters);
+        } catch (Exception | Error e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setCameraPreviewFrame() {
+        int format = ImageFormat.NV21;
+        Camera.Parameters parameters = mCamera.getParameters();
+        parameters.setPreviewFormat(format);
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int width, height;
+        if (displayMetrics.heightPixels > displayMetrics.widthPixels) {
+            width = MIN_IMAGE_EDGE;
+            height = displayMetrics.heightPixels * width / displayMetrics.widthPixels;
+        } else {
+            height = MIN_IMAGE_EDGE;
+            width = displayMetrics.widthPixels * height / displayMetrics.heightPixels;
+        }
+        Camera.Size currentSize = parameters.getPreviewSize();
+
+        Camera.Size previewSize;
+        if (currentSize.width > currentSize.height && width > height) {
+            previewSize = getOptimalPreviewSize(parameters.getSupportedPreviewSizes(),
+                    width, height);
+        } else {
+            previewSize = getOptimalPreviewSize(parameters.getSupportedPreviewSizes(),
+                    height, width);
+        }
+        parameters.setPreviewSize(previewSize.width, previewSize.height);
+        setCameraParameters(mCamera, parameters);
+    }
+
     @Override
     public void onCameraOpen(@Nullable Camera camera) {
         if (camera == null) {
@@ -201,36 +237,11 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             mCamera = camera;
             setCameraDisplayOrientation(this, Camera.CameraInfo.CAMERA_FACING_BACK,
                     mCamera);
+            setCameraPreviewFrame();
             // Create our Preview view and set it as the content of our activity.
             CameraPreview cameraPreview = new CameraPreview(this, this);
             FrameLayout preview = findViewById(mTextureId);
             preview.addView(cameraPreview);
-            int format = ImageFormat.NV21;
-            Camera.Parameters parameters = camera.getParameters();
-            parameters.setPreviewFormat(format);
-
-            DisplayMetrics displayMetrics = new DisplayMetrics();
-            getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-            int width, height;
-            if (displayMetrics.heightPixels > displayMetrics.widthPixels) {
-                width = MIN_IMAGE_EDGE;
-                height = displayMetrics.heightPixels * width / displayMetrics.widthPixels;
-            } else {
-                height = MIN_IMAGE_EDGE;
-                width = displayMetrics.widthPixels * height / displayMetrics.heightPixels;
-            }
-
-            Camera.Size previewSize = getOptimalPreviewSize(parameters.getSupportedPreviewSizes(),
-                    width, height);
-            parameters.setPreviewSize(previewSize.width, previewSize.height);
-            camera.setParameters(parameters);
-            Camera.Size size = parameters.getPreviewSize();
-            Log.d("ScanBaseActivity", size.width + "x" + size.height);
-            int bufSize = size.width * size.height * ImageFormat.getBitsPerPixel(format) / 8;
-            for (int i = 0; i < 3; i++) {
-                camera.addCallbackBuffer(new byte[bufSize]);
-            }
-            camera.setPreviewCallbackWithBuffer(this);
         }
     }
 
@@ -287,12 +298,9 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
                     mScanningIdleResource.increment();
                 }
 
-                if (mCameraThread == null) {
-                    mCameraThread = new CameraThread();
-                    mCameraThread.start();
-                }
-
-                mCameraThread.startCamera(this);
+                CameraThread thread = new CameraThread();
+                thread.start();
+                thread.startCamera(this);
             }
         } catch (Exception e){
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -380,7 +388,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             try {
                 Camera.Parameters params = mCamera.getParameters();
                 params.setRotation(rotation);
-                mCamera.setParameters(params);
+                setCameraParameters(mCamera, params);
             } catch (Exception | Error e) {
                 // This gets called often so we can just swallow it and wait for the next one
                 e.printStackTrace();
@@ -434,6 +442,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
                 mCamera.addCallbackBuffer(machineLearningFrame);
             }
             machineLearningFrame = bytes;
+
             this.scanStats.incrementScans();
 
             MachineLearningThread mlThread = getMachineLearningThread();
@@ -481,7 +490,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             } else {
                 parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
             }
-            mCamera.setParameters(parameters);
+            setCameraParameters(mCamera, parameters);
             mCamera.startPreview();
         }
 
@@ -683,7 +692,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
                 params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
             }
             params.setRecordingHint(true);
-            mCamera.setParameters(params);
+            setCameraParameters(mCamera, params);
         }
 
         @Override
@@ -727,7 +736,11 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             // start preview with new settings
             try {
                 mCamera.setPreviewDisplay(mHolder);
-                mCamera.setPreviewCallback(mPreviewCallback);
+                int bufSize = w * h * ImageFormat.getBitsPerPixel(format) / 8;
+                for (int i = 0; i < 3; i++) {
+                    mCamera.addCallbackBuffer(new byte[bufSize]);
+                }
+                mCamera.setPreviewCallbackWithBuffer(mPreviewCallback);
                 mCamera.startPreview();
             } catch (Exception e){
                 Log.d("CameraCaptureActivity", "Error starting camera preview: " + e.getMessage());

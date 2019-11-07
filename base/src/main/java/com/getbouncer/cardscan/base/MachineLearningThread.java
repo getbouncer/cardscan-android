@@ -293,6 +293,7 @@ class MachineLearningThread implements Runnable {
                         args.mObjectListener.onPrediction(bitmap, new LinkedList<DetectedSSDBox>(),
                                 bitmap.getWidth(), bitmap.getHeight());
                     }
+                    bitmap.recycle();
                 }
             });
             return;
@@ -337,6 +338,8 @@ class MachineLearningThread implements Runnable {
                                     ocr.expiryBox, bitmapForObjectDetection);
                         }
                     }
+                    bitmap.recycle();
+                    bitmapForObjectDetection.recycle();
                 } catch (Error | Exception e) {
                     // prevent callbacks from crashing the app, swallow it
                     e.printStackTrace();
