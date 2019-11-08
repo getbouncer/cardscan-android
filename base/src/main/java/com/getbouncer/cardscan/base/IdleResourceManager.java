@@ -1,6 +1,6 @@
 package com.getbouncer.cardscan.base;
 
-import android.support.test.espresso.idling.CountingIdlingResource;
+import androidx.test.espresso.idling.CountingIdlingResource;
 
 public class IdleResourceManager {
     static CountingIdlingResource scanningIdleResource = null;
