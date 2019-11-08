@@ -1,7 +1,7 @@
 package com.getbouncer.cardscan.base;
 
 import android.hardware.Camera;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 interface OnCameraOpenListener {
     void onCameraOpen(@Nullable Camera camera);

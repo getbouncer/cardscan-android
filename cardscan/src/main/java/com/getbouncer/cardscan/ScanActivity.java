@@ -2,9 +2,9 @@ package com.getbouncer.cardscan;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.test.espresso.idling.CountingIdlingResource;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.test.espresso.idling.CountingIdlingResource;
 import android.text.TextUtils;
 
 import com.getbouncer.cardscan.base.IdleResourceManager;
