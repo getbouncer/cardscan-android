@@ -13,6 +13,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         renderscriptTargetApi 18
         renderscriptSupportModeEnabled true
+        buildConfigField "String", "CARDSCAN_VERSION", "\"$version\""
 
     }
 
@@ -53,7 +54,7 @@ ext {
     siteUrl = 'https://github.com/getbouncer/cardscan-android'
     gitUrl = 'https://github.com/getbouncer/cardscan-android.git'
 
-    libraryVersion = '1.0.5106'
+    libraryVersion = version
 
     developerId = 'kingst'
     developerName = 'Sam King'
