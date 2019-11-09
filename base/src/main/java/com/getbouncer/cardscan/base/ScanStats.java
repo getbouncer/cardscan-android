@@ -38,6 +38,7 @@ class ScanStats {
             object.put("duration", duration);
             object.put("model", "FindFour");
             object.put("device_type", getDeviceName());
+            object.put("sdk_version", BuildConfig.CARDSCAN_VERSION);
             object.put("os", Build.VERSION.RELEASE);
         } catch (JSONException e) {
             e.printStackTrace();
