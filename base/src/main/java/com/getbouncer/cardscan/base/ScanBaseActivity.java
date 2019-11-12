@@ -220,7 +220,9 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             previewSize = getOptimalPreviewSize(parameters.getSupportedPreviewSizes(),
                     height, width);
         }
-        parameters.setPreviewSize(previewSize.width, previewSize.height);
+        if (previewSize != null) {
+            parameters.setPreviewSize(previewSize.width, previewSize.height);
+        }
         setCameraParameters(mCamera, parameters);
     }
 
@@ -246,7 +248,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     }
 
     // https://stackoverflow.com/a/17804792
-    private Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes, int w, int h) {
+    private @Nullable Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes, int w, int h) {
         final double ASPECT_TOLERANCE = 0.1;
         double targetRatio = (double) w/h;
 
@@ -258,17 +260,18 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
 
         int targetHeight = h;
 
-        // Find size
+        // Find the smallest size that fits our tolerance and is at least as big as our target
+        // height
         for (Camera.Size size : sizes) {
             double ratio = (double) size.width / size.height;
             if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) continue;
-            //if (Math.abs(size.height - targetHeight) < minDiff && size.height >= targetHeight) {
             if (size.height >= targetHeight) {
                 optimalSize = size;
                 minDiff = Math.abs(size.height - targetHeight);
             }
         }
 
+        // Find something that is close to our target height but still bigger
         if (optimalSize == null) {
             minDiff = Double.MAX_VALUE;
             for (Camera.Size size : sizes) {
@@ -278,6 +281,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
                 }
             }
         }
+
         return optimalSize;
     }
 
@@ -608,7 +612,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     @Override
     public void onPrediction(final String number, final Expiry expiry, final Bitmap bitmap,
                              final List<DetectedBox> digitBoxes, final DetectedBox expiryBox,
-                             final Bitmap bitmapForObjectDetection) {
+                             final Bitmap bitmapForObjectDetection, final Bitmap fullScreenBitmap) {
 
         if (!mSentResponse && mIsActivityActive) {
 
@@ -660,7 +664,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
 
     @Override
     public void onPrediction(Bitmap bm, List<DetectedSSDBox> boxes, int imageWidth,
-                             int imageHeight) {
+                             int imageHeight, final Bitmap fullScreenBitmap) {
         if (!mSentResponse && mIsActivityActive) {
             // do something with the prediction
         }

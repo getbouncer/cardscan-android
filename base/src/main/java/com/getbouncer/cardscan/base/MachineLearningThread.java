@@ -106,6 +106,15 @@ class MachineLearningThread implements Runnable {
         }
     }
 
+    class BitmapPair {
+        private Bitmap cropped;
+        private Bitmap fullScreen;
+        BitmapPair(Bitmap cropped, Bitmap fullScreen) {
+            this.cropped = cropped;
+            this.fullScreen = fullScreen;
+        }
+    }
+
     private LinkedList<RunArguments> queue = new LinkedList<>();
 
     MachineLearningThread() {
@@ -193,8 +202,9 @@ class MachineLearningThread implements Runnable {
         return resizedImage;
     }
 
-    private Bitmap getBitmap(byte[] bytes, int width, int height, int format, int sensorOrientation,
-                             float roiCenterYRatio, Context ctx, boolean isOcr) {
+    private BitmapPair getBitmap(byte[] bytes, int width, int height, int format,
+                                 int sensorOrientation, float roiCenterYRatio, Context ctx,
+                                 boolean isOcr) {
         long startTime = SystemClock.uptimeMillis();
 
         final Bitmap bitmap = YUV_toRGB(bytes, width, height, ctx);
@@ -256,9 +266,11 @@ class MachineLearningThread implements Runnable {
 
         Matrix matrix = new Matrix();
         matrix.postRotate(sensorOrientation);
-        Bitmap bm = Bitmap.createBitmap(croppedBitmap, 0, 0, croppedBitmap.getWidth(), croppedBitmap.getHeight(),
-                matrix, true);
+        Bitmap bm = Bitmap.createBitmap(croppedBitmap, 0, 0, croppedBitmap.getWidth(),
+                croppedBitmap.getHeight(), matrix, true);
 
+        Bitmap fullScreen = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
+                bitmap.getHeight(), matrix, true);
 
         long rotate = SystemClock.uptimeMillis();
         if (GlobalConfig.PRINT_TIMING) {
@@ -268,7 +280,7 @@ class MachineLearningThread implements Runnable {
         croppedBitmap.recycle();
         bitmap.recycle();
 
-        return bm;
+        return new BitmapPair(bm, fullScreen);
     }
 
     private synchronized RunArguments getNextImage() {
@@ -283,7 +295,8 @@ class MachineLearningThread implements Runnable {
         return queue.pop();
     }
 
-    private void runObjectModel(final Bitmap bitmap, final RunArguments args) {
+    private void runObjectModel(final Bitmap bitmap, final RunArguments args,
+                                final Bitmap fullScreenBitmap) {
         if (args.mObjectDetectFile == null) {
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(new Runnable() {
@@ -291,9 +304,10 @@ class MachineLearningThread implements Runnable {
                 public void run() {
                     if (args.mObjectListener != null) {
                         args.mObjectListener.onPrediction(bitmap, new LinkedList<DetectedSSDBox>(),
-                                bitmap.getWidth(), bitmap.getHeight());
+                                bitmap.getWidth(), bitmap.getHeight(), fullScreenBitmap);
                     }
                     bitmap.recycle();
+                    fullScreenBitmap.recycle();
                 }
             });
             return;
@@ -310,7 +324,7 @@ class MachineLearningThread implements Runnable {
                             args.mObjectListener.onObjectFatalError();
                         } else {
                             args.mObjectListener.onPrediction(bitmap, detect.objectBoxes,
-                                    bitmap.getWidth(), bitmap.getHeight());
+                                    bitmap.getWidth(), bitmap.getHeight(), fullScreenBitmap);
                         }
                     }
                 } catch (Error | Exception e) {
@@ -322,7 +336,7 @@ class MachineLearningThread implements Runnable {
     }
 
     private void runOcrModel(final Bitmap bitmap, final RunArguments args,
-                             final Bitmap bitmapForObjectDetection) {
+                             final Bitmap bitmapForObjectDetection, final Bitmap fullScreenBitmap) {
         final Ocr ocr = new Ocr();
         final String number = ocr.predict(bitmap, args.mContext);
         final boolean hadUnrecoverableException = ocr.hadUnrecoverableException;
@@ -335,11 +349,14 @@ class MachineLearningThread implements Runnable {
                             args.mScanListener.onFatalError();
                         } else {
                             args.mScanListener.onPrediction(number, ocr.expiry, bitmap, ocr.digitBoxes,
-                                    ocr.expiryBox, bitmapForObjectDetection);
+                                    ocr.expiryBox, bitmapForObjectDetection, fullScreenBitmap);
                         }
                     }
                     bitmap.recycle();
                     bitmapForObjectDetection.recycle();
+                    if (fullScreenBitmap != null) {
+                        fullScreenBitmap.recycle();
+                    }
                 } catch (Error | Exception e) {
                     // prevent callbacks from crashing the app, swallow it
                     e.printStackTrace();
@@ -351,10 +368,12 @@ class MachineLearningThread implements Runnable {
     private void runModel() {
         final RunArguments args = getNextImage();
 
-        Bitmap bm;
+        Bitmap bm, fullScreen = null;
         if (args.mFrameBytes != null) {
-            bm = getBitmap(args.mFrameBytes, args.mWidth, args.mHeight, args.mFormat,
+            BitmapPair pair = getBitmap(args.mFrameBytes, args.mWidth, args.mHeight, args.mFormat,
                     args.mSensorOrientation, args.mRoiCenterYRatio, args.mContext, args.mIsOcr);
+            bm = pair.cropped;
+            fullScreen = pair.fullScreen;
         } else if (args.mBitmap != null) {
             bm = args.mBitmap;
         } else {
@@ -373,9 +392,9 @@ class MachineLearningThread implements Runnable {
             Bitmap croppedBitmap = Bitmap.createBitmap(bm, (int) x, (int) y, (int) width,
                     (int) height);
 
-            runOcrModel(croppedBitmap, args, bm);
+            runOcrModel(croppedBitmap, args, bm, fullScreen);
         } else {
-            runObjectModel(bm, args);
+            runObjectModel(bm, args, fullScreen);
         }
     }
 
