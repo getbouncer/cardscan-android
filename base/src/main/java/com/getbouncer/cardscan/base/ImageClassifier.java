@@ -25,7 +25,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import org.tensorflow.lite.Interpreter;
-import org.tensorflow.lite.gpu.GpuDelegate;
 
 /**
  * Classifies images with Tensorflow Lite.
@@ -53,9 +52,6 @@ abstract class ImageClassifier {
 
     /** A ByteBuffer to hold image data, to be feed into Tensorflow Lite as inputs. */
     protected ByteBuffer imgData = null;
-
-    /** holds a gpu delegate */
-    GpuDelegate gpuDelegate = null;
 
 
     /** Initializes an {@code ImageClassifier}. */
@@ -105,14 +101,6 @@ abstract class ImageClassifier {
         recreateInterpreter();
     }
 
-    public void useGpu() {
-        if (gpuDelegate == null) {
-            gpuDelegate = new GpuDelegate();
-            tfliteOptions.addDelegate(gpuDelegate);
-            recreateInterpreter();
-        }
-    }
-
     public void useNNAPI() {
         tfliteOptions.setUseNNAPI(true);
         recreateInterpreter();
@@ -127,10 +115,6 @@ abstract class ImageClassifier {
     public void close() {
         tflite.close();
         tflite = null;
-        if (gpuDelegate != null) {
-            gpuDelegate.close();
-            gpuDelegate = null;
-        }
         tfliteModel = null;
     }
 

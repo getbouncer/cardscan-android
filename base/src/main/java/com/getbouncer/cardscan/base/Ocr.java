@@ -145,8 +145,8 @@ public class Ocr {
 
             if (createdNewModel && hasOpenGl31(context) && USE_GPU) {
                 try {
-                    findFour.useGpu();
-                    recognizedDigitsModel.useGpu();
+                    findFour.useNNAPI();
+                    recognizedDigitsModel.useNNAPI();
                 } catch (Error | Exception e) {
                     Log.i("Ocr", "useGpu exception, falling back to CPU", e);
                     findFour = new FindFourModel(context);
