@@ -269,6 +269,7 @@ class MachineLearningThread implements Runnable {
         Bitmap bm = Bitmap.createBitmap(croppedBitmap, 0, 0, croppedBitmap.getWidth(),
                 croppedBitmap.getHeight(), matrix, true);
 
+
         Bitmap fullScreen = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
                 bitmap.getHeight(), matrix, true);
 
@@ -327,6 +328,8 @@ class MachineLearningThread implements Runnable {
                                     bitmap.getWidth(), bitmap.getHeight(), fullScreenBitmap);
                         }
                     }
+                    bitmap.recycle();
+                    fullScreenBitmap.recycle();
                 } catch (Error | Exception e) {
                     // prevent callbacks from crashing the app, swallow it
                     e.printStackTrace();

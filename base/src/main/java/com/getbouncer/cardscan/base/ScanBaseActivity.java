@@ -102,6 +102,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     // Child classes must set to ensure proper flashlight handling
     public boolean mIsPermissionCheckDone = false;
     protected boolean mShowNumberAndExpiryAsScanning = true;
+    protected boolean postToMachineLearningThread = true;
 
     protected File objectDetectFile;
 
@@ -441,7 +442,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
 
     @Override
     public void onPreviewFrame(byte[] bytes, Camera camera) {
-        if (mMachineLearningSemaphore.tryAcquire()) {
+        if (postToMachineLearningThread && mMachineLearningSemaphore.tryAcquire()) {
             if (machineLearningFrame != null) {
                 mCamera.addCallbackBuffer(machineLearningFrame);
             }
