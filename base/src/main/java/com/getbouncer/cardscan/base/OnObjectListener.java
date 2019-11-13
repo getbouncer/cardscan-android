@@ -8,6 +8,6 @@ import java.util.List;
 
 interface OnObjectListener {
     void onPrediction(final Bitmap bitmap, List<DetectedSSDBox> boxes, int imageWidth,
-                      int imageHeight);
+                      int imageHeight, final Bitmap fullScreenBitmap);
     void onObjectFatalError();
 }

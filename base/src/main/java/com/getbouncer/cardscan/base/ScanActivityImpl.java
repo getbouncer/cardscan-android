@@ -88,7 +88,7 @@ public class ScanActivityImpl extends ScanBaseActivity {
     @Override
     public void onPrediction(final String number, final Expiry expiry, final Bitmap bitmap,
                              final List<DetectedBox> digitBoxes, final DetectedBox expiryBox,
-                             final Bitmap bitmapForObjectDetection) {
+                             final Bitmap bitmapForObjectDetection, final Bitmap fullScreenBitmap) {
 
         if (mInDebugMode) {
             mDebugImageView.setImageBitmap(ImageUtils.drawBoxesOnImage(bitmap, digitBoxes,
@@ -102,7 +102,8 @@ public class ScanActivityImpl extends ScanBaseActivity {
             }
         }
 
-        super.onPrediction(number, expiry, bitmap, digitBoxes, expiryBox, bitmapForObjectDetection);
+        super.onPrediction(number, expiry, bitmap, digitBoxes, expiryBox, bitmapForObjectDetection,
+                fullScreenBitmap);
     }
 
 }
