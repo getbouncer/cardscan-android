@@ -129,7 +129,7 @@ class SSDDetect extends ImageClassifier {
 
 
     @Override
-    MappedByteBuffer loadModelFile(Context context) throws IOException {
+    protected MappedByteBuffer loadModelFile(Context context) throws IOException {
         FileInputStream inputStream = new FileInputStream(modelFile);
         FileChannel fileChannel = inputStream.getChannel();
         long startOffset = 0;

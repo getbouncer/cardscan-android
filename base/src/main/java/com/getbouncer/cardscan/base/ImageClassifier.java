@@ -29,7 +29,7 @@ import org.tensorflow.lite.Interpreter;
 /**
  * Classifies images with Tensorflow Lite.
  */
-abstract class ImageClassifier {
+abstract public class ImageClassifier {
     /** Tag for the {@link Log}. */
     private static final String TAG = "CardScan";
 
@@ -55,15 +55,15 @@ abstract class ImageClassifier {
 
 
     /** Initializes an {@code ImageClassifier}. */
-    ImageClassifier(Context context) throws IOException {
+    protected ImageClassifier(Context context) throws IOException {
         init(context);
     }
 
-    ImageClassifier() {
+    protected ImageClassifier() {
         // don't do anything, but make sure that you call init later
     }
 
-    void init(Context context) throws IOException {
+    protected void init(Context context) throws IOException {
         tfliteModel = loadModelFile(context);
         tflite = new Interpreter(tfliteModel, tfliteOptions);
         imgData =
@@ -77,7 +77,7 @@ abstract class ImageClassifier {
     }
 
     /** Classifies a frame from the preview stream. */
-    void classifyFrame(Bitmap bitmap) {
+    protected void classifyFrame(Bitmap bitmap) {
         if (tflite == null) {
             Log.e(TAG, "Image classifier has not been initialized; Skipped.");
         }
@@ -119,7 +119,7 @@ abstract class ImageClassifier {
     }
 
     /** Memory-map the model file in Assets. */
-    abstract MappedByteBuffer loadModelFile(Context context) throws IOException;
+    abstract protected MappedByteBuffer loadModelFile(Context context) throws IOException;
 
     /** Writes Image data into a {@code ByteBuffer}. */
     private void convertBitmapToByteBuffer(Bitmap bitmap) {
