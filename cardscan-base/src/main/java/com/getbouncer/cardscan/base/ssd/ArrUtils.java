@@ -3,6 +3,8 @@ package com.getbouncer.cardscan.base.ssd;
 import android.util.Log;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Hashtable;
+import java.util.Iterator;
 
 public class ArrUtils {
 
@@ -29,6 +31,53 @@ public class ArrUtils {
         }
         return result;
     }
+    public float[][] rearrangeOCRArray(float[][] locations, Hashtable<String, Integer> featureMapSizes,
+                                       int noOfPriors, int locationsPerPrior){
+        int totalLocationsForAllLayers = featureMapSizes.get("layerOneWidth")
+                * featureMapSizes.get("layerOneHeight")
+                * noOfPriors * locationsPerPrior
+                + featureMapSizes.get("layerTwoWidth")
+                * featureMapSizes.get("layerTwoHeight")
+                * noOfPriors * locationsPerPrior;
+
+        float[][] rearranged = new float[1][totalLocationsForAllLayers];
+        Integer[] featureMapHeights = {featureMapSizes.get("layerOneHeight"),
+                featureMapSizes.get("layerTwoHeight")};
+
+        Integer[] featureMapWidths = {featureMapSizes.get("layerOneWidth"),
+                featureMapSizes.get("layerTwoWidth")};
+
+        Iterator<Integer> heightIterator = Arrays.asList(featureMapHeights).iterator();
+        Iterator<Integer> widthIterator = Arrays.asList(featureMapWidths).iterator();
+
+        int offset = 0;
+        while (heightIterator.hasNext() && widthIterator.hasNext()){
+            int height = heightIterator.next();
+            int width = widthIterator.next();
+
+            int totalNumberOfLocationsForThisLayer = height * width * noOfPriors * locationsPerPrior;
+            int stepsForLoop = height - 1;
+            int j = 0;
+            int i = 0;
+            int step = 0;
+
+            while (i < totalNumberOfLocationsForThisLayer){
+                while (step < height){
+                    j = step;
+                    while (j < totalNumberOfLocationsForThisLayer - stepsForLoop + step){
+                        rearranged[0][offset + i] = locations[0][offset + j];
+                        i++;
+                        j = j + height;
+                    }
+                    step++;
+                }
+                offset = offset + totalNumberOfLocationsForThisLayer;
+            }
+        }
+
+        return rearranged;
+    }
+
 
     public float[][] rearrangeLayer(float[][] locations, int steps, int noOfPriors, int locationsPerPrior){
         /** The model outputs a particular location or a particular class of each prior before moving on to the

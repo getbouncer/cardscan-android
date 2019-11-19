@@ -325,6 +325,9 @@ class MachineLearningThread implements Runnable {
                              final Bitmap bitmapForObjectDetection, final Bitmap fullScreenBitmap) {
         final Ocr ocr = new Ocr();
         final String number = ocr.predict(bitmap, args.mContext);
+        final SSDOcrDetect ocrDetect = new SSDOcrDetect();
+        final String ssd_number = ocrDetect.predict(bitmap, args.mContext);
+        Log.e("OCR Detect", "OCR Number:" + ssd_number);
         final boolean hadUnrecoverableException = ocr.hadUnrecoverableException;
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {
