@@ -3,10 +3,12 @@ package com.getbouncer.cardscan.base.ssd;
 
 import android.graphics.RectF;
 
+import org.json.JSONObject;
+
 
 public class DetectedSSDBox implements Comparable<DetectedSSDBox> {
     public float XMin, YMin, XMax, YMax;
-    float confidence;
+    public float confidence;
     public int label;
 
     public RectF rect;
@@ -22,6 +24,10 @@ public class DetectedSSDBox implements Comparable<DetectedSSDBox> {
         this.confidence = confidence;
         this.label = label;
         this.rect = new RectF(this.XMin, this.YMin, this.XMax, this.YMax);
+    }
+
+    public JSONObject toJson() {
+        return new JSONObject();
     }
 
     @Override

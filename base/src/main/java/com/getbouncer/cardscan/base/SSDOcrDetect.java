@@ -72,9 +72,11 @@ public class SSDOcrDetect {
         }
         if (CreditCardUtils.luhnCheck(num.toString())){
             numberOCR = num.toString();
-            Log.e("M Learning: OCR Number", numberOCR);
+            Log.d("OCR Number passed", numberOCR);
+        } else {
+            Log.d("OCR Number failed", num.toString());
+            numberOCR = null;
         }
-        else numberOCR = "scanning";
 
         return numberOCR;
 
