@@ -20,7 +20,7 @@ class ResourceModelFactory extends ModelFactory {
     @Override
     public MappedByteBuffer loadSSDDetectModelFile(Context context) throws IOException{
 
-        return  loadModelFromResource(context, R.raw.ssdbigocr);
+        return  loadModelFromResource(context, R.raw.ssdsmallocr);
     }
 
 }
