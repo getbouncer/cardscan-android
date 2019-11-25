@@ -64,6 +64,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         View.OnClickListener, OnScanListener, OnObjectListener, OnCameraOpenListener {
 
     private Camera mCamera = null;
+    private CameraPreview cameraPreview = null;
     private OrientationEventListener mOrientationEventListener;
     private static MachineLearningThread machineLearningThread = null;
     private Semaphore mMachineLearningSemaphore = new Semaphore(1);
@@ -233,17 +234,24 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             Intent intent = new Intent();
             intent.putExtra(RESULT_CAMERA_OPEN_ERROR, true);
             setResult(RESULT_CANCELED, intent);
+            if (cameraPreview != null) {
+                cameraPreview.getHolder().removeCallback(cameraPreview);
+            }
             finish();
         } else if (!mIsActivityActive) {
             camera.release();
+            if (cameraPreview != null) {
+                cameraPreview.getHolder().removeCallback(cameraPreview);
+            }
         } else {
             mCamera = camera;
             setCameraDisplayOrientation(this, Camera.CameraInfo.CAMERA_FACING_BACK,
                     mCamera);
             setCameraPreviewFrame();
             // Create our Preview view and set it as the content of our activity.
-            CameraPreview cameraPreview = new CameraPreview(this, this);
+            cameraPreview = new CameraPreview(this, this);
             FrameLayout preview = findViewById(mTextureId);
+            preview.removeAllViews();
             preview.addView(cameraPreview);
         }
     }
@@ -329,6 +337,11 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             mCamera.setPreviewCallbackWithBuffer(null);
             mCamera.release();
             mCamera = null;
+        }
+
+        if (cameraPreview != null) {
+            cameraPreview.getHolder().removeCallback(cameraPreview);
+            cameraPreview = null;
         }
 
         mOrientationEventListener.disable();
@@ -705,8 +718,11 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
 
         }
 
+        /**
+         * The Surface has been created, now tell the camera where to draw the preview.
+         */
+        @Override
         public void surfaceCreated(SurfaceHolder holder) {
-            // The Surface has been created, now tell the camera where to draw the preview.
             try {
                 mCamera.setPreviewDisplay(holder);
                 mCamera.startPreview();
