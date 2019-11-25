@@ -120,7 +120,7 @@ artifacts {
 }
 
 Properties properties = new Properties()
-if (project.rootProtject.file('local.properties').exists()) {
+if (project.rootProject.file('local.properties').exists()) {
     properties.load(project.rootProject.file('local.properties').newDataInputStream())
 }
 
