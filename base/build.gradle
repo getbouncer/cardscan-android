@@ -53,9 +53,9 @@ ext {
 
     libraryVersion = version
 
-    developerId = 'kingst'
-    developerName = 'Sam King'
-    developerEmail = 'kingst@gmail.com'
+    developerId = 'getbouncer'
+    developerName = 'Bouncer Technologies'
+    developerEmail = 'contact@getbouncer.com'
 
     licenseName = 'BSD 3-Clause'
     licenseUrl = 'http://opensource.org/licenses/BSD-3-Clause'
