@@ -16,11 +16,12 @@ import android.renderscript.ScriptIntrinsicYuvToRGB;
 import android.renderscript.Type;
 import android.util.Log;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.getbouncer.cardscan.base.ssd.DetectedSSDBox;
 
 import java.io.File;
 import java.util.LinkedList;
-
 
 class MachineLearningThread implements Runnable {
 
@@ -72,7 +73,7 @@ class MachineLearningThread implements Runnable {
             mObjectDetectFile = objectDetectFile;
         }
 
-        // this should only be used for testing
+        @VisibleForTesting
         RunArguments(Bitmap bitmap, OnScanListener scanListener, Context context) {
             mFrameBytes = null;
             mBitmap = bitmap;
@@ -88,7 +89,7 @@ class MachineLearningThread implements Runnable {
             mObjectDetectFile = null;
         }
 
-        // this should only be used for testing
+        @VisibleForTesting
         RunArguments(Bitmap bitmap, OnObjectListener objectListener, Context context,
                      File objectDetectFile) {
             mFrameBytes = null;
@@ -161,8 +162,10 @@ class MachineLearningThread implements Runnable {
         notify();
     }
 
-    // from https://stackoverflow.com/questions/43623817/android-yuv-nv12-to-rgb-conversion-with-renderscript
-    // interestingly the question had the right algorithm for our format (yuv nv21)
+    /**
+     * from https://stackoverflow.com/questions/43623817/android-yuv-nv12-to-rgb-conversion-with-renderscript
+     * interestingly the question had the right algorithm for our format (yuv nv21)
+     */
     public Bitmap YUV_toRGB(byte[] yuvByteArray,int W,int H, Context ctx) {
         RenderScript rs = RenderScript.create(ctx);
         ScriptIntrinsicYuvToRGB yuvToRgbIntrinsic = ScriptIntrinsicYuvToRGB.create(rs,
