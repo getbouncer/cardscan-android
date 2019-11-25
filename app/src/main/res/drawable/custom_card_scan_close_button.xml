@@ -3,6 +3,6 @@
      card_scan_close_button_button.xml and set the states appropriately. Currently
      we flipped pressed and non-pressed images just to show that it works. -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_pressed="true" android:drawable="@drawable/baseline_close_white_24" />
-    <item android:state_pressed="false" android:drawable="@drawable/close_white_pressed" />
+    <item android:state_pressed="true" android:drawable="@drawable/bouncer_private_card_scan_close_white_24" />
+    <item android:state_pressed="false" android:drawable="@drawable/card_scan_close_button_white_pressed" />
 </selector>

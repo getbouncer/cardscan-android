@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/baseline_close_white_24"
+    android:src="@drawable/bouncer_private_card_scan_close_white_24"
     android:alpha="0.5">
 </bitmap>
