@@ -42,9 +42,13 @@ apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
 ext {
+    bintrayRepo = 'cardscan-base-android'
+    bintrayName = 'cardscan-base-android'
+    bintrayOrg = 'getbouncer'
+
     publishedGroupId = 'com.getbouncer'
-    libraryName = 'base'
-    artifact = 'base'
+    libraryName = 'cardscan-base'
+    artifact = 'cardscan-base'
 
     libraryDescription = 'This library provides an Activity that you can use to scan credit and debit cards.'
 
@@ -122,4 +126,28 @@ artifacts {
 Properties properties = new Properties()
 if (project.rootProject.file('local.properties').exists()) {
     properties.load(project.rootProject.file('local.properties').newDataInputStream())
+}
+
+
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+
+    configurations = ['archives']
+    pkg {
+        repo = bintrayRepo
+        name = bintrayName
+        userOrg = bintrayOrg
+        desc = libraryDescription
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        licenses = allLicenses
+        dryRun = false
+        publish = true
+        override = false
+        publicDownloadNumbers = true
+        version {
+            desc = libraryDescription
+        }
+    }
 }
