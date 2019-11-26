@@ -17,4 +17,4 @@ To build and upload the two libraries:
   $ ./gradlew cardscan:bintrayUpload
 
 * Then make sure that you update the docs both in the README in this
-  repo as well as the apidocs repo
+  repo as well as the apidocs repoR
