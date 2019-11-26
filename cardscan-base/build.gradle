@@ -44,7 +44,7 @@ apply plugin: 'com.jfrog.bintray'
 ext {
     bintrayRepo = 'cardscan-base-android'
     bintrayName = 'cardscan-base-android'
-    bintrayOrg = 'getbouncer'
+    bintrayOrg = 'bouncerpaid'
 
     publishedGroupId = 'com.getbouncer'
     libraryName = 'cardscan-base'
