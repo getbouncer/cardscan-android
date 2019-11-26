@@ -11,8 +11,8 @@
 
 To build and upload the two libraries:
 
-  $ ./gradlew base:install
-  $ ./gradlew base:bintrayUpload
+  $ ./gradlew cardscan-base:install
+  $ ./gradlew cardscan-base:bintrayUpload
   $ ./gradlew cardscan:install
   $ ./gradlew cardscan:bintrayUpload
 
