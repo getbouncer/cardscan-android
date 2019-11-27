@@ -9,18 +9,15 @@ import android.graphics.Paint;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
-import android.renderscript.Allocation;
-import android.renderscript.Element;
-import android.renderscript.RenderScript;
-import android.renderscript.ScriptIntrinsicYuvToRGB;
-import android.renderscript.Type;
 import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.getbouncer.cardscan.base.image.YUVDecoder;
 import com.getbouncer.cardscan.base.ssd.DetectedSSDBox;
 
 import java.io.File;
+import java.nio.IntBuffer;
 import java.util.LinkedList;
 
 class MachineLearningThread implements Runnable {
@@ -127,7 +124,7 @@ class MachineLearningThread implements Runnable {
             return;
         }
         RunArguments args = new RunArguments(null, 0, 0, 0,
-                90, (OnScanListener) null, context, 0.5f);
+                90, null, context, 0.5f);
         queue.push(args);
         notify();
     }
@@ -163,54 +160,37 @@ class MachineLearningThread implements Runnable {
     }
 
     /**
-     * from https://stackoverflow.com/questions/43623817/android-yuv-nv12-to-rgb-conversion-with-renderscript
-     * interestingly the question had the right algorithm for our format (yuv nv21)
+     * from https://stackoverflow.com/questions/8340128/decoding-yuv-to-rgb-in-c-c-with-ndk
+     * This appears to be a fairly common problem for image processing apps. See also the native
+     * implementation of YUVtoARGB https://github.com/cats-oss/android-gpuimage/blob/master/library/src/main/cpp/yuv-decoder.c
      */
-    public Bitmap YUV_toRGB(byte[] yuvByteArray,int W,int H, Context ctx) {
-        RenderScript rs = RenderScript.create(ctx);
-        ScriptIntrinsicYuvToRGB yuvToRgbIntrinsic = ScriptIntrinsicYuvToRGB.create(rs,
-                Element.U8_4(rs));
+    public Bitmap YUVtoRGB(byte[] yuvByteArray, int previewWidth, int previewHeight) {
+        int[] argbByteArray = new int[previewWidth * previewHeight];
+        YUVDecoder.YUVtoARBG(yuvByteArray, previewWidth, previewHeight, argbByteArray);
 
-        Type.Builder yuvType = new Type.Builder(rs, Element.U8(rs)).setX(yuvByteArray.length);
-        Allocation in = Allocation.createTyped(rs, yuvType.create(), Allocation.USAGE_SCRIPT);
+        Bitmap fullImage = Bitmap.createBitmap(previewWidth, previewHeight, Bitmap.Config.ARGB_8888);
+        fullImage.copyPixelsFromBuffer(IntBuffer.wrap(argbByteArray));
 
-        Type.Builder rgbaType = new Type.Builder(rs, Element.RGBA_8888(rs)).setX(W).setY(H);
-        Allocation out = Allocation.createTyped(rs, rgbaType.create(), Allocation.USAGE_SCRIPT);
-
-        in.copyFrom(yuvByteArray);
-
-        yuvToRgbIntrinsic.setInput(in);
-        yuvToRgbIntrinsic.forEach(out);
-        Bitmap fullImage = Bitmap.createBitmap(W, H, Bitmap.Config.ARGB_8888);
-
-        out.copyTo(fullImage);
-
-        yuvToRgbIntrinsic.destroy();
-        rs.destroy();
-        in.destroy();
-        out.destroy();
-
-        int width, height;
-        if (W > H) {
-            height = ScanBaseActivity.MIN_IMAGE_EDGE;
-            width = W * height / H;
+        int resizedWidth, resizedHeight;
+        if (previewWidth > previewHeight) {
+            resizedHeight = ScanBaseActivity.MIN_IMAGE_EDGE;
+            resizedWidth = previewWidth * resizedHeight / previewHeight;
         } else {
-            width = ScanBaseActivity.MIN_IMAGE_EDGE;
-            height = H * width / W;
+            resizedWidth = ScanBaseActivity.MIN_IMAGE_EDGE;
+            resizedHeight = previewHeight * resizedWidth / previewWidth;
         }
-        Bitmap resizedImage = Bitmap.createScaledBitmap(fullImage, width, height, false);
+
+        Bitmap resizedImage = Bitmap.createScaledBitmap(fullImage, resizedWidth, resizedHeight, false);
         fullImage.recycle();
-        fullImage = null;
 
         return resizedImage;
     }
 
     private BitmapPair getBitmap(byte[] bytes, int width, int height, int format,
-                                 int sensorOrientation, float roiCenterYRatio, Context ctx,
-                                 boolean isOcr) {
+                                 int sensorOrientation, float roiCenterYRatio, boolean isOcr) {
         long startTime = SystemClock.uptimeMillis();
 
-        final Bitmap bitmap = YUV_toRGB(bytes, width, height, ctx);
+        final Bitmap bitmap = YUVtoRGB(bytes, width, height);
         long decode = SystemClock.uptimeMillis();
 
         if (GlobalConfig.PRINT_TIMING) {
@@ -377,7 +357,7 @@ class MachineLearningThread implements Runnable {
         Bitmap bm, fullScreen = null;
         if (args.mFrameBytes != null) {
             BitmapPair pair = getBitmap(args.mFrameBytes, args.mWidth, args.mHeight, args.mFormat,
-                    args.mSensorOrientation, args.mRoiCenterYRatio, args.mContext, args.mIsOcr);
+                    args.mSensorOrientation, args.mRoiCenterYRatio, args.mIsOcr);
             bm = pair.cropped;
             fullScreen = pair.fullScreen;
         } else if (args.mBitmap != null) {
