@@ -18,8 +18,6 @@
 
 package com.getbouncer.cardscan.base.image;
 
-import android.graphics.Bitmap;
-
 public class YUVDecoder {
     static {
         System.loadLibrary("yuv-decoder");
@@ -42,10 +40,4 @@ public class YUVDecoder {
      * @param out RGBA image data
      */
     public static native void YUVtoARBG(byte[] yuv, int width, int height, int[] out);
-
-    /**
-     * Transpose the height and width of a bitmap
-     * @param srcBitmap Bitmap to transpose
-     */
-    public static native void transposeBitmap(Bitmap srcBitmap);
 }
