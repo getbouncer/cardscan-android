@@ -3,11 +3,11 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "com.getgrowthmetrics.testcardscan"
+        applicationId "com.getbouncer.testcardscan"
         minSdkVersion 19
         targetSdkVersion 28
         versionCode 4015
-        versionName "1.0.4015"
+        versionName "1.0.5114"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
