@@ -46,7 +46,7 @@ class Overlay extends View {
     private int dpToPx(int dp) {
         return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
     }
-    
+
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
