@@ -24,9 +24,6 @@ class Overlay extends View {
 
     boolean drawCorners = true;
 
-    //private Paint paintAntiAlias = new Paint(Paint.ANTI_ALIAS_FLAG);
-    //private Paint paint = new Paint();
-
     public Overlay(Context context, AttributeSet attrs) {
         super(context, attrs);
         setLayerType(View.LAYER_TYPE_SOFTWARE, null);
@@ -40,7 +37,7 @@ class Overlay extends View {
         return R.color.card_scan_corner_color;
     }
 
-    public void setCircle(RectF rect, int radius) {
+    public void setRect(RectF rect, int radius) {
         this.rect = rect;
         this.radius = radius;
         postInvalidate();

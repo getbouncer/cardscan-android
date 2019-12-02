@@ -26,6 +26,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.hardware.Camera;
 import android.os.Bundle;
@@ -150,20 +151,20 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
 
         @Override
         public void onGlobalLayout() {
-            int[] xy = new int[2];
             View view = findViewById(cardRectangleId);
-            view.getLocationInWindow(xy);
 
             // convert from DP to pixels
             int radius = (int) (11 * Resources.getSystem().getDisplayMetrics().density);
-            RectF rect = new RectF(xy[0], xy[1],
-                    xy[0] + view.getWidth(),
-                    xy[1] + view.getHeight());
+            RectF rect = new RectF(
+                    view.getLeft(),
+                    view.getTop(),
+                    view.getRight(),
+                    view.getBottom());
             Overlay overlay = findViewById(overlayId);
-            overlay.setCircle(rect, radius);
+            overlay.setRect(rect, radius);
 
             ScanBaseActivity.this.mRoiCenterYRatio =
-                    (xy[1] + view.getHeight() * 0.5f) / overlay.getHeight();
+                    (view.getTop() + (view.getHeight() * 0.5f)) / overlay.getHeight();
         }
     }
 
