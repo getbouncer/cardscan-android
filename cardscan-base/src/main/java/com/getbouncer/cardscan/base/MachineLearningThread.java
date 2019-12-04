@@ -372,7 +372,7 @@ class MachineLearningThread implements Runnable {
 
         if (args.mIsOcr) {
             float width = bm.getWidth();
-            float height = width * 302.0f / 480.0f;
+            float height = width * 5.0f / 8.0f;
             float y = (bm.getHeight() - height) / 2.0f;
             float x = 0.0f;
             Bitmap croppedBitmap = Bitmap.createBitmap(bm, (int) x, (int) y, (int) width,
