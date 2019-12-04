@@ -26,7 +26,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.hardware.Camera;
 import android.os.Bundle;
@@ -81,6 +80,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     private int mTextureId;
     private float mRoiCenterYRatio;
     private boolean mIsOcr = true;
+    private boolean mDelayShowingExpiration = true;
     private byte[] machineLearningFrame = null;
 
     private ScanStats scanStats;
@@ -88,6 +88,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     public static String IS_OCR = "is_ocr";
     public static String RESULT_FATAL_ERROR = "result_fatal_error";
     public static String RESULT_CAMERA_OPEN_ERROR = "result_camera_open_error";
+    public static String DELAY_SHOWING_EXPIRATION = "delay_showing_expiration";
     public boolean wasPermissionDenied = false;
     public String denyPermissionTitle;
     public String denyPermissionMessage;
@@ -131,6 +132,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         this.scanStats = new ScanStats();
 
         mIsOcr = getIntent().getBooleanExtra(IS_OCR, true);
+        mDelayShowingExpiration = getIntent().getBooleanExtra(DELAY_SHOWING_EXPIRATION, true);
 
         mOrientationEventListener = new OrientationEventListener(this) {
             @Override
@@ -610,7 +612,8 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         TextView textView = findViewById(mCardNumberId);
         setValueAnimated(textView, CreditCardUtils.format(numberResult));
 
-        if (expiryResult != null && duration >= (errorCorrectionDurationMs / 2)) {
+        boolean shouldShowExpiration = !mDelayShowingExpiration || duration >= (errorCorrectionDurationMs / 2);
+        if (expiryResult != null && shouldShowExpiration) {
             textView = findViewById(mExpiryId);
             setValueAnimated(textView, expiryResult.format());
         }
