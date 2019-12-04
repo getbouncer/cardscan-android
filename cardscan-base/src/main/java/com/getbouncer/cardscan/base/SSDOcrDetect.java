@@ -7,10 +7,9 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import com.getbouncer.cardscan.base.ssd.ArrUtils;
-import com.getbouncer.cardscan.base.ssd.DetectedSSDBox;
+import com.getbouncer.cardscan.base.ssd.DetectedOcrBox;
 import com.getbouncer.cardscan.base.ssd.OcrPriorsGen;
 import com.getbouncer.cardscan.base.ssd.PredictionAPI;
-import com.getbouncer.cardscan.base.ssd.PriorsGen;
 import com.getbouncer.cardscan.base.ssd.Result;
 
 import java.util.Collections;
@@ -24,7 +23,7 @@ public class SSDOcrDetect {
     private static float[][] priors = null;
 
 
-    public List<DetectedSSDBox> objectBoxes = new ArrayList<>();
+    public List<DetectedOcrBox> objectBoxes = new ArrayList<>();
     boolean hadUnrecoverableException = false;
 
     /** We don't use the following two for now */
@@ -54,17 +53,17 @@ public class SSDOcrDetect {
         if (result.pickedBoxProbs.size() != 0 && result.pickedLabels.size() != 0)
         {
             for (int i = 0; i < result.pickedBoxProbs.size(); ++i){
-                DetectedSSDBox ssdBox = new DetectedSSDBox(
+                DetectedOcrBox ocrBox = new DetectedOcrBox(
                         result.pickedBoxes.get(i)[0], result.pickedBoxes.get(i)[1],
                         result.pickedBoxes.get(i)[2], result.pickedBoxes.get(i)[3],result.pickedBoxProbs.get(i),
                         image.getWidth(), image.getHeight(),result.pickedLabels.get(i));
-                objectBoxes.add(ssdBox);
+                objectBoxes.add(ocrBox);
             }
         }
         String numberOCR = "";
         Collections.sort(objectBoxes);
         StringBuilder num = new StringBuilder();
-        for (DetectedSSDBox box : objectBoxes){
+        for (DetectedOcrBox box : objectBoxes){
             if (box.label == 10){
                 box.label = 0;
             }
