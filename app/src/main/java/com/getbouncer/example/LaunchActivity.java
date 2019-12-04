@@ -29,7 +29,7 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.scan_button) {
-            ScanActivity.start(this);
+            ScanActivity.start(this, false);
         } else if (v.getId() == R.id.scanCardDebug) {
             ScanActivity.startDebug(this);
         } else if (v.getId() == R.id.scanCardAltText) {
