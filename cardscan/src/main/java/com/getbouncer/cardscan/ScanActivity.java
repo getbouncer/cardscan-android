@@ -2,9 +2,9 @@ package com.getbouncer.cardscan;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.test.espresso.idling.CountingIdlingResource;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.test.espresso.idling.CountingIdlingResource;
 import android.text.TextUtils;
 
 import com.getbouncer.cardscan.base.IdleResourceManager;
@@ -41,6 +41,20 @@ public class ScanActivity {
     }
 
     /**
+     * Starts a ScanActivityImpl activity, using {@param activity} as a parent.
+     *
+     * @param activity the parent activity that is waiting for the result of the ScanActivity
+     * @param delayShowingExpiration true if the scan activity should delay showing the expiration
+     */
+    public static void start(@NonNull Activity activity, boolean delayShowingExpiration) {
+        ScanBaseActivity.warmUp(activity.getApplicationContext());
+        Intent intent = new Intent(activity, ScanActivityImpl.class);
+        intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
+        intent.putExtra(ScanBaseActivity.DELAY_SHOWING_EXPIRATION, delayShowingExpiration);
+        activity.startActivityForResult(intent, REQUEST_CODE);
+    }
+
+    /**
      * Starts a scan activity and customizes the text that it displays.
      *
      * @param activity the parent activity that is waiting for the result of the ScanActivity
@@ -55,6 +69,26 @@ public class ScanActivity {
         intent.putExtra(ScanActivityImpl.SCAN_CARD_TEXT, scanCardText);
         intent.putExtra(ScanActivityImpl.POSITION_CARD_TEXT, positionCardText);
         intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
+        activity.startActivityForResult(intent, REQUEST_CODE);
+    }
+
+    /**
+     * Starts a scan activity and customizes the text that it displays.
+     *
+     * @param activity the parent activity that is waiting for the result of the ScanActivity
+     * @param scanCardText the large text above the card rectangle
+     * @param positionCardText the small text below the card rectangle
+     * @param delayShowingExpiration true if the scan activity should delay showing the expiration
+     */
+    public static void start(@NonNull Activity activity, String scanCardText,
+                             String positionCardText, boolean delayShowingExpiration) {
+
+        ScanBaseActivity.warmUp(activity.getApplicationContext());
+        Intent intent = new Intent(activity, ScanActivityImpl.class);
+        intent.putExtra(ScanActivityImpl.SCAN_CARD_TEXT, scanCardText);
+        intent.putExtra(ScanActivityImpl.POSITION_CARD_TEXT, positionCardText);
+        intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
+        intent.putExtra(ScanBaseActivity.DELAY_SHOWING_EXPIRATION, delayShowingExpiration);
         activity.startActivityForResult(intent, REQUEST_CODE);
     }
 

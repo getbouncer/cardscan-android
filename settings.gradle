@@ -1,1 +1,1 @@
-include ':app', ':cardscan', ':base'
+include ':app', ':cardscan', ':cardscan-base'

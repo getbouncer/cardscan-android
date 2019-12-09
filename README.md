@@ -20,8 +20,8 @@ We publish our library in the jcenter repository, so for most gradle configurati
 
 ```gradle
 dependencies {
-    implementation 'com.getbouncer:base:1.0.5104'
-    implementation 'com.getbouncer:cardscan:1.0.5104'
+    implementation 'com.getbouncer:cardscan-base:1.0.5116'
+    implementation 'com.getbouncer:cardscan:1.0.5116'
 }
 ```
 
@@ -31,24 +31,26 @@ To use CardScan, you create a `ScanActivity` intent, start it, and
 get the results via the `onActivityResult` method:
 
 ```java
-public void scanCard() {
-    ScanActivity.start(this);
-}
-
-protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    super.onActivityResult(requestCode, resultCode, data);
-
-    if (ScanActivity.isScanResult(requestCode)) {
-        if (resultCode == ScanActivity.RESULT_OK && data != null) {
-            CreditCard scanResult = ScanActivity.creditCardFromResult(data);
-
-	    // at this point pass the info to your app's enter card flow
-	    // this is how we do it in our example app
-            Intent intent = new Intent(this, EnterCard.class);
-            intent.putExtra("card", scanResult);
-            startActivity(intent);
-        } else if (resultCode == ScanActivity.RESULT_CANCELED) {
-            Log.d(TAG, "The user pressed the back button");
+class Example {
+    public void scanCard() {
+        ScanActivity.start(this);
+    }
+    
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+    
+        if (ScanActivity.isScanResult(requestCode)) {
+            if (resultCode == ScanActivity.RESULT_OK && data != null) {
+                CreditCard scanResult = ScanActivity.creditCardFromResult(data);
+    
+            // at this point pass the info to your app's enter card flow
+            // this is how we do it in our example app
+                Intent intent = new Intent(this, EnterCard.class);
+                intent.putExtra("card", scanResult);
+                startActivity(intent);
+            } else if (resultCode == ScanActivity.RESULT_CANCELED) {
+                Log.d(TAG, "The user pressed the back button");
+            }
         }
     }
 }
@@ -63,7 +65,7 @@ being passed into your payment form. This is what it looks like using a standard
 
 ## Authors
 
-Sam King and Rui Guo
+Sam King, Rui Guo, and Zain ul Abi Din
 
 ## License
 

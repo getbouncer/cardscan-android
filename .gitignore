@@ -17,3 +17,4 @@
 /captures
 .externalNativeBuild
 langapiconfig.json
+*.cxx

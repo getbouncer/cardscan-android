@@ -1,0 +1,15 @@
+<resources>
+    <!-- configurable strings -->
+    <string name="card_scan_scan_card">Scan Card</string>
+    <string name="card_scan_position_card">Position your card in the frame so the card number is visible</string>
+    <string name="card_scan_deny_permission_title">Need camera access</string>
+    <string name="card_scan_deny_permission_message">Please allow camera access to scan your card</string>
+    <string name="card_scan_deny_permission_button">OK</string>
+    <string name="card_scan_flashlight_button" translatable="false">Toggle flashlight</string>
+    <string name="card_scan_close_button" translatable="false">Close button</string>
+
+    <!-- resources used for testing, should not be overridden -->
+    <string name="an_image_used_only_for_debugging_and_testing" translatable="false">An image used only for debugging and testing</string>
+    <string name="_4242_4242_4242_4242" translatable="false">4242 4242 4242 4242</string>
+    <string name="_5_18" translatable="false">5/18</string>
+</resources>
