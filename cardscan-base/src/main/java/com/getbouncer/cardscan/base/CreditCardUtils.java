@@ -62,7 +62,7 @@ public class CreditCardUtils {
 
     private static boolean isValidBin(String number) {
         return isAmex(number) || isDiscover(number) || isVisa(number) || isMastercard(number)
-                || isUnionPay(number);
+                || isUnionPay(number) || isEgpMeeza(number);
     }
 
     private static String prefix(String s, int n) {
@@ -114,5 +114,9 @@ public class CreditCardUtils {
 
     public static boolean isVisa(String number) {
         return (number.length() == 16) && number.startsWith("4");
+    }
+
+    public static boolean isEgpMeeza(String number) {
+        return (number.length() == 16) && number.startsWith("50");
     }
 }

@@ -13,7 +13,7 @@ public class CreditCard  implements Parcelable {
     @Nullable public final String expiryMonth;
     @Nullable public final String expiryYear;
 
-    public enum Network {VISA, MASTERCARD, AMEX, DISCOVER, UNIONPAY, UNKNOWN};
+    public enum Network {VISA, MASTERCARD, AMEX, DISCOVER, UNIONPAY, UNKNOWN, EGP_MEEZA};
 
     CreditCard(@NonNull String number, @Nullable String expiryMonth,
                           @Nullable String expiryYear) {
@@ -31,6 +31,8 @@ public class CreditCard  implements Parcelable {
             this.network = CreditCard.Network.MASTERCARD;
         } else if (CreditCardUtils.isUnionPay(number)) {
             this.network = Network.UNIONPAY;
+        } else if (CreditCardUtils.isEgpMeeza(number)) {
+            this.network = Network.EGP_MEEZA;
         } else {
             this.network = CreditCard.Network.UNKNOWN;
         }
