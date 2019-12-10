@@ -166,7 +166,7 @@ class MachineLearningThread implements Runnable {
      */
     public Bitmap YUVtoRGB(byte[] yuvByteArray, int previewWidth, int previewHeight) {
         int[] argbByteArray = new int[previewWidth * previewHeight];
-        YUVDecoder.YUVtoRBGA(yuvByteArray, previewWidth, previewHeight, argbByteArray);
+        YUVDecoder.YUVtoRGBA(yuvByteArray, previewWidth, previewHeight, argbByteArray);
 
         Bitmap fullImage = Bitmap.createBitmap(previewWidth, previewHeight, Bitmap.Config.ARGB_8888);
         fullImage.copyPixelsFromBuffer(IntBuffer.wrap(argbByteArray));
