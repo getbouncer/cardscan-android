@@ -4,7 +4,7 @@
 
 
 JNIEXPORT void JNICALL
-Java_com_getbouncer_cardscan_base_image_YUVDecoder_YUVtoRBGA(JNIEnv *env, jobject obj,
+Java_com_getbouncer_cardscan_base_image_YUVDecoder_YUVtoRGBA(JNIEnv *env, jobject obj,
                                                              jbyteArray yuv420sp,
                                                              jint width, jint height,
                                                              jintArray rgbOut) {
@@ -63,7 +63,7 @@ Java_com_getbouncer_cardscan_base_image_YUVDecoder_YUVtoRBGA(JNIEnv *env, jobjec
 }
 
 JNIEXPORT void JNICALL
-Java_com_getbouncer_cardscan_base_image_YUVDecoder_YUVtoARBG(JNIEnv *env, jobject obj,
+Java_com_getbouncer_cardscan_base_image_YUVDecoder_YUVtoARGB(JNIEnv *env, jobject obj,
                                                              jbyteArray yuv420sp,
                                                              jint width, jint height,
                                                              jintArray rgbOut) {
