@@ -94,6 +94,15 @@ class MyAppActivity : AppCompatActivity() {
 }
 ```
 
+`ScanActivity` will send the following statistics to the bouncer servers:
+- scan start time
+- scan end time
+- number of camera images (frames) scanned
+- scan success
+
+This information helps bouncer understand the user experience so that we can continue to improve our
+SDK.
+
 ## Adding to Your App
 
 When added to your app successfully, you should see the card numbers
