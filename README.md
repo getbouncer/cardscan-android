@@ -56,6 +56,57 @@ class Example {
 }
 ```
 
+## Configuring CardScan
+
+Make sure that you get an [API key](https://api.getbouncer.com/console) and configure the library
+when your application launches. If you are using the provided `ScanActivity`, Set the static
+`apiKey` variable before invoking CardScan:
+
+```kotlin
+import com.getbouncer.cardscan.ScanActivity
+
+class MyAppActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        ScanActivity.apiKey = "YOUR_API_KEY_HERE"
+    }
+    
+    fun launchCardScan() {
+        ScanActivity.start(this)
+    }
+    
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        
+        if (ScanActivity.isScanResult(requestCode)) {
+            if (resultCode == ScanActivity.RESULT_OK && data != null) {
+                val scanResult = ScanActivity.creditCardFromResult(data)
+                // TODO: something with the scan result
+            } else if (resultCode == ScanActivity.RESULT_CANCELLED) {
+                if (data.getBooleanExtra(ScanActivity.RESULT_FATAL_ERROR, false)) {
+                    // TODO: handle a fatal error with cardscan
+                } else {
+                    // TODO: the user pressed the back button
+                }
+            }
+        }
+    }
+}
+```
+
+`ScanActivity` will send the following statistics to the bouncer servers:
+- `success`: boolean indicating if a card was successfully scanned
+- `duration`: how long the cardscan activity was running
+- `scans`: the number of camera images (frames) scanned
+- `torch_on`: whether the flashlight was turned on during scanning
+- `model`: the ML model used to detect card numbers
+- `device_type`: The `Build.MANUFACTURER` and `Build.MODEL` values
+- `sdk_version`: The version of the SDK
+- `os`: the operating system version defined by `Build.VERSION.RELEASE`
+
+This information helps bouncer understand the user experience so that we can continue to improve our
+SDK.
+
 ## Adding to Your App
 
 When added to your app successfully, you should see the card numbers
