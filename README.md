@@ -95,10 +95,14 @@ class MyAppActivity : AppCompatActivity() {
 ```
 
 `ScanActivity` will send the following statistics to the bouncer servers:
-- scan start time
-- scan end time
-- number of camera images (frames) scanned
-- scan success
+- `success`: boolean indicating if a card was successfully scanned
+- `duration`: how long the cardscan activity was running
+- `scans`: the number of camera images (frames) scanned
+- `torch_on`: whether the flashlight was turned on during scanning
+- `model`: the ML model used to detect card numbers
+- `device_type`: The `Build.MANUFACTURER` and `Build.MODEL` values
+- `sdk_version`: The version of the SDK
+- `os`: the operating system version defined by `Build.VERSION.RELEASE`
 
 This information helps bouncer understand the user experience so that we can continue to improve our
 SDK.
