@@ -39,8 +39,8 @@ apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
 ext {
-    bintrayRepo = 'cardscan-android'
-    bintrayName = 'cardscan-android'
+    bintrayRepo = 'CardScan'
+    bintrayName = 'CardScan'
     bintrayOrg = 'bouncerpaid'
 
     publishedGroupId = 'com.getbouncer'
@@ -133,7 +133,7 @@ bintray {
     pkg {
         repo = bintrayRepo
         name = bintrayName
-        userOrg = bintrayOrg
+//        userOrg = bintrayOrg
         desc = libraryDescription
         websiteUrl = siteUrl
         vcsUrl = gitUrl

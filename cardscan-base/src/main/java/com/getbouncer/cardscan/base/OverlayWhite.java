@@ -6,8 +6,8 @@ import android.view.View;
 
 public class OverlayWhite extends Overlay {
 
-    int backgroundColorId = R.color.card_scan_white_background;
-    int cornerColorId = R.color.card_scan_gray;
+    int backgroundColorId = R.color.card_scan_overlay_colored_background;
+    int cornerColorId = R.color.card_scan_overlay_colored_corner_color;
 
     public OverlayWhite(Context context, AttributeSet attrs) {
         super(context, attrs);
