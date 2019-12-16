@@ -2,6 +2,6 @@
 <resources>
     <color name="card_scan_camera_background">#992F3542</color>
     <color name="card_scan_corner_color">#4CD964</color>
-    <color name="card_scan_white_background">#ffffffff</color>
-    <color name="card_scan_gray">#88888888</color>
+    <color name="card_scan_overlay_colored_background">#ffffffff</color>
+    <color name="card_scan_overlay_colored_corner_color">#88888888</color>
 </resources>
