@@ -30,7 +30,7 @@ public class YUVDecoder {
      * @param height height of the source image
      * @param out RGBA image data
      */
-    public static native void YUVtoRBGA(byte[] yuv, int width, int height, int[] out);
+    public static native void YUVtoRGBA(byte[] yuv, int width, int height, int[] out);
 
     /**
      * Convert a YUV nv21 image byte array to an ARGB image byte array
@@ -39,5 +39,5 @@ public class YUVDecoder {
      * @param height height of the source image
      * @param out RGBA image data
      */
-    public static native void YUVtoARBG(byte[] yuv, int width, int height, int[] out);
+    public static native void YUVtoARGB(byte[] yuv, int width, int height, int[] out);
 }
