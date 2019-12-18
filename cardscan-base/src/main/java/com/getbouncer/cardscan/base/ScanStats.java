@@ -7,7 +7,7 @@ import android.text.TextUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-class ScanStats {
+public class ScanStats {
     private long endTimeMs;
     private long startTimeMs;
     private int scans;
@@ -27,7 +27,7 @@ class ScanStats {
         this.endTimeMs = SystemClock.uptimeMillis();
     }
 
-    JSONObject toJson() {
+    public JSONObject toJson() {
         JSONObject object = new JSONObject();
         double duration = ((double) endTimeMs - startTimeMs) / 1000.0;
 

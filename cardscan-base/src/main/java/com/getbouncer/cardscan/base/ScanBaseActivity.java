@@ -83,7 +83,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     private boolean mDelayShowingExpiration = true;
     private byte[] machineLearningFrame = null;
 
-    private ScanStats scanStats;
+    protected ScanStats scanStats;
 
     public static String IS_OCR = "is_ocr";
     public static String RESULT_FATAL_ERROR = "result_fatal_error";
