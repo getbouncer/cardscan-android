@@ -69,7 +69,7 @@ public class SSDOcrDetect {
             }
             num.append(String.valueOf(box.label));
         }
-        if (CreditCardUtils.luhnCheck(num.toString())){
+        if (CreditCardUtils.isValidCardNumber(num.toString())){
             numberOCR = num.toString();
             Log.d("OCR Number passed", numberOCR);
         } else {
