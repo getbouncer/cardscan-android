@@ -33,7 +33,7 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
         } else if (v.getId() == R.id.scanCardDebug) {
             ScanActivity.startDebug(this);
         } else if (v.getId() == R.id.scanCardAltText) {
-            ScanActivity.start(this, "New Scan Card",
+            ScanActivity.start(this, "New Scan CreditCardUtils",
                     "Place your card here");
         } else if (v.getId() == R.id.scan_video) {
             ScanActivity.startDebug(this, new TestResourceImages(getResources()));

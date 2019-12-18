@@ -610,7 +610,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         String numberResult = getNumberResult();
         Expiry expiryResult = getExpiryResult();
         TextView textView = findViewById(mCardNumberId);
-        setValueAnimated(textView, CreditCardUtils.format(numberResult));
+        setValueAnimated(textView, CreditCardUtils.formatNumberForDisplay(numberResult));
 
         boolean shouldShowExpiration = !mDelayShowingExpiration || duration >= (errorCorrectionDurationMs / 2);
         if (expiryResult != null && shouldShowExpiration) {

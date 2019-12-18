@@ -18,14 +18,14 @@ public class EnterCard extends AppCompatActivity {
         setContentView(R.layout.activity_enter_card);
 
         CreditCard card = getIntent().getParcelableExtra("card");
-        String number = card.number;
+        String number = card.getNumber();
         int expiryMonth = -1;
-        if (!TextUtils.isEmpty(card.expiryMonth)) {
-            expiryMonth = Integer.parseInt(card.expiryMonth);
+        if (!TextUtils.isEmpty(card.getExpiryMonth())) {
+            expiryMonth = Integer.parseInt(card.getExpiryMonth());
         }
         int expiryYear = -1;
-        if (!TextUtils.isEmpty(card.expiryYear)) {
-            expiryYear = Integer.parseInt(card.expiryYear);
+        if (!TextUtils.isEmpty(card.getExpiryYear())) {
+            expiryYear = Integer.parseInt(card.getExpiryYear());
         }
 
 
