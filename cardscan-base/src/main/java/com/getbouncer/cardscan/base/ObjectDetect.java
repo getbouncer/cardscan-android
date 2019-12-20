@@ -76,11 +76,11 @@ public class ObjectDetect {
 
         ssdDetect.classifyFrame(image);
         if (GlobalConfig.PRINT_TIMING) {
-            Log.e("Before SSD Post Process", String.valueOf(SystemClock.uptimeMillis() - startTime));
+            Log.d("Before SSD Post Process", String.valueOf(SystemClock.uptimeMillis() - startTime));
         }
         ssdOutputToPredictions(image);
         if (GlobalConfig.PRINT_TIMING) {
-            Log.e("After SSD Post Process", String.valueOf(SystemClock.uptimeMillis() - startTime));
+            Log.d("After SSD Post Process", String.valueOf(SystemClock.uptimeMillis() - startTime));
         }
 
         return "Success";
