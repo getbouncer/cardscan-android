@@ -89,9 +89,9 @@ public class SSDOcrDetect {
          * the model output */
 
         ssdOcrModel.classifyFrame(image);
-        Log.e("Before SSD Post Process", String.valueOf(SystemClock.uptimeMillis() - startTime));
+        Log.d("Before SSD Post Process", String.valueOf(SystemClock.uptimeMillis() - startTime));
         String number = ssdOutputToPredictions(image);
-        Log.e("After SSD Post Process", String.valueOf(SystemClock.uptimeMillis() - startTime));
+        Log.d("After SSD Post Process", String.valueOf(SystemClock.uptimeMillis() - startTime));
 
         return number;
     }
