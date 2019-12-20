@@ -115,7 +115,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     // Make sure that it is equal to or larger than the width of the largest expected image
     // size. Our image pipeline will resize images to be memory efficient and will make sure that
     // the width or height of any of our images never goes below this value.
-    public static int MIN_IMAGE_EDGE = 500;
+    public static int MIN_IMAGE_EDGE = 600;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
