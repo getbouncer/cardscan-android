@@ -78,6 +78,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     private int mCardNumberId;
     private int mExpiryId;
     private int mTextureId;
+    private int mEnterCardManuallyId;
     private float mRoiCenterYRatio;
     private boolean mIsOcr = true;
     private boolean mDelayShowingExpiration = true;
@@ -379,11 +380,12 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     }
 
     public void setViewIds(int flashlightId, int cardRectangleId, int overlayId, int textureId,
-                    int cardNumberId, int expiryId) {
+                    int cardNumberId, int expiryId, int enterCardManuallyId) {
         mFlashlightId = flashlightId;
         mTextureId = textureId;
         mCardNumberId = cardNumberId;
         mExpiryId = expiryId;
+        mEnterCardManuallyId = enterCardManuallyId;
         View flashlight = findViewById(flashlightId);
         if (flashlight != null) {
             flashlight.setOnClickListener(this);
@@ -504,7 +506,11 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
 
     @Override
     public void onClick(View view) {
-        if (mCamera != null && mFlashlightId == view.getId()) {
+        if (mEnterCardManuallyId == view.getId()) {
+            // this is essentially clicking the back button?
+            onBackPressed();
+        }
+        else if (mCamera != null && mFlashlightId == view.getId()) {
             Camera.Parameters parameters = mCamera.getParameters();
             if (parameters.getFlashMode().equals(Camera.Parameters.FLASH_MODE_TORCH)) {
                 parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);

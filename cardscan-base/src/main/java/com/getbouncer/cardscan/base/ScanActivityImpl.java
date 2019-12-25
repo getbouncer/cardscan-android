@@ -72,7 +72,7 @@ public class ScanActivityImpl extends ScanBaseActivity {
             mDebugImageView.setVisibility(View.INVISIBLE);
         }
         setViewIds(R.id.flashlightButton, R.id.cardRectangle, R.id.shadedBackground, R.id.texture,
-                R.id.cardNumber, R.id.expiry);
+                R.id.cardNumber, R.id.expiry, R.id.enterCardManuallyButton);
     }
 
     @Override

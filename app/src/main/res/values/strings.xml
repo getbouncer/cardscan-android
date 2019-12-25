@@ -11,6 +11,7 @@
     <!--
     <string name="card_scan_scan_card">Scan CreditCardUtils</string>
     <string name="card_scan_position_card">Position your card in the frame so the card number is visible</string>
+    <string name="card_scan_enter_card_manually">Enter card manually</string>
     <string name="card_scan_deny_permission_title">Need camera access</string>
     <string name="card_scan_deny_permission_message">Please allow camera access to scan your card</string>
     <string name="card_scan_deny_permission_button">OK</string>

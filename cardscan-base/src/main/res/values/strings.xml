@@ -5,6 +5,7 @@
     <string name="card_scan_deny_permission_title">Need camera access</string>
     <string name="card_scan_deny_permission_message">Please allow camera access to scan your card</string>
     <string name="card_scan_deny_permission_button">OK</string>
+    <string name="card_scan_enter_card_manually">Enter card manually</string>
     <string name="card_scan_flashlight_button" translatable="false">Toggle flashlight</string>
     <string name="card_scan_close_button" translatable="false">Close button</string>
 
