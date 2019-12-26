@@ -20,7 +20,6 @@ import java.io.File;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 
 class MachineLearningThread implements Runnable {
 
