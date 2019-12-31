@@ -79,7 +79,7 @@ public class SSDOcrDetect {
 
                 /** add the YMin value of the current box */
                 yMinArray.add(result.pickedBoxes.get(i)[1]*image.getHeight());
-                /** add the YMin value of the current box */
+                /** add the YMax value of the current box */
                 yMaxArray.add(result.pickedBoxes.get(i)[3]*image.getHeight());
             }
         }
