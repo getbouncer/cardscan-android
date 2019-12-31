@@ -29,6 +29,12 @@ public class SSDOcrDetect {
     @Nullable private static SSDOcrModel ssdOcrModel = null;
     @Nullable private static float[][] priors = null;
 
+    /** to store YMin values of all boxes */
+    private List<Float> yMinArray = new ArrayList<Float>();
+
+    /** to store the YMax values of all the boxes */
+    private List<Float> yMaxArray = new ArrayList<Float>();
+
     public final List<DetectedOcrBox> objectBoxes = new ArrayList<>();
     public boolean hadUnrecoverableException = false;
 
@@ -68,17 +74,43 @@ public class SSDOcrDetect {
                         result.pickedBoxes.get(i)[0], result.pickedBoxes.get(i)[1],
                         result.pickedBoxes.get(i)[2], result.pickedBoxes.get(i)[3],result.pickedBoxProbs.get(i),
                         image.getWidth(), image.getHeight(),result.pickedLabels.get(i));
+
                 objectBoxes.add(ocrBox);
+
+                /** add the YMin value of the current box */
+                yMinArray.add(result.pickedBoxes.get(i)[1]*image.getHeight());
+                /** add the YMin value of the current box */
+                yMaxArray.add(result.pickedBoxes.get(i)[3]*image.getHeight());
             }
         }
         String numberOCR = "";
         Collections.sort(objectBoxes);
+        Collections.sort(yMinArray);
+        Collections.sort(yMaxArray);
+        float medianYMin = 0;
+        float medianYMax = 0;
+        float stdValue = 0;
+
+        if (!yMaxArray.isEmpty() && !yMinArray.isEmpty()) {
+            medianYMin = yMinArray.get(yMinArray.size() / 2);
+            medianYMax = yMaxArray.get(yMaxArray.size() / 2);
+            stdValue = Math.abs(medianYMax - medianYMin);
+        }
+
         StringBuilder num = new StringBuilder();
         for (DetectedOcrBox box : objectBoxes){
             if (box.label == 10){
                 box.label = 0;
             }
-            num.append(box.label);
+            if (box.YMin + stdValue < medianYMin || box.YMax - stdValue > medianYMax)
+            {
+                Log.e("Don't add this box",
+                        String.valueOf(box.YMin) + String.valueOf(box.YMax));
+            }
+            else
+            {
+                num.append(String.valueOf(box.label));
+            }
         }
         if (CreditCardUtils.isValidCardNumber(num.toString())){
             numberOCR = num.toString();
