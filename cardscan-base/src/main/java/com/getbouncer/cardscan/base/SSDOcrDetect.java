@@ -89,12 +89,14 @@ public class SSDOcrDetect {
         Collections.sort(yMaxArray);
         float medianYMin = 0;
         float medianYMax = 0;
-        float stdValue = 0;
+        float medianHeight = 0;
+        float medianYCenter = 0;
 
         if (!yMaxArray.isEmpty() && !yMinArray.isEmpty()) {
             medianYMin = yMinArray.get(yMinArray.size() / 2);
             medianYMax = yMaxArray.get(yMaxArray.size() / 2);
-            stdValue = Math.abs(medianYMax - medianYMin);
+            medianHeight = Math.abs(medianYMax - medianYMin);
+            medianYCenter = (medianYMax + medianYMin) / 2;
         }
 
         StringBuilder num = new StringBuilder();
@@ -102,7 +104,9 @@ public class SSDOcrDetect {
             if (box.label == 10){
                 box.label = 0;
             }
-            if (box.YMin + stdValue < medianYMin || box.YMax - stdValue > medianYMax)
+            float boxYCenter = (box.YMax +  box.YMin) / 2;
+
+            if (Math.abs(boxYCenter - medianYCenter) > medianHeight)
             {
                 Log.e("Don't add this box",
                         String.valueOf(box.YMin) + String.valueOf(box.YMax));
@@ -111,6 +115,8 @@ public class SSDOcrDetect {
             {
                 num.append(String.valueOf(box.label));
             }
+
+
         }
         if (CreditCardUtils.isValidCardNumber(num.toString())){
             numberOCR = num.toString();
