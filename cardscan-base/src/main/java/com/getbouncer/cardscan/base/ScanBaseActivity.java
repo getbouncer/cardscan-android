@@ -89,6 +89,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     public static String IS_OCR = "is_ocr";
     public static String RESULT_FATAL_ERROR = "result_fatal_error";
     public static String RESULT_CAMERA_OPEN_ERROR = "result_camera_open_error";
+    public static String RESULT_ENTER_CARD_MANUALLY_REASON = "result_enter_card_manually";
     public static String DELAY_SHOWING_EXPIRATION = "delay_showing_expiration";
     public boolean wasPermissionDenied = false;
     public String denyPermissionTitle;
@@ -508,7 +509,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     public void onClick(View view) {
         if (mEnterCardManuallyId == view.getId()) {
             // this is essentially clicking the back button?
-            onBackPressed();
+            onEnterCardManuallyPressed();
         }
         else if (mCamera != null && mFlashlightId == view.getId()) {
             Camera.Parameters parameters = mCamera.getParameters();
@@ -521,6 +522,13 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             mCamera.startPreview();
         }
 
+    }
+
+    protected void onEnterCardManuallyPressed() {
+        Intent intent = new Intent();
+        intent.putExtra(RESULT_ENTER_CARD_MANUALLY_REASON, true);
+        setResult(RESULT_CANCELED, intent);
+        finish();
     }
 
     @Override
