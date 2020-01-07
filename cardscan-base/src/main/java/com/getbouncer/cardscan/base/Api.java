@@ -24,7 +24,7 @@ public class Api {
         try {
             response.put("status", "error");
             response.put("error_code", "network_error");
-            response.put("error_message", "Network error");
+            response.put("error_message", "CardNetwork error");
         } catch (JSONException e1) {
             e1.printStackTrace();
         }

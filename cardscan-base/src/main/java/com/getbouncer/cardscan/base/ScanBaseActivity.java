@@ -83,7 +83,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     private boolean mDelayShowingExpiration = true;
     private byte[] machineLearningFrame = null;
 
-    private ScanStats scanStats;
+    protected ScanStats scanStats;
 
     public static String IS_OCR = "is_ocr";
     public static String RESULT_FATAL_ERROR = "result_fatal_error";
@@ -115,7 +115,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     // Make sure that it is equal to or larger than the width of the largest expected image
     // size. Our image pipeline will resize images to be memory efficient and will make sure that
     // the width or height of any of our images never goes below this value.
-    public static int MIN_IMAGE_EDGE = 500;
+    public static int MIN_IMAGE_EDGE = 600;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -610,7 +610,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         String numberResult = getNumberResult();
         Expiry expiryResult = getExpiryResult();
         TextView textView = findViewById(mCardNumberId);
-        setValueAnimated(textView, CreditCardUtils.format(numberResult));
+        setValueAnimated(textView, CreditCardUtils.formatNumberForDisplay(numberResult));
 
         boolean shouldShowExpiration = !mDelayShowingExpiration || duration >= (errorCorrectionDurationMs / 2);
         if (expiryResult != null && shouldShowExpiration) {

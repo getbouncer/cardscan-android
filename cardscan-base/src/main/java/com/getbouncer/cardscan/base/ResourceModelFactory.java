@@ -17,4 +17,9 @@ class ResourceModelFactory extends ModelFactory {
     public MappedByteBuffer loadRecognizeDigitsFile(Context context) throws IOException {
         return loadModelFromResource(context, R.raw.fourrecognize);
     }
+    @Override
+    public MappedByteBuffer loadSSDDetectModelFile(Context context) throws IOException{
+        return  loadModelFromResource(context, R.raw.ssdelrond0136);
+    }
+
 }
