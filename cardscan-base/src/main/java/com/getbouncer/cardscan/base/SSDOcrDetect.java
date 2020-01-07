@@ -40,8 +40,8 @@ public class SSDOcrDetect {
         ArrUtils arrUtils = new ArrUtils();
 
         float[][] k_boxes = arrUtils.rearrangeOCRArray(ssdOcrModel.outputLocations, SSDOcrModel.featureMapSizes,
-                SSDOcrModel.NUM_OF_PRIORS_PER_ACTIVATION, SSDOcrModel.NUM_OF_CORDINATES);
-        k_boxes = arrUtils.reshape(k_boxes, SSDOcrModel.NUM_OF_PRIORS, SSDOcrModel.NUM_OF_CORDINATES);
+                SSDOcrModel.NUM_OF_PRIORS_PER_ACTIVATION, SSDOcrModel.NUM_OF_COORDINATES);
+        k_boxes = arrUtils.reshape(k_boxes, SSDOcrModel.NUM_OF_PRIORS, SSDOcrModel.NUM_OF_COORDINATES);
         k_boxes = arrUtils.convertLocationsToBoxes(k_boxes, priors,
                 SSDOcrModel.CENTER_VARIANCE, SSDOcrModel.SIZE_VARIANCE);
         k_boxes = arrUtils.centerFormToCornerForm(k_boxes);
