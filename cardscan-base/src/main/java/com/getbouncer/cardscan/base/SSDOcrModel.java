@@ -20,9 +20,6 @@ import android.content.Context;
 import android.util.Log;
 
 
-import com.getbouncer.cardscan.base.ImageClassifier;
-import com.getbouncer.cardscan.base.ModelFactory;
-
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.util.HashMap;
@@ -60,14 +57,14 @@ class SSDOcrModel extends ImageClassifier {
     /** We can detect a total of 12 objects plus the background class */
     static final int NUM_OF_CLASSES = 11;
 
-    /** Each prior or bounding box can be represented by 4 co-ordinates
+    /** Each prior or bounding box can be represented by 4 coordinates
      * XMin, YMin, XMax, YMax.
      */
-    static final int NUM_OF_CORDINATES = 4;
+    static final int NUM_OF_COORDINATES = 4;
 
     /** Represents the total number of datapoints for locations and classes */
 
-    static final int NUM_LOC = NUM_OF_CORDINATES * NUM_OF_PRIORS;
+    static final int NUM_LOC = NUM_OF_COORDINATES * NUM_OF_PRIORS;
     static final int NUM_CLASS = NUM_OF_CLASSES * NUM_OF_PRIORS;
 
     static final float PROB_THRESHOLD = 0.50f;
@@ -89,8 +86,8 @@ class SSDOcrModel extends ImageClassifier {
     private int[] intValues;
 
     /** outputLocations corresponds to the values of four co-ordinates of
-     * all the priors, this is equal to NUM_OF_CORDINATES x NUM_OF_PRIORS
-     * But this is reshaped by the model to 1 x [NUM_OF_CORDINATES x NUM_OF_PRIORS] */
+     * all the priors, this is equal to NUM_OF_COORDINATES x NUM_OF_PRIORS
+     * But this is reshaped by the model to 1 x [NUM_OF_COORDINATES x NUM_OF_PRIORS] */
 
     float[][] outputLocations;
 
