@@ -506,7 +506,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     public void onClick(View view) {
         if (mCamera != null && mFlashlightId == view.getId()) {
             Camera.Parameters parameters = mCamera.getParameters();
-            if (parameters.getFlashMode().equals(Camera.Parameters.FLASH_MODE_TORCH)) {
+            if (Camera.Parameters.FLASH_MODE_TORCH.equals(parameters.getFlashMode())) {
                 parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
             } else {
                 parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
