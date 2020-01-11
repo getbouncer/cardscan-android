@@ -24,6 +24,7 @@ public class ScanActivityImpl extends ScanBaseActivity {
     public static final String SCAN_CARD_TEXT = "scanCardText";
     public static final String POSITION_CARD_TEXT = "positionCardText";
     public static final String API_KEY = "apiKey";
+    public static final String ENTER_CARD_MANUALLY_BUTTON = "enterCardManuallyButton";
 
     public static final String RESULT_CARD_NUMBER = "cardNumber";
     public static final String RESULT_EXPIRY_MONTH = "expiryMonth";
@@ -71,6 +72,13 @@ public class ScanActivityImpl extends ScanBaseActivity {
         if (!mInDebugMode) {
             mDebugImageView.setVisibility(View.INVISIBLE);
         }
+
+        boolean showEnterCardManuallyButton = getIntent().getBooleanExtra(ENTER_CARD_MANUALLY_BUTTON, false);
+        TextView enterCardManuallyButton = findViewById(R.id.enterCardManuallyButton);
+        if (!showEnterCardManuallyButton) {
+            enterCardManuallyButton.setVisibility(View.INVISIBLE);
+        }
+
         setViewIds(R.id.flashlightButton, R.id.cardRectangle, R.id.shadedBackground, R.id.texture,
                 R.id.cardNumber, R.id.expiry, R.id.enterCardManuallyButton);
     }

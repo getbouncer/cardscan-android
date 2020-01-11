@@ -381,6 +381,13 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     }
 
     public void setViewIds(int flashlightId, int cardRectangleId, int overlayId, int textureId,
+                           int cardNumberId, int expiryId) {
+
+        this.setViewIds(flashlightId, cardRectangleId, overlayId, textureId, cardNumberId, expiryId, View.NO_ID);
+
+    }
+
+    public void setViewIds(int flashlightId, int cardRectangleId, int overlayId, int textureId,
                     int cardNumberId, int expiryId, int enterCardManuallyId) {
         mFlashlightId = flashlightId;
         mTextureId = textureId;
@@ -507,7 +514,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
 
     @Override
     public void onClick(View view) {
-        if (mEnterCardManuallyId == view.getId()) {
+        if (mEnterCardManuallyId == view.getId() && mEnterCardManuallyId != View.NO_ID) {
             // this is essentially clicking the back button?
             onEnterCardManuallyPressed();
         }
