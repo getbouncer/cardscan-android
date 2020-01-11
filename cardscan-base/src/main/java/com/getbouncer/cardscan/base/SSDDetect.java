@@ -87,8 +87,8 @@ class SSDDetect extends ImageClassifier {
     private int[] intValues;
 
     /** outputLocations corresponds to the values of four co-ordinates of
-     * all the priors, this is equal to NUM_OF_CORDINATES x NUM_OF_PRIORS
-     * But this is reshaped by the model to 1 x [NUM_OF_CORDINATES x NUM_OF_PRIORS] */
+     * all the priors, this is equal to NUM_OF_COORDINATES x NUM_OF_PRIORS
+     * But this is reshaped by the model to 1 x [NUM_OF_COORDINATES x NUM_OF_PRIORS] */
 
     float[][] outputLocations;
 
