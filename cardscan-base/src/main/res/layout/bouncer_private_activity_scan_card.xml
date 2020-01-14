@@ -82,6 +82,24 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cardRectangle" />
 
+    <TextView
+        android:id="@+id/enterCardManuallyButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:gravity="center"
+        android:onClick="onClick"
+        android:text="@string/card_scan_enter_card_manually"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/flashlightButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/texture"
+        app:layout_constraintTop_toBottomOf="@+id/positionCard" />
+
     <Button
         android:id="@+id/flashlightButton"
         android:layout_width="64dp"

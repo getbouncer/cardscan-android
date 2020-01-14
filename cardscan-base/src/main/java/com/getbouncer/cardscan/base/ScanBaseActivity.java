@@ -78,6 +78,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     private int mCardNumberId;
     private int mExpiryId;
     private int mTextureId;
+    private int mEnterCardManuallyId;
     private float mRoiCenterYRatio;
     private boolean mIsOcr = true;
     private boolean mDelayShowingExpiration = true;
@@ -88,6 +89,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     public static String IS_OCR = "is_ocr";
     public static String RESULT_FATAL_ERROR = "result_fatal_error";
     public static String RESULT_CAMERA_OPEN_ERROR = "result_camera_open_error";
+    public static String RESULT_ENTER_CARD_MANUALLY_REASON = "result_enter_card_manually";
     public static String DELAY_SHOWING_EXPIRATION = "delay_showing_expiration";
     public boolean wasPermissionDenied = false;
     public String denyPermissionTitle;
@@ -379,11 +381,19 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     }
 
     public void setViewIds(int flashlightId, int cardRectangleId, int overlayId, int textureId,
-                    int cardNumberId, int expiryId) {
+                           int cardNumberId, int expiryId) {
+
+        this.setViewIds(flashlightId, cardRectangleId, overlayId, textureId, cardNumberId, expiryId, View.NO_ID);
+
+    }
+
+    public void setViewIds(int flashlightId, int cardRectangleId, int overlayId, int textureId,
+                    int cardNumberId, int expiryId, int enterCardManuallyId) {
         mFlashlightId = flashlightId;
         mTextureId = textureId;
         mCardNumberId = cardNumberId;
         mExpiryId = expiryId;
+        mEnterCardManuallyId = enterCardManuallyId;
         View flashlight = findViewById(flashlightId);
         if (flashlight != null) {
             flashlight.setOnClickListener(this);
@@ -504,7 +514,10 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
 
     @Override
     public void onClick(View view) {
-        if (mCamera != null && mFlashlightId == view.getId()) {
+        if (mEnterCardManuallyId == view.getId() && mEnterCardManuallyId != View.NO_ID) {
+            onEnterCardManuallyPressed();
+        }
+        else if (mCamera != null && mFlashlightId == view.getId()) {
             Camera.Parameters parameters = mCamera.getParameters();
             if (Camera.Parameters.FLASH_MODE_TORCH.equals(parameters.getFlashMode())) {
                 parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
@@ -515,6 +528,13 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             mCamera.startPreview();
         }
 
+    }
+
+    protected void onEnterCardManuallyPressed() {
+        Intent intent = new Intent();
+        intent.putExtra(RESULT_ENTER_CARD_MANUALLY_REASON, true);
+        setResult(RESULT_CANCELED, intent);
+        finish();
     }
 
     @Override
