@@ -403,38 +403,38 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     }
 
     public void orientationChanged(int orientation) {
-        if (orientation == OrientationEventListener.ORIENTATION_UNKNOWN) return;
-        android.hardware.Camera.CameraInfo info =
-                new android.hardware.Camera.CameraInfo();
-        android.hardware.Camera.getCameraInfo(Camera.CameraInfo.CAMERA_FACING_BACK, info);
-        orientation = (orientation + 45) / 90 * 90;
-        int rotation = 0;
-        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-            rotation = (info.orientation - orientation + 360) % 360;
-        } else {  // back-facing camera
-            rotation = (info.orientation + orientation) % 360;
-        }
-
-        if (mCamera != null) {
-            try {
-                Camera.Parameters params = mCamera.getParameters();
-                params.setRotation(rotation);
-                setCameraParameters(mCamera, params);
-            } catch (Exception | Error e) {
-                // This gets called often so we can just swallow it and wait for the next one
-                e.printStackTrace();
-            }
-        }
+//        if (orientation == OrientationEventListener.ORIENTATION_UNKNOWN) return;
+//        android.hardware.Camera.CameraInfo info =
+//                new android.hardware.Camera.CameraInfo();
+//        android.hardware.Camera.getCameraInfo(Camera.CameraInfo.CAMERA_FACING_BACK, info);
+//        orientation = (orientation + 45) / 90 * 90;
+//        int rotation = 0;
+//        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+//            rotation = (info.orientation - orientation + 360) % 360;
+//        } else {  // back-facing camera
+//            rotation = (info.orientation + orientation) % 360;
+//        }
+//
+//        if (mCamera != null) {
+//            try {
+//                Camera.Parameters params = mCamera.getParameters();
+//                params.setRotation(rotation);
+//                setCameraParameters(mCamera, params);
+//            } catch (Exception | Error e) {
+//                // This gets called often so we can just swallow it and wait for the next one
+//                e.printStackTrace();
+//            }
+//        }
     }
 
     public void setCameraDisplayOrientation(Activity activity,
                                             int cameraId, android.hardware.Camera camera) {
-        android.hardware.Camera.CameraInfo info =
-                new android.hardware.Camera.CameraInfo();
-        android.hardware.Camera.getCameraInfo(cameraId, info);
-        int rotation = activity.getWindowManager().getDefaultDisplay()
-                .getRotation();
+        Camera.CameraInfo info = new Camera.CameraInfo();
+        Camera.getCameraInfo(cameraId, info);
+
+        int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
         int degrees = 0;
+
         switch (rotation) {
             case Surface.ROTATION_0: degrees = 0; break;
             case Surface.ROTATION_90: degrees = 90; break;
@@ -445,10 +445,11 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         int result;
         if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
             result = (info.orientation + degrees) % 360;
-            result = (360 - result) % 360;  // compensate the mirror
+            result = (360 - result) % 360;  // compensate for the mirror
         } else {  // back-facing
             result = (info.orientation - degrees + 360) % 360;
         }
+
         camera.setDisplayOrientation(result);
         mRotation = result;
     }
@@ -723,8 +724,6 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             // underlying surface is created and destroyed.
             mHolder = getHolder();
             mHolder.addCallback(this);
-            // deprecated setting, but required on Android versions prior to 3.0
-            mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
             Camera.Parameters params = mCamera.getParameters();
             List<String> focusModes = params.getSupportedFocusModes();
@@ -750,6 +749,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             try {
                 mCamera.setPreviewDisplay(holder);
                 mCamera.startPreview();
+//                mCamera.setDisplayOrientation(90);
             } catch (IOException e) {
                 Log.d("CameraCaptureActivity", "Error setting camera preview: " + e.getMessage());
             }
