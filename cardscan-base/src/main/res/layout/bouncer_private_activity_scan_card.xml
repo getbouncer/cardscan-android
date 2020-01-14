@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -30,21 +30,21 @@
         android:layout_marginTop="8dp"
         android:background="@drawable/card_scan_close_button_white"
         android:contentDescription="@string/card_scan_close_button"
-        app:layout_constraintStart_toStartOf="@+id/texture"
-        app:layout_constraintTop_toTopOf="@+id/texture" />
+        app:layout_constraintTop_toTopOf="@+id/texture"
+        app:layout_constraintStart_toStartOf="@+id/texture" />
 
     <View
         android:id="@+id/cardRectangle"
-        android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_width="0dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:background="@drawable/card_scan_card_rectangle"
+        app:layout_constraintTop_toTopOf="@+id/texture"
         app:layout_constraintBottom_toBottomOf="@+id/texture"
-        app:layout_constraintDimensionRatio="H,8:5"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/texture" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintDimensionRatio="H,8:5" />
 
 
     <TextView
@@ -76,8 +76,8 @@
         android:layout_marginRight="16dp"
         android:gravity="center"
         android:text="@string/card_scan_position_card"
-        android:textColor="@android:color/white"
         android:textSize="17sp"
+        android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cardRectangle" />
@@ -117,19 +117,22 @@
         android:layout_height="75dp"
         android:layout_marginStart="16dp"
         android:layout_marginBottom="16dp"
-        android:contentDescription="@string/an_image_used_only_for_debugging_and_testing"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        android:contentDescription="@string/an_image_used_only_for_debugging_and_testing" />
 
     <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:id="@+id/guideline"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.5" />
+        app:layout_constraintGuide_percent="0.5"/>
 
     <TextView
         android:id="@+id/cardNumber"
+        android:visibility="invisible"
+        android:textColor="@android:color/white"
+        android:gravity="center"
         android:layout_width="0dp"
         android:layout_height="48dp"
         android:layout_marginStart="16dp"
@@ -137,16 +140,13 @@
         android:layout_marginTop="0dp"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
-        android:gravity="center"
-        android:maxLines="1"
         android:text="@string/_4242_4242_4242_4242"
-        android:textColor="@android:color/white"
-        android:textSize="30sp"
-        android:visibility="invisible"
-        app:autoSizeMaxTextSize="100sp"
-        app:autoSizeMinTextSize="12sp"
-        app:autoSizeStepGranularity="2sp"
         app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="12sp"
+        app:autoSizeMaxTextSize="100sp"
+        app:autoSizeStepGranularity="2sp"
+        android:textSize="30sp"
+        android:maxLines="1"
         app:layout_constraintEnd_toEndOf="@+id/cardRectangle"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/cardRectangle"
@@ -154,6 +154,9 @@
 
     <TextView
         android:id="@+id/expiry"
+        android:visibility="invisible"
+        android:textColor="@android:color/white"
+        android:gravity="center"
         android:layout_width="0dp"
         android:layout_height="36dp"
         android:layout_marginStart="16dp"
@@ -161,12 +164,9 @@
         android:layout_marginTop="0dp"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
-        android:gravity="center"
-        android:maxLines="1"
         android:text="@string/_5_18"
-        android:textColor="@android:color/white"
         android:textSize="17sp"
-        android:visibility="invisible"
+        android:maxLines="1"
         app:layout_constraintEnd_toEndOf="@+id/cardRectangle"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/cardRectangle"
