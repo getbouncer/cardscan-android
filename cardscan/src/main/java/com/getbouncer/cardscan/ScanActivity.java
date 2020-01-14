@@ -66,7 +66,7 @@ public class ScanActivity {
         Intent intent = new Intent(activity, ScanActivityImpl.class);
         intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
         intent.putExtra(ScanBaseActivity.DELAY_SHOWING_EXPIRATION, delayShowingExpiration);
-        intent.putExtra(ScanActivityImpl.ENTER_CARD_MANUALLY_BUTTON, showEnterCardNumberManually);
+        intent.putExtra(ScanActivityImpl.SHOW_ENTER_CARD_MANUALLY_BUTTON, showEnterCardNumberManually);
         activity.startActivityForResult(intent, REQUEST_CODE);
     }
 
@@ -105,7 +105,7 @@ public class ScanActivity {
         intent.putExtra(ScanActivityImpl.SCAN_CARD_TEXT, scanCardText);
         intent.putExtra(ScanActivityImpl.POSITION_CARD_TEXT, positionCardText);
         intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
-        intent.putExtra(ScanActivityImpl.ENTER_CARD_MANUALLY_BUTTON, showEnterCardNumberManually);
+        intent.putExtra(ScanActivityImpl.SHOW_ENTER_CARD_MANUALLY_BUTTON, showEnterCardNumberManually);
         intent.putExtra(ScanBaseActivity.DELAY_SHOWING_EXPIRATION, delayShowingExpiration);
         activity.startActivityForResult(intent, REQUEST_CODE);
     }

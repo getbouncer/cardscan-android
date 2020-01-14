@@ -515,7 +515,6 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     @Override
     public void onClick(View view) {
         if (mEnterCardManuallyId == view.getId() && mEnterCardManuallyId != View.NO_ID) {
-            // this is essentially clicking the back button?
             onEnterCardManuallyPressed();
         }
         else if (mCamera != null && mFlashlightId == view.getId()) {

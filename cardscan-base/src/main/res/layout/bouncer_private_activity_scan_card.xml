@@ -8,7 +8,7 @@
     <FrameLayout
         android:id="@+id/texture"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"></FrameLayout>
+        android:layout_height="match_parent"/>
 
 
     <com.getbouncer.cardscan.base.Overlay
@@ -93,7 +93,7 @@
         android:gravity="center"
         android:onClick="onClick"
         android:text="@string/card_scan_enter_card_manually"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/flashlightButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
