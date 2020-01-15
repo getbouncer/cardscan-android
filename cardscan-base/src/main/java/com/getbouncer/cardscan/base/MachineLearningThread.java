@@ -121,7 +121,7 @@ class MachineLearningThread implements Runnable {
     }
 
     public synchronized void warmUp(Context context) {
-        if (Ocr.isInit() || !queue.isEmpty()) {
+        if (!queue.isEmpty()) {
             return;
         }
         RunArguments args = new RunArguments(null, 0, 0, 0,
@@ -324,8 +324,6 @@ class MachineLearningThread implements Runnable {
 
     private void runOcrModel(final Bitmap bitmap, final RunArguments args,
                              final Bitmap bitmapForObjectDetection, final Bitmap fullScreenBitmap) {
-        //final Ocr ocr = new Ocr();
-        //final String number = ocr.predict(bitmap, args.mContext);
         final SSDOcrDetect ocrDetect = new SSDOcrDetect();
         final String number = ocrDetect.predict(bitmap, args.mContext);
         Log.d("OCR Detect", "OCR Number:" + number);
