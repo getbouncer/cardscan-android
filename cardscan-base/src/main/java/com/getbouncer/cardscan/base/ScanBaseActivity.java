@@ -19,15 +19,18 @@ package com.getbouncer.cardscan.base;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.bluetooth.BluetoothClass;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
 import android.graphics.RectF;
 import android.hardware.Camera;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import androidx.annotation.Nullable;
@@ -122,6 +125,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         denyPermissionTitle = getString(R.string.card_scan_deny_permission_title);
         denyPermissionMessage = getString(R.string.card_scan_deny_permission_message);
@@ -209,26 +213,17 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        int width, height;
-        if (displayMetrics.heightPixels > displayMetrics.widthPixels) {
-            width = MIN_IMAGE_EDGE;
-            height = displayMetrics.heightPixels * width / displayMetrics.widthPixels;
-            Log.d("BOUNCER", "setCameraPreviewFrame portrait with width=" + width + " height=" + height);
-        } else {
-            height = MIN_IMAGE_EDGE;
-            width = displayMetrics.widthPixels * height / displayMetrics.heightPixels;
-            Log.d("BOUNCER", "setCameraPreviewFrame landscape with width=" + width + " height=" + height);
-        }
-        Camera.Size currentSize = parameters.getPreviewSize();
 
-        Camera.Size previewSize;
-        if (currentSize.width > currentSize.height && width > height) {
-            previewSize = getOptimalPreviewSize(parameters.getSupportedPreviewSizes(),
-                    width, height);
-        } else {
-            previewSize = getOptimalPreviewSize(parameters.getSupportedPreviewSizes(),
-                    height, width);
-        }
+        int displayWidth = Math.max(displayMetrics.heightPixels, displayMetrics.widthPixels);
+        int displayHeight = Math.min(displayMetrics.heightPixels, displayMetrics.widthPixels);
+
+        int height = MIN_IMAGE_EDGE;
+        int width = displayWidth * height / displayHeight;
+
+        Log.d("BOUNCER", "setCameraPreviewFrame portrait with width=" + width + " height=" + height);
+        Camera.Size previewSize = getOptimalPreviewSize(parameters.getSupportedPreviewSizes(),
+                width, height);
+
         if (previewSize != null) {
             parameters.setPreviewSize(previewSize.width, previewSize.height);
         }
@@ -264,9 +259,9 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
 
     // https://stackoverflow.com/a/17804792
     private @Nullable Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes, int w, int h) {
-        Log.d("BOUNCER", "getOptimalPreviewSize looking for camera preview " + w + "x" + h);
         final double ASPECT_TOLERANCE = 0.1;
         double targetRatio = (double) w / h;
+        Log.d("BOUNCER", "getOptimalPreviewSize looking for camera preview " + w + "x" + h + " ratio=" + targetRatio);
 
         if (sizes==null) {
             Log.d("BOUNCER", "getOptimalPreviewSize camera reports no sizes");
@@ -281,7 +276,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             double ratio = (double) size.width / size.height;
             if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) continue;
             if (size.height >= h) {
-                Log.d("BOUNCER", "getOptimalPreviewSize Considering preview size " + size.width + "x" + size.height);
+                Log.d("BOUNCER", "getOptimalPreviewSize Considering preview size " + size.width + "x" + size.height + " ratio=" + ratio);
                 optimalSize = size;
             }
         }
@@ -290,8 +285,9 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         if (optimalSize == null) {
             double minDiff = Double.MAX_VALUE;
             for (Camera.Size size : sizes) {
+                double ratio = (double) size.width / size.height;
                 if (Math.abs(size.height - h) < minDiff && size.height >= h) {
-                    Log.d("BOUNCER", "getOptimalPreviewSize Reconsidering preview size " + size.width + "x" + size.height);
+                    Log.d("BOUNCER", "getOptimalPreviewSize Reconsidering preview size " + size.width + "x" + size.height + " ratio=" + ratio);
                     optimalSize = size;
                     minDiff = Math.abs(size.height - h);
                 }
@@ -299,7 +295,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         }
 
         if (optimalSize != null) {
-            Log.d("BOUNCER", "getOptimalPreviewSize selected preview size " + optimalSize.width + "x" + optimalSize.height);
+            Log.d("BOUNCER", "getOptimalPreviewSize selected preview size " + optimalSize.width + "x" + optimalSize.height + " ratio=" + (double) optimalSize.width / optimalSize.height);
         } else {
             Log.d("BOUNCER", "getOptimalPreviewSize No preview size selected");
         }
@@ -413,32 +409,32 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     }
 
     public void orientationChanged(int orientation) {
-        final int originalOrientation = orientation;
-        if (orientation == OrientationEventListener.ORIENTATION_UNKNOWN) return;
-        Camera.CameraInfo info = new Camera.CameraInfo();
-        Camera.getCameraInfo(Camera.CameraInfo.CAMERA_FACING_BACK, info);
-        orientation = (orientation + 45) / 90 * 90;
-        int rotation;
-        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-            rotation = (info.orientation - orientation + 360) % 360;
-        } else {  // back-facing camera
-            rotation = (info.orientation + orientation) % 360;
-        }
-
-        if (mCamera != null) {
-            try {
-                Log.d("BOUNCER", "orientationChanged camera=" + info.facing
-                        + " origOrientation=" + originalOrientation
-                        + " orientation=" + orientation
-                        + " rotation=" + rotation);
-                Camera.Parameters params = mCamera.getParameters();
-                params.setRotation(rotation);
-                setCameraParameters(mCamera, params);
-            } catch (Exception | Error e) {
-                // This gets called often so we can just swallow it and wait for the next one
-                e.printStackTrace();
-            }
-        }
+//        final int originalOrientation = orientation;
+//        if (orientation == OrientationEventListener.ORIENTATION_UNKNOWN) return;
+//        Camera.CameraInfo info = new Camera.CameraInfo();
+//        Camera.getCameraInfo(Camera.CameraInfo.CAMERA_FACING_BACK, info);
+//        orientation = (orientation + 45) / 90 * 90;
+//        int rotation;
+//        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+//            rotation = (info.orientation - orientation + 360) % 360;
+//        } else {  // back-facing camera
+//            rotation = (info.orientation + orientation) % 360;
+//        }
+//
+//        if (mCamera != null) {
+//            try {
+//                Log.d("BOUNCER", "orientationChanged camera=" + info.facing
+//                        + " origOrientation=" + originalOrientation
+//                        + " orientation=" + orientation
+//                        + " rotation=" + rotation);
+//                Camera.Parameters params = mCamera.getParameters();
+//                params.setRotation(rotation);
+//                setCameraParameters(mCamera, params);
+//            } catch (Exception | Error e) {
+//                // This gets called often so we can just swallow it and wait for the next one
+//                e.printStackTrace();
+//            }
+//        }
     }
 
     public void setCameraDisplayOrientation(Activity activity, int cameraId) {
