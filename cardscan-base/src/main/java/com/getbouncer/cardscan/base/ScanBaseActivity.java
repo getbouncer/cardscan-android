@@ -259,7 +259,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
 
     // https://stackoverflow.com/a/17804792
     private @Nullable Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes, int w, int h) {
-        final double ASPECT_TOLERANCE = 0.1;
+        final double ASPECT_TOLERANCE = 0.2;
         double targetRatio = (double) w / h;
         Log.d("BOUNCER", "getOptimalPreviewSize looking for camera preview " + w + "x" + h + " ratio=" + targetRatio);
 
@@ -274,7 +274,10 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         // height
         for (Camera.Size size : sizes) {
             double ratio = (double) size.width / size.height;
-            if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) continue;
+            if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) {
+                Log.d("BOUNCER", "getOptimalPreviewSize ignoring size " + size.width + "x" + size.height + " ratio=" + ratio + " because out of tolerance");
+                continue;
+            }
             if (size.height >= h) {
                 Log.d("BOUNCER", "getOptimalPreviewSize Considering preview size " + size.width + "x" + size.height + " ratio=" + ratio);
                 optimalSize = size;
