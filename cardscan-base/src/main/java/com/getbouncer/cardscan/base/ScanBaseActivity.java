@@ -19,7 +19,6 @@ package com.getbouncer.cardscan.base;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.bluetooth.BluetoothClass;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -30,7 +29,6 @@ import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
 import android.graphics.RectF;
 import android.hardware.Camera;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import androidx.annotation.Nullable;
@@ -38,7 +36,6 @@ import androidx.annotation.VisibleForTesting;
 import androidx.test.espresso.idling.CountingIdlingResource;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -68,7 +65,6 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
 
     private Camera mCamera = null;
     private CameraPreview cameraPreview = null;
-    private OrientationEventListener mOrientationEventListener;
     private static MachineLearningThread machineLearningThread = null;
     private Semaphore mMachineLearningSemaphore = new Semaphore(1);
     private int mRotation;
@@ -139,13 +135,6 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
 
         mIsOcr = getIntent().getBooleanExtra(IS_OCR, true);
         mDelayShowingExpiration = getIntent().getBooleanExtra(DELAY_SHOWING_EXPIRATION, true);
-
-        mOrientationEventListener = new OrientationEventListener(this) {
-            @Override
-            public void onOrientationChanged(int orientation) {
-                orientationChanged(orientation);
-            }
-        };
     }
 
     class MyGlobalListenerClass implements ViewTreeObserver.OnGlobalLayoutListener {
@@ -216,12 +205,10 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
 
         int displayWidth = Math.max(displayMetrics.heightPixels, displayMetrics.widthPixels);
         int displayHeight = Math.min(displayMetrics.heightPixels, displayMetrics.widthPixels);
-        Log.d("BOUNCER", "setCameraPreviewFrame display metrics reports " + displayWidth + "x" + displayHeight);
 
         int height = MIN_IMAGE_EDGE;
         int width = displayWidth * height / displayHeight;
 
-        Log.d("BOUNCER", "setCameraPreviewFrame portrait with width=" + width + " height=" + height);
         Camera.Size previewSize = getOptimalPreviewSize(parameters.getSupportedPreviewSizes(),
                 width, height);
 
@@ -262,10 +249,8 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     private @Nullable Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes, int w, int h) {
         final double ASPECT_TOLERANCE = 0.2;
         double targetRatio = (double) w / h;
-        Log.d("BOUNCER", "getOptimalPreviewSize looking for camera preview " + w + "x" + h + " ratio=" + targetRatio);
 
         if (sizes==null) {
-            Log.d("BOUNCER", "getOptimalPreviewSize camera reports no sizes");
             return null;
         }
 
@@ -275,13 +260,10 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         // height
         for (Camera.Size size : sizes) {
             double ratio = (double) size.width / size.height;
-            if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) {
-                Log.d("BOUNCER", "getOptimalPreviewSize ignoring size " + size.width + "x" + size.height + " ratio=" + ratio + " because out of tolerance");
-                continue;
-            }
-            if (size.height >= h) {
-                Log.d("BOUNCER", "getOptimalPreviewSize Considering preview size " + size.width + "x" + size.height + " ratio=" + ratio);
-                optimalSize = size;
+            if (Math.abs(ratio - targetRatio) <= ASPECT_TOLERANCE) {
+                if (size.height >= h) {
+                    optimalSize = size;
+                }
             }
         }
 
@@ -291,18 +273,12 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             for (Camera.Size size : sizes) {
                 double ratio = (double) size.width / size.height;
                 if (Math.abs(size.height - h) < minDiff && size.height >= h) {
-                    Log.d("BOUNCER", "getOptimalPreviewSize Reconsidering preview size " + size.width + "x" + size.height + " ratio=" + ratio);
                     optimalSize = size;
                     minDiff = Math.abs(size.height - h);
                 }
             }
         }
 
-        if (optimalSize != null) {
-            Log.d("BOUNCER", "getOptimalPreviewSize selected preview size " + optimalSize.width + "x" + optimalSize.height + " ratio=" + (double) optimalSize.width / optimalSize.height);
-        } else {
-            Log.d("BOUNCER", "getOptimalPreviewSize No preview size selected");
-        }
         return optimalSize;
     }
 
@@ -311,12 +287,6 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         numberResults = new HashMap<>();
         expiryResults = new HashMap<>();
         firstResultMs = 0;
-        if (mOrientationEventListener.canDetectOrientation()) {
-            Log.d("BOUNCER", "startCamera mOrientationEventListener can detect orientation");
-            mOrientationEventListener.enable();
-        } else {
-            Log.d("BOUNCER", "startCamera mOrientationEventListener cannot detect orientation");
-        }
 
         try {
             if (mIsPermissionCheckDone) {
@@ -359,7 +329,6 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             cameraPreview = null;
         }
 
-        mOrientationEventListener.disable();
         mIsActivityActive = false;
     }
 
@@ -412,35 +381,6 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
                 .addOnGlobalLayoutListener(new MyGlobalListenerClass(cardRectangleId, overlayId));
     }
 
-    public void orientationChanged(int orientation) {
-//        final int originalOrientation = orientation;
-//        if (orientation == OrientationEventListener.ORIENTATION_UNKNOWN) return;
-//        Camera.CameraInfo info = new Camera.CameraInfo();
-//        Camera.getCameraInfo(Camera.CameraInfo.CAMERA_FACING_BACK, info);
-//        orientation = (orientation + 45) / 90 * 90;
-//        int rotation;
-//        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-//            rotation = (info.orientation - orientation + 360) % 360;
-//        } else {  // back-facing camera
-//            rotation = (info.orientation + orientation) % 360;
-//        }
-//
-//        if (mCamera != null) {
-//            try {
-//                Log.d("BOUNCER", "orientationChanged camera=" + info.facing
-//                        + " origOrientation=" + originalOrientation
-//                        + " orientation=" + orientation
-//                        + " rotation=" + rotation);
-//                Camera.Parameters params = mCamera.getParameters();
-//                params.setRotation(rotation);
-//                setCameraParameters(mCamera, params);
-//            } catch (Exception | Error e) {
-//                // This gets called often so we can just swallow it and wait for the next one
-//                e.printStackTrace();
-//            }
-//        }
-    }
-
     public void setCameraDisplayOrientation(Activity activity, int cameraId) {
         Camera.CameraInfo info = new Camera.CameraInfo();
         Camera.getCameraInfo(cameraId, info);
@@ -463,7 +403,6 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             result = (info.orientation - degrees + 360) % 360;
         }
 
-        Log.d("BOUNCER", "setCameraDisplayOrientation rotation=" + rotation + " result=" + result);
         mCamera.setDisplayOrientation(result);
         mRotation = result;
     }
