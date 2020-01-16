@@ -6,7 +6,6 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.SystemClock;
 import android.text.TextUtils;
-import android.util.Log;
 
 import androidx.core.content.ContextCompat;
 
@@ -20,7 +19,6 @@ public class ScanStats {
     private int scans;
     private boolean success;
     private long panFirstDetectedAtMs = -1;
-    private long panLastDetectedAtMs = -1;
 
     ScanStats(Activity activity) {
         startTimeMs = SystemClock.uptimeMillis();
@@ -42,7 +40,6 @@ public class ScanStats {
         if (panFirstDetectedAtMs == -1) {
             panFirstDetectedAtMs = SystemClock.uptimeMillis();
         }
-        panLastDetectedAtMs = SystemClock.uptimeMillis();
     }
 
     public JSONObject toJson() {
