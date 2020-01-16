@@ -131,7 +131,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         mTestingImageReader = sTestingImageReader;
         sTestingImageReader = null;
 
-        this.scanStats = new ScanStats();
+        this.scanStats = new ScanStats(this);
 
         mIsOcr = getIntent().getBooleanExtra(IS_OCR, true);
         mDelayShowingExpiration = getIntent().getBooleanExtra(DELAY_SHOWING_EXPIRATION, true);
@@ -358,7 +358,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         super.onResume();
 
         mIsActivityActive = true;
-        this.scanStats = new ScanStats();
+        this.scanStats = new ScanStats(this);
         firstResultMs = 0;
         numberResults = new HashMap<>();
         expiryResults = new HashMap<>();

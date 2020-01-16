@@ -1,13 +1,20 @@
 package com.getbouncer.cardscan.base;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.SystemClock;
 import android.text.TextUtils;
+import android.util.Log;
+
+import androidx.core.content.ContextCompat;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class ScanStats {
+    private Activity parentActivity;
     private long endTimeMs;
     private long startTimeMs;
     private int scans;
@@ -15,9 +22,10 @@ public class ScanStats {
     private long panFirstDetectedAtMs = -1;
     private long panLastDetectedAtMs = -1;
 
-    ScanStats() {
+    ScanStats(Activity activity) {
         startTimeMs = SystemClock.uptimeMillis();
         scans = 0;
+        parentActivity = activity;
     }
 
     void incrementScans() {
@@ -55,6 +63,8 @@ public class ScanStats {
             object.put("device_type", getDeviceName());
             object.put("sdk_version", BuildConfig.CARDSCAN_VERSION);
             object.put("os", Build.VERSION.RELEASE);
+            object.put("permission_granted", ContextCompat.checkSelfPermission(
+                    parentActivity, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED);
         } catch (JSONException e) {
             e.printStackTrace();
         }
