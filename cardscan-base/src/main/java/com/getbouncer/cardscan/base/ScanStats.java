@@ -12,6 +12,8 @@ public class ScanStats {
     private long startTimeMs;
     private int scans;
     private boolean success;
+    private long panFirstDetectedAtMs = -1;
+    private long panLastDetectedAtMs = -1;
 
     ScanStats() {
         startTimeMs = SystemClock.uptimeMillis();
@@ -27,15 +29,28 @@ public class ScanStats {
         this.endTimeMs = SystemClock.uptimeMillis();
     }
 
+    void observePAN() {
+        // panFirstDetectedAtMs represents, globally, when we first saw a valid card number
+        if (panFirstDetectedAtMs == -1) {
+            panFirstDetectedAtMs = SystemClock.uptimeMillis();
+        }
+        panLastDetectedAtMs = SystemClock.uptimeMillis();
+    }
+
     public JSONObject toJson() {
         JSONObject object = new JSONObject();
         double duration = ((double) endTimeMs - startTimeMs) / 1000.0;
+        long panFirstDetectedDurationMs = -1;
+        if (panFirstDetectedAtMs > 0) {
+            panFirstDetectedDurationMs = panFirstDetectedAtMs - startTimeMs;
+        }
 
         try {
             object.put("success", this.success);
             object.put("scans", this.scans);
             object.put("torch_on", false);
             object.put("duration", duration);
+            object.put("pan_first_detected_duration_ms", panFirstDetectedDurationMs);
             object.put("model", "FindFour");
             object.put("device_type", getDeviceName());
             object.put("sdk_version", BuildConfig.CARDSCAN_VERSION);

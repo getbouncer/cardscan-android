@@ -660,6 +660,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
 
             if (number != null) {
                 incrementNumber(number);
+                this.scanStats.observePAN();
             }
             if (expiry != null) {
                 incrementExpiry(expiry);
