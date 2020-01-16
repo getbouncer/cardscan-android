@@ -212,10 +212,11 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         parameters.setPreviewFormat(format);
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        getWindowManager().getDefaultDisplay().getRealMetrics(displayMetrics);
 
         int displayWidth = Math.max(displayMetrics.heightPixels, displayMetrics.widthPixels);
         int displayHeight = Math.min(displayMetrics.heightPixels, displayMetrics.widthPixels);
+        Log.d("BOUNCER", "setCameraPreviewFrame display metrics reports " + displayWidth + "x" + displayHeight);
 
         int height = MIN_IMAGE_EDGE;
         int width = displayWidth * height / displayHeight;
