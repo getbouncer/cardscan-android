@@ -267,14 +267,15 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             }
         }
 
-        // Find something that is close to our target height but still bigger
+        // Find the closest ratio that is still taller than our target height
         if (optimalSize == null) {
-            double minDiff = Double.MAX_VALUE;
+            double minDiffRatio = Double.MAX_VALUE;
             for (Camera.Size size : sizes) {
                 double ratio = (double) size.width / size.height;
-                if (Math.abs(size.height - h) < minDiff && size.height >= h) {
+                double ratioDiff = Math.abs(ratio - targetRatio);
+                if (size.height >= h && ratioDiff <= minDiffRatio) {
                     optimalSize = size;
-                    minDiff = Math.abs(size.height - h);
+                    minDiffRatio = ratioDiff;
                 }
             }
         }
