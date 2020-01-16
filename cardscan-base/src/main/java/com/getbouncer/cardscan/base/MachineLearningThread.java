@@ -131,6 +131,7 @@ class MachineLearningThread implements Runnable {
     }
 
     synchronized void post(Bitmap bitmap, OnScanListener scanListener, Context context) {
+        Log.d("BOUNCER", "post1 processing image size " + bitmap.getWidth() + "x" + bitmap.getHeight());
         RunArguments args = new RunArguments(bitmap, scanListener, context);
         queue.push(args);
         notify();
@@ -138,6 +139,7 @@ class MachineLearningThread implements Runnable {
 
     synchronized void post(byte[] bytes, int width, int height, int format, int sensorOrientation,
                            OnScanListener scanListener, Context context, float roiCenterYRatio) {
+        Log.d("BOUNCER", "post2 processing image size " + width + "x" + height + " rotation=" + sensorOrientation);
         RunArguments args = new RunArguments(bytes, width, height, format, sensorOrientation,
                 scanListener, context, roiCenterYRatio);
         queue.push(args);
@@ -146,6 +148,7 @@ class MachineLearningThread implements Runnable {
 
     synchronized void post(Bitmap bitmap, OnObjectListener objectListener, Context context,
                            File objectDetectFile) {
+        Log.d("BOUNCER", "post3 processing image size " + bitmap.getWidth() + "x" + bitmap.getHeight());
         RunArguments args = new RunArguments(bitmap, objectListener, context, objectDetectFile);
         queue.push(args);
         notify();
@@ -154,6 +157,7 @@ class MachineLearningThread implements Runnable {
     synchronized void post(byte[] bytes, int width, int height, int format, int sensorOrientation,
                            OnObjectListener objectListener, Context context, float roiCenterYRatio,
                            File objectDetectFile) {
+        Log.d("BOUNCER", "post4 processing image size " + width + "x" + height);
         RunArguments args = new RunArguments(bytes, width, height, format, sensorOrientation,
                 objectListener, context, roiCenterYRatio, objectDetectFile);
         queue.push(args);
