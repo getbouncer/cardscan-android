@@ -17,6 +17,7 @@
 package com.getbouncer.cardscan.base;
 
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -32,6 +33,7 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.content.ContextCompat;
 import androidx.test.espresso.idling.CountingIdlingResource;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -131,7 +133,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         mTestingImageReader = sTestingImageReader;
         sTestingImageReader = null;
 
-        this.scanStats = new ScanStats(this);
+        this.scanStats = createScanStats();
 
         mIsOcr = getIntent().getBooleanExtra(IS_OCR, true);
         mDelayShowingExpiration = getIntent().getBooleanExtra(DELAY_SHOWING_EXPIRATION, true);
@@ -353,12 +355,21 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         mIsActivityActive = false;
     }
 
+    private ScanStats createScanStats() {
+        boolean isCameraPermissionGranted = ContextCompat.checkSelfPermission(
+                this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+        return new ScanStats(isCameraPermissionGranted);
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
 
         mIsActivityActive = true;
-        this.scanStats = new ScanStats(this);
+
+        boolean isCameraPermissionGranted = ContextCompat.checkSelfPermission(
+                this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+        this.scanStats = createScanStats();
         firstResultMs = 0;
         numberResults = new HashMap<>();
         expiryResults = new HashMap<>();
