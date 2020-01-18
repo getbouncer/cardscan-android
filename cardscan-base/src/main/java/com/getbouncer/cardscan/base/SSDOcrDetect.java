@@ -165,6 +165,7 @@ public class SSDOcrDetect {
             try{
                 if (ssdOcrModel == null){
                     ssdOcrModel = new SSDOcrModel(context);
+                    ssdOcrModel.setNumThreads(NUM_THREADS);
                     /** Since all the frames use the same set of priors
                      * We generate these once and use for all the frame
                      */

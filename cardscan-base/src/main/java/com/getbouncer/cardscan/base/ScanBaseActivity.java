@@ -660,6 +660,10 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
                              int imageHeight, final Bitmap fullScreenBitmap) {
         if (!mSentResponse && mIsActivityActive) {
             // do something with the prediction
+
+            // Note: This method is used by `AirBnB` to release the ML semaphore without performing
+            // the voting algorithm. This is for the purpose of displaying "incorrect card" instead
+            // of failing when the card does not match.
         }
         mMachineLearningSemaphore.release();
     }
