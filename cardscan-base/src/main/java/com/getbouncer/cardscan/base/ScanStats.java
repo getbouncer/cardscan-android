@@ -8,14 +8,17 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class ScanStats {
+    private boolean mIsCameraPermissionGranted;
     private long endTimeMs;
     private long startTimeMs;
     private int scans;
     private boolean success;
+    private long panFirstDetectedAtMs = -1;
 
-    ScanStats() {
+    ScanStats(boolean isCameraPermissionGranted) {
         startTimeMs = SystemClock.uptimeMillis();
         scans = 0;
+        mIsCameraPermissionGranted = isCameraPermissionGranted;
     }
 
     void incrementScans() {
@@ -27,19 +30,32 @@ public class ScanStats {
         this.endTimeMs = SystemClock.uptimeMillis();
     }
 
+    void observePAN() {
+        // panFirstDetectedAtMs represents, globally, when we first saw a valid card number
+        if (panFirstDetectedAtMs == -1) {
+            panFirstDetectedAtMs = SystemClock.uptimeMillis();
+        }
+    }
+
     public JSONObject toJson() {
         JSONObject object = new JSONObject();
         double duration = ((double) endTimeMs - startTimeMs) / 1000.0;
+        long panFirstDetectedDurationMs = -1;
+        if (panFirstDetectedAtMs > 0) {
+            panFirstDetectedDurationMs = panFirstDetectedAtMs - startTimeMs;
+        }
 
         try {
             object.put("success", this.success);
             object.put("scans", this.scans);
             object.put("torch_on", false);
             object.put("duration", duration);
+            object.put("pan_first_detected_duration_ms", panFirstDetectedDurationMs);
             object.put("model", "FindFour");
             object.put("device_type", getDeviceName());
             object.put("sdk_version", BuildConfig.CARDSCAN_VERSION);
             object.put("os", Build.VERSION.RELEASE);
+            object.put("permission_granted", mIsCameraPermissionGranted);
         } catch (JSONException e) {
             e.printStackTrace();
         }
