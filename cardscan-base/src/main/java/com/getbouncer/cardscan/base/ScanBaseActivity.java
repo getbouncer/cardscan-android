@@ -65,11 +65,11 @@ import java.util.concurrent.Semaphore;
 public abstract class ScanBaseActivity extends Activity implements Camera.PreviewCallback,
         View.OnClickListener, OnScanListener, OnObjectListener, OnCameraOpenListener {
 
-    private Camera mCamera = null;
+    protected Camera mCamera = null;
     private CameraPreview cameraPreview = null;
-    private static MachineLearningThread machineLearningThread = null;
-    private Semaphore mMachineLearningSemaphore = new Semaphore(1);
-    private int mRotation;
+    protected static MachineLearningThread machineLearningThread = null;
+    protected Semaphore mMachineLearningSemaphore = new Semaphore(1);
+    protected int mRotation;
     private boolean mSentResponse = false;
     private boolean mIsActivityActive = false;
     private HashMap<String, Integer> numberResults = new HashMap<>();
@@ -80,10 +80,10 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     private int mExpiryId;
     private int mTextureId;
     private int mEnterCardManuallyId;
-    private float mRoiCenterYRatio;
+    protected float mRoiCenterYRatio;
     private boolean mIsOcr = true;
     private boolean mDelayShowingExpiration = true;
-    private byte[] machineLearningFrame = null;
+    protected byte[] machineLearningFrame = null;
 
     protected ScanStats scanStats;
 
@@ -100,7 +100,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     // This is a hack to enable us to inject images to use for testing. There is probably a better
     // way to do this than using a static variable, but it works for now.
     static public TestingImageReaderInternal sTestingImageReader = null;
-    private TestingImageReaderInternal mTestingImageReader = null;
+    protected TestingImageReaderInternal mTestingImageReader = null;
     protected CountingIdlingResource mScanningIdleResource = null;
 
     // set when this activity posts to the machineLearningThread
@@ -637,29 +637,40 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
                 setNumberAndExpiryAnimated(duration);
             }
 
-            if (firstResultMs != 0 && duration >= errorCorrectionDurationMs) {
-                mSentResponse = true;
-                String numberResult = getNumberResult();
-                Expiry expiryResult = getExpiryResult();
-                String month = null;
-                String year = null;
-                if (expiryResult != null) {
-                    month = Integer.toString(expiryResult.month);
-                    year = Integer.toString(expiryResult.year);
-                }
-
-                this.scanStats.setSuccess(true);
-                Api.scanStats(this, this.scanStats);
-
-                onCardScanned(numberResult, month, year);
-
-                if (mScanningIdleResource != null) {
-                    mScanningIdleResource.decrement();
-                }
+            if (isScanComplete()) {
+                onOCRCompleted();
             }
         }
 
         mMachineLearningSemaphore.release();
+    }
+
+    protected void onOCRCompleted() {
+        mSentResponse = true;
+        String numberResult = getNumberResult();
+        Expiry expiryResult = getExpiryResult();
+        String month = null;
+        String year = null;
+        if (expiryResult != null) {
+            month = Integer.toString(expiryResult.month);
+            year = Integer.toString(expiryResult.year);
+        }
+
+        this.scanStats.setSuccess(true);
+        Api.scanStats(this, this.scanStats);
+
+        onCardScanned(numberResult, month, year);
+
+        if (mScanningIdleResource != null) {
+            mScanningIdleResource.decrement();
+        }
+    }
+
+    public boolean isScanComplete() {
+        Log.d("Steven debug", "firstResultMS " + firstResultMs);
+        long duration = SystemClock.uptimeMillis() - firstResultMs;
+        Log.d("Steven debug", "duration " + duration);
+        return firstResultMs != 0 && duration >= errorCorrectionDurationMs;
     }
 
     @Override
@@ -670,6 +681,8 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     @Override
     public void onPrediction(Bitmap bm, List<DetectedSSDBox> boxes, int imageWidth,
                              int imageHeight, final Bitmap fullScreenBitmap) {
+        Log.d("Steven debug", "hmnmmmm");
+
         if (!mSentResponse && mIsActivityActive) {
             // do something with the prediction
 
@@ -678,6 +691,8 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             // of failing when the card does not match.
         }
         mMachineLearningSemaphore.release();
+        Log.d("Steven debug", "hmnmmmm??");
+
     }
 
     /** A basic Camera preview class */
