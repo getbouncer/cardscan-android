@@ -3,6 +3,7 @@ package com.getbouncer.cardscan.base;
 import android.os.Build;
 import android.os.SystemClock;
 import android.text.TextUtils;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,6 +15,8 @@ public class ScanStats {
     private int scans;
     private boolean success;
     private long panFirstDetectedAtMs = -1;
+    private int numOCRFramesProcessed = 0;
+    private int numObjFramesProcessed = 0;
 
     ScanStats(boolean isCameraPermissionGranted) {
         startTimeMs = SystemClock.uptimeMillis();
@@ -37,6 +40,14 @@ public class ScanStats {
         }
     }
 
+    public void processNumber() {
+        numOCRFramesProcessed += 1;
+    }
+
+    public void processObjectDetection() {
+        numObjFramesProcessed += 1;
+    }
+
     public JSONObject toJson() {
         JSONObject object = new JSONObject();
         double duration = ((double) endTimeMs - startTimeMs) / 1000.0;
@@ -56,6 +67,16 @@ public class ScanStats {
             object.put("sdk_version", BuildConfig.CARDSCAN_VERSION);
             object.put("os", Build.VERSION.RELEASE);
             object.put("permission_granted", mIsCameraPermissionGranted);
+
+
+            Log.d("Performance Diagonstics", "Num frames captured: " + scans);
+            Log.d("Performance Diagonstics", "Total Duration (s): " + duration);
+            Log.d("Performance Diagonstics", "Frames per second: " + 1.0* scans / duration);
+            Log.d("Performance Diagonstics", "Num OCR frames captured: " + numOCRFramesProcessed);
+            Log.d("Performance Diagonstics", "OCR Frames per second: " + 1.0* numOCRFramesProcessed / duration);;
+            Log.d("Performance Diagonstics", "Num Obj frames captured: " + numObjFramesProcessed);
+            Log.d("Performance Diagonstics", "Obj Frames per second: " + 1.0* numObjFramesProcessed / duration);
+
         } catch (JSONException e) {
             e.printStackTrace();
         }

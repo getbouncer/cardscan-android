@@ -356,7 +356,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         mSentResponse = false;
 
         if (findViewById(mCardNumberId) != null) {
-            findViewById(mCardNumberId).setVisibility(View.INVISIBLE);
+            //findViewById(mCardNumberId).setVisibility(View.INVISIBLE);
         }
         if (findViewById(mExpiryId) != null) {
             findViewById(mExpiryId).setVisibility(View.INVISIBLE);
@@ -643,6 +643,32 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         }
 
         mMachineLearningSemaphore.release();
+    }
+
+    protected boolean processOCRPrediction(final String number, final Expiry expiry) {
+        if (number != null && firstResultMs == 0) {
+            firstResultMs = SystemClock.uptimeMillis();
+        }
+
+        if (number != null) {
+            incrementNumber(number);
+            this.scanStats.observePAN();
+        }
+        if (expiry != null) {
+            incrementExpiry(expiry);
+        }
+
+        return number != null;
+    }
+
+    protected boolean showNumberAndExpiryIfNumber() {
+        long duration = SystemClock.uptimeMillis() - firstResultMs;
+        if (firstResultMs != 0 && mShowNumberAndExpiryAsScanning) {
+            Log.d("debug", "Showing Animatoin");
+            setNumberAndExpiryAnimated(duration);
+        }
+
+        return firstResultMs != 0 && mShowNumberAndExpiryAsScanning;
     }
 
     protected void onOCRCompleted() {
