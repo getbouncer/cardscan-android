@@ -125,7 +125,7 @@ public class MultiModelMachineLearningThread extends MachineLearningThread {
         });
     }
 
-    private static void cleanup(Bitmap bitmap, Bitmap bitmapForObjectDetection, Bitmap fullScreenBitmap) {
+    protected static void cleanup(Bitmap bitmap, Bitmap bitmapForObjectDetection, Bitmap fullScreenBitmap) {
         if (bitmap != null) {
             bitmap.recycle();
         }
@@ -137,7 +137,7 @@ public class MultiModelMachineLearningThread extends MachineLearningThread {
         }
     }
 
-    private void runModelParallel() {
+    protected void runModelParallel() {
         final RunArguments args = getNextImage();
 
         final Bitmap bm, fullScreen;
@@ -198,7 +198,7 @@ public class MultiModelMachineLearningThread extends MachineLearningThread {
                             }
                             args.mMultiListener.onMultiModelPrediction(
                                 croppedBitmap, boxes, number, CreditCardUtils.isValidCardNumber(number), null, new ArrayList<DetectedBox>(),
-                                    null, bm.getWidth(), bm.getHeight(), fullScreen);
+                                    null, bm.getWidth(), bm.getHeight(), fullScreen, bm);
 
                             Log.d("Steven debug", "done sending prediction");
                         }

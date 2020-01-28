@@ -11,7 +11,7 @@ public interface OnMultiListener {
     void onMultiModelPrediction(final Bitmap bitmap, List<DetectedSSDBox> boxes,
                                 final String number, final boolean isNumberValidPan, final Expiry expiry,
                                 final List<DetectedBox> digitBoxes, final DetectedBox expiryBox,
-                                int imageWidth, int imageHeight, final Bitmap fullScreenBitmap);
+                                int imageWidth, int imageHeight, final Bitmap fullScreenBitmap, final Bitmap originalBitmap);
 
     void onObjectFatalError();
 }

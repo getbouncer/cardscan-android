@@ -23,22 +23,23 @@ import java.util.LinkedList;
 
 public class MachineLearningThread implements Runnable {
 
-    class RunArguments {
-        final byte[] mFrameBytes;
-        final Bitmap mBitmap;
-        final OnScanListener mScanListener;
-        final OnObjectListener mObjectListener;
-        final OnMultiListener mMultiListener;
-        final Context mContext;
-        final int mWidth;
-        final int mHeight;
-        final int mFormat;
-        final int mSensorOrientation;
-        final float mRoiCenterYRatio;
-        final boolean mIsOcr;
-        final File mObjectDetectFile;
-        final boolean mRunOcr;
-        final boolean mRunObjDetection;
+    protected class RunArguments {
+        public final byte[] mFrameBytes;
+        public final Bitmap mBitmap;
+        public final OnScanListener mScanListener;
+        public final OnObjectListener mObjectListener;
+        public final OnMultiListener mMultiListener;
+        public final OnUXModelListener mUXModelListener;
+        public final Context mContext;
+        public final int mWidth;
+        public final int mHeight;
+        public final int mFormat;
+        public final int mSensorOrientation;
+        public final float mRoiCenterYRatio;
+        public final boolean mIsOcr;
+        public final File mObjectDetectFile;
+        public final boolean mRunOcr;
+        public final boolean mRunObjDetection;
 
         RunArguments(byte[] frameBytes, int width, int height, int format,
                      int sensorOrientation, OnScanListener scanListener, Context context,
@@ -58,6 +59,7 @@ public class MachineLearningThread implements Runnable {
             mRunOcr = false;
             mRunObjDetection = false;
             mMultiListener = null;
+            mUXModelListener = null;
         }
 
         RunArguments(byte[] frameBytes, int width, int height, int format,
@@ -70,6 +72,7 @@ public class MachineLearningThread implements Runnable {
             mFormat = format;
             mScanListener = null;
             mMultiListener = null;
+            mUXModelListener = null;
             mContext = context;
             mSensorOrientation = sensorOrientation;
             mRoiCenterYRatio = roiCenterYRatio;
@@ -91,6 +94,7 @@ public class MachineLearningThread implements Runnable {
             mFormat = format;
             mScanListener = scanListener;
             mMultiListener = null;
+            mUXModelListener = null;
             mContext = context;
             mSensorOrientation = sensorOrientation;
             mRoiCenterYRatio = roiCenterYRatio;
@@ -120,7 +124,31 @@ public class MachineLearningThread implements Runnable {
             mObjectDetectFile = objectDetectFile;
             mRunOcr = runOcrModel;
             mRunObjDetection = runObjDetectionModel;
+            mUXModelListener = null;
         }
+
+        public RunArguments(byte[] frameBytes, int width, int height, int format,
+                            int sensorOrientation, OnUXModelListener uxListener, Context context,
+                            float roiCenterYRatio, File objectDetectFile, boolean runOcrModel,
+                            boolean runObjDetectionModel) {
+            mFrameBytes = frameBytes;
+            mBitmap = null;
+            mWidth = width;
+            mHeight = height;
+            mFormat = format;
+            mScanListener = null;
+            mContext = context;
+            mSensorOrientation = sensorOrientation;
+            mRoiCenterYRatio = roiCenterYRatio;
+            mIsOcr = false;
+            mObjectListener = null;
+            mMultiListener = null;
+            mObjectDetectFile = objectDetectFile;
+            mRunOcr = runOcrModel;
+            mRunObjDetection = runObjDetectionModel;
+            mUXModelListener = uxListener;
+        }
+
 
         @VisibleForTesting
         RunArguments(Bitmap bitmap, OnScanListener scanListener, Context context) {
@@ -139,6 +167,7 @@ public class MachineLearningThread implements Runnable {
             mRunOcr = false;
             mRunObjDetection = false;
             mMultiListener = null;
+            mUXModelListener = null;
         }
 
         @VisibleForTesting
@@ -160,6 +189,7 @@ public class MachineLearningThread implements Runnable {
             mRunOcr = runOcrModel;
             mRunObjDetection = runObjDetectionModel;
             mMultiListener = null;
+            mUXModelListener = null;
         }
 
         @VisibleForTesting
@@ -180,12 +210,13 @@ public class MachineLearningThread implements Runnable {
             mRunOcr = false;
             mRunObjDetection = false;
             mMultiListener = null;
+            mUXModelListener = null;
         }
     }
 
-    class BitmapPair {
-        Bitmap cropped;
-        Bitmap fullScreen;
+    protected class BitmapPair {
+        public Bitmap cropped;
+        public Bitmap fullScreen;
         BitmapPair(Bitmap cropped, Bitmap fullScreen) {
             this.cropped = cropped;
             this.fullScreen = fullScreen;
@@ -194,7 +225,7 @@ public class MachineLearningThread implements Runnable {
 
     protected LinkedList<RunArguments> queue = new LinkedList<>();
 
-    MachineLearningThread() {
+    public MachineLearningThread() {
         super();
     }
 
@@ -265,7 +296,7 @@ public class MachineLearningThread implements Runnable {
         return resizedImage;
     }
 
-    BitmapPair getBitmap(byte[] bytes, int width, int height, int format,
+    protected BitmapPair getBitmap(byte[] bytes, int width, int height, int format,
                                  int sensorOrientation, float roiCenterYRatio, boolean isOcr) {
         long startTime = SystemClock.uptimeMillis();
 
@@ -346,7 +377,7 @@ public class MachineLearningThread implements Runnable {
         return new BitmapPair(bm, fullScreen);
     }
 
-    synchronized RunArguments getNextImage() {
+    protected synchronized RunArguments getNextImage() {
         while (queue.size() == 0) {
             try {
                 wait();
@@ -464,7 +495,7 @@ public class MachineLearningThread implements Runnable {
         }
     }
 
-    Bitmap cropBitmapForOCR(Bitmap inputBitmap) {
+    protected Bitmap cropBitmapForOCR(Bitmap inputBitmap) {
         float width = inputBitmap.getWidth();
         float height = width * 375.0f / 600.0f;
         float y = (inputBitmap.getHeight() - height) / 2.0f;

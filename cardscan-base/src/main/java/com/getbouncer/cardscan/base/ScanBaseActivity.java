@@ -356,7 +356,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         mSentResponse = false;
 
         if (findViewById(mCardNumberId) != null) {
-            //findViewById(mCardNumberId).setVisibility(View.INVISIBLE);
+            findViewById(mCardNumberId).setVisibility(View.INVISIBLE);
         }
         if (findViewById(mExpiryId) != null) {
             findViewById(mExpiryId).setVisibility(View.INVISIBLE);

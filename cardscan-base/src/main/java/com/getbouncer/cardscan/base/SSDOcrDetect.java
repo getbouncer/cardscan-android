@@ -28,7 +28,7 @@ public class SSDOcrDetect {
     private static float[][] priors = null;
 
     public List<DetectedOcrBox> objectBoxes = new ArrayList<>();
-    boolean hadUnrecoverableException = false;
+    public boolean hadUnrecoverableException = false;
 
     /** We don't use the following two for now */
     public static boolean USE_GPU = false;
