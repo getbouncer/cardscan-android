@@ -84,7 +84,7 @@ public class SSDOcrDetect {
         return numberOCR;
     }
 
-    private Pair<String, Boolean> ssdOutputToPredictionsLoose(Bitmap image){
+    private String ssdOutputToPredictionsLoose(Bitmap image){
         ArrUtils arrUtils = new ArrUtils();
 
         float[][] k_boxes = arrUtils.rearrangeOCRArray(ssdOcrModel.outputLocations, SSDOcrModel.featureMapSizes,
@@ -125,10 +125,11 @@ public class SSDOcrDetect {
             Log.d("OCR Number passed", numberOCR);
         } else {
             Log.d("OCR Number failed", num.toString());
+            numberOCR = num.toString();
             //numberOCR = null;
         }
 
-        return new Pair<String, Boolean>(numberOCR, CreditCardUtils.isValidCardNumber(num.toString()));
+        return numberOCR;
     }
 
     /**
@@ -150,12 +151,12 @@ public class SSDOcrDetect {
      * Run SSD Model and use the prediction API to post process
      * the model output
      */
-    private Pair<String, Boolean> runModelLoose(Bitmap image) {
+    private String runModelLoose(Bitmap image) {
         final long startTime = SystemClock.uptimeMillis();
 
         ssdOcrModel.classifyFrame(image);
         Log.d("Before SSD Post Process", String.valueOf(SystemClock.uptimeMillis() - startTime));
-        Pair<String, Boolean> number = ssdOutputToPredictionsLoose(image);
+        String number = ssdOutputToPredictionsLoose(image);
         Log.d("After SSD Post Process", String.valueOf(SystemClock.uptimeMillis() - startTime));
 
         return number;
@@ -243,18 +244,18 @@ public class SSDOcrDetect {
             try {
                 return runModel(image);
             } catch (Error | Exception e) {
-                Log.i("ObjectDetect", "runModel exception, retry object detection", e);
+                Log.i("OCR", "runModel exception, retry object detection", e);
                 ssdOcrModel = new SSDOcrModel(context);
                 return runModel(image);
             }
         } catch (Error | Exception e) {
-            Log.e("ObjectDetect", "unrecoverable exception on ObjectDetect", e);
+            Log.e("OCR", "unrecoverable exception on ObjectDetect", e);
             hadUnrecoverableException = true;
             return null;
         }
     }
 
-    public synchronized Pair<String, Boolean> predictLoose(Bitmap image, Context context) {
+    public synchronized String predictLoose(Bitmap image, Context context) {
         final int NUM_THREADS = 4;
         try {
             boolean createdNewModel = false;

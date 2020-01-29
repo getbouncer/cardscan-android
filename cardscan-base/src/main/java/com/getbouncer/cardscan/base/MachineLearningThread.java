@@ -433,8 +433,10 @@ public class MachineLearningThread implements Runnable {
 
     private void runOcrModel(final Bitmap bitmap, final RunArguments args,
                              final Bitmap bitmapForObjectDetection, final Bitmap fullScreenBitmap) {
+        long ocrStart = SystemClock.uptimeMillis();
         final SSDOcrDetect ocrDetect = new SSDOcrDetect();
         final String number = ocrDetect.predict(bitmap, args.mContext);
+        Log.d("Performance Diagnostics", "OCR inference time " + (SystemClock.uptimeMillis() - ocrStart));
         Log.d("OCR Detect", "OCR Number:" + number);
         final boolean hadUnrecoverableException = ocrDetect.hadUnrecoverableException;
         Handler handler = new Handler(Looper.getMainLooper());

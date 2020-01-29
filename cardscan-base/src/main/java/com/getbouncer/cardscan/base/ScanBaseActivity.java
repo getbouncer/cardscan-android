@@ -74,7 +74,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     private boolean mIsActivityActive = false;
     private HashMap<String, Integer> numberResults = new HashMap<>();
     private HashMap<Expiry, Integer> expiryResults = new HashMap<>();
-    private long firstResultMs = 0;
+    private long firstValidPanResultMs = 0;
     private int mFlashlightId;
     private int mCardNumberId;
     private int mExpiryId;
@@ -289,7 +289,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     protected void startCamera() {
         numberResults = new HashMap<>();
         expiryResults = new HashMap<>();
-        firstResultMs = 0;
+        firstValidPanResultMs = 0;
 
         try {
             if (mIsPermissionCheckDone) {
@@ -350,7 +350,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         boolean isCameraPermissionGranted = ContextCompat.checkSelfPermission(
                 this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
         this.scanStats = createScanStats();
-        firstResultMs = 0;
+        firstValidPanResultMs = 0;
         numberResults = new HashMap<>();
         expiryResults = new HashMap<>();
         mSentResponse = false;
@@ -620,8 +620,8 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
 
         if (!mSentResponse && mIsActivityActive) {
 
-            if (number != null && firstResultMs == 0) {
-                firstResultMs = SystemClock.uptimeMillis();
+            if (number != null && firstValidPanResultMs == 0) {
+                firstValidPanResultMs = SystemClock.uptimeMillis();
             }
 
             if (number != null) {
@@ -632,8 +632,8 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
                 incrementExpiry(expiry);
             }
 
-            long duration = SystemClock.uptimeMillis() - firstResultMs;
-            if (firstResultMs != 0 && mShowNumberAndExpiryAsScanning) {
+            long duration = SystemClock.uptimeMillis() - firstValidPanResultMs;
+            if (firstValidPanResultMs != 0 && mShowNumberAndExpiryAsScanning) {
                 setNumberAndExpiryAnimated(duration);
             }
 
@@ -646,8 +646,8 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     }
 
     protected boolean processOCRPrediction(final String number, final Expiry expiry) {
-        if (number != null && firstResultMs == 0) {
-            firstResultMs = SystemClock.uptimeMillis();
+        if (number != null && firstValidPanResultMs == 0) {
+            firstValidPanResultMs = SystemClock.uptimeMillis();
         }
 
         if (number != null) {
@@ -661,14 +661,18 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         return number != null;
     }
 
+    protected boolean hasSeenValidPan() {
+        return firstValidPanResultMs != 0;
+    }
+
     protected boolean showNumberAndExpiryIfNumber() {
-        long duration = SystemClock.uptimeMillis() - firstResultMs;
-        if (firstResultMs != 0 && mShowNumberAndExpiryAsScanning) {
+        long duration = SystemClock.uptimeMillis() - firstValidPanResultMs;
+        if (firstValidPanResultMs != 0 && mShowNumberAndExpiryAsScanning) {
             Log.d("debug", "Showing Animatoin");
             setNumberAndExpiryAnimated(duration);
         }
 
-        return firstResultMs != 0 && mShowNumberAndExpiryAsScanning;
+        return firstValidPanResultMs != 0 && mShowNumberAndExpiryAsScanning;
     }
 
     protected void onOCRCompleted() {
@@ -693,10 +697,10 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     }
 
     public boolean isScanComplete() {
-        Log.d("Steven debug", "firstResultMS " + firstResultMs);
-        long duration = SystemClock.uptimeMillis() - firstResultMs;
+        Log.d("Steven debug", "firstResultMS " + firstValidPanResultMs);
+        long duration = SystemClock.uptimeMillis() - firstValidPanResultMs;
         Log.d("Steven debug", "duration " + duration);
-        return firstResultMs != 0 && duration >= errorCorrectionDurationMs;
+        return firstValidPanResultMs != 0 && duration >= errorCorrectionDurationMs;
     }
 
     @Override
