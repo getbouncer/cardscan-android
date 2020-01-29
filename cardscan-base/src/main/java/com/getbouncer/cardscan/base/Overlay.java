@@ -15,10 +15,10 @@ import android.view.View;
 
 class Overlay extends View {
 
-    private RectF rect;
-    private RectF oval = new RectF();
-    private int radius;
-    private final Xfermode xfermode = new PorterDuffXfermode(PorterDuff.Mode.CLEAR);
+    protected RectF rect;
+    protected RectF oval = new RectF();
+    protected int radius;
+    protected final Xfermode xfermode = new PorterDuffXfermode(PorterDuff.Mode.CLEAR);
 
     int cornerDp = 6;
 
@@ -43,7 +43,7 @@ class Overlay extends View {
         postInvalidate();
     }
 
-    private int dpToPx(int dp) {
+    protected int dpToPx(int dp) {
         return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
     }
 
