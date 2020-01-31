@@ -59,7 +59,7 @@ class SSDDetect extends ImageClassifier {
     static final int NUM_OF_PRIORS_PER_ACTIVATION = 6;
 
     /** We can detect a total of 12 objects plus the background class */
-    static final int NUM_OF_CLASSES = 13;
+    static final int NUM_OF_CLASSES = 14;
 
     /** Each prior or bounding box can be represented by 4 co-ordinates
      * XMin, YMin, XMax, YMax.
