@@ -23,7 +23,7 @@ public class DetectedSSDBox {
         this.YMin = YMin * imageHeight;
         this.YMax = YMax * imageHeight;
         this.confidence = confidence;
-        this.label = label - 1;
+        this.label = label;
         this.imageWidth = imageWidth;
         this.imageHeight = imageHeight;
         this.rect = new RectF(this.XMin, this.YMin, this.XMax, this.YMax);
