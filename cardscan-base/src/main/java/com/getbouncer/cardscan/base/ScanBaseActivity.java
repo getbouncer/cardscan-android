@@ -619,23 +619,8 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
                              final Bitmap bitmapForObjectDetection, final Bitmap fullScreenBitmap) {
 
         if (!mSentResponse && mIsActivityActive) {
-
-            if (number != null && firstValidPanResultMs == 0) {
-                firstValidPanResultMs = SystemClock.uptimeMillis();
-            }
-
-            if (number != null) {
-                incrementNumber(number);
-                this.scanStats.observePAN();
-            }
-            if (expiry != null) {
-                incrementExpiry(expiry);
-            }
-
-            long duration = SystemClock.uptimeMillis() - firstValidPanResultMs;
-            if (firstValidPanResultMs != 0 && mShowNumberAndExpiryAsScanning) {
-                setNumberAndExpiryAnimated(duration);
-            }
+            processOCRPrediction(number, expiry);
+            showNumberAndExpiryIfNumber();
 
             if (isScanComplete()) {
                 onOCRCompleted();
@@ -645,8 +630,12 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         mMachineLearningSemaphore.release();
     }
 
-    protected boolean processOCRPrediction(final String number, final Expiry expiry) {
-        if (number != null && firstValidPanResultMs == 0) {
+    /**
+     * @param number String representation of the PAN
+     * @param expiry Expiry
+     */
+    protected void processOCRPrediction(final String number, final Expiry expiry) {
+        if (number != null && hasSeenValidPan()) {
             firstValidPanResultMs = SystemClock.uptimeMillis();
         }
 
@@ -657,24 +646,30 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         if (expiry != null) {
             incrementExpiry(expiry);
         }
-
-        return number != null;
     }
 
+    /**
+     * @return boolean of whether we saw a valid pan in the lifecycle of this activity
+     */
     protected boolean hasSeenValidPan() {
         return firstValidPanResultMs != 0;
     }
 
-    protected boolean showNumberAndExpiryIfNumber() {
+    /**
+     * Shows the animation for number and expiry if one exists
+     */
+    protected void showNumberAndExpiryIfNumber() {
         long duration = SystemClock.uptimeMillis() - firstValidPanResultMs;
         if (firstValidPanResultMs != 0 && mShowNumberAndExpiryAsScanning) {
-            Log.d("debug", "Showing Animatoin");
             setNumberAndExpiryAnimated(duration);
         }
-
-        return firstValidPanResultMs != 0 && mShowNumberAndExpiryAsScanning;
     }
 
+    /**
+     * To be called after OCR is complete.
+     * - Gathers all relevant ScanStats and fires off a request to scan stats
+     * - Calls the abstract method onCardScanned with the final card details
+     */
     protected void onOCRCompleted() {
         mSentResponse = true;
         String numberResult = getNumberResult();
@@ -697,10 +692,8 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     }
 
     public boolean isScanComplete() {
-        Log.d("Steven debug", "firstResultMS " + firstValidPanResultMs);
         long duration = SystemClock.uptimeMillis() - firstValidPanResultMs;
-        Log.d("Steven debug", "duration " + duration);
-        return firstValidPanResultMs != 0 && duration >= errorCorrectionDurationMs;
+        return hasSeenValidPan() && duration >= errorCorrectionDurationMs;
     }
 
     @Override
@@ -711,8 +704,6 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     @Override
     public void onPrediction(Bitmap bm, List<DetectedSSDBox> boxes, int imageWidth,
                              int imageHeight, final Bitmap fullScreenBitmap) {
-        Log.d("Steven debug", "hmnmmmm");
-
         if (!mSentResponse && mIsActivityActive) {
             // do something with the prediction
 
@@ -721,8 +712,6 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             // of failing when the card does not match.
         }
         mMachineLearningSemaphore.release();
-        Log.d("Steven debug", "hmnmmmm??");
-
     }
 
     /** A basic Camera preview class */

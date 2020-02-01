@@ -9,7 +9,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 
 public abstract class ModelFactory {
-    public abstract MappedByteBuffer loadSSDDetectModelFile(Context context) throws IOException;
+    public abstract MappedByteBuffer loadModelFile(Context context) throws IOException;
 
     private static ModelFactory sharedInstance;
 

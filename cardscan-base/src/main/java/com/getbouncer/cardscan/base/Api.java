@@ -16,7 +16,7 @@ import java.net.URL;
 
 
 public class Api {
-    public static String baseUrl = "http://192.168.1.117:8080"; // "https://api.getbouncer.com";
+    public static String baseUrl = "https://api.getbouncer.com";
     public static String apiKey = null;
 
     static private JSONObject getUnknownErrorResponse() {

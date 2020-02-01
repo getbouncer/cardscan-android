@@ -28,7 +28,6 @@ public class MachineLearningThread implements Runnable {
         public final Bitmap mBitmap;
         public final OnScanListener mScanListener;
         public final OnObjectListener mObjectListener;
-        public final OnMultiListener mMultiListener;
         public final OnUXModelListener mUXModelListener;
         public final Context mContext;
         public final int mWidth;
@@ -58,7 +57,6 @@ public class MachineLearningThread implements Runnable {
             mObjectDetectFile = null;
             mRunOcr = false;
             mRunObjDetection = false;
-            mMultiListener = null;
             mUXModelListener = null;
         }
 
@@ -71,7 +69,6 @@ public class MachineLearningThread implements Runnable {
             mHeight = height;
             mFormat = format;
             mScanListener = null;
-            mMultiListener = null;
             mUXModelListener = null;
             mContext = context;
             mSensorOrientation = sensorOrientation;
@@ -83,54 +80,9 @@ public class MachineLearningThread implements Runnable {
             mRunObjDetection = false;
         }
 
-        RunArguments(byte[] frameBytes, int width, int height, int format,
-                      int sensorOrientation, OnScanListener scanListener, OnObjectListener objectListener, Context context,
-                      float roiCenterYRatio, File objectDetectFile, boolean runOcrModel,
-                      boolean runObjDetectionModel) {
-            mFrameBytes = frameBytes;
-            mBitmap = null;
-            mWidth = width;
-            mHeight = height;
-            mFormat = format;
-            mScanListener = scanListener;
-            mMultiListener = null;
-            mUXModelListener = null;
-            mContext = context;
-            mSensorOrientation = sensorOrientation;
-            mRoiCenterYRatio = roiCenterYRatio;
-            mIsOcr = false;
-            mObjectListener = objectListener;
-            mObjectDetectFile = objectDetectFile;
-            mRunOcr = runOcrModel;
-            mRunObjDetection = runObjDetectionModel;
-        }
-
-        RunArguments(byte[] frameBytes, int width, int height, int format,
-                     int sensorOrientation, OnMultiListener multiListener, Context context,
-                     float roiCenterYRatio, File objectDetectFile, boolean runOcrModel,
-                     boolean runObjDetectionModel) {
-            mFrameBytes = frameBytes;
-            mBitmap = null;
-            mWidth = width;
-            mHeight = height;
-            mFormat = format;
-            mScanListener = null;
-            mContext = context;
-            mSensorOrientation = sensorOrientation;
-            mRoiCenterYRatio = roiCenterYRatio;
-            mIsOcr = false;
-            mObjectListener = null;
-            mMultiListener = multiListener;
-            mObjectDetectFile = objectDetectFile;
-            mRunOcr = runOcrModel;
-            mRunObjDetection = runObjDetectionModel;
-            mUXModelListener = null;
-        }
-
         public RunArguments(byte[] frameBytes, int width, int height, int format,
                             int sensorOrientation, OnUXModelListener uxListener, Context context,
-                            float roiCenterYRatio, File objectDetectFile, boolean runOcrModel,
-                            boolean runObjDetectionModel) {
+                            float roiCenterYRatio, File objectDetectFile, boolean runOcrModel) {
             mFrameBytes = frameBytes;
             mBitmap = null;
             mWidth = width;
@@ -142,10 +94,9 @@ public class MachineLearningThread implements Runnable {
             mRoiCenterYRatio = roiCenterYRatio;
             mIsOcr = false;
             mObjectListener = null;
-            mMultiListener = null;
             mObjectDetectFile = objectDetectFile;
             mRunOcr = runOcrModel;
-            mRunObjDetection = runObjDetectionModel;
+            mRunObjDetection = false;
             mUXModelListener = uxListener;
         }
 
@@ -166,7 +117,6 @@ public class MachineLearningThread implements Runnable {
             mObjectDetectFile = null;
             mRunOcr = false;
             mRunObjDetection = false;
-            mMultiListener = null;
             mUXModelListener = null;
         }
 
@@ -188,7 +138,6 @@ public class MachineLearningThread implements Runnable {
             mObjectDetectFile = objectDetectFile;
             mRunOcr = runOcrModel;
             mRunObjDetection = runObjDetectionModel;
-            mMultiListener = null;
             mUXModelListener = null;
         }
 
@@ -209,7 +158,6 @@ public class MachineLearningThread implements Runnable {
             mObjectDetectFile = objectDetectFile;
             mRunOcr = false;
             mRunObjDetection = false;
-            mMultiListener = null;
             mUXModelListener = null;
         }
     }
@@ -484,13 +432,7 @@ public class MachineLearningThread implements Runnable {
         }
 
         if (args.mIsOcr) {
-            float width = bm.getWidth();
-            float height = width * 375.0f / 600.0f;
-            float y = (bm.getHeight() - height) / 2.0f;
-            float x = 0.0f;
-            Bitmap croppedBitmap = Bitmap.createBitmap(bm, (int) x, (int) y, (int) width,
-                    (int) height);
-
+            Bitmap croppedBitmap = cropBitmapForOCR(bm);
             runOcrModel(croppedBitmap, args, bm, fullScreen);
         } else {
             runObjectModel(bm, args, fullScreen);

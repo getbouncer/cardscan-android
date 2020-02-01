@@ -10,8 +10,8 @@ import java.nio.MappedByteBuffer;
 public class ResourceModelFactory extends ModelFactory {
 
     @Override
-    public MappedByteBuffer loadSSDDetectModelFile(Context context) throws IOException{
-        return  loadModelFromResource(context, R.raw.darknite);
+    public MappedByteBuffer loadModelFile(Context context) throws IOException{
+        return loadModelFromResource(context, R.raw.darknite);
     }
 
 }

@@ -17,7 +17,6 @@ buildscript {
 }
 
 
-
 plugins {
     id "com.jfrog.bintray" version "1.7.3"
     id "com.github.dcendents.android-maven" version "2.0"
