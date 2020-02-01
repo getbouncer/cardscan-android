@@ -37,7 +37,7 @@ public class SSDOcrDetect {
         return ssdOcrModel != null;
     }
 
-    private String ssdOutputToPredictions(Bitmap image){
+    private String ssdOutputToPredictions(Bitmap image, boolean strict){
         ArrUtils arrUtils = new ArrUtils();
 
         float[][] k_boxes = arrUtils.rearrangeOCRArray(ssdOcrModel.outputLocations, SSDOcrModel.featureMapSizes,
@@ -78,55 +78,11 @@ public class SSDOcrDetect {
             Log.d("OCR Number passed", numberOCR);
         } else {
             Log.d("OCR Number failed", num.toString());
-            numberOCR = null;
-        }
-
-        return numberOCR;
-    }
-
-    private String ssdOutputToPredictionsLoose(Bitmap image){
-        ArrUtils arrUtils = new ArrUtils();
-
-        float[][] k_boxes = arrUtils.rearrangeOCRArray(ssdOcrModel.outputLocations, SSDOcrModel.featureMapSizes,
-                SSDOcrModel.NUM_OF_PRIORS_PER_ACTIVATION, SSDOcrModel.NUM_OF_COORDINATES);
-        k_boxes = arrUtils.reshape(k_boxes, SSDOcrModel.NUM_OF_PRIORS, SSDOcrModel.NUM_OF_COORDINATES);
-        k_boxes = arrUtils.convertLocationsToBoxes(k_boxes, priors,
-                SSDOcrModel.CENTER_VARIANCE, SSDOcrModel.SIZE_VARIANCE);
-        k_boxes = arrUtils.centerFormToCornerForm(k_boxes);
-        float[][] k_scores = arrUtils.rearrangeOCRArray(ssdOcrModel.outputClasses, SSDOcrModel.featureMapSizes,
-                SSDOcrModel.NUM_OF_PRIORS_PER_ACTIVATION, SSDOcrModel.NUM_OF_CLASSES);
-        k_scores = arrUtils.reshape(k_scores, SSDOcrModel.NUM_OF_PRIORS, SSDOcrModel.NUM_OF_CLASSES);
-        k_scores = arrUtils.softmax2D(k_scores);
-
-        PredictionAPI predAPI = new PredictionAPI();
-        Result result = predAPI.predictionAPI(k_scores, k_boxes, SSDOcrModel.PROB_THRESHOLD,
-                SSDOcrModel.IOU_THRESHOLD, SSDOcrModel.CANDIDATE_SIZE, SSDOcrModel.TOP_K);
-        if (result.pickedBoxProbs.size() != 0 && result.pickedLabels.size() != 0)
-        {
-            for (int i = 0; i < result.pickedBoxProbs.size(); ++i){
-                DetectedOcrBox ocrBox = new DetectedOcrBox(
-                        result.pickedBoxes.get(i)[0], result.pickedBoxes.get(i)[1],
-                        result.pickedBoxes.get(i)[2], result.pickedBoxes.get(i)[3],result.pickedBoxProbs.get(i),
-                        image.getWidth(), image.getHeight(),result.pickedLabels.get(i));
-                objectBoxes.add(ocrBox);
+            if (strict) {
+                numberOCR = null;
+            } else {
+                numberOCR = num.toString();
             }
-        }
-        String numberOCR = "";
-        Collections.sort(objectBoxes);
-        StringBuilder num = new StringBuilder();
-        for (DetectedOcrBox box : objectBoxes){
-            if (box.label == 10){
-                box.label = 0;
-            }
-            num.append(box.label);
-        }
-        if (CreditCardUtils.isValidCardNumber(num.toString())){
-            numberOCR = num.toString();
-            Log.d("OCR Number passed", numberOCR);
-        } else {
-            Log.d("OCR Number failed", num.toString());
-            numberOCR = num.toString();
-            //numberOCR = null;
         }
 
         return numberOCR;
@@ -137,26 +93,19 @@ public class SSDOcrDetect {
      * the model output
      */
     private String runModel(Bitmap image) {
-        final long startTime = SystemClock.uptimeMillis();
-
-        ssdOcrModel.classifyFrame(image);
-        Log.d("Before SSD Post Process", String.valueOf(SystemClock.uptimeMillis() - startTime));
-        String number = ssdOutputToPredictions(image);
-        Log.d("After SSD Post Process", String.valueOf(SystemClock.uptimeMillis() - startTime));
-
-        return number;
+        return runModel(image, true);
     }
 
     /**
      * Run SSD Model and use the prediction API to post process
      * the model output
      */
-    private String runModelLoose(Bitmap image) {
+    private String runModel(Bitmap image, boolean strict) {
         final long startTime = SystemClock.uptimeMillis();
 
         ssdOcrModel.classifyFrame(image);
         Log.d("Before SSD Post Process", String.valueOf(SystemClock.uptimeMillis() - startTime));
-        String number = ssdOutputToPredictionsLoose(image);
+        String number = ssdOutputToPredictions(image, strict);
         Log.d("After SSD Post Process", String.valueOf(SystemClock.uptimeMillis() - startTime));
 
         return number;
@@ -255,7 +204,7 @@ public class SSDOcrDetect {
         }
     }
 
-    public synchronized String predictLoose(Bitmap image, Context context) {
+    public synchronized String predict(Bitmap image, Context context, boolean strict) {
         final int NUM_THREADS = 4;
         try {
             boolean createdNewModel = false;
@@ -278,11 +227,11 @@ public class SSDOcrDetect {
 
 
             try {
-                return runModelLoose(image);
+                return runModel(image, strict);
             } catch (Error | Exception e) {
                 Log.i("ObjectDetect", "runModel exception, retry object detection", e);
                 ssdOcrModel = new SSDOcrModel(context);
-                return runModelLoose(image);
+                return runModel(image, strict);
             }
         } catch (Error | Exception e) {
             Log.e("ObjectDetect", "unrecoverable exception on ObjectDetect", e);

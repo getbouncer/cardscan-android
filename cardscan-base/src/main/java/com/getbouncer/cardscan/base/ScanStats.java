@@ -67,16 +67,6 @@ public class ScanStats {
             object.put("sdk_version", BuildConfig.CARDSCAN_VERSION);
             object.put("os", Build.VERSION.RELEASE);
             object.put("permission_granted", mIsCameraPermissionGranted);
-
-
-            Log.d("Performance Diagonstics", "Num frames captured: " + scans);
-            Log.d("Performance Diagonstics", "Total Duration (s): " + duration);
-            Log.d("Performance Diagonstics", "Frames per second: " + 1.0* scans / duration);
-            Log.d("Performance Diagonstics", "Num OCR frames captured: " + numOCRFramesProcessed);
-            Log.d("Performance Diagonstics", "OCR Frames per second: " + 1.0* numOCRFramesProcessed / duration);;
-            Log.d("Performance Diagonstics", "Num Obj frames captured: " + numObjFramesProcessed);
-            Log.d("Performance Diagonstics", "Obj Frames per second: " + 1.0* numObjFramesProcessed / duration);
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
