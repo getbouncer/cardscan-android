@@ -635,7 +635,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
      * @param expiry Expiry
      */
     protected void processOCRPrediction(final String number, final Expiry expiry) {
-        if (number != null && hasSeenValidPan()) {
+        if (number != null && !hasSeenValidPan()) {
             firstValidPanResultMs = SystemClock.uptimeMillis();
         }
 
