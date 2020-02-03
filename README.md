@@ -1,7 +1,5 @@
 # CardScan
 
-[![](https://jitpack.io/v/Anwera64/cardscan-android.svg)](https://jitpack.io/#Anwera64/cardscan-android)
-
 CardScan Android installation guide
 
 ## Contents
