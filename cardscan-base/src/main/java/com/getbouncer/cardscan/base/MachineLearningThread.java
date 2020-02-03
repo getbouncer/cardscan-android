@@ -37,9 +37,11 @@ public class MachineLearningThread implements Runnable {
         public final float mRoiCenterYRatio;
         public final boolean mIsOcr;
         public final File mObjectDetectFile;
-        public final boolean mRunOcr;
-        public final boolean mRunObjDetection;
+        public final boolean mRunAdditionalOcr;
 
+        /**
+         * Used by MachineLearningThread for running OCR on the main loop
+         */
         RunArguments(byte[] frameBytes, int width, int height, int format,
                      int sensorOrientation, OnScanListener scanListener, Context context,
                      float roiCenterYRatio) {
@@ -55,11 +57,13 @@ public class MachineLearningThread implements Runnable {
             mIsOcr = true;
             mObjectListener = null;
             mObjectDetectFile = null;
-            mRunOcr = false;
-            mRunObjDetection = false;
+            mRunAdditionalOcr = false;
             mUXModelListener = null;
         }
 
+        /**
+         * Used by MachineLearningThread for running Obj detection on the main loop
+         */
         RunArguments(byte[] frameBytes, int width, int height, int format,
                      int sensorOrientation, OnObjectListener objectListener, Context context,
                      float roiCenterYRatio, File objectDetectFile) {
@@ -76,10 +80,12 @@ public class MachineLearningThread implements Runnable {
             mIsOcr = false;
             mObjectListener = objectListener;
             mObjectDetectFile = objectDetectFile;
-            mRunOcr = false;
-            mRunObjDetection = false;
+            mRunAdditionalOcr = false;
         }
 
+        /**
+         * Used by the new UXModelMachineLearningThread
+         */
         public RunArguments(byte[] frameBytes, int width, int height, int format,
                             int sensorOrientation, OnUXModelListener uxListener, Context context,
                             float roiCenterYRatio, File objectDetectFile, boolean runOcrModel) {
@@ -95,12 +101,14 @@ public class MachineLearningThread implements Runnable {
             mIsOcr = false;
             mObjectListener = null;
             mObjectDetectFile = objectDetectFile;
-            mRunOcr = runOcrModel;
-            mRunObjDetection = false;
+            mRunAdditionalOcr = runOcrModel;
             mUXModelListener = uxListener;
         }
 
 
+        /**
+         * For testing OCR MLThread only
+         */
         @VisibleForTesting
         RunArguments(Bitmap bitmap, OnScanListener scanListener, Context context) {
             mFrameBytes = null;
@@ -115,32 +123,13 @@ public class MachineLearningThread implements Runnable {
             mIsOcr = true;
             mObjectListener = null;
             mObjectDetectFile = null;
-            mRunOcr = false;
-            mRunObjDetection = false;
+            mRunAdditionalOcr = false;
             mUXModelListener = null;
         }
 
-        @VisibleForTesting
-        RunArguments(Bitmap bitmap, OnScanListener scanListener, OnObjectListener objectListener, Context context,
-                     File objectDetectFile, boolean runOcrModel,
-                     boolean runObjDetectionModel) {
-            mFrameBytes = null;
-            mBitmap = bitmap;
-            mWidth = bitmap == null ? 0 : bitmap.getWidth();
-            mHeight = bitmap == null ? 0 : bitmap.getHeight();
-            mFormat = 0;
-            mScanListener = scanListener;
-            mContext = context;
-            mSensorOrientation = 0;
-            mRoiCenterYRatio = 0;
-            mIsOcr = false;
-            mObjectListener = objectListener;
-            mObjectDetectFile = objectDetectFile;
-            mRunOcr = runOcrModel;
-            mRunObjDetection = runObjDetectionModel;
-            mUXModelListener = null;
-        }
-
+        /**
+         * For testing Object Detector MLThread only
+         */
         @VisibleForTesting
         RunArguments(Bitmap bitmap, OnObjectListener objectListener, Context context,
                      File objectDetectFile) {
@@ -156,8 +145,7 @@ public class MachineLearningThread implements Runnable {
             mIsOcr = false;
             mObjectListener = objectListener;
             mObjectDetectFile = objectDetectFile;
-            mRunOcr = false;
-            mRunObjDetection = false;
+            mRunAdditionalOcr = false;
             mUXModelListener = null;
         }
     }
