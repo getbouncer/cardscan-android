@@ -6,34 +6,28 @@ import androidx.annotation.NonNull;
 
 import org.json.JSONObject;
 
-
-public class DetectedOcrBox implements Comparable<DetectedOcrBox> {
-    public float XMin, YMin, XMax, YMax;
+public class DetectedOcrBox {
+    public float xMin, yMin, xMax, yMax;
     public float confidence;
     public int label;
 
     public RectF rect;
 
 
-    public DetectedOcrBox(float XMin, float YMin, float XMax, float YMax, float confidence,
-                          int ImageWidth, int ImageHeight, int label) {
+    public DetectedOcrBox(float xMin, float yMin, float xMax, float yMax, float confidence,
+                          int imageWidth, int imageHeight, int label) {
 
-        this.XMin = XMin * ImageWidth;
-        this.XMax = XMax * ImageWidth;
-        this.YMin = YMin * ImageHeight;
-        this.YMax = YMax * ImageHeight;
+        this.xMin = xMin * imageWidth;
+        this.xMax = xMax * imageWidth;
+        this.yMin = yMin * imageHeight;
+        this.yMax = yMax * imageHeight;
         this.confidence = confidence;
         this.label = label;
-        this.rect = new RectF(this.XMin, this.YMin, this.XMax, this.YMax);
+        this.rect = new RectF(this.xMin, this.yMin, this.xMax, this.yMax);
     }
 
     @NonNull
     public JSONObject toJson() {
         return new JSONObject();
-    }
-
-    @Override
-    public int compareTo(@NonNull DetectedOcrBox detectedOcrBox) {
-        return Float.compare(this.XMin, detectedOcrBox.XMin);
     }
 }

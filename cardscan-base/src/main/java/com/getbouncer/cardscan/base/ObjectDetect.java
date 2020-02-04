@@ -4,15 +4,18 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.SystemClock;
 import android.util.Log;
+import android.util.Size;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.getbouncer.cardscan.base.ssd.ArrUtils;
 import com.getbouncer.cardscan.base.ssd.DetectedSSDBox;
-import com.getbouncer.cardscan.base.ssd.PredictionAPI;
-import com.getbouncer.cardscan.base.ssd.PriorsGen;
-import com.getbouncer.cardscan.base.ssd.Result;
+import com.getbouncer.cardscan.base.ssd.DetectionBox;
+import com.getbouncer.cardscan.base.ssd.ObjectPriorsGen;
+import com.getbouncer.cardscan.base.ssd.SSD;
+import com.getbouncer.cardscan.base.ssd.domain.ClassifierScores;
+import com.getbouncer.cardscan.base.ssd.domain.SizeAndCenter;
+import com.getbouncer.cardscan.base.util.ArrayExtensions;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -20,6 +23,8 @@ import java.io.File;
 import java.util.List;
 
 import java.util.ArrayList;
+
+import kotlin.jvm.functions.Function1;
 
 
 public class ObjectDetect {
@@ -43,38 +48,48 @@ public class ObjectDetect {
     }
 
     private void ssdOutputToPredictions(@NonNull Bitmap image) {
-        ArrUtils arrUtils = new ArrUtils();
-
         if (ssdDetect == null) {
             return;
         }
 
-        float[][] k_boxes = arrUtils.rearrangeArray(ssdDetect.outputLocations, SSDDetect.featureMapSizes,
+        float[][] k_boxes = SSD.rearrangeArray(ssdDetect.outputLocations, SSDDetect.featureMapSizes,
                 SSDDetect.NUM_OF_PRIORS_PER_ACTIVATION, SSDDetect.NUM_OF_CORDINATES);
-        k_boxes = arrUtils.reshape(k_boxes, SSDDetect.NUM_OF_PRIORS, SSDDetect.NUM_OF_CORDINATES);
-        k_boxes = arrUtils.convertLocationsToBoxes(k_boxes, priors,
-                SSDDetect.CENTER_VARIANCE, SSDDetect.SIZE_VARIANCE);
-        k_boxes = arrUtils.centerFormToCornerForm(k_boxes);
-        float[][] k_scores = arrUtils.rearrangeArray(ssdDetect.outputClasses, SSDDetect.featureMapSizes,
+        k_boxes = ArrayExtensions.reshape(k_boxes, SSDDetect.NUM_OF_CORDINATES);
+        SizeAndCenter.adjustLocations(k_boxes, priors, SSDDetect.CENTER_VARIANCE, SSDDetect.SIZE_VARIANCE);
+        SizeAndCenter.toRectForm(k_boxes);
+
+        float[][] k_scores = SSD.rearrangeArray(ssdDetect.outputClasses, SSDDetect.featureMapSizes,
                 SSDDetect.NUM_OF_PRIORS_PER_ACTIVATION, SSDDetect.NUM_OF_CLASSES);
-        k_scores = arrUtils.reshape(k_scores, SSDDetect.NUM_OF_PRIORS, SSDDetect.NUM_OF_CLASSES);
-        k_scores = arrUtils.softmax2D(k_scores);
+        k_scores = ArrayExtensions.reshape(k_scores, SSDDetect.NUM_OF_CLASSES);
+        ClassifierScores.softMax2D(k_scores);
 
-        PredictionAPI predAPI = new PredictionAPI();
-        Result result = predAPI.predictionAPI(k_scores, k_boxes, SSDDetect.PROB_THRESHOLD,
-                SSDDetect.IOU_THRESHOLD, SSDDetect.CANDIDATE_SIZE, SSDDetect.TOP_K);
-        if (result.pickedBoxProbs.size() != 0 && result.pickedLabels.size() != 0)
-        {
-            for (int i = 0; i < result.pickedBoxProbs.size(); ++i){
-                DetectedSSDBox ssdBox = new DetectedSSDBox(
-                        result.pickedBoxes.get(i)[0], result.pickedBoxes.get(i)[1],
-                        result.pickedBoxes.get(i)[2], result.pickedBoxes.get(i)[3],result.pickedBoxProbs.get(i),
-                        image.getWidth(), image.getHeight(),result.pickedLabels.get(i));
-                objectBoxes.add(ssdBox);
+        List<DetectionBox> detectionBoxes = SSD.extractPredictions(
+            k_scores,
+            k_boxes,
+            new Size(image.getWidth(), image.getHeight()),
+            SSDDetect.PROB_THRESHOLD,
+            SSDDetect.IOU_THRESHOLD,
+            SSDDetect.TOP_K,
+            new Function1<Integer, Integer>() {
+                @Override
+                public Integer invoke(Integer integer) {
+                    return integer;
+                }
             }
+        );
+
+        for (DetectionBox detectionBox : detectionBoxes) {
+            objectBoxes.add(new DetectedSSDBox(
+                    detectionBox.getRect().left,
+                    detectionBox.getRect().top,
+                    detectionBox.getRect().right,
+                    detectionBox.getRect().bottom,
+                    detectionBox.getConfidence(),
+                    detectionBox.getImageSize().getWidth(),
+                    detectionBox.getImageSize().getHeight(),
+                    detectionBox.getLabel()
+            ));
         }
-
-
     }
 
     @NonNull
@@ -117,7 +132,7 @@ public class ObjectDetect {
                      * We generate these once and use for all the frame
                      */
                     if ( priors == null){
-                        priors = PriorsGen.combinePriors();
+                        priors = ObjectPriorsGen.combinePriors();
                     }
 
                 }

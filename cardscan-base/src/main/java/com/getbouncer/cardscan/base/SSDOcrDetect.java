@@ -10,19 +10,25 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import android.util.Size;
 
-import com.getbouncer.cardscan.base.ssd.ArrUtils;
 import com.getbouncer.cardscan.base.ssd.DetectedOcrBox;
-import com.getbouncer.cardscan.base.ssd.OcrPriorsGen;
-import com.getbouncer.cardscan.base.ssd.PredictionAPI;
-import com.getbouncer.cardscan.base.ssd.Result;
+import com.getbouncer.cardscan.base.ssd.DetectionBox;
+import com.getbouncer.cardscan.base.ssd.OcrPriorsGenerator;
+import com.getbouncer.cardscan.base.ssd.SSD;
+import com.getbouncer.cardscan.base.ssd.domain.ClassifierScores;
+import com.getbouncer.cardscan.base.ssd.domain.SizeAndCenter;
+import com.getbouncer.cardscan.base.util.ArrayExtensions;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
 import java.util.ArrayList;
 import java.util.Map;
+
+import kotlin.jvm.functions.Function1;
 
 
 public class SSDOcrDetect {
@@ -46,45 +52,66 @@ public class SSDOcrDetect {
     }
 
     @Nullable
-    private String ssdOutputToPredictions(@NonNull Bitmap image, boolean strict){
-        ArrUtils arrUtils = new ArrUtils();
-
+    private String ssdOutputToPredictions(@NonNull Bitmap image, boolean strict) {
         if (ssdOcrModel == null) {
             return null;
         }
 
-        float[][] k_boxes = arrUtils.rearrangeOCRArray(ssdOcrModel.outputLocations, SSDOcrModel.featureMapSizes,
+        float[][] k_boxes = SSD.rearrangeOCRArray(ssdOcrModel.outputLocations, SSDOcrModel.FEATURE_MAP_SIZES,
                 SSDOcrModel.NUM_OF_PRIORS_PER_ACTIVATION, SSDOcrModel.NUM_OF_COORDINATES);
-        k_boxes = arrUtils.reshape(k_boxes, SSDOcrModel.NUM_OF_PRIORS, SSDOcrModel.NUM_OF_COORDINATES);
-        k_boxes = arrUtils.convertLocationsToBoxes(k_boxes, priors,
-                SSDOcrModel.CENTER_VARIANCE, SSDOcrModel.SIZE_VARIANCE);
-        k_boxes = arrUtils.centerFormToCornerForm(k_boxes);
-        float[][] k_scores = arrUtils.rearrangeOCRArray(ssdOcrModel.outputClasses, SSDOcrModel.featureMapSizes,
+        k_boxes = ArrayExtensions.reshape(k_boxes, SSDOcrModel.NUM_OF_COORDINATES);
+        SizeAndCenter.adjustLocations(k_boxes, priors, SSDOcrModel.CENTER_VARIANCE, SSDOcrModel.SIZE_VARIANCE);
+        SizeAndCenter.toRectForm(k_boxes);
+
+        float[][] k_scores = SSD.rearrangeOCRArray(ssdOcrModel.outputClasses, SSDOcrModel.FEATURE_MAP_SIZES,
                 SSDOcrModel.NUM_OF_PRIORS_PER_ACTIVATION, SSDOcrModel.NUM_OF_CLASSES);
-        k_scores = arrUtils.reshape(k_scores, SSDOcrModel.NUM_OF_PRIORS, SSDOcrModel.NUM_OF_CLASSES);
-        k_scores = arrUtils.softmax2D(k_scores);
+        k_scores = ArrayExtensions.reshape(k_scores, SSDOcrModel.NUM_OF_CLASSES);
+        ClassifierScores.softMax2D(k_scores);
 
-        PredictionAPI predAPI = new PredictionAPI();
-        Result result = predAPI.predictionAPI(k_scores, k_boxes, SSDOcrModel.PROB_THRESHOLD,
-                SSDOcrModel.IOU_THRESHOLD, SSDOcrModel.CANDIDATE_SIZE, SSDOcrModel.TOP_K);
-        if (result.pickedBoxProbs.size() != 0 && result.pickedLabels.size() != 0)
-        {
-            for (int i = 0; i < result.pickedBoxProbs.size(); ++i){
-                DetectedOcrBox ocrBox = new DetectedOcrBox(
-                        result.pickedBoxes.get(i)[0], result.pickedBoxes.get(i)[1],
-                        result.pickedBoxes.get(i)[2], result.pickedBoxes.get(i)[3],result.pickedBoxProbs.get(i),
-                        image.getWidth(), image.getHeight(),result.pickedLabels.get(i));
-
-                objectBoxes.add(ocrBox);
-
-                // add the YMin value of the current box
-                yMinArray.add(result.pickedBoxes.get(i)[1]*image.getHeight());
-                // add the YMax value of the current box
-                yMaxArray.add(result.pickedBoxes.get(i)[3]*image.getHeight());
+        List<DetectionBox> detectionBoxes = SSD.extractPredictions(
+            k_scores,
+            k_boxes,
+            new Size(image.getWidth(), image.getHeight()),
+            SSDOcrModel.PROB_THRESHOLD,
+            SSDOcrModel.IOU_THRESHOLD,
+            SSDOcrModel.TOP_K,
+            new Function1<Integer, Integer>() {
+                @Override
+                public Integer invoke(Integer o) {
+                    if (o == 10) {
+                        return 0;
+                    } else {
+                        return o;
+                    }
+                }
             }
+        );
+
+        Collections.sort(detectionBoxes, new Comparator<DetectionBox>() {
+            @Override
+            public int compare(DetectionBox o1, DetectionBox o2) {
+                return Float.compare(o1.getRect().left, o2.getRect().left);
+            }
+        });
+
+        for (DetectionBox detectionBox : detectionBoxes) {
+            objectBoxes.add(new DetectedOcrBox(
+                    detectionBox.getRect().left,
+                    detectionBox.getRect().top,
+                    detectionBox.getRect().right,
+                    detectionBox.getRect().bottom,
+                    detectionBox.getConfidence(),
+                    detectionBox.getImageSize().getWidth(),
+                    detectionBox.getImageSize().getHeight(),
+                    detectionBox.getLabel()
+            ));
+
+            // add the YMin value of the current box
+            yMinArray.add(detectionBox.getRect().top * image.getHeight());
+            // add the YMax value of the current box
+            yMaxArray.add(detectionBox.getRect().bottom * image.getHeight());
         }
-        String numberOCR = "";
-        Collections.sort(objectBoxes);
+
         Collections.sort(yMinArray);
         Collections.sort(yMaxArray);
         float medianYMin = 0;
@@ -99,18 +126,12 @@ public class SSDOcrDetect {
             medianYCenter = (medianYMax + medianYMin) / 2;
         }
 
+        String numberOCR;
         StringBuilder num = new StringBuilder();
-        for (DetectedOcrBox box : objectBoxes){
-            if (box.label == 10){
-                box.label = 0;
-            }
-            float boxYCenter = (box.YMax +  box.YMin) / 2;
-
-            if (Math.abs(boxYCenter - medianYCenter) <= medianHeight) {
+        for (DetectedOcrBox box : objectBoxes) {
+            if (Math.abs(box.rect.centerY() - medianYCenter) <= medianHeight) {
                 num.append(box.label);
             }
-
-
         }
         if (CreditCardUtils.isValidCardNumber(num.toString())){
             numberOCR = num.toString();
@@ -225,7 +246,7 @@ public class SSDOcrDetect {
                      * We generate these once and use for all the frame
                      */
                     if ( priors == null){
-                        priors = OcrPriorsGen.combinePriors();
+                        priors = OcrPriorsGenerator.combinePriors();
                     }
 
                 }
@@ -262,7 +283,7 @@ public class SSDOcrDetect {
                      * We generate these once and use for all the frame
                      */
                     if ( priors == null){
-                        priors = OcrPriorsGen.combinePriors();
+                        priors = OcrPriorsGenerator.combinePriors();
                     }
 
                 }
