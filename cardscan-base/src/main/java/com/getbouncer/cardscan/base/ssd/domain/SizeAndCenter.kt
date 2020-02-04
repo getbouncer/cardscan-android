@@ -60,28 +60,10 @@ fun Array<SizeAndCenter>.toRectForm() {
  * Clamp all values in the array to the specified [minimum] and [maximum].
  */
 fun SizeAndCenter.clampAll(minimum: Float, maximum: Float) {
-    setCenterX(
-        clamp(
-            centerX(),
-            minimum,
-            maximum
-        )
-    )
-    setCenterY(
-        clamp(
-            centerY(),
-            minimum,
-            maximum
-        )
-    )
+    setCenterX(clamp(centerX(), minimum, maximum))
+    setCenterY(clamp(centerY(), minimum, maximum))
     setWidth(clamp(width(), minimum, maximum))
-    setHeight(
-        clamp(
-            height(),
-            minimum,
-            maximum
-        )
-    )
+    setHeight(clamp(height(), minimum, maximum))
 }
 
 /**
