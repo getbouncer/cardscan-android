@@ -7,11 +7,11 @@ import com.getbouncer.cardscan.base.ModelFactory;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 
-class ResourceModelFactory extends ModelFactory {
+public class ResourceModelFactory extends ModelFactory {
 
     @Override
-    public MappedByteBuffer loadSSDDetectModelFile(Context context) throws IOException{
-        return  loadModelFromResource(context, R.raw.ssdelrond0136);
+    public MappedByteBuffer loadModelFile(Context context) throws IOException{
+        return loadModelFromResource(context, R.raw.darknite);
     }
 
 }

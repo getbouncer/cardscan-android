@@ -65,25 +65,25 @@ import java.util.concurrent.Semaphore;
 public abstract class ScanBaseActivity extends Activity implements Camera.PreviewCallback,
         View.OnClickListener, OnScanListener, OnObjectListener, OnCameraOpenListener {
 
-    private Camera mCamera = null;
+    protected Camera mCamera = null;
     private CameraPreview cameraPreview = null;
-    private static MachineLearningThread machineLearningThread = null;
-    private Semaphore mMachineLearningSemaphore = new Semaphore(1);
-    private int mRotation;
+    protected static MachineLearningThread machineLearningThread = null;
+    protected Semaphore mMachineLearningSemaphore = new Semaphore(1);
+    protected int mRotation;
     private boolean mSentResponse = false;
     private boolean mIsActivityActive = false;
     private HashMap<String, Integer> numberResults = new HashMap<>();
     private HashMap<Expiry, Integer> expiryResults = new HashMap<>();
-    private long firstResultMs = 0;
+    private long firstValidPanResultMs = 0;
     private int mFlashlightId;
     private int mCardNumberId;
     private int mExpiryId;
     private int mTextureId;
     private int mEnterCardManuallyId;
-    private float mRoiCenterYRatio;
+    protected float mRoiCenterYRatio;
     private boolean mIsOcr = true;
     private boolean mDelayShowingExpiration = true;
-    private byte[] machineLearningFrame = null;
+    protected byte[] machineLearningFrame = null;
 
     protected ScanStats scanStats;
 
@@ -100,7 +100,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     // This is a hack to enable us to inject images to use for testing. There is probably a better
     // way to do this than using a static variable, but it works for now.
     static public TestingImageReaderInternal sTestingImageReader = null;
-    private TestingImageReaderInternal mTestingImageReader = null;
+    protected TestingImageReaderInternal mTestingImageReader = null;
     protected CountingIdlingResource mScanningIdleResource = null;
 
     // set when this activity posts to the machineLearningThread
@@ -289,7 +289,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     protected void startCamera() {
         numberResults = new HashMap<>();
         expiryResults = new HashMap<>();
-        firstResultMs = 0;
+        firstValidPanResultMs = 0;
 
         try {
             if (mIsPermissionCheckDone) {
@@ -350,7 +350,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         boolean isCameraPermissionGranted = ContextCompat.checkSelfPermission(
                 this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
         this.scanStats = createScanStats();
-        firstResultMs = 0;
+        firstValidPanResultMs = 0;
         numberResults = new HashMap<>();
         expiryResults = new HashMap<>();
         mSentResponse = false;
@@ -619,47 +619,81 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
                              final Bitmap bitmapForObjectDetection, final Bitmap fullScreenBitmap) {
 
         if (!mSentResponse && mIsActivityActive) {
+            processOCRPrediction(number, expiry);
+            showNumberAndExpiryIfNumber();
 
-            if (number != null && firstResultMs == 0) {
-                firstResultMs = SystemClock.uptimeMillis();
-            }
-
-            if (number != null) {
-                incrementNumber(number);
-                this.scanStats.observePAN();
-            }
-            if (expiry != null) {
-                incrementExpiry(expiry);
-            }
-
-            long duration = SystemClock.uptimeMillis() - firstResultMs;
-            if (firstResultMs != 0 && mShowNumberAndExpiryAsScanning) {
-                setNumberAndExpiryAnimated(duration);
-            }
-
-            if (firstResultMs != 0 && duration >= errorCorrectionDurationMs) {
-                mSentResponse = true;
-                String numberResult = getNumberResult();
-                Expiry expiryResult = getExpiryResult();
-                String month = null;
-                String year = null;
-                if (expiryResult != null) {
-                    month = Integer.toString(expiryResult.month);
-                    year = Integer.toString(expiryResult.year);
-                }
-
-                this.scanStats.setSuccess(true);
-                Api.scanStats(this, this.scanStats);
-
-                onCardScanned(numberResult, month, year);
-
-                if (mScanningIdleResource != null) {
-                    mScanningIdleResource.decrement();
-                }
+            if (isScanComplete()) {
+                onOCRCompleted();
             }
         }
 
         mMachineLearningSemaphore.release();
+    }
+
+    /**
+     * @param number String representation of the PAN
+     * @param expiry Expiry
+     */
+    protected void processOCRPrediction(final String number, final Expiry expiry) {
+        if (number != null && !hasSeenValidPan()) {
+            firstValidPanResultMs = SystemClock.uptimeMillis();
+        }
+
+        if (number != null) {
+            incrementNumber(number);
+            this.scanStats.observePAN();
+        }
+        if (expiry != null) {
+            incrementExpiry(expiry);
+        }
+    }
+
+    /**
+     * @return boolean of whether we saw a valid pan in the lifecycle of this activity
+     */
+    protected boolean hasSeenValidPan() {
+        return firstValidPanResultMs != 0;
+    }
+
+    /**
+     * Shows the animation for number and expiry if one exists
+     */
+    protected void showNumberAndExpiryIfNumber() {
+        long duration = SystemClock.uptimeMillis() - firstValidPanResultMs;
+        if (firstValidPanResultMs != 0 && mShowNumberAndExpiryAsScanning) {
+            setNumberAndExpiryAnimated(duration);
+        }
+    }
+
+    /**
+     * To be called after OCR is complete.
+     * - Gathers all relevant ScanStats and fires off a request to scan stats
+     * - Calls the abstract method onCardScanned with the final card details
+     */
+    protected void onOCRCompleted() {
+        mSentResponse = true;
+        String numberResult = getNumberResult();
+        Expiry expiryResult = getExpiryResult();
+        String month = null;
+        String year = null;
+        if (expiryResult != null) {
+            month = Integer.toString(expiryResult.month);
+            year = Integer.toString(expiryResult.year);
+        }
+
+        this.scanStats.setSuccess(true);
+        Api.scanStats(this, this.scanStats);
+
+        onCardScanned(numberResult, month, year);
+
+        if (mScanningIdleResource != null) {
+            mScanningIdleResource.decrement();
+        }
+    }
+
+    public boolean isScanComplete() {
+        long duration = SystemClock.uptimeMillis() - firstValidPanResultMs;
+        return hasSeenValidPan() && duration >= errorCorrectionDurationMs;
     }
 
     @Override

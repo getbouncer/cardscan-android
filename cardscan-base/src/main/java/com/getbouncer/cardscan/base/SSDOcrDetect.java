@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
+import android.util.Pair;
 
 import com.getbouncer.cardscan.base.ssd.ArrUtils;
 import com.getbouncer.cardscan.base.ssd.DetectedOcrBox;
@@ -27,7 +28,7 @@ public class SSDOcrDetect {
     private static float[][] priors = null;
 
     public List<DetectedOcrBox> objectBoxes = new ArrayList<>();
-    boolean hadUnrecoverableException = false;
+    public boolean hadUnrecoverableException = false;
 
     /** We don't use the following two for now */
     public static boolean USE_GPU = false;
@@ -36,7 +37,7 @@ public class SSDOcrDetect {
         return ssdOcrModel != null;
     }
 
-    private String ssdOutputToPredictions(Bitmap image){
+    private String ssdOutputToPredictions(Bitmap image, boolean strict){
         ArrUtils arrUtils = new ArrUtils();
 
         float[][] k_boxes = arrUtils.rearrangeOCRArray(ssdOcrModel.outputLocations, SSDOcrModel.featureMapSizes,
@@ -77,12 +78,14 @@ public class SSDOcrDetect {
             Log.d("OCR Number passed", numberOCR);
         } else {
             Log.d("OCR Number failed", num.toString());
-            numberOCR = null;
+            if (strict) {
+                numberOCR = null;
+            } else {
+                numberOCR = num.toString();
+            }
         }
 
         return numberOCR;
-
-
     }
 
     /**
@@ -90,11 +93,19 @@ public class SSDOcrDetect {
      * the model output
      */
     private String runModel(Bitmap image) {
+        return runModel(image, true);
+    }
+
+    /**
+     * Run SSD Model and use the prediction API to post process
+     * the model output
+     */
+    private String runModel(Bitmap image, boolean strict) {
         final long startTime = SystemClock.uptimeMillis();
 
         ssdOcrModel.classifyFrame(image);
         Log.d("Before SSD Post Process", String.valueOf(SystemClock.uptimeMillis() - startTime));
-        String number = ssdOutputToPredictions(image);
+        String number = ssdOutputToPredictions(image, strict);
         Log.d("After SSD Post Process", String.valueOf(SystemClock.uptimeMillis() - startTime));
 
         return number;
@@ -182,9 +193,45 @@ public class SSDOcrDetect {
             try {
                 return runModel(image);
             } catch (Error | Exception e) {
-                Log.i("ObjectDetect", "runModel exception, retry object detection", e);
+                Log.i("OCR", "runModel exception, retry object detection", e);
                 ssdOcrModel = new SSDOcrModel(context);
                 return runModel(image);
+            }
+        } catch (Error | Exception e) {
+            Log.e("OCR", "unrecoverable exception on ObjectDetect", e);
+            hadUnrecoverableException = true;
+            return null;
+        }
+    }
+
+    public synchronized String predict(Bitmap image, Context context, boolean strict) {
+        final int NUM_THREADS = 4;
+        try {
+            boolean createdNewModel = false;
+
+            try{
+                if (ssdOcrModel == null){
+                    ssdOcrModel = new SSDOcrModel(context);
+                    ssdOcrModel.setNumThreads(NUM_THREADS);
+                    /** Since all the frames use the same set of priors
+                     * We generate these once and use for all the frame
+                     */
+                    if ( priors == null){
+                        priors = OcrPriorsGen.combinePriors();
+                    }
+
+                }
+            } catch (Error | Exception e){
+                Log.e("SSD", "Couldn't load ssd", e);
+            }
+
+
+            try {
+                return runModel(image, strict);
+            } catch (Error | Exception e) {
+                Log.i("ObjectDetect", "runModel exception, retry object detection", e);
+                ssdOcrModel = new SSDOcrModel(context);
+                return runModel(image, strict);
             }
         } catch (Error | Exception e) {
             Log.e("ObjectDetect", "unrecoverable exception on ObjectDetect", e);

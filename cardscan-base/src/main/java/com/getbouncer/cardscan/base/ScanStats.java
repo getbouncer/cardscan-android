@@ -3,6 +3,7 @@ package com.getbouncer.cardscan.base;
 import android.os.Build;
 import android.os.SystemClock;
 import android.text.TextUtils;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,6 +15,8 @@ public class ScanStats {
     private int scans;
     private boolean success;
     private long panFirstDetectedAtMs = -1;
+    private int numOCRFramesProcessed = 0;
+    private int numObjFramesProcessed = 0;
 
     ScanStats(boolean isCameraPermissionGranted) {
         startTimeMs = SystemClock.uptimeMillis();
@@ -35,6 +38,14 @@ public class ScanStats {
         if (panFirstDetectedAtMs == -1) {
             panFirstDetectedAtMs = SystemClock.uptimeMillis();
         }
+    }
+
+    public void processNumber() {
+        numOCRFramesProcessed += 1;
+    }
+
+    public void processObjectDetection() {
+        numObjFramesProcessed += 1;
     }
 
     public JSONObject toJson() {

@@ -133,7 +133,7 @@ class SSDOcrModel extends ImageClassifier {
 
     @Override
     protected MappedByteBuffer loadModelFile(Context context) throws IOException {
-        return ModelFactory.getSharedInstance().loadSSDDetectModelFile(context);
+        return ModelFactory.getSharedInstance().loadModelFile(context);
     }
 
     @Override
