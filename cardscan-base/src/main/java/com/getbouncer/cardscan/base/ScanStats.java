@@ -67,6 +67,7 @@ public class ScanStats {
             object.put("sdk_version", BuildConfig.CARDSCAN_VERSION);
             object.put("os", Build.VERSION.RELEASE);
             object.put("permission_granted", mIsCameraPermissionGranted);
+            Log.d("Steven", "vanilla OCR duration " + duration * 1000);
         } catch (JSONException e) {
             e.printStackTrace();
         }

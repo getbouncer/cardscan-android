@@ -585,7 +585,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         if (textView.getVisibility() != View.VISIBLE) {
             textView.setVisibility(View.VISIBLE);
             textView.setAlpha(0.0f);
-            textView.animate().setDuration(400).alpha(1.0f);
+            textView.animate().setDuration(1000).alpha(1.0f);
         }
         textView.setText(value);
     }
