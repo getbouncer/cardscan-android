@@ -91,6 +91,16 @@ public class MachineLearningThread implements Runnable {
          */
         public RunArguments(byte[] frameBytes, int width, int height, int format,
                             int sensorOrientation, OnUXModelListener uxListener, Context context,
+                            float roiCenterYRatio, File objectDetectFile, boolean runOcrModel) {
+            this(frameBytes, width, height, format, sensorOrientation, uxListener, context,
+                          roiCenterYRatio, objectDetectFile, runOcrModel, true);
+        }
+
+        /**
+         * Used by the new UXModelMachineLearningThread
+         */
+        public RunArguments(byte[] frameBytes, int width, int height, int format,
+                            int sensorOrientation, OnUXModelListener uxListener, Context context,
                             float roiCenterYRatio, File objectDetectFile, boolean runOcrModel, boolean runUXModel) {
             mFrameBytes = frameBytes;
             mBitmap = null;
