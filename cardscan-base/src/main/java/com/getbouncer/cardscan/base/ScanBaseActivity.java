@@ -415,7 +415,9 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             result = (info.orientation - degrees + 360) % 360;
         }
 
+        mCamera.stopPreview();
         mCamera.setDisplayOrientation(result);
+        mCamera.startPreview();
         mRotation = result;
     }
 
