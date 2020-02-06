@@ -20,8 +20,8 @@ We publish our library in the jcenter repository, so for most gradle configurati
 
 ```gradle
 dependencies {
-    implementation 'com.getbouncer:cardscan-base:1.0.5130'
-    implementation 'com.getbouncer:cardscan:1.0.5130'
+    implementation 'com.getbouncer:cardscan-base:1.0.5131'
+    implementation 'com.getbouncer:cardscan:1.0.5131'
 }
 ```
 
