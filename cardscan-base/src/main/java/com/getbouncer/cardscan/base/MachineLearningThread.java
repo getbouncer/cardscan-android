@@ -227,11 +227,7 @@ public class MachineLearningThread implements Runnable {
      * implementation of YUVtoARGB https://github.com/cats-oss/android-gpuimage/blob/master/library/src/main/cpp/yuv-decoder.c
      */
     public Bitmap YUVtoRGB(byte[] yuvByteArray, int previewWidth, int previewHeight) {
-        int[] argbByteArray = new int[previewWidth * previewHeight];
-        YUVDecoder.YUVtoRGBA(yuvByteArray, previewWidth, previewHeight, argbByteArray);
-
-        Bitmap fullImage = Bitmap.createBitmap(previewWidth, previewHeight, Bitmap.Config.ARGB_8888);
-        fullImage.copyPixelsFromBuffer(IntBuffer.wrap(argbByteArray));
+        Bitmap fullImage = YUVDecoder.YUVtoBitmap(yuvByteArray, previewWidth, previewHeight);
 
         int resizedWidth, resizedHeight;
         if (previewWidth > previewHeight) {

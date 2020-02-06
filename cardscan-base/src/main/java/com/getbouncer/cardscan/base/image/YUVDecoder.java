@@ -18,26 +18,30 @@
 
 package com.getbouncer.cardscan.base.image;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.ImageFormat;
+import android.graphics.Rect;
+import android.graphics.YuvImage;
+
+import java.io.ByteArrayOutputStream;
+
 public class YUVDecoder {
-    static {
-        System.loadLibrary("yuv-decoder");
+
+    /**
+     * Convert a YUV nv21 image byte array to a Bitmap.
+     * @param data YUV nv21 image data
+     * @param width width of the source image
+     * @param height height of the source image
+     * @return the converted Bitmap
+     */
+    public static Bitmap YUVtoBitmap(byte[] data, int width, int height) {
+        YuvImage yuv = new YuvImage(data, ImageFormat.NV21, width, height, null);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        yuv.compressToJpeg(new Rect(0, 0, width, height), 50, out);
+
+        byte[] bytes = out.toByteArray();
+        return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
     }
-
-    /**
-     * Convert a YUV nv21 image byte array to an RGBA image byte array
-     * @param yuv YUV nv21 image data
-     * @param width width of the source image
-     * @param height height of the source image
-     * @param out RGBA image data
-     */
-    public static native void YUVtoRGBA(byte[] yuv, int width, int height, int[] out);
-
-    /**
-     * Convert a YUV nv21 image byte array to an ARGB image byte array
-     * @param yuv YUV nv21 image data
-     * @param width width of the source image
-     * @param height height of the source image
-     * @param out RGBA image data
-     */
-    public static native void YUVtoARGB(byte[] yuv, int width, int height, int[] out);
 }
