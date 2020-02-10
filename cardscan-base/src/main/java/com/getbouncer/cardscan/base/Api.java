@@ -67,6 +67,7 @@ public class Api {
             }
         } while (data != null);
 
+        in.close();
         return responseBody.toString();
     }
 
