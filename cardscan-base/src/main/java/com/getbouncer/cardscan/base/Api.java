@@ -13,6 +13,7 @@ import java.io.OutputStream;
 import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 
 public class Api {
@@ -81,7 +82,7 @@ public class Api {
     }
 
     static private JSONObject makeApiCallPostImplementation(String url, JSONObject args) {
-        HttpURLConnection urlConnection = null;
+        HttpURLConnection urlConnection;
         try {
             if (TextUtils.isEmpty(Api.baseUrl) || TextUtils.isEmpty(Api.apiKey)) {
                 return getApiUrlNotSet();
@@ -93,7 +94,7 @@ public class Api {
                 urlConnection.setRequestProperty("x-bouncer-auth", apiKey);
             }
             urlConnection.setDoOutput(true);
-            byte[] content = args.toString().getBytes("UTF-8");
+            byte[] content = args.toString().getBytes(StandardCharsets.UTF_8);
             urlConnection.setFixedLengthStreamingMode(content.length);
 
             OutputStream out = new BufferedOutputStream(urlConnection.getOutputStream());
