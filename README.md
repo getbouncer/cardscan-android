@@ -9,6 +9,7 @@ CardScan Android installation guide
 * [Using CardScan](#using-cardscan)
 * [Authors](#authors)
 * [License](#license)
+* [Creating changelogs](#changelog)
 
 ## Requirements
 
@@ -116,8 +117,17 @@ being passed into your payment form. This is what it looks like using a standard
 
 ## Authors
 
-Sam King, Rui Guo, and Zain ul Abi Din
+Adam Wushensky, Sam King, and Zain ul Abi Din
 
 ## License
 
 CardScan is available under the BSD license. See the LICENSE file for more info.
+
+## Changelog
+
+```bash
+# checkout https://github.com/github-changelog-generator/github-changelog-generator for installation instructions
+# put your github token in a file called github_token in the base directory
+# run:
+github_changelog_generator -u getbouncer -p cardscan-android -t `cat github_token`
+```
