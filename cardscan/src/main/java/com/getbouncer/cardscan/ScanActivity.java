@@ -8,7 +8,6 @@ import androidx.test.espresso.idling.CountingIdlingResource;
 import android.text.TextUtils;
 
 import com.getbouncer.cardscan.base.IdleResourceManager;
-import com.getbouncer.cardscan.base.ModelFactory;
 import com.getbouncer.cardscan.base.ScanActivityImpl;
 import com.getbouncer.cardscan.base.ScanBaseActivity;
 
@@ -27,6 +26,8 @@ public class ScanActivity {
     public static String RESULT_FATAL_ERROR = ScanBaseActivity.RESULT_FATAL_ERROR;
     public static TestingImageReader testingImageReader = null;
     public static String apiKey;
+    public static String cameraPermissionTitle;
+    public static String cameraPermissionMessage;
 
     /**
      * Starts a ScanActivityImpl activity, using {@param activity} as a parent.
@@ -37,6 +38,8 @@ public class ScanActivity {
         ScanBaseActivity.warmUp(activity.getApplicationContext());
         Intent intent = new Intent(activity, ScanActivityImpl.class);
         intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
+        intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_TITLE, cameraPermissionTitle);
+        intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_MESSAGE, cameraPermissionMessage);
         activity.startActivityForResult(intent, REQUEST_CODE);
     }
 
@@ -50,6 +53,8 @@ public class ScanActivity {
         ScanBaseActivity.warmUp(activity.getApplicationContext());
         Intent intent = new Intent(activity, ScanActivityImpl.class);
         intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
+        intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_TITLE, cameraPermissionTitle);
+        intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_MESSAGE, cameraPermissionMessage);
         intent.putExtra(ScanBaseActivity.DELAY_SHOWING_EXPIRATION, delayShowingExpiration);
         activity.startActivityForResult(intent, REQUEST_CODE);
     }
@@ -65,6 +70,8 @@ public class ScanActivity {
         ScanBaseActivity.warmUp(activity.getApplicationContext());
         Intent intent = new Intent(activity, ScanActivityImpl.class);
         intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
+        intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_TITLE, cameraPermissionTitle);
+        intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_MESSAGE, cameraPermissionMessage);
         intent.putExtra(ScanBaseActivity.DELAY_SHOWING_EXPIRATION, delayShowingExpiration);
         intent.putExtra(ScanActivityImpl.SHOW_ENTER_CARD_MANUALLY_BUTTON, showEnterCardNumberManually);
         activity.startActivityForResult(intent, REQUEST_CODE);
@@ -85,6 +92,8 @@ public class ScanActivity {
         intent.putExtra(ScanActivityImpl.SCAN_CARD_TEXT, scanCardText);
         intent.putExtra(ScanActivityImpl.POSITION_CARD_TEXT, positionCardText);
         intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
+        intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_TITLE, cameraPermissionTitle);
+        intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_MESSAGE, cameraPermissionMessage);
         activity.startActivityForResult(intent, REQUEST_CODE);
     }
 
@@ -105,6 +114,8 @@ public class ScanActivity {
         intent.putExtra(ScanActivityImpl.SCAN_CARD_TEXT, scanCardText);
         intent.putExtra(ScanActivityImpl.POSITION_CARD_TEXT, positionCardText);
         intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
+        intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_TITLE, cameraPermissionTitle);
+        intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_MESSAGE, cameraPermissionMessage);
         intent.putExtra(ScanActivityImpl.SHOW_ENTER_CARD_MANUALLY_BUTTON, showEnterCardNumberManually);
         intent.putExtra(ScanBaseActivity.DELAY_SHOWING_EXPIRATION, delayShowingExpiration);
         activity.startActivityForResult(intent, REQUEST_CODE);
@@ -148,6 +159,8 @@ public class ScanActivity {
         Intent intent = new Intent(activity, ScanActivityImpl.class);
         intent.putExtra("debug", true);
         intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
+        intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_TITLE, cameraPermissionTitle);
+        intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_MESSAGE, cameraPermissionMessage);
         activity.startActivityForResult(intent, REQUEST_CODE);
     }
 
