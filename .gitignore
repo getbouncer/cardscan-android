@@ -19,3 +19,4 @@
 .externalNativeBuild
 langapiconfig.json
 *.cxx
+github_token
