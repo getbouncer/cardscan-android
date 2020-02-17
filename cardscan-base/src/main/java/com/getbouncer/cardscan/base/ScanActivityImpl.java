@@ -26,6 +26,8 @@ public class ScanActivityImpl extends ScanBaseActivity {
     public static final String POSITION_CARD_TEXT = "positionCardText";
     public static final String API_KEY = "apiKey";
     public static final String SHOW_ENTER_CARD_MANUALLY_BUTTON = "enterCardManuallyButton";
+    public static final String CAMERA_PERMISSION_TITLE = "cameraPermissionTitle";
+    public static final String CAMERA_PERMISSION_MESSAGE = "cameraPermissionMessage";
 
     public static final String RESULT_CARD_NUMBER = "cardNumber";
     public static final String RESULT_EXPIRY_MONTH = "expiryMonth";
@@ -50,6 +52,16 @@ public class ScanActivityImpl extends ScanBaseActivity {
         String apiKey = getIntent().getStringExtra(API_KEY);
         if (!TextUtils.isEmpty(apiKey)) {
             Api.apiKey = apiKey;
+        }
+
+        String cameraPermissionTitle = getIntent().getStringExtra(CAMERA_PERMISSION_TITLE);
+        if (!TextUtils.isEmpty(cameraPermissionTitle)) {
+            denyPermissionTitle = cameraPermissionTitle;
+        }
+
+        String cameraPermissionMessage = getIntent().getStringExtra(CAMERA_PERMISSION_MESSAGE);
+        if (!TextUtils.isEmpty(cameraPermissionMessage)) {
+            denyPermissionMessage = cameraPermissionMessage;
         }
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
