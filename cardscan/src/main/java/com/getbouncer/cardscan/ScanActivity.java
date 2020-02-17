@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.test.espresso.idling.CountingIdlingResource;
 import android.text.TextUtils;
 
@@ -44,6 +45,18 @@ public class ScanActivity {
     }
 
     /**
+     * Starts a ScanActivityImpl activity, using {@param fragment} as a parent.
+     *
+     * @param fragment the parent fragment that is waiting for the result of the ScanActivity
+     */
+    public static void start(@NonNull Fragment fragment) {
+        ScanBaseActivity.warmUp(fragment.getContext());
+        Intent intent = new Intent(fragment.getContext(), ScanActivityImpl.class);
+        intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
+        fragment.startActivityForResult(intent, REQUEST_CODE);
+    }
+
+    /**
      * Starts a ScanActivityImpl activity, using {@param activity} as a parent.
      *
      * @param activity the parent activity that is waiting for the result of the ScanActivity
@@ -57,6 +70,20 @@ public class ScanActivity {
         intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_MESSAGE, cameraPermissionMessage);
         intent.putExtra(ScanBaseActivity.DELAY_SHOWING_EXPIRATION, delayShowingExpiration);
         activity.startActivityForResult(intent, REQUEST_CODE);
+    }
+
+    /**
+     * Starts a ScanActivityImpl activity, using {@param fragment} as a parent.
+     *
+     * @param fragment the parent fragment that is waiting for the result of the ScanActivity
+     * @param delayShowingExpiration true if the scan activity should delay showing the expiration
+     */
+    public static void start(@NonNull Fragment fragment, boolean delayShowingExpiration) {
+        ScanBaseActivity.warmUp(fragment.getContext());
+        Intent intent = new Intent(fragment.getContext(), ScanActivityImpl.class);
+        intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
+        intent.putExtra(ScanBaseActivity.DELAY_SHOWING_EXPIRATION, delayShowingExpiration);
+        fragment.startActivityForResult(intent, REQUEST_CODE);
     }
 
     /**
@@ -75,6 +102,22 @@ public class ScanActivity {
         intent.putExtra(ScanBaseActivity.DELAY_SHOWING_EXPIRATION, delayShowingExpiration);
         intent.putExtra(ScanActivityImpl.SHOW_ENTER_CARD_MANUALLY_BUTTON, showEnterCardNumberManually);
         activity.startActivityForResult(intent, REQUEST_CODE);
+    }
+
+    /**
+     * Starts a ScanActivityImpl activity, using {@param fragment} as a parent.
+     *
+     * @param fragment the parent fragment that is waiting for the result of the ScanActivity
+     * @param delayShowingExpiration true if the scan activity should delay showing the expiration
+     * @param showEnterCardNumberManually true if the scan activity should show the enter_card_manually button
+     */
+    public static void start(@NonNull Fragment fragment, boolean delayShowingExpiration, boolean showEnterCardNumberManually) {
+        ScanBaseActivity.warmUp(fragment.getContext());
+        Intent intent = new Intent(fragment.getContext(), ScanActivityImpl.class);
+        intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
+        intent.putExtra(ScanBaseActivity.DELAY_SHOWING_EXPIRATION, delayShowingExpiration);
+        intent.putExtra(ScanActivityImpl.SHOW_ENTER_CARD_MANUALLY_BUTTON, showEnterCardNumberManually);
+        fragment.startActivityForResult(intent, REQUEST_CODE);
     }
 
     /**
@@ -98,12 +141,30 @@ public class ScanActivity {
     }
 
     /**
+     * Starts a ScanActivityImpl activity, using {@param fragment} as a parent.
+     *
+     * @param fragment the parent fragment that is waiting for the result of the ScanActivity
+     * @param scanCardText the large text above the card rectangle
+     * @param positionCardText the small text below the card rectangle
+     */
+    public static void start(@NonNull Fragment fragment, String scanCardText,
+                             String positionCardText) {
+        ScanBaseActivity.warmUp(fragment.getContext());
+        Intent intent = new Intent(fragment.getContext(), ScanActivityImpl.class);
+        intent.putExtra(ScanActivityImpl.SCAN_CARD_TEXT, scanCardText);
+        intent.putExtra(ScanActivityImpl.POSITION_CARD_TEXT, positionCardText);
+        intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
+        fragment.startActivityForResult(intent, REQUEST_CODE);
+    }
+
+    /**
      * Starts a scan activity and customizes the text that it displays.
      *
      * @param activity the parent activity that is waiting for the result of the ScanActivity
      * @param scanCardText the large text above the card rectangle
      * @param positionCardText the small text below the card rectangle
      * @param delayShowingExpiration true if the scan activity should delay showing the expiration
+     * @param showEnterCardNumberManually true if the scan activity should show the enter_card_manually button
      */
     public static void start(@NonNull Activity activity, String scanCardText,
                              String positionCardText, boolean delayShowingExpiration,
@@ -122,6 +183,28 @@ public class ScanActivity {
     }
 
     /**
+     * Starts a ScanActivityImpl activity, using {@param fragment} as a parent.
+     *
+     * @param fragment the parent fragment that is waiting for the result of the ScanActivity
+     * @param scanCardText the large text above the card rectangle
+     * @param positionCardText the small text below the card rectangle
+     * @param delayShowingExpiration true if the scan activity should delay showing the expiration
+     * @param showEnterCardNumberManually true if the scan activity should show the enter_card_manually button
+     */
+    public static void start(@NonNull Fragment fragment, String scanCardText,
+                             String positionCardText, boolean delayShowingExpiration,
+                             boolean showEnterCardNumberManually) {
+        ScanBaseActivity.warmUp(fragment.getContext());
+        Intent intent = new Intent(fragment.getContext(), ScanActivityImpl.class);
+        intent.putExtra(ScanActivityImpl.SCAN_CARD_TEXT, scanCardText);
+        intent.putExtra(ScanActivityImpl.POSITION_CARD_TEXT, positionCardText);
+        intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
+        intent.putExtra(ScanActivityImpl.SHOW_ENTER_CARD_MANUALLY_BUTTON, showEnterCardNumberManually);
+        intent.putExtra(ScanBaseActivity.DELAY_SHOWING_EXPIRATION, delayShowingExpiration);
+        fragment.startActivityForResult(intent, REQUEST_CODE);
+    }
+
+    /**
      * Initializes the machine learning models and GPU hardware for faster scan performance.
      *
      * This optional static method initializes the machine learning models and GPU hardware in a
@@ -136,6 +219,23 @@ public class ScanActivity {
      */
     public static void warmUp(@NonNull Activity activity) {
         ScanBaseActivity.warmUp(activity.getApplicationContext());
+    }
+
+    /**
+     * Initializes the machine learning models and GPU hardware for faster scan performance.
+     *
+     * This optional static method initializes the machine learning models and GPU hardware in a
+     * background thread so that when the ScanActivity starts it can complete its first scan
+     * quickly. App builders can choose to not call this method and they can call it multiple
+     * times safely.
+     *
+     * This method is thread safe.
+     *
+     * @param fragment the fragment that invokes this method, which the library uses to get
+     *                 an application context.
+     */
+    public static void warmUp(@NonNull Fragment fragment) {
+        ScanBaseActivity.warmUp(fragment.getContext());
     }
 
     /**
@@ -162,6 +262,30 @@ public class ScanActivity {
         intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_TITLE, cameraPermissionTitle);
         intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_MESSAGE, cameraPermissionMessage);
         activity.startActivityForResult(intent, REQUEST_CODE);
+    }
+
+    /**
+     * Starts the scan activity and turns on a small debugging window in the bottom left.
+     *
+     * This debugging activity helps designers see some of the machine learning model's internals
+     * by showing boxes around digits and expiry dates that it detects.
+     *
+     * @param fragment the parent fragment that is waiting for the result of the ScanActivity
+     */
+    public static void startDebug(@NonNull Fragment fragment) {
+        startDebug(fragment, null);
+    }
+
+    public static void startDebug(@NonNull Fragment fragment,
+                                  @Nullable TestingImageReader imageReader) {
+        if (imageReader != null) {
+            ScanBaseActivity.sTestingImageReader = new TestingImageBridge(imageReader);
+        }
+        ScanBaseActivity.warmUp(fragment.getContext());
+        Intent intent = new Intent(fragment.getContext(), ScanActivityImpl.class);
+        intent.putExtra("debug", true);
+        intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
+        fragment.startActivityForResult(intent, REQUEST_CODE);
     }
 
     /**
