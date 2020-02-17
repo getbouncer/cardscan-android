@@ -1,5 +1,23 @@
 # Changelog
 
+## [Unreleased](https://github.com/getbouncer/cardscan-android/tree/HEAD)
+
+[Full Changelog](https://github.com/getbouncer/cardscan-android/compare/1.0.5136...HEAD)
+
+**Merged pull requests:**
+
+- Added changelog and instructions for doing so [\#104](https://github.com/getbouncer/cardscan-android/pull/104) ([kingst](https://github.com/kingst))
+
+## [1.0.5136](https://github.com/getbouncer/cardscan-android/tree/1.0.5136) (2020-02-17)
+
+[Full Changelog](https://github.com/getbouncer/cardscan-android/compare/1.0.5135...1.0.5136)
+
+**Merged pull requests:**
+
+- Bump cardscan version [\#107](https://github.com/getbouncer/cardscan-android/pull/107) ([awushensky](https://github.com/awushensky))
+- Add customizable camera permissions [\#106](https://github.com/getbouncer/cardscan-android/pull/106) ([Tronicnotes](https://github.com/Tronicnotes))
+- Start scan Activity from Fragment [\#105](https://github.com/getbouncer/cardscan-android/pull/105) ([Tronicnotes](https://github.com/Tronicnotes))
+
 ## [1.0.5135](https://github.com/getbouncer/cardscan-android/tree/1.0.5135) (2020-02-12)
 
 [Full Changelog](https://github.com/getbouncer/cardscan-android/compare/1.0.5134...1.0.5135)
