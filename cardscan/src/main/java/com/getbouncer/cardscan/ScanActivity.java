@@ -53,6 +53,8 @@ public class ScanActivity {
         ScanBaseActivity.warmUp(fragment.getContext());
         Intent intent = new Intent(fragment.getContext(), ScanActivityImpl.class);
         intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
+        intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_TITLE, cameraPermissionTitle);
+        intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_MESSAGE, cameraPermissionMessage);
         fragment.startActivityForResult(intent, REQUEST_CODE);
     }
 
@@ -82,6 +84,8 @@ public class ScanActivity {
         ScanBaseActivity.warmUp(fragment.getContext());
         Intent intent = new Intent(fragment.getContext(), ScanActivityImpl.class);
         intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
+        intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_TITLE, cameraPermissionTitle);
+        intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_MESSAGE, cameraPermissionMessage);
         intent.putExtra(ScanBaseActivity.DELAY_SHOWING_EXPIRATION, delayShowingExpiration);
         fragment.startActivityForResult(intent, REQUEST_CODE);
     }
@@ -115,6 +119,8 @@ public class ScanActivity {
         ScanBaseActivity.warmUp(fragment.getContext());
         Intent intent = new Intent(fragment.getContext(), ScanActivityImpl.class);
         intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
+        intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_TITLE, cameraPermissionTitle);
+        intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_MESSAGE, cameraPermissionMessage);
         intent.putExtra(ScanBaseActivity.DELAY_SHOWING_EXPIRATION, delayShowingExpiration);
         intent.putExtra(ScanActivityImpl.SHOW_ENTER_CARD_MANUALLY_BUTTON, showEnterCardNumberManually);
         fragment.startActivityForResult(intent, REQUEST_CODE);
@@ -154,6 +160,8 @@ public class ScanActivity {
         intent.putExtra(ScanActivityImpl.SCAN_CARD_TEXT, scanCardText);
         intent.putExtra(ScanActivityImpl.POSITION_CARD_TEXT, positionCardText);
         intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
+        intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_TITLE, cameraPermissionTitle);
+        intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_MESSAGE, cameraPermissionMessage);
         fragment.startActivityForResult(intent, REQUEST_CODE);
     }
 
@@ -199,6 +207,8 @@ public class ScanActivity {
         intent.putExtra(ScanActivityImpl.SCAN_CARD_TEXT, scanCardText);
         intent.putExtra(ScanActivityImpl.POSITION_CARD_TEXT, positionCardText);
         intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
+        intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_TITLE, cameraPermissionTitle);
+        intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_MESSAGE, cameraPermissionMessage);
         intent.putExtra(ScanActivityImpl.SHOW_ENTER_CARD_MANUALLY_BUTTON, showEnterCardNumberManually);
         intent.putExtra(ScanBaseActivity.DELAY_SHOWING_EXPIRATION, delayShowingExpiration);
         fragment.startActivityForResult(intent, REQUEST_CODE);
@@ -285,6 +295,8 @@ public class ScanActivity {
         Intent intent = new Intent(fragment.getContext(), ScanActivityImpl.class);
         intent.putExtra("debug", true);
         intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
+        intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_TITLE, cameraPermissionTitle);
+        intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_MESSAGE, cameraPermissionMessage);
         fragment.startActivityForResult(intent, REQUEST_CODE);
     }
 
