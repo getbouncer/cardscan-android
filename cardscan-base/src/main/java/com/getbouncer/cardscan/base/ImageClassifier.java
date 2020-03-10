@@ -20,6 +20,9 @@ import android.graphics.Bitmap;
 import android.os.SystemClock;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -39,23 +42,23 @@ abstract public class ImageClassifier {
     private static final int DIM_PIXEL_SIZE = 3;
 
     /** Preallocated buffers for storing image data in. */
-    private int[] intValues = new int[getImageSizeX() * getImageSizeY()];
+    private final int[] intValues = new int[getImageSizeX() * getImageSizeY()];
 
     /** Options for configuring the Interpreter. */
     private final Interpreter.Options tfliteOptions = new Interpreter.Options();
 
     /** The loaded TensorFlow Lite model. */
-    private MappedByteBuffer tfliteModel;
+    @Nullable private MappedByteBuffer tfliteModel;
 
     /** An instance of the driver class to run model inference with Tensorflow Lite. */
-    protected Interpreter tflite;
+    @Nullable protected Interpreter tflite;
 
     /** A ByteBuffer to hold image data, to be feed into Tensorflow Lite as inputs. */
-    protected ByteBuffer imgData = null;
+    @Nullable protected ByteBuffer imgData = null;
 
 
     /** Initializes an {@code ImageClassifier}. */
-    protected ImageClassifier(Context context) throws IOException {
+    protected ImageClassifier(@NonNull Context context) throws IOException {
         init(context);
     }
 
@@ -63,7 +66,7 @@ abstract public class ImageClassifier {
         // don't do anything, but make sure that you call init later
     }
 
-    protected void init(Context context) throws IOException {
+    protected void init(@NonNull Context context) throws IOException {
         tfliteModel = loadModelFile(context);
         tflite = new Interpreter(tfliteModel, tfliteOptions);
         imgData =
@@ -77,7 +80,7 @@ abstract public class ImageClassifier {
     }
 
     /** Classifies a frame from the preview stream. */
-    protected void classifyFrame(Bitmap bitmap) {
+    protected void classifyFrame(@NonNull Bitmap bitmap) {
         if (tflite == null) {
             Log.e(TAG, "Image classifier has not been initialized; Skipped.");
         }
@@ -90,7 +93,7 @@ abstract public class ImageClassifier {
     }
 
     private void recreateInterpreter() {
-        if (tflite != null) {
+        if (tflite != null && tfliteModel != null) {
             tflite.close();
             tflite = new Interpreter(tfliteModel, tfliteOptions);
         }
@@ -113,16 +116,19 @@ abstract public class ImageClassifier {
 
     /** Closes tflite to release resources. */
     public void close() {
-        tflite.close();
+        if (tflite != null) {
+            tflite.close();
+        }
         tflite = null;
         tfliteModel = null;
     }
 
     /** Memory-map the model file in Assets. */
-    abstract protected MappedByteBuffer loadModelFile(Context context) throws IOException;
+    @NonNull
+    abstract protected MappedByteBuffer loadModelFile(@NonNull Context context) throws IOException;
 
     /** Writes Image data into a {@code ByteBuffer}. */
-    private void convertBitmapToByteBuffer(Bitmap bitmap) {
+    private void convertBitmapToByteBuffer(@NonNull Bitmap bitmap) {
         if (imgData == null) {
             return;
         }

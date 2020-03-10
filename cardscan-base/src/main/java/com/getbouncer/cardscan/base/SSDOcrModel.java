@@ -20,6 +20,10 @@ import android.content.Context;
 import android.util.Log;
 
 
+import androidx.annotation.NonNull;
+
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.util.HashMap;
@@ -75,16 +79,6 @@ class SSDOcrModel extends ImageClassifier {
     static final int TOP_K = 20;
     static final Hashtable<String, Integer> featureMapSizes = new Hashtable<String, Integer>();
 
-
-
-    //static final int[] featureMapSizes = {32, 16};
-
-    // Config values.
-    private int inputSize;
-    // Pre-allocated buffers.
-
-    private int[] intValues;
-
     /** outputLocations corresponds to the values of four co-ordinates of
      * all the priors, this is equal to NUM_OF_COORDINATES x NUM_OF_PRIORS
      * But this is reshaped by the model to 1 x [NUM_OF_COORDINATES x NUM_OF_PRIORS] */
@@ -96,7 +90,7 @@ class SSDOcrModel extends ImageClassifier {
      *  but this is reshaped by the model to 1 x [NUM_OF_CLASSES x NUM_OF_PRIORS]
      */
 
-    float[][] outputClasses;
+    final float[][] outputClasses;
 
     /** This datastructure will be populated by the Interpreter
      * Since the model outputs multiple output types, we need to create the
@@ -104,7 +98,7 @@ class SSDOcrModel extends ImageClassifier {
      * the SSD Model
      */
 
-    private Map<Integer, Object> outputMap = new HashMap<>();
+    private final Map<Integer, Object> outputMap = new HashMap<>();
 
 
     /**
@@ -112,27 +106,25 @@ class SSDOcrModel extends ImageClassifier {
      *
      * @param context
      */
-    public SSDOcrModel(Context context) throws IOException {
+    public SSDOcrModel(@NonNull Context context) throws IOException {
         super(context);
         featureMapSizes.put("layerOneWidth", 38);
         featureMapSizes.put("layerOneHeight", 24);
         featureMapSizes.put("layerTwoWidth", 19);
         featureMapSizes.put("layerTwoHeight", 12);
 
-        /** The model reshapes all the data to 1 x [All Data Points]
-         */
+        // The model reshapes all the data to 1 x [All Data Points]
         outputLocations = new float[1][NUM_LOC];
         outputClasses = new float[1][NUM_CLASS];
 
         outputMap.put(0, outputClasses);
         outputMap.put(1, outputLocations);
-
-
     }
 
 
+    @NotNull
     @Override
-    protected MappedByteBuffer loadModelFile(Context context) throws IOException {
+    protected MappedByteBuffer loadModelFile(@NotNull Context context) throws IOException {
         return ModelFactory.getSharedInstance().loadModelFile(context);
     }
 
@@ -154,20 +146,22 @@ class SSDOcrModel extends ImageClassifier {
     @Override
     protected void addPixelValue(int pixelValue) {
 
-        /** Normalize each pixel with MEAN and STD from training */
-
-        imgData.putFloat((((pixelValue >> 16) & 0xFF) - IMAGE_MEAN) / IMAGE_STD);
-        imgData.putFloat((((pixelValue >> 8) & 0xFF) - IMAGE_MEAN) / IMAGE_STD);
-        imgData.putFloat(((pixelValue & 0xFF) - IMAGE_MEAN) / IMAGE_STD);
+        /* Normalize each pixel with MEAN and STD from training */
+        if (imgData != null) {
+            imgData.putFloat((((pixelValue >> 16) & 0xFF) - IMAGE_MEAN) / IMAGE_STD);
+            imgData.putFloat((((pixelValue >> 8) & 0xFF) - IMAGE_MEAN) / IMAGE_STD);
+            imgData.putFloat(((pixelValue & 0xFF) - IMAGE_MEAN) / IMAGE_STD);
+        }
     }
 
     @Override
     protected void runInference() {
-        Object[] inputArray = {imgData};
-        Log.d("SSD Inference", "Running inference on image ");
-        //final long startTime = SystemClock.uptimeMillis();
-        tflite.runForMultipleInputsOutputs(inputArray, outputMap);
-        //Log.d("SSD Inference", "Inference time: " + Long.toString(SystemClock.uptimeMillis() - startTime) );
-
+        if (imgData != null && tflite != null) {
+            Object[] inputArray = {imgData};
+            Log.d("SSD Inference", "Running inference on image ");
+            //final long startTime = SystemClock.uptimeMillis();
+            tflite.runForMultipleInputsOutputs(inputArray, outputMap);
+            //Log.d("SSD Inference", "Inference time: " + Long.toString(SystemClock.uptimeMillis() - startTime) );
+        }
     }
 }

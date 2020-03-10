@@ -1,5 +1,7 @@
 package com.getbouncer.cardscan.base.ssd;
 
+import androidx.annotation.NonNull;
+
 public class PriorsGen{
 
     /** A utility class used to generate priors for initializing SSD
@@ -10,6 +12,7 @@ public class PriorsGen{
 
     */
 
+    @NonNull
     public static float[][] genPriors(int featureMapSize, int shrinkage, int boxSizeMin, int boxSizeMax, int aspecRatioOne, int aspectRatioTwo, int noOfPriors){
         float[][] boxes = new float[featureMapSize*featureMapSize*noOfPriors][4];
         float x_center, y_center;
@@ -79,6 +82,7 @@ public class PriorsGen{
         return boxes;
     }
 
+    @NonNull
     public static float[][] combinePriors(){
 
         float[][] priorsOne, priorsTwo, priorsCombined;

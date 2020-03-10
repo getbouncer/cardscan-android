@@ -3,18 +3,18 @@ package com.getbouncer.cardscan.base;
 import androidx.annotation.NonNull;
 
 public class DetectedBox implements Comparable {
-    CGRect rect;
-    int row;
-    int col;
-    private float confidence;
-    private int numRows;
-    private int numCols;
-    private CGSize boxSize;
-    private CGSize cardSize;
-    private CGSize imageSize;
+    @NonNull final CGRect rect;
+    final int row;
+    final int col;
+    private final float confidence;
+    private final int numRows;
+    private final int numCols;
+    @NonNull private final CGSize boxSize;
+    @NonNull private final CGSize cardSize;
+    @NonNull private final CGSize imageSize;
 
     DetectedBox(int row, int col, float confidence, int numRows, int numCols,
-            CGSize boxSize, CGSize cardSize, CGSize imageSize) {
+            @NonNull CGSize boxSize, @NonNull CGSize cardSize, @NonNull CGSize imageSize) {
 
         // Resize the box to transform it from the model's coordinates into
         // the image's coordinates

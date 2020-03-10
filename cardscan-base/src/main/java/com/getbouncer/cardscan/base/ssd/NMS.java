@@ -1,11 +1,14 @@
 package com.getbouncer.cardscan.base.ssd;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 
 public class NMS{
-    public static ArrayList<Integer> hardNMS(ArrayList<float[]> subsetBoxes, ArrayList<Float> probs, float iouThreshold,
+    @NonNull
+    public static ArrayList<Integer> hardNMS(@NonNull ArrayList<float[]> subsetBoxes, @NonNull ArrayList<Float> probs, float iouThreshold,
                                              int topK, int candidateSize ){
 
         /** In this project we implement HARD NMS and NOT Soft NMS

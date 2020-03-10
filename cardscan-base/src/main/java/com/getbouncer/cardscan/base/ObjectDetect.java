@@ -5,11 +5,16 @@ import android.graphics.Bitmap;
 import android.os.SystemClock;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.getbouncer.cardscan.base.ssd.ArrUtils;
 import com.getbouncer.cardscan.base.ssd.DetectedSSDBox;
 import com.getbouncer.cardscan.base.ssd.PredictionAPI;
 import com.getbouncer.cardscan.base.ssd.PriorsGen;
 import com.getbouncer.cardscan.base.ssd.Result;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.List;
@@ -18,12 +23,12 @@ import java.util.ArrayList;
 
 
 public class ObjectDetect {
-    private static SSDDetect ssdDetect = null;
-    private static float[][] priors = null;
+    @Nullable private static SSDDetect ssdDetect = null;
+    @Nullable private static float[][] priors = null;
 
-    private final File ssdModelFile;
+    @NonNull private final File ssdModelFile;
 
-    public List<DetectedSSDBox> objectBoxes = new ArrayList<>();
+    @NonNull public List<DetectedSSDBox> objectBoxes = new ArrayList<>();
     boolean hadUnrecoverableException = false;
 
     /** We don't use the following two for now */
@@ -33,27 +38,31 @@ public class ObjectDetect {
         return ssdDetect != null;
     }
 
-    public ObjectDetect(File modelFile) {
+    public ObjectDetect(@NotNull File modelFile) {
         this.ssdModelFile = modelFile;
     }
 
-    private void ssdOutputToPredictions(Bitmap image){
+    private void ssdOutputToPredictions(@NonNull Bitmap image) {
         ArrUtils arrUtils = new ArrUtils();
 
-        float[][] k_boxes = arrUtils.rearrangeArray(ssdDetect.outputLocations, ssdDetect.featureMapSizes,
-                                ssdDetect.NUM_OF_PRIORS_PER_ACTIVATION, ssdDetect.NUM_OF_CORDINATES);
-        k_boxes = arrUtils.reshape(k_boxes, ssdDetect.NUM_OF_PRIORS, ssdDetect.NUM_OF_CORDINATES);
+        if (ssdDetect == null) {
+            return;
+        }
+
+        float[][] k_boxes = arrUtils.rearrangeArray(ssdDetect.outputLocations, SSDDetect.featureMapSizes,
+                SSDDetect.NUM_OF_PRIORS_PER_ACTIVATION, SSDDetect.NUM_OF_CORDINATES);
+        k_boxes = arrUtils.reshape(k_boxes, SSDDetect.NUM_OF_PRIORS, SSDDetect.NUM_OF_CORDINATES);
         k_boxes = arrUtils.convertLocationsToBoxes(k_boxes, priors,
-                                ssdDetect.CENTER_VARIANCE, ssdDetect.SIZE_VARIANCE);
+                SSDDetect.CENTER_VARIANCE, SSDDetect.SIZE_VARIANCE);
         k_boxes = arrUtils.centerFormToCornerForm(k_boxes);
-        float[][] k_scores = arrUtils.rearrangeArray(ssdDetect.outputClasses, ssdDetect.featureMapSizes,
-                      ssdDetect.NUM_OF_PRIORS_PER_ACTIVATION, ssdDetect.NUM_OF_CLASSES);
-        k_scores = arrUtils.reshape(k_scores, ssdDetect.NUM_OF_PRIORS, ssdDetect.NUM_OF_CLASSES);
+        float[][] k_scores = arrUtils.rearrangeArray(ssdDetect.outputClasses, SSDDetect.featureMapSizes,
+                SSDDetect.NUM_OF_PRIORS_PER_ACTIVATION, SSDDetect.NUM_OF_CLASSES);
+        k_scores = arrUtils.reshape(k_scores, SSDDetect.NUM_OF_PRIORS, SSDDetect.NUM_OF_CLASSES);
         k_scores = arrUtils.softmax2D(k_scores);
 
         PredictionAPI predAPI = new PredictionAPI();
-        Result result = predAPI.predictionAPI(k_scores, k_boxes, ssdDetect.PROB_THRESHOLD,
-                      ssdDetect.IOU_THRESHOLD, ssdDetect.CANDIDATE_SIZE, ssdDetect.TOP_K);
+        Result result = predAPI.predictionAPI(k_scores, k_boxes, SSDDetect.PROB_THRESHOLD,
+                SSDDetect.IOU_THRESHOLD, SSDDetect.CANDIDATE_SIZE, SSDDetect.TOP_K);
         if (result.pickedBoxProbs.size() != 0 && result.pickedLabels.size() != 0)
         {
             for (int i = 0; i < result.pickedBoxProbs.size(); ++i){
@@ -68,11 +77,18 @@ public class ObjectDetect {
 
     }
 
-    private String runModel(Bitmap image) {
+    @NonNull
+    private String runModel(@NonNull Bitmap image) {
         final long startTime = SystemClock.uptimeMillis();
 
-        /**Run SSD Model and use the prediction API to post process
-         * the model output */
+        /*
+         * Run SSD Model and use the prediction API to post process
+         * the model output
+         */
+
+        if (ssdDetect == null) {
+            return "Failure";
+        }
 
         ssdDetect.classifyFrame(image);
         if (GlobalConfig.PRINT_TIMING) {
@@ -86,7 +102,8 @@ public class ObjectDetect {
         return "Success";
     }
 
-    public synchronized String predictOnCpu(Bitmap image, Context context) {
+    @Nullable
+    public synchronized String predictOnCpu(@NonNull Bitmap image, @NonNull Context context) {
         final int NUM_THREADS = 4;
         try {
             boolean createdNewModel = false;
@@ -95,7 +112,8 @@ public class ObjectDetect {
                 if (ssdDetect == null){
                     ssdDetect = new SSDDetect(context, ssdModelFile);
                     ssdDetect.setNumThreads(NUM_THREADS);
-                    /** Since all the frames use the same set of priors
+                    /*
+                     * Since all the frames use the same set of priors
                      * We generate these once and use for all the frame
                      */
                     if ( priors == null){

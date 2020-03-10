@@ -5,18 +5,21 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import java.lang.ref.WeakReference;
 
 class CameraThread extends Thread {
-    private WeakReference<OnCameraOpenListener> listener;
+    @Nullable private WeakReference<OnCameraOpenListener> mListener;
 
     synchronized void startCamera(OnCameraOpenListener listener) {
-        this.listener = new WeakReference<>(listener);
+        this.mListener = new WeakReference<>(listener);
         notify();
     }
 
+    @Nullable
     synchronized OnCameraOpenListener waitForOpenRequest() {
-        while (this.listener == null) {
+        while (this.mListener == null) {
             try {
                 wait();
             } catch (InterruptedException e) {
@@ -24,14 +27,14 @@ class CameraThread extends Thread {
             }
         }
 
-        return listener.get();
+        return mListener.get();
     }
 
     @Override
     public void run() {
         final OnCameraOpenListener listener = waitForOpenRequest();
-        if (listener == null) {
-            this.listener.clear();
+        if (listener == null && this.mListener != null) {
+            this.mListener.clear();
             return;
         }
 
@@ -48,9 +51,13 @@ class CameraThread extends Thread {
         handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    listener.onCameraOpen(resultCamera);
-                    CameraThread.this.listener.clear();
-                    CameraThread.this.listener = null;
+                    if (listener != null) {
+                        listener.onCameraOpen(resultCamera);
+                    }
+                    if (mListener != null) {
+                        mListener.clear();
+                    }
+                    mListener = null;
                 }
             });
     }

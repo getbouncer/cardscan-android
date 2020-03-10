@@ -3,6 +3,9 @@ package com.getbouncer.cardscan.base;
 import android.content.Context;
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -17,9 +20,10 @@ import java.nio.charset.StandardCharsets;
 
 
 public class Api {
-    public static String baseUrl = "https://api.getbouncer.com";
-    public static String apiKey = null;
+    @NonNull public static String baseUrl = "https://api.getbouncer.com";
+    @Nullable public static String apiKey = null;
 
+    @NonNull
     static private JSONObject getUnknownErrorResponse() {
         JSONObject response = new JSONObject();
         try {
@@ -32,6 +36,7 @@ public class Api {
         return response;
     }
 
+    @NonNull
     static private JSONObject getApiUrlNotSet() {
         JSONObject response = new JSONObject();
         try {
@@ -44,7 +49,7 @@ public class Api {
         return response;
     }
 
-    static void scanStats(Context context, ScanStats scanStats) {
+    static void scanStats(@NonNull Context context, @NonNull ScanStats scanStats) {
         try {
             JSONObject args = new JSONObject();
             args.put("platform", "android");
@@ -56,7 +61,8 @@ public class Api {
         }
     }
 
-    static private String downloadString(HttpURLConnection urlConnection) throws IOException, JSONException {
+    @NonNull
+    static private String downloadString(@NonNull HttpURLConnection urlConnection) throws IOException, JSONException {
         InputStreamReader in = new InputStreamReader(urlConnection.getInputStream());
         int contentLen = urlConnection.getContentLength();
         StringWriter responseBody = (contentLen > 0) ? new StringWriter(contentLen) : new StringWriter();
@@ -72,7 +78,7 @@ public class Api {
         return responseBody.toString();
     }
 
-    static private void makeApiCallPost(final String url, final JSONObject args) {
+    static private void makeApiCallPost(@NonNull final String url, @NonNull final JSONObject args) {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -81,7 +87,8 @@ public class Api {
         }).start();
     }
 
-    static private JSONObject makeApiCallPostImplementation(String url, JSONObject args) {
+    @NonNull
+    static private JSONObject makeApiCallPostImplementation(@NonNull String url, @NonNull JSONObject args) {
         HttpURLConnection urlConnection;
         try {
             if (TextUtils.isEmpty(Api.baseUrl) || TextUtils.isEmpty(Api.apiKey)) {
@@ -109,7 +116,8 @@ public class Api {
     }
 
     // Reads an InputStream and converts it to a String.
-    static private String readIt2(InputStreamReader stream, int len) throws IOException {
+    @Nullable
+    static private String readIt2(@NonNull InputStreamReader stream, int len) throws IOException {
         char[] buffer = new char[len];
         int ret = stream.read(buffer);
         if (ret < 0) {

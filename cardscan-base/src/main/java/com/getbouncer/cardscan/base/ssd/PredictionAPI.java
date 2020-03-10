@@ -1,26 +1,21 @@
 package com.getbouncer.cardscan.base.ssd;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 
+/**
+ * A utitliy class that applies non-max supression to each class
+ * picks out the remaining boxes, the class probabilities for classes
+ * that are kept and composes all the information in one place to be returned as
+ * an object.
+ */
 public class PredictionAPI{
-    ArrayList<Float> pickedBoxProbs;
-    ArrayList<Integer> pickedLabels;
-    ArrayList<float[]> pickedBoxes;
+    final ArrUtils arrUtils = new ArrUtils();
 
-    ArrUtils arrUtils = new ArrUtils();
-
-    public Result predictionAPI(float[][] k_scores, float[][] k_boxes, float probThreshold, float iouThreshold,
+    @NonNull
+    public Result predictionAPI(@NonNull float[][] k_scores, @NonNull float[][] k_boxes, float probThreshold, float iouThreshold,
                                 int candidateSize, int topK){
-
-        /**
-         * A utitliy class that applies non-max supression to each class
-         * picks out the remaining boxes, the class probabilities for classes
-         * that are kept and composes all the information in one place to be returned as
-         * an object.
-         */
-        pickedBoxProbs = new ArrayList<Float>();
-        pickedLabels = new ArrayList<Integer>();
-        pickedBoxes = new ArrayList<float[]>();
 
         ArrayList<Float> probs;
         ArrayList<float[]> subsetBoxes;
@@ -28,6 +23,7 @@ public class PredictionAPI{
 
         // skip the background class
 
+        Result res = new Result();
         for(int classIndex = 1; classIndex < k_scores[0].length; classIndex++){
             probs = new ArrayList<Float>();
             subsetBoxes = new ArrayList<float[]>();
@@ -45,15 +41,11 @@ public class PredictionAPI{
             indices = NMS.hardNMS(subsetBoxes, probs, iouThreshold, topK, candidateSize);
 
             for(int Index: indices){
-                pickedBoxProbs.add(probs.get(Index));
-                pickedBoxes.add(subsetBoxes.get(Index));
-                pickedLabels.add(classIndex);
+                res.pickedBoxProbs.add(probs.get(Index));
+                res.pickedBoxes.add(subsetBoxes.get(Index));
+                res.pickedLabels.add(classIndex);
             }
         }
-        Result res = new Result();
-        res.pickedBoxProbs = pickedBoxProbs;
-        res.pickedBoxes = pickedBoxes;
-        res.pickedLabels = pickedLabels;
 
         return res;
 

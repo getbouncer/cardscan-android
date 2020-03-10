@@ -4,12 +4,15 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 public class OverlayWhite extends Overlay {
 
     int backgroundColorId = R.color.card_scan_overlay_colored_background;
     int cornerColorId = R.color.card_scan_overlay_colored_corner_color;
 
-    public OverlayWhite(Context context, AttributeSet attrs) {
+    public OverlayWhite(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         cornerDp = 3;

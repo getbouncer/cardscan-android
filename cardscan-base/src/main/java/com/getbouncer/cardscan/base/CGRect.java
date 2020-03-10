@@ -2,6 +2,8 @@ package com.getbouncer.cardscan.base;
 
 import android.graphics.RectF;
 
+import androidx.annotation.NonNull;
+
 class CGRect {
     final float x;
     final float y;
@@ -14,6 +16,7 @@ class CGRect {
         this.height = height;
     }
 
+    @NonNull
     RectF RectF() {
         return new RectF(x, y, x+width, y+height);
     }

@@ -1,6 +1,8 @@
 
 package com.getbouncer.cardscan.base.ssd;
 
+import androidx.annotation.NonNull;
+
 public class OcrPriorsGen{
 
     public static float[][] genPriors(int featureMapSize_height, int featureMapSize_width, int shrinkage_height,
@@ -62,6 +64,7 @@ public class OcrPriorsGen{
         return boxes;
     }
 
+    @NonNull
     public static float[][] combinePriors(){
 
         float[][] priorsOne, priorsTwo, priorsCombined;

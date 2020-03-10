@@ -32,6 +32,8 @@ import android.graphics.RectF;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.SystemClock;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.content.ContextCompat;
@@ -47,6 +49,8 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.getbouncer.cardscan.base.ssd.DetectedSSDBox;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -121,7 +125,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     public static int MIN_IMAGE_EDGE = 600;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
@@ -168,9 +172,11 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                                           int[] grantResults) {
-
+    public void onRequestPermissionsResult(
+            int requestCode,
+            @NonNull String[] permissions,
+            @NonNull int[] grantResults
+    ) {
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             mIsPermissionCheckDone = true;
         } else {
@@ -189,7 +195,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         }
     }
 
-    private void setCameraParameters(Camera camera, Camera.Parameters parameters) {
+    private void setCameraParameters(@NonNull Camera camera, @NonNull Camera.Parameters parameters) {
         try {
             camera.setParameters(parameters);
         } catch (Exception | Error e) {
@@ -248,7 +254,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     }
 
     // https://stackoverflow.com/a/17804792
-    private @Nullable Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes, int w, int h) {
+    private @Nullable Camera.Size getOptimalPreviewSize(@Nullable List<Camera.Size> sizes, int w, int h) {
         final double ASPECT_TOLERANCE = 0.2;
         double targetRatio = (double) w / h;
 
@@ -335,6 +341,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         mIsActivityActive = false;
     }
 
+    @NonNull
     private ScanStats createScanStats() {
         boolean isCameraPermissionGranted = ContextCompat.checkSelfPermission(
                 this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
@@ -347,8 +354,6 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
 
         mIsActivityActive = true;
 
-        boolean isCameraPermissionGranted = ContextCompat.checkSelfPermission(
-                this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
         this.scanStats = createScanStats();
         firstValidPanResultMs = 0;
         numberResults = new HashMap<>();
@@ -393,7 +398,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
                 .addOnGlobalLayoutListener(new MyGlobalListenerClass(cardRectangleId, overlayId));
     }
 
-    public void setCameraDisplayOrientation(Activity activity, int cameraId) {
+    public void setCameraDisplayOrientation(@NonNull Activity activity, int cameraId) {
         Camera.CameraInfo info = new Camera.CameraInfo();
         Camera.getCameraInfo(cameraId, info);
 
@@ -421,10 +426,11 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         mRotation = result;
     }
 
-    static public void warmUp(Context context) {
+    static public void warmUp(@NonNull Context context) {
         getMachineLearningThread().warmUp(context);
     }
 
+    @NonNull
     static public MachineLearningThread getMachineLearningThread() {
         if (machineLearningThread == null) {
             machineLearningThread = new MachineLearningThread();
@@ -435,7 +441,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     }
 
     @Override
-    public void onPreviewFrame(byte[] bytes, Camera camera) {
+    public void onPreviewFrame(@NonNull byte[] bytes, @NonNull Camera camera) {
         if (postToMachineLearningThread && mMachineLearningSemaphore.tryAcquire()) {
             if (machineLearningFrame != null) {
                 mCamera.addCallbackBuffer(machineLearningFrame);
@@ -464,7 +470,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
                             this.getApplicationContext(), mRoiCenterYRatio, objectDetectFile);
                 }
             } else {
-                Bitmap bm = mTestingImageReader.nextImage();
+                @Nullable Bitmap bm = mTestingImageReader.nextImage();
                 if (mIsOcr) {
                     mlThread.post(bm, this, this.getApplicationContext());
                 } else {
@@ -481,7 +487,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     }
 
     @Override
-    public void onClick(View view) {
+    public void onClick(@NonNull View view) {
         if (mEnterCardManuallyId == view.getId() && mEnterCardManuallyId != View.NO_ID) {
             onEnterCardManuallyPressed();
         }
@@ -522,8 +528,8 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         }
     }
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    public void incrementNumber(String number) {
+    @VisibleForTesting
+    public void incrementNumber(@NonNull String number) {
         Integer currentValue = numberResults.get(number);
         if (currentValue == null) {
             currentValue = 0;
@@ -532,8 +538,8 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         numberResults.put(number, currentValue + 1);
     }
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    public void incrementExpiry(Expiry expiry) {
+    @VisibleForTesting
+    public void incrementExpiry(@NonNull Expiry expiry) {
         Integer currentValue = expiryResults.get(expiry);
         if (currentValue == null) {
             currentValue = 0;
@@ -542,7 +548,8 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         expiryResults.put(expiry, currentValue + 1);
     }
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    @VisibleForTesting
+    @Nullable
     public String getNumberResult() {
         // Ugg there has to be a better way
         String result = null;
@@ -563,7 +570,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         return result;
     }
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    @VisibleForTesting
     public Expiry getExpiryResult() {
         Expiry result = null;
         int maxValue = 0;
@@ -583,7 +590,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         return result;
     }
 
-    private void setValueAnimated(TextView textView, String value) {
+    private void setValueAnimated(@NonNull TextView textView, @Nullable String value) {
         if (textView.getVisibility() != View.VISIBLE) {
             textView.setVisibility(View.VISIBLE);
             textView.setAlpha(0.0f);
@@ -592,13 +599,15 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         textView.setText(value);
     }
 
-    protected abstract void onCardScanned(String numberResult, String month, String year);
+    protected abstract void onCardScanned(@NonNull String numberResult, @Nullable String month, @Nullable String year);
 
     protected void setNumberAndExpiryAnimated(long duration) {
         String numberResult = getNumberResult();
         Expiry expiryResult = getExpiryResult();
         TextView textView = findViewById(mCardNumberId);
-        setValueAnimated(textView, CreditCardUtils.formatNumberForDisplay(numberResult));
+        if (numberResult != null) {
+            setValueAnimated(textView, CreditCardUtils.formatNumberForDisplay(numberResult));
+        }
 
         boolean shouldShowExpiration = !mDelayShowingExpiration || duration >= (errorCorrectionDurationMs / 2);
         if (expiryResult != null && shouldShowExpiration) {
@@ -616,9 +625,15 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     }
 
     @Override
-    public void onPrediction(final String number, final Expiry expiry, final Bitmap bitmap,
-                             final List<DetectedBox> digitBoxes, final DetectedBox expiryBox,
-                             final Bitmap bitmapForObjectDetection, final Bitmap fullScreenBitmap) {
+    public void onPrediction(
+            @Nullable final String number,
+            @Nullable final Expiry expiry,
+            @NotNull final Bitmap ocrDetectionBitmap,
+            @Nullable final List<DetectedBox> digitBoxes,
+            @Nullable final DetectedBox expiryBox,
+            @NotNull final Bitmap bitmapForObjectDetection,
+            @Nullable final Bitmap screenDetectionBitmap
+    ) {
 
         if (!mSentResponse && mIsActivityActive) {
             processOCRPrediction(number, expiry);
@@ -636,7 +651,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
      * @param number String representation of the PAN
      * @param expiry Expiry
      */
-    protected void processOCRPrediction(final String number, final Expiry expiry) {
+    protected void processOCRPrediction(@Nullable final String number, @Nullable final Expiry expiry) {
         if (number != null && !hasSeenValidPan()) {
             firstValidPanResultMs = SystemClock.uptimeMillis();
         }
@@ -686,6 +701,10 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         this.scanStats.setSuccess(true);
         Api.scanStats(this, this.scanStats);
 
+        if (numberResult == null) {
+            // This should never happen since OCR has completed.
+            numberResult = "";
+        }
         onCardScanned(numberResult, month, year);
 
         if (mScanningIdleResource != null) {
@@ -704,8 +723,13 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     }
 
     @Override
-    public void onPrediction(Bitmap bm, List<DetectedSSDBox> boxes, int imageWidth,
-                             int imageHeight, final Bitmap fullScreenBitmap) {
+    public void onPrediction(
+            @NotNull Bitmap ocrBitmap,
+            @Nullable List<DetectedSSDBox> boxes,
+            int imageWidth,
+            int imageHeight,
+            @Nullable final Bitmap screenDetectionBitmap
+    ) {
         if (!mSentResponse && mIsActivityActive) {
             // do something with the prediction
 
@@ -718,10 +742,10 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
 
     /** A basic Camera preview class */
     public class CameraPreview extends SurfaceView implements Camera.AutoFocusCallback, SurfaceHolder.Callback {
-        private SurfaceHolder mHolder;
-        private Camera.PreviewCallback mPreviewCallback;
+        @NonNull private SurfaceHolder mHolder;
+        @NonNull private Camera.PreviewCallback mPreviewCallback;
 
-        public CameraPreview(Context context, Camera.PreviewCallback previewCallback) {
+        public CameraPreview(@NonNull Context context, @NonNull Camera.PreviewCallback previewCallback) {
             super(context);
 
             mPreviewCallback = previewCallback;

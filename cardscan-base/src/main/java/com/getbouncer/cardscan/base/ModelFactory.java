@@ -3,17 +3,21 @@ package com.getbouncer.cardscan.base;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 
+import androidx.annotation.NonNull;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 
 public abstract class ModelFactory {
-    public abstract MappedByteBuffer loadModelFile(Context context) throws IOException;
+    @NonNull
+    public abstract MappedByteBuffer loadModelFile(@NonNull Context context) throws IOException;
 
     private static ModelFactory sharedInstance;
 
-    public MappedByteBuffer loadModelFromResource(Context context, int resource) throws IOException {
+    @NonNull
+    public MappedByteBuffer loadModelFromResource(@NonNull Context context, int resource) throws IOException {
         AssetFileDescriptor fileDescriptor = context.getResources()
                 .openRawResourceFd(resource);
         FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
@@ -27,6 +31,7 @@ public abstract class ModelFactory {
         return result;
     }
 
+    @NonNull
     public static ModelFactory getSharedInstance() {
         if (sharedInstance == null) {
             sharedInstance = new ResourceModelFactory();

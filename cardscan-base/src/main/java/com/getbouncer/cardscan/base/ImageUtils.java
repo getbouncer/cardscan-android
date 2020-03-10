@@ -6,12 +6,19 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import java.util.List;
 
 public class ImageUtils {
 
-    public static Bitmap drawBoxesOnImage(Bitmap frame, List<DetectedBox> boxes,
-                                          DetectedBox expiryBox) {
+    @NonNull
+    public static Bitmap drawBoxesOnImage(
+            @NonNull Bitmap frame,
+            @Nullable List<DetectedBox> boxes,
+            @Nullable DetectedBox expiryBox
+    ) {
         Paint paint = new Paint(0);
         paint.setColor(Color.GREEN);
         paint.setStyle(Paint.Style.STROKE);
@@ -19,8 +26,10 @@ public class ImageUtils {
 
         Bitmap mutableBitmap = frame.copy(Bitmap.Config.ARGB_8888, true);
         Canvas canvas = new Canvas(mutableBitmap);
-        for (DetectedBox box:boxes) {
-            canvas.drawRect(box.rect.RectF(), paint);
+        if (boxes != null) {
+            for (DetectedBox box : boxes) {
+                canvas.drawRect(box.rect.RectF(), paint);
+            }
         }
 
         paint.setColor(Color.RED);

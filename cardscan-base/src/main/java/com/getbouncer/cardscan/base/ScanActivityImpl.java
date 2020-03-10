@@ -14,6 +14,11 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.List;
 
 public class ScanActivityImpl extends ScanBaseActivity {
@@ -33,7 +38,7 @@ public class ScanActivityImpl extends ScanBaseActivity {
     public static final String RESULT_EXPIRY_MONTH = "expiryMonth";
     public static final String RESULT_EXPIRY_YEAR = "expiryYear";
 
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.bouncer_private_activity_scan_card);
 
@@ -99,7 +104,7 @@ public class ScanActivityImpl extends ScanBaseActivity {
     }
 
     @Override
-    protected void onCardScanned(String numberResult, String month, String year) {
+    protected void onCardScanned(@NonNull String numberResult, @Nullable String month, @Nullable String year) {
         Intent intent = new Intent();
         intent.putExtra(RESULT_CARD_NUMBER, numberResult);
         intent.putExtra(RESULT_EXPIRY_MONTH, month);
@@ -109,12 +114,17 @@ public class ScanActivityImpl extends ScanBaseActivity {
     }
 
     @Override
-    public void onPrediction(final String number, final Expiry expiry, final Bitmap bitmap,
-                             final List<DetectedBox> digitBoxes, final DetectedBox expiryBox,
-                             final Bitmap bitmapForObjectDetection, final Bitmap fullScreenBitmap) {
-
+    public void onPrediction(
+            @Nullable final String number,
+            @Nullable final Expiry expiry,
+            @NotNull final Bitmap ocrDetectionBitmap,
+            @Nullable final List<DetectedBox> digitBoxes,
+            @Nullable final DetectedBox expiryBox,
+            @NotNull final Bitmap bitmapForObjectDetection,
+            @Nullable final Bitmap screenDetectionBitmap
+    ) {
         if (mInDebugMode) {
-            mDebugImageView.setImageBitmap(ImageUtils.drawBoxesOnImage(bitmap, digitBoxes,
+            mDebugImageView.setImageBitmap(ImageUtils.drawBoxesOnImage(ocrDetectionBitmap, digitBoxes,
                     expiryBox));
             Log.d(TAG, "Prediction (ms): " +
                     (SystemClock.uptimeMillis() - mPredictionStartMs));
@@ -125,8 +135,15 @@ public class ScanActivityImpl extends ScanBaseActivity {
             }
         }
 
-        super.onPrediction(number, expiry, bitmap, digitBoxes, expiryBox, bitmapForObjectDetection,
-                fullScreenBitmap);
+        super.onPrediction(
+                number,
+                expiry,
+                ocrDetectionBitmap,
+                digitBoxes,
+                expiryBox,
+                bitmapForObjectDetection,
+                screenDetectionBitmap
+        );
     }
 
 }
