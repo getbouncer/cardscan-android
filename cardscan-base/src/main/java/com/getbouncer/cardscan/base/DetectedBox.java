@@ -4,7 +4,14 @@ import androidx.annotation.NonNull;
 
 public class DetectedBox implements Comparable {
     @NonNull final CGRect rect;
+    final int row;
+    final int col;
     private final float confidence;
+    private final int numRows;
+    private final int numCols;
+    @NonNull private final CGSize boxSize;
+    @NonNull private final CGSize cardSize;
+    @NonNull private final CGSize imageSize;
 
     DetectedBox(int row, int col, float confidence, int numRows, int numCols,
             @NonNull CGSize boxSize, @NonNull CGSize cardSize, @NonNull CGSize imageSize) {
@@ -16,7 +23,14 @@ public class DetectedBox implements Comparable {
         float x = (imageSize.width - w) / ((float) (numCols-1)) * ((float) col);
         float y = (imageSize.height - h) / ((float) (numRows-1)) * ((float) row);
         this.rect = new CGRect(x, y, w, h);
+        this.row = row;
+        this.col = col;
         this.confidence = confidence;
+        this.numRows = numRows;
+        this.numCols = numCols;
+        this.boxSize = boxSize;
+        this.cardSize = cardSize;
+        this.imageSize = imageSize;
     }
 
     @Override
