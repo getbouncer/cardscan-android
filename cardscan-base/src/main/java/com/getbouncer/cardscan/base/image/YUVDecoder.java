@@ -24,6 +24,8 @@ import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 
+import androidx.annotation.NonNull;
+
 import java.io.ByteArrayOutputStream;
 
 public class YUVDecoder {
@@ -35,7 +37,8 @@ public class YUVDecoder {
      * @param height height of the source image
      * @return the converted Bitmap
      */
-    public static Bitmap YUVtoBitmap(byte[] data, int width, int height) {
+    @NonNull
+    public static Bitmap YUVtoBitmap(@NonNull byte[] data, int width, int height) {
         YuvImage yuv = new YuvImage(data, ImageFormat.NV21, width, height, null);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();

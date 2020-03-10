@@ -11,6 +11,9 @@ import android.graphics.Xfermode;
 import android.util.AttributeSet;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 // adapted from this: https://medium.com/@rgomez/android-how-to-draw-an-overlay-with-a-transparent-hole-471af6cf3953
 
 class Overlay extends View {
@@ -24,7 +27,7 @@ class Overlay extends View {
 
     boolean drawCorners = true;
 
-    public Overlay(Context context, AttributeSet attrs) {
+    public Overlay(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         setLayerType(View.LAYER_TYPE_SOFTWARE, null);
     }

@@ -1,8 +1,10 @@
 package com.getbouncer.cardscan.base.ssd;
 
 
+import androidx.annotation.NonNull;
+
 public class NMSUtil{
-    public static float IOUOf(float[] currentBox, float[] nextBox){
+    public static float IOUOf(@NonNull float[] currentBox, @NonNull float[] nextBox){
 
         /** Return intersection-over-union (Jaccard index) of boxes.
 

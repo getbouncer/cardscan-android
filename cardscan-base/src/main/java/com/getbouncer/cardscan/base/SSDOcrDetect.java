@@ -7,7 +7,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
-import android.util.Pair;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.getbouncer.cardscan.base.ssd.ArrUtils;
 import com.getbouncer.cardscan.base.ssd.DetectedOcrBox;
@@ -24,10 +26,10 @@ import java.util.Map;
 
 
 public class SSDOcrDetect {
-    private static SSDOcrModel ssdOcrModel = null;
-    private static float[][] priors = null;
+    @Nullable private static SSDOcrModel ssdOcrModel = null;
+    @Nullable private static float[][] priors = null;
 
-    public List<DetectedOcrBox> objectBoxes = new ArrayList<>();
+    public final List<DetectedOcrBox> objectBoxes = new ArrayList<>();
     public boolean hadUnrecoverableException = false;
 
     /** We don't use the following two for now */
@@ -37,8 +39,13 @@ public class SSDOcrDetect {
         return ssdOcrModel != null;
     }
 
-    private String ssdOutputToPredictions(Bitmap image, boolean strict){
+    @Nullable
+    private String ssdOutputToPredictions(@NonNull Bitmap image, boolean strict){
         ArrUtils arrUtils = new ArrUtils();
+
+        if (ssdOcrModel == null) {
+            return null;
+        }
 
         float[][] k_boxes = arrUtils.rearrangeOCRArray(ssdOcrModel.outputLocations, SSDOcrModel.featureMapSizes,
                 SSDOcrModel.NUM_OF_PRIORS_PER_ACTIVATION, SSDOcrModel.NUM_OF_COORDINATES);
@@ -100,8 +107,12 @@ public class SSDOcrDetect {
      * Run SSD Model and use the prediction API to post process
      * the model output
      */
-    private String runModel(Bitmap image, boolean strict) {
+    @Nullable
+    private String runModel(@NonNull Bitmap image, boolean strict) {
         final long startTime = SystemClock.uptimeMillis();
+        if (ssdOcrModel == null) {
+            return "";
+        }
 
         ssdOcrModel.classifyFrame(image);
         Log.d("Before SSD Post Process", String.valueOf(SystemClock.uptimeMillis() - startTime));
@@ -115,9 +126,9 @@ public class SSDOcrDetect {
         void complete(String result);
     }
 
-    private static <T> T getKeyByMaxValue(Map<T, ? extends Comparable> map) {
-        Map.Entry<T, ? extends Comparable> maxEntry = null;
-        for (Map.Entry<T, ? extends Comparable> entry : map.entrySet()) {
+    private static <T, V extends Comparable<V>> T getKeyByMaxValue(Map<T, V> map) {
+        Map.Entry<T, V> maxEntry = null;
+        for (Map.Entry<T, V> entry : map.entrySet()) {
             if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0) {
                 maxEntry = entry;
             }
@@ -131,9 +142,9 @@ public class SSDOcrDetect {
     }
 
     public static void runInCompletionLoop(
-        final List<Bitmap> frames,
-        final Context context,
-        final OnDetectListener detection
+        @NonNull final List<Bitmap> frames,
+        @NonNull final Context context,
+        @Nullable final OnDetectListener detection
     ) {
         new Thread(new Runnable() {
             @Override
@@ -168,7 +179,8 @@ public class SSDOcrDetect {
         }).start();
     }
 
-    public synchronized String predict(Bitmap image, Context context) {
+    @Nullable
+    public synchronized String predict(@NonNull Bitmap image, @NonNull Context context) {
         final int NUM_THREADS = 4;
         try {
             boolean createdNewModel = false;
@@ -204,7 +216,8 @@ public class SSDOcrDetect {
         }
     }
 
-    public synchronized String predict(Bitmap image, Context context, boolean strict) {
+    @Nullable
+    public synchronized String predict(@NonNull Bitmap image, @NonNull Context context, boolean strict) {
         final int NUM_THREADS = 4;
         try {
             boolean createdNewModel = false;
@@ -213,7 +226,7 @@ public class SSDOcrDetect {
                 if (ssdOcrModel == null){
                     ssdOcrModel = new SSDOcrModel(context);
                     ssdOcrModel.setNumThreads(NUM_THREADS);
-                    /** Since all the frames use the same set of priors
+                    /* Since all the frames use the same set of priors
                      * We generate these once and use for all the frame
                      */
                     if ( priors == null){

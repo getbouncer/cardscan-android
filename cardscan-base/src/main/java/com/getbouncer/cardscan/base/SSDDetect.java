@@ -16,14 +16,13 @@ limitations under the License.
 package com.getbouncer.cardscan.base;
 
 import android.content.Context;
-import android.util.Log;
 
 
-import com.getbouncer.cardscan.base.ImageClassifier;
-import com.getbouncer.cardscan.base.ModelFactory;
+import androidx.annotation.NonNull;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
@@ -84,20 +83,18 @@ class SSDDetect extends ImageClassifier {
     private int inputSize;
     // Pre-allocated buffers.
 
-    private int[] intValues;
-
     /** outputLocations corresponds to the values of four co-ordinates of
      * all the priors, this is equal to NUM_OF_COORDINATES x NUM_OF_PRIORS
      * But this is reshaped by the model to 1 x [NUM_OF_COORDINATES x NUM_OF_PRIORS] */
 
-    float[][] outputLocations;
+    @NonNull float[][] outputLocations;
 
     /** outputClasses corresponds to the values of the NUM_OF_CLASSES for all priors
      *  this is equal to NUM_OF_CLASSES x NUM_OF_PRIORS
      *  but this is reshaped by the model to 1 x [NUM_OF_CLASSES x NUM_OF_PRIORS]
      */
 
-     float[][] outputClasses;
+     @NonNull float[][] outputClasses;
 
     /** This datastructure will be populated by the Interpreter
      * Since the model outputs multiple output types, we need to create the
@@ -105,21 +102,20 @@ class SSDDetect extends ImageClassifier {
      * the SSD Model
      */
 
-    private Map<Integer, Object> outputMap = new HashMap<>();
+    @NonNull private Map<Integer, Object> outputMap = new HashMap<>();
 
-    private File modelFile = null;
+    @NonNull private File modelFile;
 
     /**
      * Initializes an {@code ImageClassifierFloatMobileNet}.
      *
      * @param context
      */
-    public SSDDetect(Context context, File modelFile) throws IOException {
+    public SSDDetect(@NonNull Context context, @NonNull File modelFile) throws IOException {
         this.modelFile = modelFile;
         init(context);
 
-        /** The model reshapes all the data to 1 x [All Data Points]
-         */
+        // The model reshapes all the data to 1 x [All Data Points]
         outputLocations = new float[1][NUM_LOC];
         outputClasses = new float[1][NUM_CLASS];
 
@@ -128,8 +124,9 @@ class SSDDetect extends ImageClassifier {
     }
 
 
+    @NotNull
     @Override
-    protected MappedByteBuffer loadModelFile(Context context) throws IOException {
+    protected MappedByteBuffer loadModelFile(@NotNull Context context) throws IOException {
         FileInputStream inputStream = new FileInputStream(modelFile);
         FileChannel fileChannel = inputStream.getChannel();
         long startOffset = 0;
@@ -160,18 +157,21 @@ class SSDDetect extends ImageClassifier {
 
         /** Normalize each pixel with MEAN and STD from training */
 
-        imgData.putFloat((((pixelValue >> 16) & 0xFF) - IMAGE_MEAN) / IMAGE_STD);
-        imgData.putFloat((((pixelValue >> 8) & 0xFF) - IMAGE_MEAN) / IMAGE_STD);
-        imgData.putFloat(((pixelValue & 0xFF) - IMAGE_MEAN) / IMAGE_MEAN);
+        if (imgData != null) {
+            imgData.putFloat((((pixelValue >> 16) & 0xFF) - IMAGE_MEAN) / IMAGE_STD);
+            imgData.putFloat((((pixelValue >> 8) & 0xFF) - IMAGE_MEAN) / IMAGE_STD);
+            imgData.putFloat(((pixelValue & 0xFF) - IMAGE_MEAN) / IMAGE_MEAN);
+        }
     }
 
     @Override
     protected void runInference() {
-        Object[] inputArray = {imgData};
-        //Log.d("SSD Inference", "Running inference on image ");
-        //final long startTime = SystemClock.uptimeMillis();
-        tflite.runForMultipleInputsOutputs(inputArray, outputMap);
-        //Log.d("SSD Inference", "Inference time: " + Long.toString(SystemClock.uptimeMillis() - startTime) );
-
+        if (tflite != null && imgData != null) {
+            Object[] inputArray = {imgData};
+            //Log.d("SSD Inference", "Running inference on image ");
+            //final long startTime = SystemClock.uptimeMillis();
+            tflite.runForMultipleInputsOutputs(inputArray, outputMap);
+            //Log.d("SSD Inference", "Inference time: " + Long.toString(SystemClock.uptimeMillis() - startTime) );
+        }
     }
 }

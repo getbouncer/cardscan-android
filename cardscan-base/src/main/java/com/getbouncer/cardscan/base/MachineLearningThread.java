@@ -11,41 +11,50 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.getbouncer.cardscan.base.image.YUVDecoder;
 import com.getbouncer.cardscan.base.ssd.DetectedSSDBox;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.File;
-import java.nio.IntBuffer;
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class MachineLearningThread implements Runnable {
 
-    protected class RunArguments {
-        public final byte[] mFrameBytes;
-        public final Bitmap mBitmap;
-        public final OnScanListener mScanListener;
-        public final OnObjectListener mObjectListener;
-        public final OnUXModelListener mUXModelListener;
-        public final Context mContext;
+    protected static class RunArguments {
+        @Nullable public final byte[] mFrameBytes;
+        @Nullable public final Bitmap mBitmap;
+        @Nullable final OnScanListener mScanListener;
+        @Nullable final OnObjectListener mObjectListener;
+        @Nullable public final OnUXModelListener mUXModelListener;
+        @NonNull public final Context mContext;
         public final int mWidth;
         public final int mHeight;
         public final int mFormat;
         public final int mSensorOrientation;
         public final float mRoiCenterYRatio;
         public final boolean mIsOcr;
-        public final File mObjectDetectFile;
+        @Nullable final File mObjectDetectFile;
         public final boolean mRunAdditionalOcr;
         public final boolean mRunUXModel;
 
         /**
          * Used by MachineLearningThread for running OCR on the main loop
          */
-        RunArguments(byte[] frameBytes, int width, int height, int format,
-                     int sensorOrientation, OnScanListener scanListener, Context context,
-                     float roiCenterYRatio) {
+        RunArguments(
+                @Nullable byte[] frameBytes,
+                int width,
+                int height,
+                int format,
+                int sensorOrientation,
+                @Nullable OnScanListener scanListener,
+                @NonNull Context context,
+                float roiCenterYRatio
+        ) {
             mFrameBytes = frameBytes;
             mBitmap = null;
             mWidth = width;
@@ -66,9 +75,17 @@ public class MachineLearningThread implements Runnable {
         /**
          * Used by MachineLearningThread for running Obj detection on the main loop
          */
-        RunArguments(byte[] frameBytes, int width, int height, int format,
-                     int sensorOrientation, OnObjectListener objectListener, Context context,
-                     float roiCenterYRatio, File objectDetectFile) {
+        RunArguments(
+                @Nullable byte[] frameBytes,
+                int width,
+                int height,
+                int format,
+                int sensorOrientation,
+                @Nullable OnObjectListener objectListener,
+                @NonNull Context context,
+                float roiCenterYRatio,
+                @Nullable File objectDetectFile
+        ) {
             mFrameBytes = frameBytes;
             mBitmap = null;
             mWidth = width;
@@ -89,9 +106,18 @@ public class MachineLearningThread implements Runnable {
         /**
          * Used by the new UXModelMachineLearningThread
          */
-        public RunArguments(byte[] frameBytes, int width, int height, int format,
-                            int sensorOrientation, OnUXModelListener uxListener, Context context,
-                            float roiCenterYRatio, File objectDetectFile, boolean runOcrModel) {
+        public RunArguments(
+                @NonNull byte[] frameBytes,
+                int width,
+                int height,
+                int format,
+                int sensorOrientation,
+                @Nullable OnUXModelListener uxListener,
+                @NonNull Context context,
+                float roiCenterYRatio,
+                @Nullable File objectDetectFile,
+                boolean runOcrModel
+        ) {
             this(frameBytes, width, height, format, sensorOrientation, uxListener, context,
                           roiCenterYRatio, objectDetectFile, runOcrModel, true);
         }
@@ -99,9 +125,19 @@ public class MachineLearningThread implements Runnable {
         /**
          * Used by the new UXModelMachineLearningThread
          */
-        public RunArguments(byte[] frameBytes, int width, int height, int format,
-                            int sensorOrientation, OnUXModelListener uxListener, Context context,
-                            float roiCenterYRatio, File objectDetectFile, boolean runOcrModel, boolean runUXModel) {
+        public RunArguments(
+                @NonNull byte[] frameBytes,
+                int width,
+                int height,
+                int format,
+                int sensorOrientation,
+                @Nullable OnUXModelListener uxListener,
+                @NonNull Context context,
+                float roiCenterYRatio,
+                @Nullable File objectDetectFile,
+                boolean runOcrModel,
+                boolean runUXModel
+        ) {
             mFrameBytes = frameBytes;
             mBitmap = null;
             mWidth = width;
@@ -124,7 +160,11 @@ public class MachineLearningThread implements Runnable {
          * For testing OCR MLThread only
          */
         @VisibleForTesting
-        RunArguments(Bitmap bitmap, OnScanListener scanListener, Context context) {
+        RunArguments(
+                @Nullable Bitmap bitmap,
+                @Nullable OnScanListener scanListener,
+                @NotNull Context context
+        ) {
             mFrameBytes = null;
             mBitmap = bitmap;
             mWidth = bitmap == null ? 0 : bitmap.getWidth();
@@ -146,8 +186,12 @@ public class MachineLearningThread implements Runnable {
          * For testing Object Detector MLThread only
          */
         @VisibleForTesting
-        RunArguments(Bitmap bitmap, OnObjectListener objectListener, Context context,
-                     File objectDetectFile) {
+        RunArguments(
+                @Nullable Bitmap bitmap,
+                @Nullable OnObjectListener objectListener,
+                @NonNull Context context,
+                @Nullable File objectDetectFile
+        ) {
             mFrameBytes = null;
             mBitmap = bitmap;
             mWidth = bitmap == null ? 0 : bitmap.getWidth();
@@ -166,11 +210,20 @@ public class MachineLearningThread implements Runnable {
         }
     }
 
-    protected class BitmapPair {
-        public Bitmap cropped;
-        public Bitmap fullScreen;
-        BitmapPair(Bitmap cropped, Bitmap fullScreen) {
-            this.cropped = cropped;
+    protected static class Bitmaps {
+        @NonNull public final Bitmap ocr;
+        @NonNull public final Bitmap objectDetect;
+        @NonNull public final Bitmap screenDetect;
+        @NonNull public final Bitmap fullScreen;
+        Bitmaps(
+                @NonNull Bitmap ocr,
+                @NonNull Bitmap objectDetect,
+                @NonNull Bitmap screenDetect,
+                @NonNull Bitmap fullScreen
+        ) {
+            this.ocr = ocr;
+            this.objectDetect = objectDetect;
+            this.screenDetect = screenDetect;
             this.fullScreen = fullScreen;
         }
     }
@@ -181,7 +234,7 @@ public class MachineLearningThread implements Runnable {
         super();
     }
 
-    public synchronized void warmUp(Context context) {
+    public synchronized void warmUp(@NonNull Context context) {
         if (!queue.isEmpty()) {
             return;
         }
@@ -191,30 +244,54 @@ public class MachineLearningThread implements Runnable {
         notify();
     }
 
-    synchronized public void post(Bitmap bitmap, OnScanListener scanListener, Context context) {
+    synchronized public void post(
+            @Nullable Bitmap bitmap,
+            @Nullable OnScanListener scanListener,
+            @NonNull Context context
+    ) {
         RunArguments args = new RunArguments(bitmap, scanListener, context);
         queue.push(args);
         notify();
     }
 
-    synchronized public void post(byte[] bytes, int width, int height, int format, int sensorOrientation,
-                           OnScanListener scanListener, Context context, float roiCenterYRatio) {
+    synchronized public void post(
+            @NonNull byte[] bytes,
+            int width,
+            int height,
+            int format,
+            int sensorOrientation,
+            @Nullable OnScanListener scanListener,
+            @NonNull Context context,
+            float roiCenterYRatio
+    ) {
         RunArguments args = new RunArguments(bytes, width, height, format, sensorOrientation,
                 scanListener, context, roiCenterYRatio);
         queue.push(args);
         notify();
     }
 
-    synchronized public void post(Bitmap bitmap, OnObjectListener objectListener, Context context,
-                           File objectDetectFile) {
+    synchronized public void post(
+            @Nullable Bitmap bitmap,
+            @Nullable OnObjectListener objectListener,
+            @NonNull Context context,
+            @Nullable File objectDetectFile
+    ) {
         RunArguments args = new RunArguments(bitmap, objectListener, context, objectDetectFile);
         queue.push(args);
         notify();
     }
 
-    synchronized public void post(byte[] bytes, int width, int height, int format, int sensorOrientation,
-                           OnObjectListener objectListener, Context context, float roiCenterYRatio,
-                           File objectDetectFile) {
+    synchronized public void post(
+            @NonNull byte[] bytes,
+            int width,
+            int height,
+            int format,
+            int sensorOrientation,
+            @Nullable OnObjectListener objectListener,
+            @NonNull Context context,
+            float roiCenterYRatio,
+            @Nullable File objectDetectFile
+    ) {
         RunArguments args = new RunArguments(bytes, width, height, format, sensorOrientation,
                 objectListener, context, roiCenterYRatio, objectDetectFile);
         queue.push(args);
@@ -226,7 +303,8 @@ public class MachineLearningThread implements Runnable {
      * This appears to be a fairly common problem for image processing apps. See also the native
      * implementation of YUVtoARGB https://github.com/cats-oss/android-gpuimage/blob/master/library/src/main/cpp/yuv-decoder.c
      */
-    public Bitmap YUVtoRGB(byte[] yuvByteArray, int previewWidth, int previewHeight) {
+    @NonNull
+    public Bitmap YUVtoRGB(@NonNull byte[] yuvByteArray, int previewWidth, int previewHeight) {
         Bitmap fullImage = YUVDecoder.YUVtoBitmap(yuvByteArray, previewWidth, previewHeight);
 
         int resizedWidth, resizedHeight;
@@ -244,8 +322,16 @@ public class MachineLearningThread implements Runnable {
         return resizedImage;
     }
 
-    protected BitmapPair getBitmap(byte[] bytes, int width, int height, int format,
-                                 int sensorOrientation, float roiCenterYRatio, boolean isOcr) {
+    @NonNull
+    protected Bitmaps getBitmaps(
+            @NonNull byte[] bytes,
+            int width,
+            int height,
+            int format,
+            int sensorOrientation,
+            float roiCenterYRatio,
+            boolean isOcr
+    ) {
         long startTime = SystemClock.uptimeMillis();
 
         final Bitmap bitmap = YUVtoRGB(bytes, width, height);
@@ -298,33 +384,39 @@ public class MachineLearningThread implements Runnable {
             y = bitmap.getHeight() - (int) h;
         }
 
-        Bitmap croppedBitmap = Bitmap.createBitmap(bitmap, x, y, (int) w, (int) h);
+        // create a bitmap of the desired size. crop is a square (h = w) with an offset matching the
+        // card preview
+        Bitmap objectCroppedBitmap = Bitmap.createBitmap(bitmap, x, y, (int) w, (int) h);
 
         long crop = SystemClock.uptimeMillis();
         if (GlobalConfig.PRINT_TIMING) {
             Log.d("MLThread", "crop -> " + ((crop - decode) / 1000.0));
         }
 
+        // Rotate the cropped bitmap
         Matrix matrix = new Matrix();
         matrix.postRotate(sensorOrientation);
-        Bitmap bm = Bitmap.createBitmap(croppedBitmap, 0, 0, croppedBitmap.getWidth(),
-                croppedBitmap.getHeight(), matrix, true);
+        Bitmap objectCroppedRotatedBitmap = Bitmap.createBitmap(objectCroppedBitmap, 0, 0, objectCroppedBitmap.getWidth(),
+                objectCroppedBitmap.getHeight(), matrix, true);
 
+        Bitmap ocrCroppedBitmap = cropBitmapForOCR(objectCroppedRotatedBitmap);
 
-        Bitmap fullScreen = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
+        Bitmap fullScreenRotated = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
                 bitmap.getHeight(), matrix, true);
+        Bitmap screenCroppedRotatedBitmap = cropBitmapForScreenDetection(fullScreenRotated);
 
         long rotate = SystemClock.uptimeMillis();
         if (GlobalConfig.PRINT_TIMING) {
             Log.d("MLThread", "rotate -> " + ((rotate - crop) / 1000.0));
         }
 
-        croppedBitmap.recycle();
+        objectCroppedBitmap.recycle();
         bitmap.recycle();
 
-        return new BitmapPair(bm, fullScreen);
+        return new Bitmaps(ocrCroppedBitmap, objectCroppedRotatedBitmap, screenCroppedRotatedBitmap, fullScreenRotated);
     }
 
+    @NonNull
     protected synchronized RunArguments getNextImage() {
         while (queue.size() == 0) {
             try {
@@ -337,26 +429,36 @@ public class MachineLearningThread implements Runnable {
         return queue.pop();
     }
 
-    private void runObjectModel(final Bitmap bitmap, final RunArguments args,
-                                final Bitmap fullScreenBitmap) {
+    private void runObjectModel(
+            @NonNull final Bitmap bitmapForObjectDetection,
+            @NonNull final RunArguments args,
+            @Nullable final Bitmap bitmapForScreenDetection
+    ) {
         if (args.mObjectDetectFile == null) {
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(new Runnable() {
                 @Override
                 public void run() {
                     if (args.mObjectListener != null) {
-                        args.mObjectListener.onPrediction(bitmap, new LinkedList<DetectedSSDBox>(),
-                                bitmap.getWidth(), bitmap.getHeight(), fullScreenBitmap);
+                        args.mObjectListener.onPrediction(
+                                bitmapForObjectDetection,
+                                new LinkedList<DetectedSSDBox>(),
+                                bitmapForObjectDetection.getWidth(),
+                                bitmapForObjectDetection.getHeight(),
+                                bitmapForScreenDetection
+                        );
                     }
-                    bitmap.recycle();
-                    fullScreenBitmap.recycle();
+                    bitmapForObjectDetection.recycle();
+                    if (bitmapForScreenDetection != null) {
+                        bitmapForScreenDetection.recycle();
+                    }
                 }
             });
             return;
         }
 
         final ObjectDetect detect = new ObjectDetect(args.mObjectDetectFile);
-        final String result = detect.predictOnCpu(bitmap, args.mContext);
+        detect.predictOnCpu(bitmapForObjectDetection, args.mContext);
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {
             public void run() {
@@ -365,12 +467,19 @@ public class MachineLearningThread implements Runnable {
                         if (detect.hadUnrecoverableException) {
                             args.mObjectListener.onObjectFatalError();
                         } else {
-                            args.mObjectListener.onPrediction(bitmap, detect.objectBoxes,
-                                    bitmap.getWidth(), bitmap.getHeight(), fullScreenBitmap);
+                            args.mObjectListener.onPrediction(
+                                    bitmapForObjectDetection,
+                                    detect.objectBoxes,
+                                    bitmapForObjectDetection.getWidth(),
+                                    bitmapForObjectDetection.getHeight(),
+                                    bitmapForScreenDetection
+                            );
                         }
                     }
-                    bitmap.recycle();
-                    fullScreenBitmap.recycle();
+                    bitmapForObjectDetection.recycle();
+                    if (bitmapForScreenDetection != null) {
+                        bitmapForScreenDetection.recycle();
+                    }
                 } catch (Error | Exception e) {
                     // prevent callbacks from crashing the app, swallow it
                     e.printStackTrace();
@@ -379,11 +488,14 @@ public class MachineLearningThread implements Runnable {
         });
     }
 
-    private void runOcrModel(final Bitmap bitmap, final RunArguments args,
-                             final Bitmap bitmapForObjectDetection, final Bitmap fullScreenBitmap) {
-        long ocrStart = SystemClock.uptimeMillis();
+    private void runOcrModel(
+            @NonNull final Bitmap bitmapForOcrDetection,
+            @NonNull final RunArguments args,
+            @NonNull final Bitmap bitmapForObjectDetection,
+            @Nullable final Bitmap bitmapForScreenDetection
+    ) {
         final SSDOcrDetect ocrDetect = new SSDOcrDetect();
-        final String number = ocrDetect.predict(bitmap, args.mContext);
+        final String number = ocrDetect.predict(bitmapForOcrDetection, args.mContext);
         Log.d("OCR Detect", "OCR Number:" + number);
         final boolean hadUnrecoverableException = ocrDetect.hadUnrecoverableException;
         Handler handler = new Handler(Looper.getMainLooper());
@@ -394,14 +506,21 @@ public class MachineLearningThread implements Runnable {
                         if (hadUnrecoverableException) {
                             args.mScanListener.onFatalError();
                         } else {
-                            args.mScanListener.onPrediction(number, null, bitmap, new ArrayList<DetectedBox>(),
-                                    null, bitmapForObjectDetection, fullScreenBitmap);
+                            args.mScanListener.onPrediction(
+                                number,
+                                null,
+                                bitmapForOcrDetection,
+                                null,
+                                null,
+                                bitmapForObjectDetection,
+                                bitmapForScreenDetection
+                            );
                         }
                     }
-                    bitmap.recycle();
+                    bitmapForOcrDetection.recycle();
                     bitmapForObjectDetection.recycle();
-                    if (fullScreenBitmap != null) {
-                        fullScreenBitmap.recycle();
+                    if (bitmapForScreenDetection != null) {
+                        bitmapForScreenDetection.recycle();
                     }
                 } catch (Error | Exception e) {
                     // prevent callbacks from crashing the app, swallow it
@@ -412,39 +531,69 @@ public class MachineLearningThread implements Runnable {
     }
 
     private void runModel() {
-        final RunArguments args = getNextImage();
+        @NonNull final RunArguments args = getNextImage();
 
-        Bitmap bm, fullScreen = null;
+        @NonNull Bitmap ocr, objectDetect;
+        @Nullable Bitmap screenDetect;
         if (args.mFrameBytes != null) {
-            BitmapPair pair = getBitmap(args.mFrameBytes, args.mWidth, args.mHeight, args.mFormat,
-                    args.mSensorOrientation, args.mRoiCenterYRatio, args.mIsOcr);
-            bm = pair.cropped;
-            fullScreen = pair.fullScreen;
+            Bitmaps bitmaps = getBitmaps(
+                    args.mFrameBytes,
+                    args.mWidth,
+                    args.mHeight,
+                    args.mFormat,
+                    args.mSensorOrientation,
+                    args.mRoiCenterYRatio,
+                    args.mIsOcr
+            );
+            ocr = bitmaps.ocr;
+            objectDetect = bitmaps.objectDetect;
+            screenDetect = bitmaps.screenDetect;
         } else if (args.mBitmap != null) {
-            bm = args.mBitmap;
+            ocr = cropBitmapForOCR(args.mBitmap);
+            objectDetect = args.mBitmap;
+            screenDetect = null;
         } else {
-            bm = Bitmap.createBitmap(480, 480, Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bm);
+
+            objectDetect = Bitmap.createBitmap(480, 480, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(objectDetect);
             Paint paint = new Paint();
             paint.setColor(Color.GRAY);
             canvas.drawRect(0.0f, 0.0f, 480.0f, 480.0f, paint);
+            ocr = cropBitmapForOCR(objectDetect);
+            screenDetect = null;
         }
 
         if (args.mIsOcr) {
-            Bitmap croppedBitmap = cropBitmapForOCR(bm);
-            runOcrModel(croppedBitmap, args, bm, fullScreen);
+            runOcrModel(ocr, args, objectDetect, screenDetect);
         } else {
-            runObjectModel(bm, args, fullScreen);
+            runObjectModel(objectDetect, args, screenDetect);
         }
     }
 
-    protected Bitmap cropBitmapForOCR(Bitmap inputBitmap) {
-        float width = inputBitmap.getWidth();
+    @NonNull
+    protected Bitmap cropBitmapForOCR(@NonNull Bitmap objectDetect) {
+        float width = objectDetect.getWidth();
         float height = width * 375.0f / 600.0f;
-        float y = (inputBitmap.getHeight() - height) / 2.0f;
-        float x = 0.0f;
-        return Bitmap.createBitmap(inputBitmap, (int) x, (int) y, (int) width,
-                (int) height);
+        if (height > objectDetect.getHeight()) {
+            height = objectDetect.getHeight();
+            width = height / 375F * 600F;
+        }
+        float y = (objectDetect.getHeight() - height) / 2.0f;
+        float x = (objectDetect.getWidth() - width) / 2F;
+        return Bitmap.createBitmap(objectDetect, (int) x, (int) y, (int) width, (int) height);
+    }
+
+    @NonNull
+    protected Bitmap cropBitmapForScreenDetection(@NonNull Bitmap fullScreen) {
+        float width = fullScreen.getWidth();
+        float height = width * 16F / 9F;
+        if (height > fullScreen.getHeight()) {
+            height = fullScreen.getHeight();
+            width = height / 16F * 9F;
+        }
+        float y = (fullScreen.getHeight() - height) / 2F;
+        float x = (fullScreen.getWidth() - width) / 2F;
+        return Bitmap.createBitmap(fullScreen, (int) x, (int) y, (int) width, (int) height);
     }
 
     @Override

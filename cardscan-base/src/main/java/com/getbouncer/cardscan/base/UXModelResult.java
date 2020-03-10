@@ -1,5 +1,8 @@
 package com.getbouncer.cardscan.base;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 public class UXModelResult {
 
     public final float noCardScore;
@@ -7,9 +10,9 @@ public class UXModelResult {
     public final float noPanSideScore;
     private float[] modelOutput;
     private float maxScore;
-    private UXModelEnum uxModelEnum;
+    @Nullable private UXModelEnum uxModelEnum;
 
-    public UXModelResult(float[] modelOutput) {
+    public UXModelResult(@NonNull float[] modelOutput) {
         noCardScore = modelOutput[0];
         panSideScore = modelOutput[1];
         noPanSideScore = modelOutput[2];
@@ -24,6 +27,7 @@ public class UXModelResult {
         PAN_SIDE
     }
 
+    @Nullable
     public UXModelEnum getResult() {
         return this.uxModelEnum;
     }

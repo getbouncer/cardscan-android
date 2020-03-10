@@ -2,6 +2,8 @@ package com.getbouncer.cardscan.base.ssd;
 
 import android.graphics.RectF;
 
+import androidx.annotation.NonNull;
+
 import org.json.JSONObject;
 
 
@@ -25,12 +27,13 @@ public class DetectedOcrBox implements Comparable<DetectedOcrBox> {
         this.rect = new RectF(this.XMin, this.YMin, this.XMax, this.YMax);
     }
 
+    @NonNull
     public JSONObject toJson() {
         return new JSONObject();
     }
 
     @Override
-    public int compareTo(DetectedOcrBox detectedOcrBox) {
+    public int compareTo(@NonNull DetectedOcrBox detectedOcrBox) {
         return Float.compare(this.XMin, detectedOcrBox.XMin);
     }
 }

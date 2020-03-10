@@ -4,6 +4,8 @@ import android.os.Build;
 import android.os.SystemClock;
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -47,6 +49,7 @@ public class ScanStats {
         numObjFramesProcessed += 1;
     }
 
+    @NonNull
     public JSONObject toJson() {
         JSONObject object = new JSONObject();
         double duration = ((double) endTimeMs - startTimeMs) / 1000.0;
@@ -74,6 +77,7 @@ public class ScanStats {
     }
 
     // from https://stackoverflow.com/a/27836910/947883
+    @NonNull
     private static String getDeviceName() {
         String manufacturer = Build.MANUFACTURER;
         String model = Build.MODEL;
@@ -83,9 +87,10 @@ public class ScanStats {
         return capitalize(manufacturer) + " " + model;
     }
 
+    @NonNull
     private static String capitalize(String str) {
         if (TextUtils.isEmpty(str)) {
-            return str;
+            return "";
         }
         char[] arr = str.toCharArray();
         boolean capitalizeNext = true;

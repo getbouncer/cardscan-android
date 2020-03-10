@@ -12,13 +12,7 @@ public class Result {
      * with the pickedBoxes.
      */
 
-    public ArrayList<Float> pickedBoxProbs;
-    public ArrayList<Integer> pickedLabels;
-    public ArrayList<float[]> pickedBoxes;
-
-    public Result(){
-        this.pickedBoxProbs = new ArrayList<Float>();
-        this.pickedLabels = new ArrayList<Integer>();
-        this.pickedBoxes = new ArrayList<float[]>();
-    }
+    public final ArrayList<Float> pickedBoxProbs = new ArrayList<Float>();
+    public final ArrayList<Integer> pickedLabels = new ArrayList<Integer>();
+    public final ArrayList<float[]> pickedBoxes = new ArrayList<float[]>();
 }

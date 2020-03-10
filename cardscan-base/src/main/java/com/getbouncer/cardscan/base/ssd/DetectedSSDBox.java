@@ -2,6 +2,8 @@ package com.getbouncer.cardscan.base.ssd;
 
 import android.graphics.RectF;
 
+import androidx.annotation.NonNull;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,6 +31,7 @@ public class DetectedSSDBox {
         this.rect = new RectF(this.XMin, this.YMin, this.XMax, this.YMax);
     }
 
+    @NonNull
     public JSONObject toJson() {
         try {
             JSONObject result = new JSONObject();
@@ -48,6 +51,7 @@ public class DetectedSSDBox {
     /**
      * 0.0.3 of the model has an off-by-one issue w/ the label
      */
+    @NonNull
     public JSONObject toJsonV3() {
         try {
             JSONObject result = new JSONObject();

@@ -1,17 +1,23 @@
 package com.getbouncer.cardscan.base.ssd;
 
 
+import androidx.annotation.NonNull;
+
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Comparator;
 
 public class ArrayIndexComparator implements Comparator<Integer>
 {
+    @NonNull
     private final Float[] array;
 
-    public ArrayIndexComparator(Float[] array)
+    public ArrayIndexComparator(@NotNull Float[] array)
     {
         this.array = array;
     }
 
+    @NonNull
     public Integer[] createIndexArray()
     {
         Integer[] indexes = new Integer[array.length];
@@ -23,7 +29,7 @@ public class ArrayIndexComparator implements Comparator<Integer>
     }
 
     @Override
-    public int compare(Integer index1, Integer index2)
+    public int compare(@NonNull Integer index1, @NonNull Integer index2)
     {
          // Autounbox from Integer to int to use as array indexes
         return Float.compare(array[index1], array[index2]) * (-1);
