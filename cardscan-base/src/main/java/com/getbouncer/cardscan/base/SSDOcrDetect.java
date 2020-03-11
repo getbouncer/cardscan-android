@@ -77,9 +77,9 @@ public class SSDOcrDetect {
 
                 objectBoxes.add(ocrBox);
 
-                /** add the YMin value of the current box */
+                // add the YMin value of the current box
                 yMinArray.add(result.pickedBoxes.get(i)[1]*image.getHeight());
-                /** add the YMax value of the current box */
+                // add the YMax value of the current box
                 yMaxArray.add(result.pickedBoxes.get(i)[3]*image.getHeight());
             }
         }
@@ -106,14 +106,10 @@ public class SSDOcrDetect {
             }
             float boxYCenter = (box.YMax +  box.YMin) / 2;
 
-            if (Math.abs(boxYCenter - medianYCenter) > medianHeight)
-            {
-                Log.e("Don't add this box",
-                        String.valueOf(box.YMin) + String.valueOf(box.YMax));
-            }
-            else
-            {
-                num.append(String.valueOf(box.label));
+            if (Math.abs(boxYCenter - medianYCenter) > medianHeight) {
+                Log.e("Don't add this box", box.YMin + ", " + box.YMax);
+            } else {
+                num.append(box.label);
             }
 
 
