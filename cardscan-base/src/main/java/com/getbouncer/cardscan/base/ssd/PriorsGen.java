@@ -18,7 +18,7 @@ public class PriorsGen{
         float x_center, y_center;
         int image_size = 300;
         float size;
-        float scale = image_size / shrinkage;
+        float scale = (float) image_size / shrinkage;
         float h, w;
         int priorIndex = 0;
         float ratioOne;
