@@ -48,7 +48,7 @@ public class ObjectDetect {
     }
 
     private void ssdOutputToPredictions(@NonNull Bitmap image) {
-        if (ssdDetect == null) {
+        if (ssdDetect == null || priors == null) {
             return;
         }
 
