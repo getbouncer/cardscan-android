@@ -106,9 +106,7 @@ public class SSDOcrDetect {
             }
             float boxYCenter = (box.YMax +  box.YMin) / 2;
 
-            if (Math.abs(boxYCenter - medianYCenter) > medianHeight) {
-                Log.e("Don't add this box", box.YMin + ", " + box.YMax);
-            } else {
+            if (Math.abs(boxYCenter - medianYCenter) <= medianHeight) {
                 num.append(box.label);
             }
 
