@@ -36,10 +36,10 @@ public class SSDOcrDetect {
     @Nullable private static float[][] priors = null;
 
     /** to store YMin values of all boxes */
-    private List<Float> yMinArray = new ArrayList<Float>();
+    private final List<Float> yMinArray = new ArrayList<Float>();
 
     /** to store the YMax values of all the boxes */
-    private List<Float> yMaxArray = new ArrayList<Float>();
+    private final List<Float> yMaxArray = new ArrayList<Float>();
 
     public final List<DetectedOcrBox> objectBoxes = new ArrayList<>();
     public boolean hadUnrecoverableException = false;
