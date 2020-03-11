@@ -53,7 +53,7 @@ public class SSDOcrDetect {
 
     @Nullable
     private String ssdOutputToPredictions(@NonNull Bitmap image, boolean strict) {
-        if (ssdOcrModel == null) {
+        if (ssdOcrModel == null || priors == null) {
             return null;
         }
 
