@@ -13,8 +13,8 @@ public class OcrPriorsGen{
         int image_height = 375;
         int image_width = 600;
         float size;
-        float scale_height = image_height / shrinkage_height;
-        float scale_width = image_width / shrinkage_width;
+        float scale_height = (float) image_height / shrinkage_height;
+        float scale_width = (float) image_width / shrinkage_width;
         float h, w;
         int priorIndex = 0;
         float ratioOne;
