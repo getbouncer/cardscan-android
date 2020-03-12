@@ -2,10 +2,41 @@
 
 ## [Unreleased](https://github.com/getbouncer/cardscan-android/tree/HEAD)
 
-[Full Changelog](https://github.com/getbouncer/cardscan-android/compare/1.0.5136...HEAD)
+[Full Changelog](https://github.com/getbouncer/cardscan-android/compare/1.0.5139...HEAD)
 
 **Merged pull requests:**
 
+- False positive removal [\#115](https://github.com/getbouncer/cardscan-android/pull/115) ([awushensky](https://github.com/awushensky))
+
+## [1.0.5139](https://github.com/getbouncer/cardscan-android/tree/1.0.5139) (2020-03-11)
+
+[Full Changelog](https://github.com/getbouncer/cardscan-android/compare/1.0.5138...1.0.5139)
+
+**Merged pull requests:**
+
+- Clean up nullability [\#114](https://github.com/getbouncer/cardscan-android/pull/114) ([awushensky](https://github.com/awushensky))
+
+## [1.0.5138](https://github.com/getbouncer/cardscan-android/tree/1.0.5138) (2020-03-03)
+
+[Full Changelog](https://github.com/getbouncer/cardscan-android/compare/1.0.5137...1.0.5138)
+
+**Closed issues:**
+
+- Enhancement: Customise the image assets [\#111](https://github.com/getbouncer/cardscan-android/issues/111)
+
+**Merged pull requests:**
+
+- Match cardverify version bump [\#112](https://github.com/getbouncer/cardscan-android/pull/112) ([awushensky](https://github.com/awushensky))
+- Add customizable permission messages to fragment-based start methods [\#109](https://github.com/getbouncer/cardscan-android/pull/109) ([Tronicnotes](https://github.com/Tronicnotes))
+
+## [1.0.5137](https://github.com/getbouncer/cardscan-android/tree/1.0.5137) (2020-02-19)
+
+[Full Changelog](https://github.com/getbouncer/cardscan-android/compare/1.0.5136...1.0.5137)
+
+**Merged pull requests:**
+
+- Update bob model [\#110](https://github.com/getbouncer/cardscan-android/pull/110) ([awushensky](https://github.com/awushensky))
+- Update changelog [\#108](https://github.com/getbouncer/cardscan-android/pull/108) ([awushensky](https://github.com/awushensky))
 - Added changelog and instructions for doing so [\#104](https://github.com/getbouncer/cardscan-android/pull/104) ([kingst](https://github.com/kingst))
 
 ## [1.0.5136](https://github.com/getbouncer/cardscan-android/tree/1.0.5136) (2020-02-17)
