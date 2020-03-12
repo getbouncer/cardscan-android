@@ -4,10 +4,10 @@ android {
     compileSdkVersion 29
     defaultConfig {
         applicationId "com.getbouncer.testcardscan"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 29
         versionCode 4015
-        versionName "1.0.5139"
+        versionName "1.0.5140"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

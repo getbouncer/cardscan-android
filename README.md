@@ -13,7 +13,7 @@ CardScan Android installation guide
 
 ## Requirements
 
-* Android API level 19 or higher
+* Android API level 21 or higher
 
 ## Installation
 
@@ -21,8 +21,8 @@ We publish our library in the jcenter repository, so for most gradle configurati
 
 ```gradle
 dependencies {
-    implementation 'com.getbouncer:cardscan-base:1.0.5139'
-    implementation 'com.getbouncer:cardscan:1.0.5139'
+    implementation 'com.getbouncer:cardscan-base:1.0.5140'
+    implementation 'com.getbouncer:cardscan:1.0.5140'
 }
 ```
 

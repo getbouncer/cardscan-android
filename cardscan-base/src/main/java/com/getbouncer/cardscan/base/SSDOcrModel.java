@@ -1,4 +1,3 @@
-
 /* Copyright 2018 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,19 +18,16 @@ package com.getbouncer.cardscan.base;
 import android.content.Context;
 import android.util.Log;
 
-
 import androidx.annotation.NonNull;
-
-import org.jetbrains.annotations.NotNull;
+import com.getbouncer.cardscan.base.ssd.OcrFeatureMapSizes;
 
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 
 
-class SSDOcrModel extends ImageClassifier {
+public class SSDOcrModel extends ImageClassifier {
     /** We normalized the images with mean 127.5 and std 128.5 during training */
 
     private static final float IMAGE_MEAN = 127.5f;
@@ -40,9 +36,9 @@ class SSDOcrModel extends ImageClassifier {
 
     /** the model takes a 300x300 sample images as input */
 
-    private static final int CROP_SIZE_HEIGHT = 375;
+    public static final int CROP_SIZE_HEIGHT = 375;
 
-    private static final int CROP_SIZE_WIDTH = 600;
+    public static final int CROP_SIZE_WIDTH = 600;
     /** To be  used later */
     private static final int NUM_THREADS = 4;
     private boolean isModelQuantized; // TODO later
@@ -75,9 +71,13 @@ class SSDOcrModel extends ImageClassifier {
     static final float IOU_THRESHOLD = 0.50f;
     static final float CENTER_VARIANCE = 0.1f;
     static final float SIZE_VARIANCE = 0.2f;
-    static final int CANDIDATE_SIZE = 50;
     static final int TOP_K = 20;
-    static final Hashtable<String, Integer> featureMapSizes = new Hashtable<String, Integer>();
+    static final OcrFeatureMapSizes FEATURE_MAP_SIZES = new OcrFeatureMapSizes(
+        38,
+        24,
+        19,
+        12
+    );
 
     /** outputLocations corresponds to the values of four co-ordinates of
      * all the priors, this is equal to NUM_OF_COORDINATES x NUM_OF_PRIORS
@@ -108,10 +108,6 @@ class SSDOcrModel extends ImageClassifier {
      */
     public SSDOcrModel(@NonNull Context context) throws IOException {
         super(context);
-        featureMapSizes.put("layerOneWidth", 38);
-        featureMapSizes.put("layerOneHeight", 24);
-        featureMapSizes.put("layerTwoWidth", 19);
-        featureMapSizes.put("layerTwoHeight", 12);
 
         // The model reshapes all the data to 1 x [All Data Points]
         outputLocations = new float[1][NUM_LOC];
@@ -122,9 +118,9 @@ class SSDOcrModel extends ImageClassifier {
     }
 
 
-    @NotNull
+    @NonNull
     @Override
-    protected MappedByteBuffer loadModelFile(@NotNull Context context) throws IOException {
+    protected MappedByteBuffer loadModelFile(@NonNull Context context) throws IOException {
         return ModelFactory.getSharedInstance().loadModelFile(context);
     }
 

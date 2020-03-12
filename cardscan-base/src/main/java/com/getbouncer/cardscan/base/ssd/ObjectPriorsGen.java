@@ -2,7 +2,9 @@ package com.getbouncer.cardscan.base.ssd;
 
 import androidx.annotation.NonNull;
 
-public class PriorsGen{
+import com.getbouncer.cardscan.base.util.ArrayExtensions;
+
+public class ObjectPriorsGen {
 
     /** A utility class used to generate priors for initializing SSD
     * Since we use the output feature maps of only two layers
@@ -87,21 +89,21 @@ public class PriorsGen{
 
         float[][] priorsOne, priorsTwo, priorsCombined;
 
-        priorsOne = PriorsGen.genPriors(19, 16, 60, 105, 2, 3, 6 );
-        priorsTwo = PriorsGen.genPriors(10, 32, 105, 150, 2, 3, 6);
+        priorsOne = ObjectPriorsGen.genPriors(19, 16, 60, 105, 2, 3, 6 );
+        priorsTwo = ObjectPriorsGen.genPriors(10, 32, 105, 150, 2, 3, 6);
 
         priorsCombined = new float[priorsOne.length + priorsTwo.length][4];
 
         for(int i = 0; i < priorsOne.length; i++){
             for (int j = 0; j< priorsOne[0].length; j++){
-                priorsCombined[i][j] = ArrUtils.clamp(priorsOne[i][j], 0.0f, 1.0f);
+                priorsCombined[i][j] = ArrayExtensions.clamp(priorsOne[i][j], 0.0f, 1.0f);
             }
         }
 
 
         for(int i = 0; i < priorsTwo.length; i++){
             for (int j = 0; j< priorsTwo[0].length; j++){
-                priorsCombined[i+priorsOne.length][j] = ArrUtils.clamp(priorsTwo[i][j], 0.0f, 1.0f);
+                priorsCombined[i+priorsOne.length][j] = ArrayExtensions.clamp(priorsTwo[i][j], 0.0f, 1.0f);
             }
         }
 
