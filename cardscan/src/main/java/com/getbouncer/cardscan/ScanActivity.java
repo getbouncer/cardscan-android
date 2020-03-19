@@ -1,16 +1,17 @@
 package com.getbouncer.cardscan;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Intent;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.test.espresso.idling.CountingIdlingResource;
 import android.text.TextUtils;
 
 import com.getbouncer.cardscan.base.IdleResourceManager;
 import com.getbouncer.cardscan.base.ScanActivityImpl;
 import com.getbouncer.cardscan.base.ScanBaseActivity;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 
 /**
@@ -35,7 +36,7 @@ public class ScanActivity {
      *
      * @param activity the parent activity that is waiting for the result of the ScanActivity
      */
-    public static void start(@NonNull Activity activity) {
+    public static void start(@NotNull Activity activity) {
         ScanBaseActivity.warmUp(activity.getApplicationContext());
         Intent intent = new Intent(activity, ScanActivityImpl.class);
         intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
@@ -49,9 +50,9 @@ public class ScanActivity {
      *
      * @param fragment the parent fragment that is waiting for the result of the ScanActivity
      */
-    public static void start(@NonNull Fragment fragment) {
-        ScanBaseActivity.warmUp(fragment.getContext());
-        Intent intent = new Intent(fragment.getContext(), ScanActivityImpl.class);
+    public static void start(@NotNull Fragment fragment) {
+        ScanBaseActivity.warmUp(fragment.getActivity());
+        Intent intent = new Intent(fragment.getActivity(), ScanActivityImpl.class);
         intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
         intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_TITLE, cameraPermissionTitle);
         intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_MESSAGE, cameraPermissionMessage);
@@ -64,7 +65,7 @@ public class ScanActivity {
      * @param activity the parent activity that is waiting for the result of the ScanActivity
      * @param delayShowingExpiration true if the scan activity should delay showing the expiration
      */
-    public static void start(@NonNull Activity activity, boolean delayShowingExpiration) {
+    public static void start(@NotNull Activity activity, boolean delayShowingExpiration) {
         ScanBaseActivity.warmUp(activity.getApplicationContext());
         Intent intent = new Intent(activity, ScanActivityImpl.class);
         intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
@@ -80,9 +81,9 @@ public class ScanActivity {
      * @param fragment the parent fragment that is waiting for the result of the ScanActivity
      * @param delayShowingExpiration true if the scan activity should delay showing the expiration
      */
-    public static void start(@NonNull Fragment fragment, boolean delayShowingExpiration) {
-        ScanBaseActivity.warmUp(fragment.getContext());
-        Intent intent = new Intent(fragment.getContext(), ScanActivityImpl.class);
+    public static void start(@NotNull Fragment fragment, boolean delayShowingExpiration) {
+        ScanBaseActivity.warmUp(fragment.getActivity());
+        Intent intent = new Intent(fragment.getActivity(), ScanActivityImpl.class);
         intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
         intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_TITLE, cameraPermissionTitle);
         intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_MESSAGE, cameraPermissionMessage);
@@ -97,7 +98,7 @@ public class ScanActivity {
      * @param delayShowingExpiration true if the scan activity should delay showing the expiration
      * @param showEnterCardNumberManually true if the scan activity should show the enter_card_manually button
      */
-    public static void start(@NonNull Activity activity, boolean delayShowingExpiration, boolean showEnterCardNumberManually) {
+    public static void start(@NotNull Activity activity, boolean delayShowingExpiration, boolean showEnterCardNumberManually) {
         ScanBaseActivity.warmUp(activity.getApplicationContext());
         Intent intent = new Intent(activity, ScanActivityImpl.class);
         intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
@@ -115,9 +116,9 @@ public class ScanActivity {
      * @param delayShowingExpiration true if the scan activity should delay showing the expiration
      * @param showEnterCardNumberManually true if the scan activity should show the enter_card_manually button
      */
-    public static void start(@NonNull Fragment fragment, boolean delayShowingExpiration, boolean showEnterCardNumberManually) {
-        ScanBaseActivity.warmUp(fragment.getContext());
-        Intent intent = new Intent(fragment.getContext(), ScanActivityImpl.class);
+    public static void start(@NotNull Fragment fragment, boolean delayShowingExpiration, boolean showEnterCardNumberManually) {
+        ScanBaseActivity.warmUp(fragment.getActivity());
+        Intent intent = new Intent(fragment.getActivity(), ScanActivityImpl.class);
         intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
         intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_TITLE, cameraPermissionTitle);
         intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_MESSAGE, cameraPermissionMessage);
@@ -133,7 +134,7 @@ public class ScanActivity {
      * @param scanCardText the large text above the card rectangle
      * @param positionCardText the small text below the card rectangle
      */
-    public static void start(@NonNull Activity activity, String scanCardText,
+    public static void start(@NotNull Activity activity, String scanCardText,
                              String positionCardText) {
 
         ScanBaseActivity.warmUp(activity.getApplicationContext());
@@ -153,10 +154,10 @@ public class ScanActivity {
      * @param scanCardText the large text above the card rectangle
      * @param positionCardText the small text below the card rectangle
      */
-    public static void start(@NonNull Fragment fragment, String scanCardText,
+    public static void start(@NotNull Fragment fragment, String scanCardText,
                              String positionCardText) {
-        ScanBaseActivity.warmUp(fragment.getContext());
-        Intent intent = new Intent(fragment.getContext(), ScanActivityImpl.class);
+        ScanBaseActivity.warmUp(fragment.getActivity());
+        Intent intent = new Intent(fragment.getActivity(), ScanActivityImpl.class);
         intent.putExtra(ScanActivityImpl.SCAN_CARD_TEXT, scanCardText);
         intent.putExtra(ScanActivityImpl.POSITION_CARD_TEXT, positionCardText);
         intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
@@ -174,7 +175,7 @@ public class ScanActivity {
      * @param delayShowingExpiration true if the scan activity should delay showing the expiration
      * @param showEnterCardNumberManually true if the scan activity should show the enter_card_manually button
      */
-    public static void start(@NonNull Activity activity, String scanCardText,
+    public static void start(@NotNull Activity activity, String scanCardText,
                              String positionCardText, boolean delayShowingExpiration,
                              boolean showEnterCardNumberManually) {
 
@@ -199,11 +200,11 @@ public class ScanActivity {
      * @param delayShowingExpiration true if the scan activity should delay showing the expiration
      * @param showEnterCardNumberManually true if the scan activity should show the enter_card_manually button
      */
-    public static void start(@NonNull Fragment fragment, String scanCardText,
+    public static void start(@NotNull Fragment fragment, String scanCardText,
                              String positionCardText, boolean delayShowingExpiration,
                              boolean showEnterCardNumberManually) {
-        ScanBaseActivity.warmUp(fragment.getContext());
-        Intent intent = new Intent(fragment.getContext(), ScanActivityImpl.class);
+        ScanBaseActivity.warmUp(fragment.getActivity());
+        Intent intent = new Intent(fragment.getActivity(), ScanActivityImpl.class);
         intent.putExtra(ScanActivityImpl.SCAN_CARD_TEXT, scanCardText);
         intent.putExtra(ScanActivityImpl.POSITION_CARD_TEXT, positionCardText);
         intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
@@ -227,7 +228,7 @@ public class ScanActivity {
      * @param activity the activity that invokes this method, which the library uses to get
      *                 an application context.
      */
-    public static void warmUp(@NonNull Activity activity) {
+    public static void warmUp(@NotNull Activity activity) {
         ScanBaseActivity.warmUp(activity.getApplicationContext());
     }
 
@@ -244,8 +245,8 @@ public class ScanActivity {
      * @param fragment the fragment that invokes this method, which the library uses to get
      *                 an application context.
      */
-    public static void warmUp(@NonNull Fragment fragment) {
-        ScanBaseActivity.warmUp(fragment.getContext());
+    public static void warmUp(@NotNull Fragment fragment) {
+        ScanBaseActivity.warmUp(fragment.getActivity());
     }
 
     /**
@@ -256,11 +257,11 @@ public class ScanActivity {
      *
      * @param activity the parent activity that is waiting for the result of the ScanActivity
      */
-    public static void startDebug(@NonNull Activity activity) {
+    public static void startDebug(@NotNull Activity activity) {
         startDebug(activity, null);
     }
 
-    public static void startDebug(@NonNull Activity activity,
+    public static void startDebug(@NotNull Activity activity,
                                   @Nullable TestingImageReader imageReader) {
         if (imageReader != null) {
             ScanBaseActivity.sTestingImageReader = new TestingImageBridge(imageReader);
@@ -282,17 +283,17 @@ public class ScanActivity {
      *
      * @param fragment the parent fragment that is waiting for the result of the ScanActivity
      */
-    public static void startDebug(@NonNull Fragment fragment) {
+    public static void startDebug(@NotNull Fragment fragment) {
         startDebug(fragment, null);
     }
 
-    public static void startDebug(@NonNull Fragment fragment,
+    public static void startDebug(@NotNull Fragment fragment,
                                   @Nullable TestingImageReader imageReader) {
         if (imageReader != null) {
             ScanBaseActivity.sTestingImageReader = new TestingImageBridge(imageReader);
         }
-        ScanBaseActivity.warmUp(fragment.getContext());
-        Intent intent = new Intent(fragment.getContext(), ScanActivityImpl.class);
+        ScanBaseActivity.warmUp(fragment.getActivity());
+        Intent intent = new Intent(fragment.getActivity(), ScanActivityImpl.class);
         intent.putExtra("debug", true);
         intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
         intent.putExtra(ScanActivityImpl.CAMERA_PERMISSION_TITLE, cameraPermissionTitle);
