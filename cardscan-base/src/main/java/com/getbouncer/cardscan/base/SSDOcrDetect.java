@@ -10,12 +10,12 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import android.util.Size;
 
 import com.getbouncer.cardscan.base.ssd.DetectedOcrBox;
 import com.getbouncer.cardscan.base.ssd.DetectionBox;
 import com.getbouncer.cardscan.base.ssd.OcrPriorsGenerator;
 import com.getbouncer.cardscan.base.ssd.SSD;
+import com.getbouncer.cardscan.base.ssd.Size;
 import com.getbouncer.cardscan.base.ssd.domain.ClassifierScores;
 import com.getbouncer.cardscan.base.ssd.domain.SizeAndCenter;
 import com.getbouncer.cardscan.base.util.ArrayExtensions;

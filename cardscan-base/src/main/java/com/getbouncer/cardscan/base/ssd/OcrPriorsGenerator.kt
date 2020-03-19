@@ -2,7 +2,6 @@
 
 package com.getbouncer.cardscan.base.ssd
 
-import android.util.Size
 import com.getbouncer.cardscan.base.SSDOcrModel
 import com.getbouncer.cardscan.base.ssd.domain.SizeAndCenter
 import com.getbouncer.cardscan.base.ssd.domain.clampAll
