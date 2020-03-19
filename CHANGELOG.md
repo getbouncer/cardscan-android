@@ -1,8 +1,37 @@
 # Changelog
 
-## [Unreleased](https://github.com/getbouncer/cardscan-android/tree/HEAD)
+## [1.0.5143](https://github.com/getbouncer/cardscan-android/tree/1.0.5143) (2020-03-19)
 
-[Full Changelog](https://github.com/getbouncer/cardscan-android/compare/1.0.5139...HEAD)
+[Full Changelog](https://github.com/getbouncer/cardscan-android/compare/1.0.5142...1.0.5143)
+
+**Closed issues:**
+
+- Unable to detect expiry date [\#113](https://github.com/getbouncer/cardscan-android/issues/113)
+
+**Merged pull requests:**
+
+- Reduce SDK version to 19 [\#120](https://github.com/getbouncer/cardscan-android/pull/120) ([awushensky](https://github.com/awushensky))
+
+## [1.0.5142](https://github.com/getbouncer/cardscan-android/tree/1.0.5142) (2020-03-13)
+
+[Full Changelog](https://github.com/getbouncer/cardscan-android/compare/1.0.5141...1.0.5142)
+
+**Merged pull requests:**
+
+- Upgrade bob model [\#118](https://github.com/getbouncer/cardscan-android/pull/118) ([awushensky](https://github.com/awushensky))
+
+## [1.0.5141](https://github.com/getbouncer/cardscan-android/tree/1.0.5141) (2020-03-13)
+
+[Full Changelog](https://github.com/getbouncer/cardscan-android/compare/1.0.5140...1.0.5141)
+
+**Merged pull requests:**
+
+- Remove unused dependencies [\#117](https://github.com/getbouncer/cardscan-android/pull/117) ([awushensky](https://github.com/awushensky))
+- Add code owners file [\#116](https://github.com/getbouncer/cardscan-android/pull/116) ([awushensky](https://github.com/awushensky))
+
+## [1.0.5140](https://github.com/getbouncer/cardscan-android/tree/1.0.5140) (2020-03-12)
+
+[Full Changelog](https://github.com/getbouncer/cardscan-android/compare/1.0.5139...1.0.5140)
 
 **Merged pull requests:**
 
@@ -125,7 +154,6 @@
 **Merged pull requests:**
 
 - More tweaks for UX model [\#93](https://github.com/getbouncer/cardscan-android/pull/93) ([xsl](https://github.com/xsl))
-- OCR model bump + other changes to support UX model [\#91](https://github.com/getbouncer/cardscan-android/pull/91) ([xsl](https://github.com/xsl))
 - Disabled screenshot in the ScanActivityImpl [\#70](https://github.com/getbouncer/cardscan-android/pull/70) ([Anwera64](https://github.com/Anwera64))
 
 ## [1.0.5127](https://github.com/getbouncer/cardscan-android/tree/1.0.5127) (2020-01-29)
