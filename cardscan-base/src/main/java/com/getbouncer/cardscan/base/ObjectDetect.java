@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.SystemClock;
 import android.util.Log;
-import android.util.Size;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,6 +12,7 @@ import com.getbouncer.cardscan.base.ssd.DetectedSSDBox;
 import com.getbouncer.cardscan.base.ssd.DetectionBox;
 import com.getbouncer.cardscan.base.ssd.ObjectPriorsGen;
 import com.getbouncer.cardscan.base.ssd.SSD;
+import com.getbouncer.cardscan.base.ssd.Size;
 import com.getbouncer.cardscan.base.ssd.domain.ClassifierScores;
 import com.getbouncer.cardscan.base.ssd.domain.SizeAndCenter;
 import com.getbouncer.cardscan.base.util.ArrayExtensions;

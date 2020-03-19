@@ -3,7 +3,6 @@
 package com.getbouncer.cardscan.base.ssd
 
 import android.graphics.RectF
-import android.util.Size
 import com.getbouncer.cardscan.base.ssd.domain.ClassifierScores
 import com.getbouncer.cardscan.base.ssd.domain.RectForm
 import com.getbouncer.cardscan.base.ssd.domain.toRectF
