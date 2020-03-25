@@ -18,6 +18,7 @@ package com.getbouncer.cardscan.base;
 
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -68,6 +69,9 @@ import java.util.concurrent.Semaphore;
  */
 public abstract class ScanBaseActivity extends Activity implements Camera.PreviewCallback,
         View.OnClickListener, OnScanListener, OnObjectListener, OnCameraOpenListener {
+
+    public static final String LICENSE_ACCEPTED = "licenseAccepted";
+    public static final String RESULT_LICENSE_ACCEPTED = "licenseAccepted";
 
     protected Camera mCamera = null;
     private CameraPreview cameraPreview = null;
@@ -124,10 +128,18 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     // the width or height of any of our images never goes below this value.
     public static int MIN_IMAGE_EDGE = 600;
 
+    @SuppressLint("SourceLockedOrientationActivity")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+        if (!getIntent().getBooleanExtra(LICENSE_ACCEPTED, false)) {
+            Intent intent = new Intent();
+            intent.putExtra(RESULT_LICENSE_ACCEPTED, false);
+            setResult(RESULT_CANCELED, intent);
+            finish();
+        }
 
         denyPermissionTitle = getString(R.string.card_scan_deny_permission_title);
         denyPermissionMessage = getString(R.string.card_scan_deny_permission_message);

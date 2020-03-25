@@ -13,7 +13,7 @@ CardScan Android installation guide
 
 ## Requirements
 
-* Android API level 21 or higher
+* Android API level 19 or higher
 
 ## Installation
 
