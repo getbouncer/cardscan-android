@@ -124,6 +124,9 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     // the width or height of any of our images never goes below this value.
     public static int MIN_IMAGE_EDGE = 600;
 
+    private long firstFrameTimeMs = -1;
+    private long totalFramesProcessed = 0;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -632,7 +635,8 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             @Nullable final List<DetectedBox> digitBoxes,
             @Nullable final DetectedBox expiryBox,
             @NotNull final Bitmap bitmapForObjectDetection,
-            @Nullable final Bitmap screenDetectionBitmap
+            @Nullable final Bitmap screenDetectionBitmap,
+            final long frameAddedTimeMs
     ) {
 
         if (!mSentResponse && mIsActivityActive) {
@@ -643,6 +647,19 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
                 onOCRCompleted();
             }
         }
+
+        // keep track of frame rate
+        if (firstFrameTimeMs < 0) {
+            firstFrameTimeMs = System.currentTimeMillis() - 1; // hack to ensure no div by 0
+        } else {
+            totalFramesProcessed++;
+        }
+        Log.d("Bouncer", "Frame time: " +
+            (System.currentTimeMillis() - frameAddedTimeMs) +
+            ", Frame rate: " +
+            (((float) totalFramesProcessed * 1000) / System.currentTimeMillis() - firstFrameTimeMs) +
+            " FPS"
+        );
 
         mMachineLearningSemaphore.release();
     }
@@ -728,7 +745,8 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             @Nullable List<DetectedSSDBox> boxes,
             int imageWidth,
             int imageHeight,
-            @Nullable final Bitmap screenDetectionBitmap
+            @Nullable final Bitmap screenDetectionBitmap,
+            final long frameAddedTimeMs
     ) {
         if (!mSentResponse && mIsActivityActive) {
             // do something with the prediction

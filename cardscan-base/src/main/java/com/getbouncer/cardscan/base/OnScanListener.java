@@ -15,7 +15,8 @@ interface OnScanListener {
             @Nullable final List<DetectedBox> digitBoxes,
             @Nullable final DetectedBox expiryBox,
             @NonNull final Bitmap objectDetectionBitmap,
-            @Nullable final Bitmap screenDetectionBitmap
+            @Nullable final Bitmap screenDetectionBitmap,
+            final long frameAddedTimeMs
     );
     void onFatalError();
 }

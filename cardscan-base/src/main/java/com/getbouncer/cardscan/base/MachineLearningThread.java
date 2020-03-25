@@ -41,6 +41,7 @@ public class MachineLearningThread implements Runnable {
         @Nullable final File mObjectDetectFile;
         public final boolean mRunAdditionalOcr;
         public final boolean mRunUXModel;
+        public final long frameAddedTimeMs;
 
         /**
          * Used by MachineLearningThread for running OCR on the main loop
@@ -70,6 +71,7 @@ public class MachineLearningThread implements Runnable {
             mRunAdditionalOcr = false;
             mRunUXModel = false;
             mUXModelListener = null;
+            frameAddedTimeMs = System.currentTimeMillis();
         }
 
         /**
@@ -101,6 +103,7 @@ public class MachineLearningThread implements Runnable {
             mObjectDetectFile = objectDetectFile;
             mRunAdditionalOcr = false;
             mRunUXModel = false;
+            frameAddedTimeMs = System.currentTimeMillis();
         }
 
         /**
@@ -153,6 +156,7 @@ public class MachineLearningThread implements Runnable {
             mRunAdditionalOcr = runOcrModel;
             mRunUXModel = runUXModel;
             mUXModelListener = uxListener;
+            frameAddedTimeMs = System.currentTimeMillis();
         }
 
 
@@ -180,6 +184,7 @@ public class MachineLearningThread implements Runnable {
             mRunAdditionalOcr = false;
             mRunUXModel = false;
             mUXModelListener = null;
+            frameAddedTimeMs = System.currentTimeMillis();
         }
 
         /**
@@ -207,6 +212,7 @@ public class MachineLearningThread implements Runnable {
             mRunAdditionalOcr = false;
             mRunUXModel = false;
             mUXModelListener = null;
+            frameAddedTimeMs = System.currentTimeMillis();
         }
     }
 
@@ -432,7 +438,8 @@ public class MachineLearningThread implements Runnable {
     private void runObjectModel(
             @NonNull final Bitmap bitmapForObjectDetection,
             @NonNull final RunArguments args,
-            @Nullable final Bitmap bitmapForScreenDetection
+            @Nullable final Bitmap bitmapForScreenDetection,
+            final long frameAddedTimeMs
     ) {
         if (args.mObjectDetectFile == null) {
             Handler handler = new Handler(Looper.getMainLooper());
@@ -441,11 +448,12 @@ public class MachineLearningThread implements Runnable {
                 public void run() {
                     if (args.mObjectListener != null) {
                         args.mObjectListener.onPrediction(
-                                bitmapForObjectDetection,
-                                new LinkedList<DetectedSSDBox>(),
-                                bitmapForObjectDetection.getWidth(),
-                                bitmapForObjectDetection.getHeight(),
-                                bitmapForScreenDetection
+                            bitmapForObjectDetection,
+                            new LinkedList<DetectedSSDBox>(),
+                            bitmapForObjectDetection.getWidth(),
+                            bitmapForObjectDetection.getHeight(),
+                            bitmapForScreenDetection,
+                            frameAddedTimeMs
                         );
                     }
                     bitmapForObjectDetection.recycle();
@@ -468,11 +476,12 @@ public class MachineLearningThread implements Runnable {
                             args.mObjectListener.onObjectFatalError();
                         } else {
                             args.mObjectListener.onPrediction(
-                                    bitmapForObjectDetection,
-                                    detect.objectBoxes,
-                                    bitmapForObjectDetection.getWidth(),
-                                    bitmapForObjectDetection.getHeight(),
-                                    bitmapForScreenDetection
+                                bitmapForObjectDetection,
+                                detect.objectBoxes,
+                                bitmapForObjectDetection.getWidth(),
+                                bitmapForObjectDetection.getHeight(),
+                                bitmapForScreenDetection,
+                                frameAddedTimeMs
                             );
                         }
                     }
@@ -492,7 +501,8 @@ public class MachineLearningThread implements Runnable {
             @NonNull final Bitmap bitmapForOcrDetection,
             @NonNull final RunArguments args,
             @NonNull final Bitmap bitmapForObjectDetection,
-            @Nullable final Bitmap bitmapForScreenDetection
+            @Nullable final Bitmap bitmapForScreenDetection,
+            final long frameAddedTimeMs
     ) {
         final SSDOcrDetect ocrDetect = new SSDOcrDetect();
         final String number = ocrDetect.predict(bitmapForOcrDetection, args.mContext);
@@ -513,7 +523,8 @@ public class MachineLearningThread implements Runnable {
                                 null,
                                 null,
                                 bitmapForObjectDetection,
-                                bitmapForScreenDetection
+                                bitmapForScreenDetection,
+                                frameAddedTimeMs
                             );
                         }
                     }
@@ -564,9 +575,9 @@ public class MachineLearningThread implements Runnable {
         }
 
         if (args.mIsOcr) {
-            runOcrModel(ocr, args, objectDetect, screenDetect);
+            runOcrModel(ocr, args, objectDetect, screenDetect, args.frameAddedTimeMs);
         } else {
-            runObjectModel(objectDetect, args, screenDetect);
+            runObjectModel(objectDetect, args, screenDetect, args.frameAddedTimeMs);
         }
     }
 
