@@ -17,7 +17,7 @@ Our license will be changing in an upcoming release. Please view the [License](#
 
 ## Requirements
 
-* Android API level 21 or higher
+* Android API level 19 or higher
 
 ## Installation
 

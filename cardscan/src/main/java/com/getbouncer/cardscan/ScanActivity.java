@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * The ScanActivity class provides the main interface to the scanning functionality. To use this
- * activity, call the {@link ScanActivity#start(Activity)} method and override
+ * activity, call the {@link ScanActivity#start} method and override
  * onActivityResult in your own activity to get the result of the scan.
  */
 public class ScanActivity {
@@ -29,7 +29,6 @@ public class ScanActivity {
     public static final int RESULT_OK = ScanActivityImpl.RESULT_OK;
     public static String RESULT_FATAL_ERROR = ScanBaseActivity.RESULT_FATAL_ERROR;
     public static TestingImageReader testingImageReader = null;
-    public static String apiKey;
     public static String cameraPermissionTitle;
     public static String cameraPermissionMessage;
 
@@ -37,8 +36,12 @@ public class ScanActivity {
      * Starts a ScanActivityImpl activity, using {@param activity} as a parent.
      *
      * @param activity the parent activity that is waiting for the result of the ScanActivity
+     * @param apiKey a 32 character API key generated from https://api.getbouncer.com/console
      */
-    public static void start(@NotNull Activity activity) {
+    public static void start(
+            @NotNull Activity activity,
+            @NotNull String apiKey
+    ) {
         ScanBaseActivity.warmUp(activity.getApplicationContext());
         Intent intent = new Intent(activity, ScanActivityImpl.class);
         intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
@@ -51,8 +54,12 @@ public class ScanActivity {
      * Starts a ScanActivityImpl activity, using {@param fragment} as a parent.
      *
      * @param fragment the parent fragment that is waiting for the result of the ScanActivity
+     * @param apiKey a 32 character API key generated from https://api.getbouncer.com/console
      */
-    public static void start(@NotNull Fragment fragment) {
+    public static void start(
+            @NotNull Fragment fragment,
+            @NotNull String apiKey
+    ) {
         final Context context = fragment.getContext();
         if (context == null) {
             return;
@@ -69,9 +76,14 @@ public class ScanActivity {
      * Starts a ScanActivityImpl activity, using {@param activity} as a parent.
      *
      * @param activity the parent activity that is waiting for the result of the ScanActivity
+     * @param apiKey a 32 character API key generated from https://api.getbouncer.com/console
      * @param delayShowingExpiration true if the scan activity should delay showing the expiration
      */
-    public static void start(@NotNull Activity activity, boolean delayShowingExpiration) {
+    public static void start(
+            @NotNull Activity activity,
+            @NotNull String apiKey,
+            boolean delayShowingExpiration
+    ) {
         ScanBaseActivity.warmUp(activity.getApplicationContext());
         Intent intent = new Intent(activity, ScanActivityImpl.class);
         intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
@@ -85,9 +97,14 @@ public class ScanActivity {
      * Starts a ScanActivityImpl activity, using {@param fragment} as a parent.
      *
      * @param fragment the parent fragment that is waiting for the result of the ScanActivity
+     * @param apiKey a 32 character API key generated from https://api.getbouncer.com/console
      * @param delayShowingExpiration true if the scan activity should delay showing the expiration
      */
-    public static void start(@NotNull Fragment fragment, boolean delayShowingExpiration) {
+    public static void start(
+            @NotNull Fragment fragment,
+            @NotNull String apiKey,
+            boolean delayShowingExpiration
+    ) {
         final Context context = fragment.getContext();
         if (context == null) {
             return;
@@ -105,10 +122,16 @@ public class ScanActivity {
      * Starts a ScanActivityImpl activity, using {@param activity} as a parent.
      *
      * @param activity the parent activity that is waiting for the result of the ScanActivity
+     * @param apiKey a 32 character API key generated from https://api.getbouncer.com/console
      * @param delayShowingExpiration true if the scan activity should delay showing the expiration
      * @param showEnterCardNumberManually true if the scan activity should show the enter_card_manually button
      */
-    public static void start(@NotNull Activity activity, boolean delayShowingExpiration, boolean showEnterCardNumberManually) {
+    public static void start(
+            @NotNull Activity activity,
+            @NotNull String apiKey,
+            boolean delayShowingExpiration,
+            boolean showEnterCardNumberManually
+    ) {
         ScanBaseActivity.warmUp(activity.getApplicationContext());
         Intent intent = new Intent(activity, ScanActivityImpl.class);
         intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
@@ -123,10 +146,16 @@ public class ScanActivity {
      * Starts a ScanActivityImpl activity, using {@param fragment} as a parent.
      *
      * @param fragment the parent fragment that is waiting for the result of the ScanActivity
+     * @param apiKey a 32 character API key generated from https://api.getbouncer.com/console
      * @param delayShowingExpiration true if the scan activity should delay showing the expiration
      * @param showEnterCardNumberManually true if the scan activity should show the enter_card_manually button
      */
-    public static void start(@NotNull Fragment fragment, boolean delayShowingExpiration, boolean showEnterCardNumberManually) {
+    public static void start(
+            @NotNull Fragment fragment,
+            @NotNull String apiKey,
+            boolean delayShowingExpiration,
+            boolean showEnterCardNumberManually
+    ) {
         final Context context = fragment.getContext();
         if (context == null) {
             return;
@@ -145,11 +174,16 @@ public class ScanActivity {
      * Starts a scan activity and customizes the text that it displays.
      *
      * @param activity the parent activity that is waiting for the result of the ScanActivity
+     * @param apiKey a 32 character API key generated from https://api.getbouncer.com/console
      * @param scanCardText the large text above the card rectangle
      * @param positionCardText the small text below the card rectangle
      */
-    public static void start(@NotNull Activity activity, String scanCardText,
-                             String positionCardText) {
+    public static void start(
+            @NotNull Activity activity,
+            @NotNull String apiKey,
+            String scanCardText,
+            String positionCardText
+    ) {
 
         ScanBaseActivity.warmUp(activity.getApplicationContext());
         Intent intent = new Intent(activity, ScanActivityImpl.class);
@@ -165,11 +199,16 @@ public class ScanActivity {
      * Starts a ScanActivityImpl activity, using {@param fragment} as a parent.
      *
      * @param fragment the parent fragment that is waiting for the result of the ScanActivity
+     * @param apiKey a 32 character API key generated from https://api.getbouncer.com/console
      * @param scanCardText the large text above the card rectangle
      * @param positionCardText the small text below the card rectangle
      */
-    public static void start(@NotNull Fragment fragment, String scanCardText,
-                             String positionCardText) {
+    public static void start(
+            @NotNull Fragment fragment,
+            @NotNull String apiKey,
+            String scanCardText,
+            String positionCardText
+    ) {
         final Context context = fragment.getContext();
         if (context == null) {
             return;
@@ -188,15 +227,20 @@ public class ScanActivity {
      * Starts a scan activity and customizes the text that it displays.
      *
      * @param activity the parent activity that is waiting for the result of the ScanActivity
+     * @param apiKey a 32 character API key generated from https://api.getbouncer.com/console
      * @param scanCardText the large text above the card rectangle
      * @param positionCardText the small text below the card rectangle
      * @param delayShowingExpiration true if the scan activity should delay showing the expiration
      * @param showEnterCardNumberManually true if the scan activity should show the enter_card_manually button
      */
-    public static void start(@NotNull Activity activity, String scanCardText,
-                             String positionCardText, boolean delayShowingExpiration,
-                             boolean showEnterCardNumberManually) {
-
+    public static void start(
+            @NotNull Activity activity,
+            @NotNull String apiKey,
+            String scanCardText,
+            String positionCardText,
+            boolean delayShowingExpiration,
+            boolean showEnterCardNumberManually
+    ) {
         ScanBaseActivity.warmUp(activity.getApplicationContext());
         Intent intent = new Intent(activity, ScanActivityImpl.class);
         intent.putExtra(ScanActivityImpl.SCAN_CARD_TEXT, scanCardText);
@@ -213,14 +257,20 @@ public class ScanActivity {
      * Starts a ScanActivityImpl activity, using {@param fragment} as a parent.
      *
      * @param fragment the parent fragment that is waiting for the result of the ScanActivity
+     * @param apiKey a 32 character API key generated from https://api.getbouncer.com/console
      * @param scanCardText the large text above the card rectangle
      * @param positionCardText the small text below the card rectangle
      * @param delayShowingExpiration true if the scan activity should delay showing the expiration
      * @param showEnterCardNumberManually true if the scan activity should show the enter_card_manually button
      */
-    public static void start(@NotNull Fragment fragment, String scanCardText,
-                             String positionCardText, boolean delayShowingExpiration,
-                             boolean showEnterCardNumberManually) {
+    public static void start(
+            @NotNull Fragment fragment,
+            @NotNull String apiKey,
+            String scanCardText,
+            String positionCardText,
+            boolean delayShowingExpiration,
+            boolean showEnterCardNumberManually
+    ) {
         final Context context = fragment.getContext();
         if (context == null) {
             return;
@@ -279,12 +329,18 @@ public class ScanActivity {
      *
      * @param activity the parent activity that is waiting for the result of the ScanActivity
      */
-    public static void startDebug(@NotNull Activity activity) {
-        startDebug(activity, null);
+    public static void startDebug(
+            @NotNull Activity activity,
+            @NotNull String apiKey
+    ) {
+        startDebug(activity, apiKey, null);
     }
 
-    public static void startDebug(@NotNull Activity activity,
-                                  @Nullable TestingImageReader imageReader) {
+    public static void startDebug(
+            @NotNull Activity activity,
+            @NotNull String apiKey,
+            @Nullable TestingImageReader imageReader
+    ) {
         if (imageReader != null) {
             ScanBaseActivity.sTestingImageReader = new TestingImageBridge(imageReader);
         }
@@ -305,18 +361,24 @@ public class ScanActivity {
      *
      * @param fragment the parent fragment that is waiting for the result of the ScanActivity
      */
-    public static void startDebug(@NotNull Fragment fragment) {
-        startDebug(fragment, null);
+    public static void startDebug(
+            @NotNull Fragment fragment,
+            @NotNull String apiKey
+    ) {
+        startDebug(fragment, apiKey, null);
     }
 
-    public static void startDebug(@NotNull Fragment fragment,
-                                  @Nullable TestingImageReader imageReader) {
+    public static void startDebug(
+            @NotNull Fragment fragment,
+            @NotNull String apiKey,
+            @Nullable TestingImageReader imageReader
+    ) {
+        if (imageReader != null) {
+            ScanBaseActivity.sTestingImageReader = new TestingImageBridge(imageReader);
+        }
         final Context context = fragment.getContext();
         if (context == null) {
             return;
-        }
-        if (imageReader != null) {
-            ScanBaseActivity.sTestingImageReader = new TestingImageBridge(imageReader);
         }
         ScanBaseActivity.warmUp(context);
         Intent intent = new Intent(context, ScanActivityImpl.class);

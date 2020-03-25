@@ -14,6 +14,7 @@ import com.getbouncer.cardscan.ScanActivity;
 public class LaunchActivity extends AppCompatActivity implements View.OnClickListener {
 
     public static final String TAG = "LaunchActivity";
+    private static final String API_KEY = "qOJ_fF-WLDMbG05iBq5wvwiTNTmM2qIn";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,14 +37,14 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.scan_button) {
-            ScanActivity.start(this, false, true);
+            ScanActivity.start(this, API_KEY, true, false, true);
         } else if (v.getId() == R.id.scanCardDebug) {
-            ScanActivity.startDebug(this);
+            ScanActivity.startDebug(this, API_KEY, true);
         } else if (v.getId() == R.id.scanCardAltText) {
-            ScanActivity.start(this, "New Scan CreditCardUtils",
+            ScanActivity.start(this, API_KEY, true, "New Scan CreditCardUtils",
                     "Place your card here");
         } else if (v.getId() == R.id.scan_video) {
-            ScanActivity.startDebug(this, new TestResourceImages(getResources()));
+            ScanActivity.startDebug(this, API_KEY, true, new TestResourceImages(getResources()));
         }
     }
 

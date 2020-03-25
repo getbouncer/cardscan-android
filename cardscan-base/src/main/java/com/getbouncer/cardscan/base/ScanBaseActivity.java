@@ -18,6 +18,7 @@ package com.getbouncer.cardscan.base;
 
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -133,6 +134,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     private long firstFrameTimeMs = -1;
     private long totalFramesProcessed = 0;
 
+    @SuppressLint("SourceLockedOrientationActivity")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
