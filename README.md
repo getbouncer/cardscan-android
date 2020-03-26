@@ -83,7 +83,7 @@ class MyAppActivity : AppCompatActivity() {
             if (resultCode == ScanActivity.RESULT_OK && data != null) {
                 val scanResult = ScanActivity.creditCardFromResult(data)
                 // TODO: something with the scan result
-            } else if (resultCode == ScanActivity.RESULT_CANCELLED) {
+            } else if (resultCode == ScanActivity.RESULT_CANCELED) {
                 if (data.getBooleanExtra(ScanActivity.RESULT_FATAL_ERROR, false)) {
                     // TODO: handle a fatal error with cardscan
                 } else {
