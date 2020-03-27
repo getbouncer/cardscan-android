@@ -38,10 +38,7 @@ public class ScanActivity {
      * @param activity the parent activity that is waiting for the result of the ScanActivity
      * @param apiKey a 32 character API key generated from https://api.getbouncer.com/console
      */
-    public static void start(
-            @NotNull Activity activity,
-            @NotNull String apiKey
-    ) {
+    public static void start(@NotNull Activity activity, @NotNull String apiKey) {
         ScanBaseActivity.warmUp(activity.getApplicationContext());
         Intent intent = new Intent(activity, ScanActivityImpl.class);
         intent.putExtra(ScanActivityImpl.API_KEY, apiKey);
@@ -56,10 +53,7 @@ public class ScanActivity {
      * @param fragment the parent fragment that is waiting for the result of the ScanActivity
      * @param apiKey a 32 character API key generated from https://api.getbouncer.com/console
      */
-    public static void start(
-            @NotNull Fragment fragment,
-            @NotNull String apiKey
-    ) {
+    public static void start(@NotNull Fragment fragment, @NotNull String apiKey) {
         final Context context = fragment.getContext();
         if (context == null) {
             return;
@@ -329,10 +323,7 @@ public class ScanActivity {
      *
      * @param activity the parent activity that is waiting for the result of the ScanActivity
      */
-    public static void startDebug(
-            @NotNull Activity activity,
-            @NotNull String apiKey
-    ) {
+    public static void startDebug(@NotNull Activity activity, @NotNull String apiKey) {
         startDebug(activity, apiKey, null);
     }
 
@@ -361,10 +352,7 @@ public class ScanActivity {
      *
      * @param fragment the parent fragment that is waiting for the result of the ScanActivity
      */
-    public static void startDebug(
-            @NotNull Fragment fragment,
-            @NotNull String apiKey
-    ) {
+    public static void startDebug(@NotNull Fragment fragment, @NotNull String apiKey) {
         startDebug(fragment, apiKey, null);
     }
 

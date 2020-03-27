@@ -71,13 +71,8 @@ when your application launches. If you are using the provided `ScanActivity`, Se
 import com.getbouncer.cardscan.ScanActivity
 
 class MyAppActivity : AppCompatActivity() {
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        ScanActivity.apiKey = "YOUR_API_KEY_HERE"
-    }
-    
     fun launchCardScan() {
-        ScanActivity.start(this)
+        ScanActivity.start(this, "YOUR_API_KEY_HERE")
     }
     
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
