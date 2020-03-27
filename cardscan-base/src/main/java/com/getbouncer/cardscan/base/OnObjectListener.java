@@ -11,11 +11,12 @@ import java.util.List;
 
 interface OnObjectListener {
     void onPrediction(
-            @NonNull final Bitmap ocrBitmap,
-            @Nullable List<DetectedSSDBox> boxes,
-            int imageWidth,
-            int imageHeight,
-            @Nullable final Bitmap screenDetectionBitmap
+        @NonNull final Bitmap ocrBitmap,
+        @Nullable List<DetectedSSDBox> boxes,
+        int imageWidth,
+        int imageHeight,
+        @Nullable final Bitmap screenDetectionBitmap,
+        long frameAddedTimeMs
     );
 
     void onObjectFatalError();

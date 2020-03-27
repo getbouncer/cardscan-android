@@ -121,7 +121,8 @@ public class ScanActivityImpl extends ScanBaseActivity {
             @Nullable final List<DetectedBox> digitBoxes,
             @Nullable final DetectedBox expiryBox,
             @NotNull final Bitmap bitmapForObjectDetection,
-            @Nullable final Bitmap screenDetectionBitmap
+            @Nullable final Bitmap screenDetectionBitmap,
+            final long frameAddedTimeMs
     ) {
         if (mInDebugMode) {
             mDebugImageView.setImageBitmap(ImageUtils.drawBoxesOnImage(ocrDetectionBitmap, digitBoxes,
@@ -142,8 +143,8 @@ public class ScanActivityImpl extends ScanBaseActivity {
                 digitBoxes,
                 expiryBox,
                 bitmapForObjectDetection,
-                screenDetectionBitmap
+                screenDetectionBitmap,
+                frameAddedTimeMs
         );
     }
-
 }
