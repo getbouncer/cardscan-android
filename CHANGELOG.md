@@ -2,7 +2,52 @@
 
 ## [Unreleased](https://github.com/getbouncer/cardscan-android/tree/HEAD)
 
-[Full Changelog](https://github.com/getbouncer/cardscan-android/compare/1.0.5139...HEAD)
+[Full Changelog](https://github.com/getbouncer/cardscan-android/compare/1.0.5143...HEAD)
+
+**Closed issues:**
+
+- Can you lower the min SDK? [\#119](https://github.com/getbouncer/cardscan-android/issues/119)
+
+**Merged pull requests:**
+
+- Bump version [\#128](https://github.com/getbouncer/cardscan-android/pull/128) ([awushensky](https://github.com/awushensky))
+- Update to fragmentx [\#127](https://github.com/getbouncer/cardscan-android/pull/127) ([awushensky](https://github.com/awushensky))
+- Add frame rate debug logging [\#125](https://github.com/getbouncer/cardscan-android/pull/125) ([awushensky](https://github.com/awushensky))
+- Update github checks [\#123](https://github.com/getbouncer/cardscan-android/pull/123) ([awushensky](https://github.com/awushensky))
+- chore: fix static variable name [\#122](https://github.com/getbouncer/cardscan-android/pull/122) ([anil-alt](https://github.com/anil-alt))
+
+## [1.0.5143](https://github.com/getbouncer/cardscan-android/tree/1.0.5143) (2020-03-19)
+
+[Full Changelog](https://github.com/getbouncer/cardscan-android/compare/1.0.5142...1.0.5143)
+
+**Closed issues:**
+
+- Unable to detect expiry date [\#113](https://github.com/getbouncer/cardscan-android/issues/113)
+
+**Merged pull requests:**
+
+- Reduce SDK version to 19 [\#120](https://github.com/getbouncer/cardscan-android/pull/120) ([awushensky](https://github.com/awushensky))
+
+## [1.0.5142](https://github.com/getbouncer/cardscan-android/tree/1.0.5142) (2020-03-13)
+
+[Full Changelog](https://github.com/getbouncer/cardscan-android/compare/1.0.5141...1.0.5142)
+
+**Merged pull requests:**
+
+- Upgrade bob model [\#118](https://github.com/getbouncer/cardscan-android/pull/118) ([awushensky](https://github.com/awushensky))
+
+## [1.0.5141](https://github.com/getbouncer/cardscan-android/tree/1.0.5141) (2020-03-13)
+
+[Full Changelog](https://github.com/getbouncer/cardscan-android/compare/1.0.5140...1.0.5141)
+
+**Merged pull requests:**
+
+- Remove unused dependencies [\#117](https://github.com/getbouncer/cardscan-android/pull/117) ([awushensky](https://github.com/awushensky))
+- Add code owners file [\#116](https://github.com/getbouncer/cardscan-android/pull/116) ([awushensky](https://github.com/awushensky))
+
+## [1.0.5140](https://github.com/getbouncer/cardscan-android/tree/1.0.5140) (2020-03-12)
+
+[Full Changelog](https://github.com/getbouncer/cardscan-android/compare/1.0.5139...1.0.5140)
 
 **Merged pull requests:**
 
