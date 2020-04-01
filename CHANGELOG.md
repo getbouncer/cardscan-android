@@ -1,8 +1,8 @@
 # Changelog
 
-## [Unreleased](https://github.com/getbouncer/cardscan-android/tree/HEAD)
+## [1.0.5144](https://github.com/getbouncer/cardscan-android/tree/1.0.5144) (2020-04-01)
 
-[Full Changelog](https://github.com/getbouncer/cardscan-android/compare/1.0.5143...HEAD)
+[Full Changelog](https://github.com/getbouncer/cardscan-android/compare/1.0.5143...1.0.5144)
 
 **Closed issues:**
 
