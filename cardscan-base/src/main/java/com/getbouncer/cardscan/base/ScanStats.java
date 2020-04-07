@@ -6,10 +6,12 @@ import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class ScanStats {
+    private String flowName;
     private boolean mIsCameraPermissionGranted;
     private long endTimeMs;
     private long startTimeMs;
@@ -19,10 +21,11 @@ public class ScanStats {
     private int numOCRFramesProcessed = 0;
     private int numObjFramesProcessed = 0;
 
-    ScanStats(boolean isCameraPermissionGranted) {
+    ScanStats(final boolean isCameraPermissionGranted, @NotNull final String flowName) {
         startTimeMs = SystemClock.uptimeMillis();
         scans = 0;
         mIsCameraPermissionGranted = isCameraPermissionGranted;
+        this.flowName = flowName;
     }
 
     void incrementScans() {
@@ -69,6 +72,7 @@ public class ScanStats {
             object.put("sdk_version", BuildConfig.CARDSCAN_VERSION);
             object.put("os", Build.VERSION.RELEASE);
             object.put("permission_granted", mIsCameraPermissionGranted);
+            object.put("flow_name", flowName);
         } catch (JSONException e) {
             e.printStackTrace();
         }
