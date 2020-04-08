@@ -348,7 +348,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     private ScanStats createScanStats() {
         boolean isCameraPermissionGranted = ContextCompat.checkSelfPermission(
                 this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
-        return new ScanStats(isCameraPermissionGranted);
+        return new ScanStats(isCameraPermissionGranted, this.getClass().getSimpleName());
     }
 
     @Override
