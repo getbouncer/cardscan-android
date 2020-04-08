@@ -123,6 +123,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     // size. Our image pipeline will resize images to be memory efficient and will make sure that
     // the width or height of any of our images never goes below this value.
     public static int MIN_IMAGE_EDGE = 600;
+    public static int MAX_IMAGE_EDGE = 1920;
 
     private long firstFrameTimeMs = -1;
     private long totalFramesProcessed = 0;
@@ -284,9 +285,18 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             for (Camera.Size size : sizes) {
                 double ratio = (double) size.width / size.height;
                 double ratioDiff = Math.abs(ratio - targetRatio);
-                if (size.height >= h && ratioDiff <= minDiffRatio) {
+                if (size.height >= h && ratioDiff <= minDiffRatio && size.height <= MAX_IMAGE_EDGE && size.width <= MAX_IMAGE_EDGE) {
                     optimalSize = size;
                     minDiffRatio = ratioDiff;
+                }
+            }
+        }
+
+        if (optimalSize == null) {
+            // Find the smallest size that is at least as big as our target height
+            for (Camera.Size size : sizes) {
+                if (size.height >= h) {
+                    optimalSize = size;
                 }
             }
         }
