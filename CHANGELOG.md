@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.0.5145](https://github.com/getbouncer/cardscan-android/tree/1.0.5145) (2020-04-08)
+
+[Full Changelog](https://github.com/getbouncer/cardscan-android/compare/1.0.5144...1.0.5145)
+
+**Closed issues:**
+
+- Support androidX fragments [\#126](https://github.com/getbouncer/cardscan-android/issues/126)
+
+**Merged pull requests:**
+
+- Update preview size calculation [\#133](https://github.com/getbouncer/cardscan-android/pull/133) ([awushensky](https://github.com/awushensky))
+- Add flow name to scanstats [\#132](https://github.com/getbouncer/cardscan-android/pull/132) ([awushensky](https://github.com/awushensky))
+
 ## [1.0.5144](https://github.com/getbouncer/cardscan-android/tree/1.0.5144) (2020-04-01)
 
 [Full Changelog](https://github.com/getbouncer/cardscan-android/compare/1.0.5143...1.0.5144)
@@ -10,6 +23,7 @@
 
 **Merged pull requests:**
 
+- Update changelog [\#129](https://github.com/getbouncer/cardscan-android/pull/129) ([awushensky](https://github.com/awushensky))
 - Bump version [\#128](https://github.com/getbouncer/cardscan-android/pull/128) ([awushensky](https://github.com/awushensky))
 - Update to fragmentx [\#127](https://github.com/getbouncer/cardscan-android/pull/127) ([awushensky](https://github.com/awushensky))
 - Add frame rate debug logging [\#125](https://github.com/getbouncer/cardscan-android/pull/125) ([awushensky](https://github.com/awushensky))
