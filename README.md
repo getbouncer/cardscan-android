@@ -2,6 +2,10 @@
 
 CardScan Android installation guide
 
+## IMPORTANT NOTICE:
+
+Our license will be changing in an upcoming release. Please view the [License](#license) section for more information.
+
 ## Contents
 
 * [Requirements](#requirements)
@@ -121,7 +125,25 @@ Adam Wushensky, Sam King, and Zain ul Abi Din
 
 ## License
 
-CardScan is available under the BSD license. See the LICENSE file for more info.
+IMPORTANT: OUR LICENSE IS CHANGING.
+
+CardScan is currently available under the BSD license (See the [LICENSE](LICENSE) file for the full text). Version 1.0.5145 will be the last version of CardScan that is available under the BSD-3 license. Future versions of the CardScan library will remain open source, but will be under a new license.
+
+In short, CardScan will remain free for use forever for non-commercial applications. For commercial applications, CardScan will have a 90 day free trial limit, after which use must be discontinued or an [agreement made](mailto:will@getbouncer.com) with Bouncer Technologies, Inc.
+
+What will be allowed under the new free license:
+* Contributions (contributors must agree to a contributor license agreement)
+* Modifications as needed to work in your app
+* Inclusion and distributed in your app
+
+What will not be allowed under the new free license:
+* Redistribution under a different license
+* Removing attribution
+* Modifying logos
+* Use for more than 90 days in a commercial application (contact will@getbouncer.com for sales)
+* Sue Bouncer Technologies, Inc. for problems caused by this library
+
+As before, a non-free version of CardScan can be licensed for long-term use through a contract. Contact Will Megson ([will@getbouncer.com](mailto:will@getbouncer.com)) for details.
 
 ## Changelog
 
