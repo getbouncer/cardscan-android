@@ -7,8 +7,11 @@ import android.text.TextUtils;
 import androidx.annotation.NonNull;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.Locale;
 
 public class ScanStats {
     private String flowName;
@@ -71,6 +74,9 @@ public class ScanStats {
             object.put("device_type", getDeviceName());
             object.put("sdk_version", BuildConfig.CARDSCAN_VERSION);
             object.put("os", Build.VERSION.RELEASE);
+            object.put("locale", getDeviceLocale());
+            object.put("platform", "android");
+            object.put("os_version", Build.VERSION.SDK_INT);
             object.put("permission_granted", mIsCameraPermissionGranted);
             object.put("flow_name", flowName);
         } catch (JSONException e) {
@@ -89,6 +95,15 @@ public class ScanStats {
             return capitalize(model);
         }
         return capitalize(manufacturer) + " " + model;
+    }
+
+    @Nullable
+    private static String getDeviceLocale() {
+        try {
+            return Locale.getDefault().getISO3Language() + "_" + Locale.getDefault().getISO3Country();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @NonNull
