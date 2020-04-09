@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.5146](https://github.com/getbouncer/cardscan-android/tree/1.0.5146) (2020-04-09)
+
+[Full Changelog](https://github.com/getbouncer/cardscan-android/compare/1.0.5145...1.0.5146)
+
+**Merged pull requests:**
+
+- Increment version [\#135](https://github.com/getbouncer/cardscan-android/pull/135) ([awushensky](https://github.com/awushensky))
+- Update changelog [\#134](https://github.com/getbouncer/cardscan-android/pull/134) ([awushensky](https://github.com/awushensky))
+
 ## [1.0.5145](https://github.com/getbouncer/cardscan-android/tree/1.0.5145) (2020-04-08)
 
 [Full Changelog](https://github.com/getbouncer/cardscan-android/compare/1.0.5144...1.0.5145)
@@ -12,6 +21,7 @@
 
 - Update preview size calculation [\#133](https://github.com/getbouncer/cardscan-android/pull/133) ([awushensky](https://github.com/awushensky))
 - Add flow name to scanstats [\#132](https://github.com/getbouncer/cardscan-android/pull/132) ([awushensky](https://github.com/awushensky))
+- Update changelog [\#129](https://github.com/getbouncer/cardscan-android/pull/129) ([awushensky](https://github.com/awushensky))
 
 ## [1.0.5144](https://github.com/getbouncer/cardscan-android/tree/1.0.5144) (2020-04-01)
 
@@ -23,7 +33,6 @@
 
 **Merged pull requests:**
 
-- Update changelog [\#129](https://github.com/getbouncer/cardscan-android/pull/129) ([awushensky](https://github.com/awushensky))
 - Bump version [\#128](https://github.com/getbouncer/cardscan-android/pull/128) ([awushensky](https://github.com/awushensky))
 - Update to fragmentx [\#127](https://github.com/getbouncer/cardscan-android/pull/127) ([awushensky](https://github.com/awushensky))
 - Add frame rate debug logging [\#125](https://github.com/getbouncer/cardscan-android/pull/125) ([awushensky](https://github.com/awushensky))
@@ -382,6 +391,7 @@
 **Merged pull requests:**
 
 - Move to stable tensorflow lite [\#50](https://github.com/getbouncer/cardscan-android/pull/50) ([kingst](https://github.com/kingst))
+- Memory efficiency [\#46](https://github.com/getbouncer/cardscan-android/pull/46) ([kingst](https://github.com/kingst))
 
 ## [1.0.5107](https://github.com/getbouncer/cardscan-android/tree/1.0.5107) (2019-11-09)
 
@@ -407,7 +417,6 @@
 
 - Android x [\#48](https://github.com/getbouncer/cardscan-android/pull/48) ([kingst](https://github.com/kingst))
 - Bitmap recycle [\#47](https://github.com/getbouncer/cardscan-android/pull/47) ([kingst](https://github.com/kingst))
-- Memory efficiency [\#46](https://github.com/getbouncer/cardscan-android/pull/46) ([kingst](https://github.com/kingst))
 
 ## [1.0.5105](https://github.com/getbouncer/cardscan-android/tree/1.0.5105) (2019-11-06)
 
