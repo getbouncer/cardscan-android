@@ -4,7 +4,7 @@ CardScan Android installation guide
 
 ## IMPORTANT NOTICE:
 
-Our license will be changing in an upcoming release. Please view the [License](#license) section for more information.
+Our license recently changed. Please view the [License](#license) section for more information.
 
 ## Contents
 
@@ -120,23 +120,25 @@ Adam Wushensky, Sam King, and Zain ul Abi Din
 
 ## License
 
-IMPORTANT: OUR LICENSE IS CHANGING.
+**IMPORTANT: OUR LICENSE RECENTLY CHANGED**
 
-Card Scan is currently available under the BSD license (See the [LICENSE](LICENSE) file for the full text). Version 1.0.5148 will be the last version of Card Scan that is available under the BSD-3 license. Future versions of the Card Scan library will remain open source, but will be under a new license (see the new [LICENSE](https://github.com/getbouncer/cardscan-android/blob/24ac9491f36e92241f37d8eebc5bd394a70bd4dd/LICENSE) file for the full text).
+Card Scan is an open source library available under a proprietary license. See the [LICENSE](LICENSE) file for the full text.
 
 ### Quick summary
-In short, Card Scan will remain free forever for non-commercial applications, but use by commercial applications is limited to 90 days, after which time a licensing agreement is required. We’re also adding some legal liability protections.
+
+In short, Card Scan is free forever for non-commercial applications, but use by commercial applications is limited to 90 days, after which time a licensing agreement is required. There are also some legal liability protections.
 
 After this period commercial applications need to convert to a licensing agreement to continue to use Card Scan.
 * Details of licensing (pricing, etc) are [here](https://cardscan.io/pricing), or you can contact us at [license@getbouncer.com](mailto:license@getbouncer.com).
 
 ### More detailed summary
-What's allowed under the new license:
+
+What's allowed under the license:
 * Free use for any app for 90 days (for demos, evaluations, hack-a-thons, etc.)
 * Contributions (contributors must agree to the [CLA](Contributor%20License%20Agreement))
 * Any modifications as needed to work in your app
 
-What's not allowed under the new license:
+What's not allowed under the license:
 * Commercial applications using the license for longer than 90 days without a license agreement
   * Using us now in a commercial app today? No worries! Just email [license@getbouncer.com](mailto:license@getbouncer.com) and we’ll get you set up
 * Redistribution under a different license
@@ -145,6 +147,7 @@ What's not allowed under the new license:
 * Indemnification: using this free software is "at your own risk", so you can’t sue Bouncer Technologies, Inc. for problems caused by this library
 
 ### Questions? Concerns?
+
 Please email us at [license@getbouncer.com](mailto:license@getbouncer.com) or ask us on [slack](https://getbouncer.slack.com).
 
 ## Changelog
