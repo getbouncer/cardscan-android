@@ -127,23 +127,30 @@ Adam Wushensky, Sam King, and Zain ul Abi Din
 
 IMPORTANT: OUR LICENSE IS CHANGING.
 
-CardScan is currently available under the BSD license (See the [LICENSE](LICENSE) file for the full text). Version 1.0.5145 will be the last version of CardScan that is available under the BSD-3 license. Future versions of the CardScan library will remain open source, but will be under a new license.
+Card Scan is currently available under the BSD license (See the [LICENSE](LICENSE) file for the full text). Version 1.0.5147 will be the last version of Card Scan that is available under the BSD-3 license. Future versions of the Card Scan library will remain open source, but will be under a new license.
 
-In short, CardScan will remain free for use forever for non-commercial applications. For commercial applications, CardScan will have a 90 day free trial limit, after which use must be discontinued or an [agreement made](mailto:will@getbouncer.com) with Bouncer Technologies, Inc.
+### Quick summary
+In short, Card Scan will remain free forever for non-commercial applications, but use by commercial applications is limited to 90 days, after which time a licensing agreement is required. We’re also adding some legal liability protections.
 
-What will be allowed under the new free license:
-* Contributions (contributors must agree to a contributor license agreement)
-* Modifications as needed to work in your app
-* Inclusion and distributed in your app
+After this period commercial applications need to convert to a licensing agreement to continue to use Card Scan.
+* Details of licensing (pricing, etc) are [here](https://cardscan.io/pricing), or you can contact us at [license@getbouncer.com](mailto:license@getbouncer.com).
 
-What will not be allowed under the new free license:
+### More detailed summary
+What's allowed under the new license:
+* Free use for any app for 90 days (for demos, evaluations, hack-a-thons, etc.)
+* Contributions (contributors must agree to the [CLA](Contributor%20License%20Agreement))
+* Any modifications as needed to work in your app
+
+What's not allowed under the new license:
+* Commercial applications using the license for longer than 90 days without a license agreement
+  * Using us now in a commercial app today? No worries! Just email [license@getbouncer.com](mailto:license@getbouncer.com) and we’ll get you set up
 * Redistribution under a different license
 * Removing attribution
 * Modifying logos
-* Use for more than 90 days in a commercial application (contact will@getbouncer.com for sales)
-* Sue Bouncer Technologies, Inc. for problems caused by this library
+* Indemnification: using this free software is "at your own risk", so you can’t sue Bouncer Technologies, Inc. for problems caused by this library
 
-As before, a non-free version of CardScan can be licensed for long-term use through a contract. Contact Will Megson ([will@getbouncer.com](mailto:will@getbouncer.com)) for details.
+### Questions? Concerns?
+Please email us at [license@getbouncer.com](mailto:license@getbouncer.com) or ask us on [slack](https://getbouncer.slack.com).
 
 ## Changelog
 
