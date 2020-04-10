@@ -37,14 +37,14 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.scan_button) {
-            ScanActivity.start(this, API_KEY, true, false, true);
+            ScanActivity.start(this, API_KEY, false, true);
         } else if (v.getId() == R.id.scanCardDebug) {
-            ScanActivity.startDebug(this, API_KEY, true);
+            ScanActivity.startDebug(this, API_KEY);
         } else if (v.getId() == R.id.scanCardAltText) {
-            ScanActivity.start(this, API_KEY, true, "New Scan CreditCardUtils",
+            ScanActivity.start(this, API_KEY, "New Scan CreditCardUtils",
                     "Place your card here");
         } else if (v.getId() == R.id.scan_video) {
-            ScanActivity.startDebug(this, API_KEY, true, new TestResourceImages(getResources()));
+            ScanActivity.startDebug(this, API_KEY, new TestResourceImages(getResources()));
         }
     }
 
