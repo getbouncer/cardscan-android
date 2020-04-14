@@ -52,8 +52,11 @@ fun RectForm.areaClamped() = clamp(
     calcWidth(),
     0F,
     1000F
-) *
-        clamp(calcHeight(), 0F, 1000F)
+) * clamp(
+    calcHeight(),
+    0F,
+    1000F
+)
 
 /**
  * Create a rectangle of the overlap of this rectangle and another. Note that if the two rectangles
