@@ -3,6 +3,7 @@ package com.getbouncer.example;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.getbouncer.cardscan.CreditCard;
@@ -16,6 +17,12 @@ public class EnterCard extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_enter_card);
+
+        // Because this activity displays card numbers, disallow screenshots.
+        getWindow().setFlags(
+                WindowManager.LayoutParams.FLAG_SECURE,
+                WindowManager.LayoutParams.FLAG_SECURE
+        );
 
         CreditCard card = getIntent().getParcelableExtra("card");
         String number = card.getNumber();
