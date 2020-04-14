@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 
 import com.getbouncer.cardscan.CreditCard;
 import com.getbouncer.cardscan.ScanActivity;
@@ -18,6 +19,12 @@ public class LaunchActivity extends AppCompatActivity implements View.OnClickLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launch);
+
+        // Because this activity displays card numbers, disallow screenshots.
+        getWindow().setFlags(
+                WindowManager.LayoutParams.FLAG_SECURE,
+                WindowManager.LayoutParams.FLAG_SECURE
+        );
 
         findViewById(R.id.scan_button).setOnClickListener(this);
         findViewById(R.id.scanCardDebug).setOnClickListener(this);

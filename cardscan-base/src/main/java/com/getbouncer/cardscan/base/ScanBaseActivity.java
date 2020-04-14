@@ -45,6 +45,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -132,6 +133,8 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
 
         denyPermissionTitle = getString(R.string.card_scan_deny_permission_title);
         denyPermissionMessage = getString(R.string.card_scan_deny_permission_message);

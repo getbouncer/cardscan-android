@@ -42,7 +42,11 @@ public class ScanActivityImpl extends ScanBaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.bouncer_private_activity_scan_card);
 
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+        // Because this activity displays card numbers, disallow screenshots.
+        getWindow().setFlags(
+                WindowManager.LayoutParams.FLAG_SECURE,
+                WindowManager.LayoutParams.FLAG_SECURE
+        );
 
         String scanCardText = getIntent().getStringExtra(SCAN_CARD_TEXT);
         if (!TextUtils.isEmpty(scanCardText)) {
