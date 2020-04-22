@@ -45,65 +45,61 @@ dependencies {
 CardScan provides a user interface through which payment cards can be scanned.
 
 ```kotlin
-class MyActivity : Activity {
+class LaunchActivity : AppCompatActivity, CardScanActivityResultHandler {
 
-    /**
-     * This method should be called as soon in the application as possible to give time for
-     * the SDK to warm up ML model processing.
-     */
+    private const val API_KEY = "qOJ_fF-WLDMbG05iBq5wvwiTNTmM2qIn";
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_launch);
+
+        // Because this activity displays card numbers, disallow screenshots.
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_SECURE,
+            WindowManager.LayoutParams.FLAG_SECURE
+        )
+
+        findViewById(R.id.scanCardButton).setOnClickListener { _ ->
+            CardScanActivity.start(
+                activity = LaunchActivity.this,
+                apiKey = API_KEY,
+                enableEnterCardManually = true
+            )
+        }
+
         CardScanActivity.warmUp(this)
     }
 
-    /**
-     * This method launches the CardScan SDK.
-     */
-    private fun onScanCardClicked() {
-        CardScanActivity.start(
-            activity = this,
-            apiKey = "<YOUR_API_KEY_HERE>",
-            enableEnterCardManually = true
-        )
-    }
-    
-    /**
-     * This method receives the result from the CardScan SDK.
-     */
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
         if (CardScanActivity.isScanResult(requestCode)) {
-            if (resultCode == Activity.RESULT_OK) {
-                handleCardScanSuccess(CardScanActivity.getScannedCard(data))
-            } else if (resultCode == Activity.RESULT_CANCELED) {
-                handleCardScanCanceled(data.getIntExtra(RESULT_CANCELED_REASON, -1))
-            }
+            CardScanActivity.parseScanResult(resultCode, data, this)
         }
     }
-    
-    private fun handleCardScanSuccess(result: ScanResult) {
-        // do something with the scanned credit card
+
+    override fun cardScanned(scanId: String?, scanResult: ScanResult) {
+        // a payment card was scanned successfully
     }
-    
-    private fun handleCardScanCanceled(reason: Int) = when (reason) {
-        CANCELED_REASON_USER -> handleUserCanceled()
-        CANCELED_REASON_ENTER_MANUALLY -> handleEnterCardManually()
-        CANCELED_REASON_CAMERA_ERROR -> handleCameraError()
-        else -> handleCardScanFailed()
+
+    override fun enterManually(scanId: String?) {
+        // the user wants to enter a card manually
     }
-    
-    private fun handleUserCanceled() {
-        // do something when the user cancels the card scan
+
+    override fun userCanceled(scanId: String?) {
+        // the user canceled the scan
     }
-    
-    private fun handleEnterCardManually() {
-        // do something when the user wants to enter a card manually
+
+    override fun cameraError(scanId: String?) {
+        // scan was canceled due to a camera error
     }
-    
-    private fun handleCameraError() {
-        // do something when camera had an error
+
+    override fun analyzerFailure(scanId: String?) {
+        // scan was canceled due to a failure to analyze camera images
     }
-    
-    private fun handleCardScanFailed() {
-        // do something when scanning a card failed
+
+    override fun canceledUnknown(scanId: String?) {
+        // scan was canceled for an unknown reason
     }
 }
 ```
