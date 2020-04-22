@@ -1,4 +1,4 @@
-# CardScan UI
+# CardScan
 
 This repository provides user interfaces for the CardScan library. [CardScan](https://cardscan.io/) is a relatively small library (1.9 MB) that provides fast and accurate payment card scanning.
 
@@ -35,12 +35,12 @@ The CardScan libraries are published in the [jcenter](https://jcenter.bintray.co
 
 ```gradle
 dependencies {
-    implementation 'com.getbouncer:cardscan-ui:2.0.0001'
+    implementation 'com.getbouncer:cardscan:2.0.0001'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3'
 }
 ```
 
-## Using cardscan-ui
+## Using cardscan
 
 CardScan provides a user interface through which payment cards can be scanned.
 
@@ -114,7 +114,7 @@ CardScan is built to be customized to fit your UI.
 
 ### Basic modifications
 
-To modify text, colors, or padding of the default UI, see the [customization](docs/customize.md) documentation.
+To modify text, colors, or padding of the default UI, see the [customization](https://github.com/getbouncer/cardscan-ui-android/blob/master/docs/customize.md) documentation.
 
 ### Extensive modifications
 
