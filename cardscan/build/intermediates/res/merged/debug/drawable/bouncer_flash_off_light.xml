@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="18dp"
+    android:height="32dp"
+    android:viewportWidth="36.0"
+    android:viewportHeight="64.0">
+    <path
+        android:pathData="
+           M 12,60
+           L 15,35
+           L 4,38
+           L 24,4
+           L 21,29
+           L 32,26 Z"
+        android:strokeColor="@color/bouncerFlashButtonLightColor"
+        android:strokeWidth="@dimen/bouncerIconStrokeWidth"
+        android:strokeLineJoin="round" />
+
+</vector>

@@ -1,0 +1,15 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="18dp"
+        android:height="32dp"
+        android:viewportWidth="36.0"
+        android:viewportHeight="64.0">
+    <path
+        android:pathData="
+           M 4,18
+           L 32,46
+           M 4,46
+           L 32,18"
+        android:strokeColor="@color/bouncerCloseButtonDarkColor"
+        android:strokeWidth="@dimen/bouncerIconStrokeWidth"
+        android:strokeLineCap="round" />
+</vector>

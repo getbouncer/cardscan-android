@@ -1,0 +1,26 @@
+[
+    {
+        "merged": "/Users/adamwushensky/src/getbouncer/cardverify-demo-android/cardscan-android/cardscan/build/intermediates/res/merged/debug/drawable-v21/notification_action_background.xml",
+        "source": "/Users/adamwushensky/.gradle/caches/transforms-2/files-2.1/b180fdd1e1d53c48980ae7d2f0f647dc/core-1.2.0/res/drawable-v21/notification_action_background.xml"
+    },
+    {
+        "merged": "/Users/adamwushensky/src/getbouncer/cardverify-demo-android/cardscan-android/cardscan/build/intermediates/res/merged/debug/drawable-v21/abc_dialog_material_background.xml",
+        "source": "/Users/adamwushensky/.gradle/caches/transforms-2/files-2.1/a5948c357b2c1f9f79a6f5f374298639/appcompat-1.1.0/res/drawable-v21/abc_dialog_material_background.xml"
+    },
+    {
+        "merged": "/Users/adamwushensky/src/getbouncer/cardverify-demo-android/cardscan-android/cardscan/build/intermediates/res/merged/debug/drawable-v21/abc_list_divider_material.xml",
+        "source": "/Users/adamwushensky/.gradle/caches/transforms-2/files-2.1/a5948c357b2c1f9f79a6f5f374298639/appcompat-1.1.0/res/drawable-v21/abc_list_divider_material.xml"
+    },
+    {
+        "merged": "/Users/adamwushensky/src/getbouncer/cardverify-demo-android/cardscan-android/cardscan/build/intermediates/res/merged/debug/drawable-v21/abc_btn_colored_material.xml",
+        "source": "/Users/adamwushensky/.gradle/caches/transforms-2/files-2.1/a5948c357b2c1f9f79a6f5f374298639/appcompat-1.1.0/res/drawable-v21/abc_btn_colored_material.xml"
+    },
+    {
+        "merged": "/Users/adamwushensky/src/getbouncer/cardverify-demo-android/cardscan-android/cardscan/build/intermediates/res/merged/debug/drawable-v21/abc_action_bar_item_background_material.xml",
+        "source": "/Users/adamwushensky/.gradle/caches/transforms-2/files-2.1/a5948c357b2c1f9f79a6f5f374298639/appcompat-1.1.0/res/drawable-v21/abc_action_bar_item_background_material.xml"
+    },
+    {
+        "merged": "/Users/adamwushensky/src/getbouncer/cardverify-demo-android/cardscan-android/cardscan/build/intermediates/res/merged/debug/drawable-v21/abc_edit_text_material.xml",
+        "source": "/Users/adamwushensky/.gradle/caches/transforms-2/files-2.1/a5948c357b2c1f9f79a6f5f374298639/appcompat-1.1.0/res/drawable-v21/abc_edit_text_material.xml"
+    }
+]
