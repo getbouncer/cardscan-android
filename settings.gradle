@@ -1,0 +1,5 @@
+include ':cardscan', ':cardscan-ui', ':cardscan-base', ':cardscan-camera'
+rootProject.name='cardscan-android'
+project(':cardscan-ui').projectDir = new File('cardscan-ui-android/cardscan-ui')
+project(':cardscan-base').projectDir = new File('cardscan-ui-android/cardscan-base-android/cardscan-base')
+project(':cardscan-camera').projectDir = new File('cardscan-ui-android/cardscan-camera-android/cardscan-camera')
