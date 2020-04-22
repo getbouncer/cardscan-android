@@ -34,9 +34,9 @@ import com.getbouncer.cardscan.camera.CameraAdapter
 import com.getbouncer.cardscan.camera.camera2.Camera2Adapter
 import com.getbouncer.cardscan.camera.camera2.CardImageFrameConverter
 import com.getbouncer.cardscan.camera.camera2.ImageListenerAdapter
+import com.getbouncer.cardscan.ui.ScanActivity
 import com.getbouncer.cardscan.ui.card.ScanResult
 import com.getbouncer.cardscan.ui.card.toScanResult
-import com.getbouncer.cardscan.ui.ScanActivity
 import com.getbouncer.cardscan.ui.util.fadeIn
 import com.getbouncer.cardscan.ui.util.fadeOut
 import com.getbouncer.cardscan.ui.util.getColorByRes
@@ -57,6 +57,10 @@ import kotlinx.android.synthetic.main.bouncer_activity_card_scan.instructionsTex
 import kotlinx.android.synthetic.main.bouncer_activity_card_scan.viewFinderBackground
 import kotlinx.android.synthetic.main.bouncer_activity_card_scan.viewFinderBorder
 import kotlinx.android.synthetic.main.bouncer_activity_card_scan.viewFinderWindow
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 
 private const val REQUEST_CODE = 21521 // "bou"
 
@@ -69,11 +73,34 @@ enum class State(val value: Int) {
 }
 
 interface CardScanActivityResultHandler {
+    /**
+     * A payment card was successfully scanned.
+     */
     fun cardScanned(scanId: String?, scanResult: ScanResult)
+
+    /**
+     * The user requested to enter payment card details manually.
+     */
     fun enterManually(scanId: String?)
+
+    /**
+     * The user canceled the scan.
+     */
     fun userCanceled(scanId: String?)
+
+    /**
+     * The scan failed because of a camera error.
+     */
     fun cameraError(scanId: String?)
+
+    /**
+     * The scan failed to analyze images from the camera.
+     */
     fun analyzerFailure(scanId: String?)
+
+    /**
+     * The scan was canceled due to unknown reasons.
+     */
     fun canceledUnknown(scanId: String?)
 }
 
@@ -98,7 +125,9 @@ class CardScanActivity : ScanActivity(),
          */
         @JvmStatic
         fun warmUp(context: Context) {
-            analyzerPool = getAnalyzerPool(context)
+            GlobalScope.launch(Dispatchers.IO) { supervisorScope {
+                analyzerPool = getAnalyzerPool(context)
+            } }
         }
 
         /**
@@ -463,7 +492,7 @@ class CardScanActivity : ScanActivity(),
     }
 
     override fun prepareCamera(onCameraReady: () -> Unit) {
-        cameraTexture.post { onCameraReady() }
+        cameraTexture.post(onCameraReady)
     }
 
     /**
