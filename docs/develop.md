@@ -1,6 +1,6 @@
 # Development
 
-cardscan-ui development guide
+cardscan development guide
 
 ## Contents
 
@@ -14,25 +14,25 @@ cardscan-ui development guide
 
 This android library builds on top of the framework in the [CardScan base library](https://github.com/getbouncer/cardscan-base-android) to provide user interfaces for scanning payment cards. Anything specific to the user interface of the CardScan product lives in this library.
 
-![cardscan dependencies](images/cardscan_ui_dependencies.png)
+![cardscan dependencies](images/cardscan_dependencies.png)
 
 ## Building
 
 Check out the project using `git`. Note that this project makes use of submodules, so a `recursive` clone is recommended.
 ```bash
-git clone --recursive https://github.com/getbouncer/cardscan-ui-android
+git clone --recursive https://github.com/getbouncer/cardscan-android
 ```
 
 To build the project, run the following command:
 ```bash
-./gradlew cardscan-ui:build
+./gradlew cardscan:build
 ```
 
 To create an AAR release of the app, run the following command:
 ```bash
-./gradlew cardscan-ui:assembleRelease
+./gradlew cardscan:assembleRelease
 ```
-This will place an AAR file in `cardscan-ui/build/outputs/aar`
+This will place an AAR file in `cardscan/build/outputs/aar`
 
 ## Contributing
 

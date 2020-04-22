@@ -1,6 +1,6 @@
 # Release
 
-CardScan UI release guide
+CardScan release guide
 
 ## Contents
 
@@ -39,14 +39,14 @@ The release version of this library is determined by the value of the `version` 
 
 1. run:
     ```bash
-    github_changelog_generator -u getbouncer -p cardscan-ui-android -t `cat github_token`
+    github_changelog_generator -u getbouncer -p cardscan-android -t `cat github_token`
     ```
 
 1. Create a new pull request with the updated changelog, get it approved, and merged.
 
 ## Installing to local maven
 
-* execute `./gradlew cardscan-ui:install`
+* execute `./gradlew cardscan:install`
 
 ## Installing to BinTray
 
@@ -60,9 +60,9 @@ The release version of this library is determined by the value of the `version` 
 
 1. build and upload the library
     ```bash
-    ./gradlew cardscan-ui:build
-    ./gradlew cardscan-ui:install
-    ./gradlew cardscan-ui:bintrayUpload
+    ./gradlew cardscan:build
+    ./gradlew cardscan:install
+    ./gradlew cardscan:bintrayUpload
     ```
 
 1. Make sure you update docs in this readme and the apidocs repo.
