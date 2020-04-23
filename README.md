@@ -128,13 +128,13 @@ Adam Wushensky, Sam King, and Zain ul Abi Din
 
 CardScan is available under paid and free licenses. See the [LICENSE](LICENSE) file for the full license text.
 
-###Quick summary:
+### Quick summary
 In short, CardScan will remain free forever for non-commercial applications, but use by commercial applications is limited to 90 days, after which time a licensing agreement is required. We're also adding some legal liability protections.
 
 After this period commercial applications need to convert to a licensing agreement to continue to use CardScan.
 * Details of licensing (pricing, etc) are available at [https://cardscan.io/pricing](https://cardscan.io/pricing), or you can contact us at [license@getbouncer.com](mailto:license@getbouncer.com).
 
-###More detailed summary:
+### More detailed summary
 What’s allowed under the new license:
 * Free use for any app for 90 days (for demos, evaluations, hackathons, etc).
 * Contributions (contributors must agree to the [Contributor License Agreement](Contributor%20License%20Agreement))
