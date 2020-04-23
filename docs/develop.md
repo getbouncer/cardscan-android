@@ -16,6 +16,30 @@ This android library builds on top of the framework in the [CardScan base librar
 
 ![cardscan dependencies](images/cardscan_dependencies.png)
 
+CardScan consists of these modules and a demo app:
+* [cardscan-base](https://github.com/getbouncer/cardscan-base-android)
+* [cardscan-camera](https://github.com/getbouncer/cardscan-camera-android)
+* [cardscan-ui](https://github.com/getbouncer/cardscan-ui-android)
+* [cardscan](https://github.com/getbouncer/cardscan-android)
+
+![cardverify_demo dependencies](images/cardverify_demo_dependencies.png)
+
+### cardscan base
+
+[CardScan Base](https://github.com/getbouncer/cardscan-base-android) contains the framework and machine learning models used to scan cards. See the [architecture document](https://github.com/getbouncer/cardscan-base-android/blob/master/docs/architecture.md) for details on how CardScan processes images from the camera.
+
+### cardscan camera
+
+[CardScan Camera](https://github.com/getbouncer/cardscan-camera-android) contains the camera interfaces for setting up the camera on the device and receiving images from it. It also handles converting the images from the camera to a processable format.
+
+### cardscan ui
+
+[CardScan UI](https://github.com/getbouncer/cardscan-ui-android) contains some common functionality shared between user interfaces. This provides the card viewfinder, debug overlay, and base scan activity.
+
+### cardscan
+
+[CardScan](https://github.com/getbouncer/cardscan-android) provides a user interface for scanning payment cards. The demo uses this to capture a card to later verify. See the [CardScan Demo](https://github.com/getbouncer/cardscan-demo-android) for more details.
+
 ## Building
 
 Check out the project using `git`. Note that this project makes use of submodules, so a `recursive` clone is recommended.
