@@ -35,7 +35,7 @@ The CardScan libraries are published in the [jcenter](https://jcenter.bintray.co
 
 ```gradle
 dependencies {
-    implementation 'com.getbouncer:cardscan:2.0.0001'
+    implementation 'com.getbouncer:cardscan:2.0.0002'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3'
 }
 ```
