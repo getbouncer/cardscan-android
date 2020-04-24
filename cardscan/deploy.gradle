@@ -22,9 +22,9 @@ ext {
     developerName = 'Bouncer Technologies'
     developerEmail = 'contact@getbouncer.com'
 
-    licenseName = 'BSD 3-Clause'
-    licenseUrl = 'http://opensource.org/licenses/BSD-3-Clause'
-    allLicenses = ["BSD 3-Clause", "Apache-2.0"]
+    licenseName = 'bouncer-free-1'
+    licenseUrl = 'https://github.com/getbouncer/cardscan-base-android/blob/0a5643243704792049b8d7c263d3ae7750f41060/LICENSE'
+    allLicenses = ["bouncer-free-1"]
 }
 
 group = publishedGroupId
