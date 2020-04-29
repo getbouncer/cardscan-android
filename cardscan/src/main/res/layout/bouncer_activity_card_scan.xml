@@ -125,13 +125,6 @@
             android:visibility="invisible"
             style="@style/BouncerCardPanLarge.Default" />
 
-        <TextView
-            android:id="@+id/cardExpiryTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="invisible"
-            style="@style/BouncerCardPanLarge.Default" />
-
     </LinearLayout>
 
     <ImageView
