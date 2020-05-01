@@ -184,7 +184,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             @NonNull String[] permissions,
             @NonNull int[] grantResults
     ) {
-        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             mIsPermissionCheckDone = true;
         } else {
             wasPermissionDenied = true;
