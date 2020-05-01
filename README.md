@@ -127,7 +127,7 @@ Adam Wushensky, Sam King, and Zain ul Abi Din
 
 IMPORTANT: OUR LICENSE IS CHANGING.
 
-Card Scan is currently available under the BSD license (See the [LICENSE](LICENSE) file for the full text). Version 1.0.5147 will be the last version of Card Scan that is available under the BSD-3 license. Future versions of the Card Scan library will remain open source, but will be under a new license (see the new [LICENSE](https://github.com/getbouncer/cardscan-android/blob/24ac9491f36e92241f37d8eebc5bd394a70bd4dd/LICENSE) file for the full text).
+Card Scan is currently available under the BSD license (See the [LICENSE](LICENSE) file for the full text). Version 1.0.5148 will be the last version of Card Scan that is available under the BSD-3 license. Future versions of the Card Scan library will remain open source, but will be under a new license (see the new [LICENSE](https://github.com/getbouncer/cardscan-android/blob/24ac9491f36e92241f37d8eebc5bd394a70bd4dd/LICENSE) file for the full text).
 
 ### Quick summary
 In short, Card Scan will remain free forever for non-commercial applications, but use by commercial applications is limited to 90 days, after which time a licensing agreement is required. We’re also adding some legal liability protections.
