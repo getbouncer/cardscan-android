@@ -28,6 +28,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.hardware.Camera;
 import android.os.Bundle;
@@ -40,6 +41,7 @@ import androidx.core.content.ContextCompat;
 import androidx.test.espresso.idling.CountingIdlingResource;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -55,6 +57,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Semaphore;
@@ -412,6 +415,33 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         }
         findViewById(cardRectangleId).getViewTreeObserver()
                 .addOnGlobalLayoutListener(new MyGlobalListenerClass(cardRectangleId, overlayId));
+
+        final View overlay = findViewById(overlayId);
+        if (overlay != null) {
+            overlay.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent e) {
+                    if (mCamera != null) {
+                        final Camera.Parameters parameters = mCamera.getParameters();
+                        if (parameters.getMaxNumFocusAreas() > 0) {
+                            Rect focusRect = new Rect(
+                                (int) e.getX() - 150,
+                                (int) e.getY() - 150,
+                                (int) e.getX() + 150,
+                                (int) e.getY() + 150
+                            );
+                            List<Camera.Area> cameraFocusAreas = new ArrayList<>();
+                            cameraFocusAreas.add(new Camera.Area(focusRect, 1000));
+                            parameters.setFocusAreas(cameraFocusAreas);
+                            setCameraParameters(mCamera, parameters);
+                            return true;
+                        }
+                    }
+                    v.performClick();
+                    return false;
+                }
+            });
+        }
     }
 
     public void setCameraDisplayOrientation(@NonNull Activity activity, int cameraId) {
