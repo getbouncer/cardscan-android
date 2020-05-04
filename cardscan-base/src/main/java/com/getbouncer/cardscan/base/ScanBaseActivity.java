@@ -32,6 +32,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.hardware.Camera;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.SystemClock;
 
 import androidx.annotation.NonNull;
@@ -466,10 +467,44 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
             result = (info.orientation - degrees + 360) % 360;
         }
 
-        mCamera.stopPreview();
-        mCamera.setDisplayOrientation(result);
-        mCamera.startPreview();
+        try {
+            mCamera.stopPreview();
+        } catch (Exception e) {
+            // preview was already stopped
+        }
+
+        try {
+            mCamera.setDisplayOrientation(result);
+        } catch (Exception e) {
+            Log.d("Bouncer", "Could not set display orientation", e);
+        }
+
+        startCameraPreview();
+
         mRotation = result;
+    }
+
+    private void startCameraPreview() {
+        startCameraPreviewInternal(0, 5, null);
+    }
+
+    private void startCameraPreviewInternal(final int attemptNumber, final int maxAttempts, final Exception previousException) {
+        if (attemptNumber >= maxAttempts) {
+            Log.e("Bouncer", "Unable to start camera preview", previousException);
+            return;
+        }
+
+        try {
+            mCamera.startPreview();
+        } catch (final Exception e) {
+            Log.w("Bouncer", "Could not start camera preview, retrying", e);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    startCameraPreviewInternal(attemptNumber + 1, maxAttempts, e);
+                }
+            }, 500);
+        }
     }
 
     static public void warmUp(@NonNull Context context) {
@@ -545,7 +580,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
                 parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
             }
             setCameraParameters(mCamera, parameters);
-            mCamera.startPreview();
+            startCameraPreview();
         }
 
     }
@@ -839,7 +874,8 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
         public void surfaceCreated(SurfaceHolder holder) {
             try {
                 mCamera.setPreviewDisplay(holder);
-                mCamera.startPreview();
+                mCamera.setPreviewCallbackWithBuffer(mPreviewCallback);
+                startCameraPreview();
 //                mCamera.setDisplayOrientation(90);
             } catch (IOException e) {
                 Log.d("CameraCaptureActivity", "Error setting camera preview: " + e.getMessage());
@@ -877,7 +913,7 @@ public abstract class ScanBaseActivity extends Activity implements Camera.Previe
                     mCamera.addCallbackBuffer(new byte[bufSize]);
                 }
                 mCamera.setPreviewCallbackWithBuffer(mPreviewCallback);
-                mCamera.startPreview();
+                startCameraPreview();
             } catch (Exception e){
                 Log.d("CameraCaptureActivity", "Error starting camera preview: " + e.getMessage());
             }
