@@ -265,8 +265,8 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
         @JvmStatic
         fun isScanResult(requestCode: Int) = REQUEST_CODE == requestCode
 
-        private var analyzerPool: AnalyzerPool<PreviewImage, Unit, OcrCardPan>? = null
         private val analyzerPoolMutex = Mutex()
+        private var analyzerPool: AnalyzerPool<PreviewImage, Unit, OcrCardPan>? = null
         private suspend fun getAnalyzerPool(context: Context):
                 AnalyzerPool<PreviewImage, Unit, OcrCardPan> = analyzerPoolMutex.withLock {
             var analyzerPool = analyzerPool
