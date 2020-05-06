@@ -54,7 +54,10 @@ import kotlinx.android.synthetic.main.bouncer_activity_card_scan.viewFinderWindo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 private const val REQUEST_CODE = 21521 // "bou"
 
@@ -263,11 +266,12 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
         fun isScanResult(requestCode: Int) = REQUEST_CODE == requestCode
 
         private var analyzerPool: AnalyzerPool<PreviewImage, Unit, OcrCardPan>? = null
-        @Synchronized
-        private fun getAnalyzerPool(context: Context): AnalyzerPool<PreviewImage, Unit, OcrCardPan> {
+        private val analyzerPoolMutex = Mutex()
+        private suspend fun getAnalyzerPool(context: Context):
+                AnalyzerPool<PreviewImage, Unit, OcrCardPan> = analyzerPoolMutex.withLock {
             var analyzerPool = analyzerPool
             if (analyzerPool == null) {
-                analyzerPool = AnalyzerPool(SSDOcr.Factory(context, SSDOcr.ModelLoader(context)))
+                analyzerPool = AnalyzerPool.Factory(SSDOcr.Factory(context, SSDOcr.ModelLoader(context))).buildAnalyzerPool()
                 Companion.analyzerPool = analyzerPool
             }
 
@@ -426,7 +430,7 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
         resultAggregator: ResultAggregator<PreviewImage, Unit, OcrCardPan, String>
     ): ProcessBoundAnalyzerLoop<PreviewImage, Unit, OcrCardPan> =
         ProcessBoundAnalyzerLoop(
-            analyzerPool = getAnalyzerPool(this),
+            analyzerPool = runBlocking { getAnalyzerPool(this@CardScanActivity) },
             resultHandler = resultAggregator,
             initialState = Unit,
             name = "main_loop",
