@@ -295,6 +295,7 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
         intent.getBooleanExtra(PARAM_DISPLAY_CARD_SCAN_LOGO, true)
     }
 
+    private val mainLoopIsProducingResultsMutex = Mutex()
     private var mainLoopIsProducingResults: Boolean = false
 
     override val viewFinderRect by lazy {
@@ -398,7 +399,7 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
      * Cancel scanning to enter a card manually
      */
     private fun enterCardManually() {
-        scanStat.trackResult("enter_card_manually")
+        runBlocking { scanStat.trackResult("enter_card_manually") }
         cancelScan(CANCELED_REASON_ENTER_MANUALLY)
     }
 
@@ -406,7 +407,7 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
      * Card was successfully scanned, return an activity result.
      */
     private fun cardScanned(result: ScanResult) {
-        scanStat.trackResult("card_scanned")
+        runBlocking { scanStat.trackResult("card_scanned") }
         completeScan(Intent().putExtra(RESULT_SCANNED_CARD, result))
     }
 
@@ -415,7 +416,6 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
     }
 
     override fun buildResultAggregator() = PaymentCardImageResultAggregator(
-        coroutineScope = this,
         config = ResultAggregatorConfig.Builder()
             .withMaxTotalAggregationTime(2.seconds)
             .withDefaultMaxSavedFrames(0)
@@ -434,7 +434,6 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
             resultHandler = resultAggregator,
             initialState = Unit,
             name = "main_loop",
-            coroutineScope = this,
             onAnalyzerFailure = {
                 analyzerFailureCancelScan(it)
                 true // terminate the loop on any analyzer failures
@@ -484,7 +483,7 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
     /**
      * A final result was received from the aggregator. Set the result from this activity.
      */
-    override fun onResult(
+    override suspend fun onResult(
         result: String,
         frames: Map<String, List<SavedFrame<PreviewImage, Unit, OcrCardPan>>>
     ) = cardScanned(ScanResult(
@@ -500,7 +499,7 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
     /**
      * An interim result was received from the result aggregator.
      */
-    override fun onInterimResult(
+    override suspend fun onInterimResult(
         result: OcrCardPan,
         state: Unit,
         frame: PreviewImage,
@@ -515,7 +514,7 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
             debugOverlayView.setBoxes(result.detectedBoxes)
         }
 
-        synchronized(this) {
+        mainLoopIsProducingResultsMutex.withLock {
             if (!mainLoopIsProducingResults) {
                 mainLoopIsProducingResults = true
                 scanStat.trackResult("first_image_processed")
@@ -538,7 +537,7 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
         setStateFound()
     }
 
-    override fun onInvalidResult(
+    override suspend fun onInvalidResult(
         result: OcrCardPan,
         state: Unit,
         frame: PreviewImage,
@@ -553,7 +552,7 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
             debugOverlayView.setBoxes(result.detectedBoxes)
         }
 
-        synchronized(this) {
+        mainLoopIsProducingResultsMutex.withLock {
             if (!mainLoopIsProducingResults) {
                 mainLoopIsProducingResults = true
                 scanStat.trackResult("first_image_processed")
