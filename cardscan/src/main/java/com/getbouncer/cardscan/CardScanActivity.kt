@@ -141,6 +141,7 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
          * @param enableDebug: If true, enable debug views in card scan.
          */
         @JvmStatic
+        @JvmOverloads
         fun start(
             activity: Activity,
             apiKey: String,
@@ -177,6 +178,7 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
          * @param enableDebug: If true, enable debug views in card scan.
          */
         @JvmStatic
+        @JvmOverloads
         fun start(
             fragment: Fragment,
             apiKey: String,
@@ -214,6 +216,7 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
          * @param enableDebug: If true, enable debug views in card scan.
          */
         @JvmStatic
+        @JvmOverloads
         fun buildIntent(
             context: Context,
             apiKey: String,
