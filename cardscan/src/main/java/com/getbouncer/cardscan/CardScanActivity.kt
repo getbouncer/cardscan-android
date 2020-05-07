@@ -465,6 +465,7 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
             viewFinderBackground.setBackgroundColor(getColorByRes(R.color.bouncerFoundBackground))
             viewFinderWindow.setBackgroundResource(R.drawable.bouncer_card_background_found)
             setAnimated(viewFinderBorder, R.drawable.bouncer_card_border_found)
+            instructionsTextView.setText(R.string.bouncer_card_scan_instructions)
         }
         scanState = State.FOUND
     }
@@ -540,7 +541,6 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
             }
         }
 
-        instructionsTextView.setText(R.string.bouncer_card_scan_instructions)
         setStateFound()
     }
 
