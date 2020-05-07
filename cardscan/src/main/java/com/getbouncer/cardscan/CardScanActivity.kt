@@ -58,6 +58,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 
 private const val REQUEST_CODE = 21521 // "bou"
 
@@ -454,6 +455,7 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
             viewFinderWindow.setBackgroundResource(R.drawable.bouncer_card_background_not_found)
             setAnimated(viewFinderBorder, R.drawable.bouncer_card_border_not_found)
             cardPanTextView.setVisible(false)
+            instructionsTextView.setText(R.string.bouncer_card_scan_instructions)
         }
         scanState = State.NOT_FOUND
     }
@@ -489,15 +491,17 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
     override suspend fun onResult(
         result: String,
         frames: Map<String, List<SavedFrame<PreviewImage, Unit, OcrCardPan>>>
-    ) = cardScanned(ScanResult(
-        pan = result,
-        networkName = getCardIssuer(result).displayName,
-        expiryDay = null,
-        expiryMonth = null,
-        expiryYear = null,
-        cvc = null,
-        legalName = null
-    ))
+    ) = withContext(Dispatchers.Main) {
+        cardScanned(ScanResult(
+            pan = result,
+            networkName = getCardIssuer(result).displayName,
+            expiryDay = null,
+            expiryMonth = null,
+            expiryYear = null,
+            cvc = null,
+            legalName = null
+        ))
+    }
 
     /**
      * An interim result was received from the result aggregator.
@@ -507,7 +511,7 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
         state: Unit,
         frame: PreviewImage,
         isFirstValidResult: Boolean
-    ) {
+    ) = withContext(Dispatchers.Main) {
         if (Config.isDebug) {
             debugBitmapView.setImageBitmap(frame.fullImage.crop(SSDOcr.calculateCrop(
                 frame.fullImage.size(),
@@ -545,7 +549,7 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
         state: Unit,
         frame: PreviewImage,
         hasPreviousValidResult: Boolean
-    ) {
+    ) = withContext(Dispatchers.Main) {
         if (Config.isDebug) {
             debugBitmapView.setImageBitmap(frame.fullImage.crop(SSDOcr.calculateCrop(
                 frame.fullImage.size(),
@@ -572,13 +576,15 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
             }
             setStateWrong()
         } else if (!isValidPan(result.pan)) {
-            val lastWrongCard = this.lastWrongCard
+            val lastWrongCard = lastWrongCard
             if (scanState == State.WRONG &&
                 (lastWrongCard == null || lastWrongCard.elapsedSince() > showWrongDuration)) {
-                instructionsTextView.setText(R.string.bouncer_card_scan_instructions)
                 setStateNotFound()
             }
         }
+    }
+    override suspend fun onReset() = withContext(Dispatchers.Main) {
+        setStateNotFound()
     }
 
     override fun getLayoutRes(): Int = R.layout.bouncer_activity_card_scan
