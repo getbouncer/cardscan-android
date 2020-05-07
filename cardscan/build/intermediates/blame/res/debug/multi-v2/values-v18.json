@@ -1,0 +1,34 @@
+{
+    "logs": [
+        {
+            "outputFile": "/Users/adamwushensky/src/getbouncer/cardverify-demo-android/cardscan-android/cardscan/build/intermediates/incremental/mergeDebugResources/merged.dir/values-v18/values-v18.xml",
+            "map": [
+                {
+                    "source": "/Users/adamwushensky/.gradle/caches/transforms-2/files-2.1/a5948c357b2c1f9f79a6f5f374298639/appcompat-1.1.0/res/values-v18/values-v18.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "48",
+                        "endOffsets": "99"
+                    }
+                }
+            ]
+        },
+        {
+            "outputFile": "/Users/adamwushensky/src/getbouncer/cardverify-demo-android/cardscan-android/cardscan/build/intermediates/res/merged/debug/values-v18/values-v18.xml",
+            "map": [
+                {
+                    "source": "/Users/adamwushensky/.gradle/caches/transforms-2/files-2.1/a5948c357b2c1f9f79a6f5f374298639/appcompat-1.1.0/res/values-v18/values-v18.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "48",
+                        "endOffsets": "99"
+                    }
+                }
+            ]
+        }
+    ]
+}

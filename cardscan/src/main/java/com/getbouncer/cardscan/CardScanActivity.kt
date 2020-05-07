@@ -58,6 +58,10 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+<<<<<<< HEAD
+=======
+import kotlinx.coroutines.withContext
+>>>>>>> 6a8310fca0061d9dab96f489db00207d4c948796
 
 private const val REQUEST_CODE = 21521 // "bou"
 
@@ -454,6 +458,10 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
             viewFinderWindow.setBackgroundResource(R.drawable.bouncer_card_background_not_found)
             setAnimated(viewFinderBorder, R.drawable.bouncer_card_border_not_found)
             cardPanTextView.setVisible(false)
+<<<<<<< HEAD
+=======
+            instructionsTextView.setText(R.string.bouncer_card_scan_instructions)
+>>>>>>> 6a8310fca0061d9dab96f489db00207d4c948796
         }
         scanState = State.NOT_FOUND
     }
@@ -463,6 +471,10 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
             viewFinderBackground.setBackgroundColor(getColorByRes(R.color.bouncerFoundBackground))
             viewFinderWindow.setBackgroundResource(R.drawable.bouncer_card_background_found)
             setAnimated(viewFinderBorder, R.drawable.bouncer_card_border_found)
+<<<<<<< HEAD
+=======
+            instructionsTextView.setText(R.string.bouncer_card_scan_instructions)
+>>>>>>> 6a8310fca0061d9dab96f489db00207d4c948796
         }
         scanState = State.FOUND
     }
@@ -489,6 +501,7 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
     override suspend fun onResult(
         result: String,
         frames: Map<String, List<SavedFrame<PreviewImage, Unit, OcrCardPan>>>
+<<<<<<< HEAD
     ) = cardScanned(ScanResult(
         pan = result,
         networkName = getCardIssuer(result).displayName,
@@ -498,6 +511,19 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
         cvc = null,
         legalName = null
     ))
+=======
+    ) = withContext(Dispatchers.Main) {
+        cardScanned(ScanResult(
+            pan = result,
+            networkName = getCardIssuer(result).displayName,
+            expiryDay = null,
+            expiryMonth = null,
+            expiryYear = null,
+            cvc = null,
+            legalName = null
+        ))
+    }
+>>>>>>> 6a8310fca0061d9dab96f489db00207d4c948796
 
     /**
      * An interim result was received from the result aggregator.
@@ -507,7 +533,11 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
         state: Unit,
         frame: PreviewImage,
         isFirstValidResult: Boolean
+<<<<<<< HEAD
     ) {
+=======
+    ) = withContext(Dispatchers.Main) {
+>>>>>>> 6a8310fca0061d9dab96f489db00207d4c948796
         if (Config.isDebug) {
             debugBitmapView.setImageBitmap(frame.fullImage.crop(SSDOcr.calculateCrop(
                 frame.fullImage.size(),
@@ -536,7 +566,10 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
             }
         }
 
+<<<<<<< HEAD
         instructionsTextView.setText(R.string.bouncer_card_scan_instructions)
+=======
+>>>>>>> 6a8310fca0061d9dab96f489db00207d4c948796
         setStateFound()
     }
 
@@ -545,7 +578,11 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
         state: Unit,
         frame: PreviewImage,
         hasPreviousValidResult: Boolean
+<<<<<<< HEAD
     ) {
+=======
+    ) = withContext(Dispatchers.Main) {
+>>>>>>> 6a8310fca0061d9dab96f489db00207d4c948796
         if (Config.isDebug) {
             debugBitmapView.setImageBitmap(frame.fullImage.crop(SSDOcr.calculateCrop(
                 frame.fullImage.size(),
@@ -572,14 +609,26 @@ class CardScanActivity : ScanActivity<Unit, OcrCardPan, String>(),
             }
             setStateWrong()
         } else if (!isValidPan(result.pan)) {
+<<<<<<< HEAD
             val lastWrongCard = this.lastWrongCard
             if (scanState == State.WRONG &&
                 (lastWrongCard == null || lastWrongCard.elapsedSince() > showWrongDuration)) {
                 instructionsTextView.setText(R.string.bouncer_card_scan_instructions)
+=======
+            val lastWrongCard = lastWrongCard
+            if (scanState == State.WRONG &&
+                (lastWrongCard == null || lastWrongCard.elapsedSince() > showWrongDuration)) {
+>>>>>>> 6a8310fca0061d9dab96f489db00207d4c948796
                 setStateNotFound()
             }
         }
     }
+<<<<<<< HEAD
+=======
+    override suspend fun onReset() = withContext(Dispatchers.Main) {
+        setStateNotFound()
+    }
+>>>>>>> 6a8310fca0061d9dab96f489db00207d4c948796
 
     override fun getLayoutRes(): Int = R.layout.bouncer_activity_card_scan
 }
