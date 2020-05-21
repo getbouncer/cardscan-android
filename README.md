@@ -18,7 +18,7 @@ Our license recently changed. Please view the [License](#license) section for mo
 
 ## Deprecation
 
-This library has been replaced by [Version 2.0](https://github.com/getbouncer/cardscan-ui-android), which brings improved performance, [customizability](https://github.com/getbouncer/, and modularity. This library (version 1.0.x) will still receive security and feature updates, but will lag behind 2.0. 
+This library has been replaced by [Version 2.0](https://github.com/getbouncer/cardscan-ui-android), which brings improved performance, [customizability](https://github.com/getbouncer/scan-ui-android/blob/master/docs/customize.md), and [modularity](https://github.com/getbouncer/scan-framework-android/blob/master/docs/architecture.md). This library (version 1.0.x) will still receive security and feature updates, but will lag behind version 2.0. 
 
 ## Requirements
 
