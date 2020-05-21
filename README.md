@@ -8,12 +8,17 @@ Our license recently changed. Please view the [License](#license) section for mo
 
 ## Contents
 
+* [Deprecation](#deprecation)
 * [Requirements](#requirements)
 * [Installation](#installation)
 * [Using CardScan](#using-cardscan)
 * [Authors](#authors)
 * [License](#license)
 * [Creating changelogs](#changelog)
+
+## Deprecation
+
+This library has been replaced by [Version 2.0](https://github.com/getbouncer/cardscan-ui-android), which brings improved performance, [customizability](https://github.com/getbouncer/, and modularity. This library (version 1.0.x) will still receive security and feature updates, but will lag behind 2.0. 
 
 ## Requirements
 
