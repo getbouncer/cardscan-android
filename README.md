@@ -4,6 +4,8 @@ CardScan Android installation guide
 
 ## IMPORTANT NOTICE:
 
+This version is outdated! Please see the new version 2.0 in [cardscan-ui-android](https://github.com/getbouncer/cardscan-ui-android). See the [Deprecation](#deprecation) section for more details.
+
 Our license recently changed. Please view the [License](#license) section for more information.
 
 ## Contents
