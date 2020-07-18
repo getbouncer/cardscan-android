@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bouncerCardPanColor" description="The text color of the card number displayed over the scan window">@android:color/white</color>
+    <color name="bouncerCardPanOutlineColor" description="The outline color of the card number displayed over the scan window">@android:color/black</color>
+
+    <color name="bouncerCardExpiryColor" description="The text color of the card expiry displayed over the scan window">@android:color/white</color>
+    <color name="bouncerCardExpiryOutlineColor" description="The outline color of the card expiry displayed over the scan window">@android:color/black</color>
+
+    <color name="bouncerEnterCardManuallyColorDark" description="The color of the Enter Card Manually text displayed at the bottom of the screen when the background is a dark color">@android:color/white</color>
+    <color name="bouncerEnterCardManuallyColorLight" description="The color of the Enter Card Manually text displayed at the bottom of the screen when the background is a light color">@android:color/black</color>
+    <color name="bouncerInstructionsColorDark" description="The color of the instructions text above the scan window when the background is a dark color">@android:color/white</color>
+    <color name="bouncerInstructionsColorLight" description="The color of the instructions text above the scan window when the background is a light color">@android:color/black</color>
+    <color name="bouncerSecurityColorDark" description="The color of the security notification shown below the scan window when the background is a dark color">@android:color/white</color>
+    <color name="bouncerSecurityColorLight" description="The color of the security notification shown below the scan window when the background is a light color">@android:color/black</color>
+
+    <color name="bouncerNotFoundBackground" description="The background color of the scan window when no card is visible">#DD222222</color>
+    <color name="bouncerFoundBackground" description="The background color of the scan window when a card has been found and the scan is started">#DD222222</color>
+    <color name="bouncerCorrectBackground" description="The background color of the scan window when a card has been found and the scan is completed">#DD222222</color>
+    <color name="bouncerWrongBackground" description="The background color of the scan window when a card has been found that does not match the required card">#DD222222</color>
+
+    <color name="bouncerNotFoundOutline" description="The outline color of the scan window when no card is visible">#FFFFFF</color>
+    <color name="bouncerFoundOutline" description="The outline color of the scan window when a card has been found and the scan is started">#1E90FF</color>
+    <color name="bouncerCorrectOutline" description="The outline color of the scan window when the scan has completed">#2ED573</color>
+    <color name="bouncerWrongOutline" description="The outline color of the scan window when a card has been found that does not match the required card">#FF2222</color>
+
+    <color name="bouncerCloseButtonDarkColor" description="The color of the close button when the background is a dark color">#FFFFFF</color>
+    <color name="bouncerFlashButtonDarkColor" description="The color of the torch button when the background is a dark color">#FFFFFF</color>
+    <color name="bouncerCloseButtonLightColor" description="The color of the close button when the background is a light color">#000000</color>
+    <color name="bouncerFlashButtonLightColor" description="The color of the torch button when the background is a light color">#000000</color>
+
+    <color name="bouncerDebugHighConfidence" description="When using debug mode, the color of boxes to draw around high confidence text">#00FF00</color>
+    <color name="bouncerDebugMediumConfidence" description="When using debug mode, the color of boxes to draw around medium confidence text">#DDDD00</color>
+    <color name="bouncerDebugLowConfidence" description="When using debug mode, the color of boxes to draw around low confidence text">#FF0000</color>
+</resources>

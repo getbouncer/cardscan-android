@@ -1,0 +1,116 @@
+<resources>
+
+    <style name="Theme.AppCompat.Light.NoActionBar.FullScreen" parent="@style/Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <!-- Base application theme. -->
+    <style name="BouncerDefaultTheme" parent="Theme.AppCompat.Light.NoActionBar.FullScreen">
+        <item name="bouncerNotFoundBackgroundColor">@color/bouncerNotFoundBackground</item>
+        <item name="bouncerNotFoundOutlineColor">@color/bouncerNotFoundOutline</item>
+        <item name="bouncerNotFoundOutlineWidth">@dimen/bouncerNotFoundOutlineWidth</item>
+
+        <item name="bouncerFoundBackgroundColor">@color/bouncerFoundBackground</item>
+        <item name="bouncerFoundOutlineColor">@color/bouncerFoundOutline</item>
+        <item name="bouncerFoundOutlineWidth">@dimen/bouncerFoundOutlineWidth</item>
+
+        <item name="bouncerWrongBackgroundColor">@color/bouncerWrongBackground</item>
+        <item name="bouncerWrongOutlineColor">@color/bouncerWrongOutline</item>
+        <item name="bouncerWrongOutlineWidth">@dimen/bouncerWrongOutlineWidth</item>
+
+        <item name="bouncerCorrectBackgroundColor">@color/bouncerCorrectBackground</item>
+        <item name="bouncerCorrectOutlineColor">@color/bouncerCorrectOutline</item>
+        <item name="bouncerCorrectOutlineWidth">@dimen/bouncerCorrectOutlineWidth</item>
+
+        <item name="android:windowTranslucentStatus">true</item>
+    </style>
+
+    <style name="BouncerCardPanLarge"/>
+
+    <style name="BouncerCardPanLarge.Default">
+        <item name="android:textColor">@color/bouncerCardPanColor</item>
+        <item name="android:shadowColor">@color/bouncerCardPanOutlineColor</item>
+        <item name="android:textSize">@dimen/bouncerPanTextSize</item>
+        <item name="android:shadowRadius">@dimen/bouncerPanStrokeSize</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:shadowDx">0</item>
+        <item name="android:shadowDy">0</item>
+    </style>
+
+    <style name="BouncerCardExpiryLarge"/>
+
+    <style name="BouncerCardExpiryLarge.Default">
+        <item name="android:textColor">@color/bouncerCardExpiryColor</item>
+        <item name="android:shadowColor">@color/bouncerCardExpiryOutlineColor</item>
+        <item name="android:textSize">@dimen/bouncerExpiryTextSize</item>
+        <item name="android:shadowRadius">@dimen/bouncerExpiryStrokeSize</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:shadowDx">0</item>
+        <item name="android:shadowDy">0</item>
+    </style>
+
+    <style name="BouncerEnterCardManually" />
+
+    <style name="BouncerEnterCardManually.Default">
+        <item name="android:textColor">@color/bouncerEnterCardManuallyColorDark</item>
+        <item name="android:textSize">@dimen/bouncerEnterCardManuallyTextSize</item>
+        <item name="android:layout_marginTop">@dimen/bouncerEnterCardManuallyMargin</item>
+        <item name="android:layout_marginBottom">@dimen/bouncerEnterCardManuallyMargin</item>
+        <item name="android:layout_marginStart">@dimen/bouncerEnterCardManuallyMargin</item>
+        <item name="android:layout_marginEnd">@dimen/bouncerEnterCardManuallyMargin</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="BouncerInstructions" />
+
+    <style name="BouncerInstructions.Default">
+        <item name="android:textColor">@color/bouncerInstructionsColorDark</item>
+        <item name="android:textSize">@dimen/bouncerInstructionsTextSize</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:layout_marginTop">@dimen/bouncerInstructionsMargin</item>
+        <item name="android:layout_marginBottom">@dimen/bouncerInstructionsMargin</item>
+        <item name="android:layout_marginStart">@dimen/bouncerInstructionsMargin</item>
+        <item name="android:layout_marginEnd">@dimen/bouncerInstructionsMargin</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="BouncerSecurity" />
+
+    <style name="BouncerSecurity.Default">
+        <item name="android:textColor">@color/bouncerSecurityColorDark</item>
+        <item name="android:textSize">@dimen/bouncerSecurityTextSize</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:layout_marginTop">@dimen/bouncerSecurityMargin</item>
+        <item name="android:layout_marginBottom">@dimen/bouncerSecurityMargin</item>
+        <item name="android:layout_marginEnd">@dimen/bouncerSecurityMargin</item>
+    </style>
+
+    <attr name="bouncerCardPanColor" format="color" />
+    <attr name="bouncerCardExpiryColor" format="color" />
+
+    <attr name="bouncerNotFoundBackgroundColor" format="color" />
+    <attr name="bouncerNotFoundOutlineColor" format="color" />
+    <attr name="bouncerNotFoundOutlineWidth" format="dimension" />
+
+    <attr name="bouncerFoundBackgroundColor" format="color" />
+    <attr name="bouncerFoundOutlineColor" format="color" />
+    <attr name="bouncerFoundOutlineWidth" format="dimension" />
+
+    <attr name="bouncerWrongBackgroundColor" format="color" />
+    <attr name="bouncerWrongOutlineColor" format="color" />
+    <attr name="bouncerWrongOutlineWidth" format="dimension" />
+
+    <attr name="bouncerCorrectBackgroundColor" format="color" />
+    <attr name="bouncerCorrectOutlineColor" format="color" />
+    <attr name="bouncerCorrectOutlineWidth" format="dimension" />
+
+    <declare-styleable name="ViewFinderBackground">
+        <attr name="backgroundColor" format="color" />
+    </declare-styleable>
+
+</resources>

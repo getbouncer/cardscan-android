@@ -1,0 +1,31 @@
+<resources>
+    <string name="bouncer_card_scan_instructions" description="Text displayed above the scan window, instructing the user how to scan card">Center your card in the frame</string>
+    <string name="bouncer_card_scan_security" description="Security notification displayed below the scan window">Your card info is secure</string>
+    <string name="bouncer_enter_card_manually" description="Text shown at the bottom of the screen offering for the user to type in card details manually">Enter card manually</string>
+    <string name="bouncer_scanned_wrong_card" description="Text displayed above the scan window when the wrong card is scanned">Please scan the card ending in %1$s</string>
+
+    <string name="bouncer_camera_permission_denied_message" description="Message shown to the user when camera permission is denied">Please allow camera access to scan your card</string>
+    <string name="bouncer_camera_permission_denied_ok" description="Affirmative button shown as part of the permission denied dialog">OK</string>
+    <string name="bouncer_camera_permission_denied_cancel" description="Negative button shown as part of the permission denied dialog">Cancel</string>
+
+    <string name="bouncer_error_camera_title" description="Title of the dialog shown to the user when an error using the camera occurs">Camera Problem</string>
+    <string name="bouncer_error_camera_open" description="Message of the dialog shown to the user when an error starting the camera occurs">The camera failed to turn on</string>
+    <string name="bouncer_error_camera_access" description="Message of the dialog shown to the user when an error accessing the camera occurs">Permission was denied when turning on the camera</string>
+    <string name="bouncer_error_camera_unsupported" description="Message of the dialog shown to the user when the camera is not supported">This device does not support the required camera features</string>
+    <string name="bouncer_error_camera_acknowledge_button" description="Affirmative button shown as part of the camera error dialog">Close</string>
+
+    <string name="bouncer_api_key_invalid_title" description="Title of the dialog shown to the user when an invalid API key is specified">Network Problem</string>
+    <string name="bouncer_api_key_invalid_message" description="Message of the dialog shown to the user when an invalid API key is specified">Sorry, this API key is not valid.</string>
+    <string name="bouncer_api_key_invalid_ok" description="Affirmative button shown as part of the invalid API key dialog">OK</string>
+
+    <string name="bouncer_name_and_expiry_initialization_error" description="Title of the dialog shown to the user when attempting to extract name and expiry from a card when models have not been warmed up">Config Problem</string>
+    <string name="bouncer_name_and_expiry_initialization_error_message" description="Message of the dialog shown to the user when attempting to extract name and expiry from a card when models have not been warmed up">Please initialize name/expiry models first in the warmup() function.</string>
+    <string name="bouncer_name_and_expiry_initialization_error_ok" description="Affirmative button shown as part of the name or expiry extraction error dialog">OK</string>
+
+    <string name="bouncer_cardscan_logo" description="Accessibility description of the CardScan.io logo">cardscan.io logo</string>
+    <string name="bouncer_security_description" description="Accessibility description of the security notification lock icon">lock icon</string>
+    <string name="bouncer_preview_description" description="Accessibility description of the camera preview window">card scanning window</string>
+    <string name="bouncer_debug_description" description="Accessibility description of the debug preview window">card debug window</string>
+    <string name="bouncer_close_button_description" description="Accessibility description of the close button">close button</string>
+    <string name="bouncer_card_view_finder_description" description="Accessibility description of the view finder window">card view finder</string>
+</resources>
