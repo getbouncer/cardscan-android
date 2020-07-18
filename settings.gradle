@@ -1,2 +1,2 @@
-include ':demo', 'cardscan-ui', 'scan-payment', 'scan-framework', 'scan-camera', 'scan-ui'
+include ':cardscan-demo', 'cardscan-ui', 'scan-payment', 'scan-framework', 'scan-camera', 'scan-ui'
 rootProject.name='cardscan-android'
