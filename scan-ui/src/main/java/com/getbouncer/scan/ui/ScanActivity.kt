@@ -205,38 +205,40 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      * Validate the API key against the server. If it's invalid, close the scanner.
      */
     private fun ensureValidApiKey() {
-        launch {
-            when (val apiKeyValidateResult = validateApiKey(this@ScanActivity)) {
-                is NetworkResult.Success -> {
-                    if (!apiKeyValidateResult.body.isApiKeyValid) {
-                        Log.e(
-                            Config.logTag,
-                            "API key is invalid: ${apiKeyValidateResult.body.keyInvalidReason}"
-                        )
-                        onInvalidApiKey()
-                        showApiKeyInvalidError()
+        if (Config.apiKey != null) {
+            launch {
+                when (val apiKeyValidateResult = validateApiKey(this@ScanActivity)) {
+                    is NetworkResult.Success -> {
+                        if (!apiKeyValidateResult.body.isApiKeyValid) {
+                            Log.e(
+                                Config.logTag,
+                                "API key is invalid: ${apiKeyValidateResult.body.keyInvalidReason}"
+                            )
+                            onInvalidApiKey()
+                            showApiKeyInvalidError()
+                        }
                     }
-                }
-                is NetworkResult.Error -> {
-                    if (apiKeyValidateResult.error.errorCode == ERROR_CODE_NOT_AUTHENTICATED) {
-                        Log.e(
-                            Config.logTag,
-                            "API key is invalid: ${apiKeyValidateResult.error.errorMessage}"
-                        )
-                        onInvalidApiKey()
-                        showApiKeyInvalidError()
-                    } else {
-                        Log.w(
-                            Config.logTag,
-                            "Unable to validate API key: ${apiKeyValidateResult.error.errorMessage}"
-                        )
+                    is NetworkResult.Error -> {
+                        if (apiKeyValidateResult.error.errorCode == ERROR_CODE_NOT_AUTHENTICATED) {
+                            Log.e(
+                                Config.logTag,
+                                "API key is invalid: ${apiKeyValidateResult.error.errorMessage}"
+                            )
+                            onInvalidApiKey()
+                            showApiKeyInvalidError()
+                        } else {
+                            Log.w(
+                                Config.logTag,
+                                "Unable to validate API key: ${apiKeyValidateResult.error.errorMessage}"
+                            )
+                        }
                     }
+                    is NetworkResult.Exception -> Log.w(
+                        Config.logTag,
+                        "Unable to validate API key",
+                        apiKeyValidateResult.exception
+                    )
                 }
-                is NetworkResult.Exception -> Log.w(
-                    Config.logTag,
-                    "Unable to validate API key",
-                    apiKeyValidateResult.exception
-                )
             }
         }
     }
