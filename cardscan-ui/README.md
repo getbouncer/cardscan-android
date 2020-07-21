@@ -3,7 +3,7 @@ This repository provides user interfaces for the CardScan product. [CardScan](ht
 
 This library is the foundation for CardScan and CardVerify enterprise libraries, which validate the authenticity of payment cards as they are scanned.
 
-![demo](docs/images/demo.gif)
+![demo](../docs/images/demo.gif)
 
 ## Contents
 * [Requirements](#requirements)
@@ -55,7 +55,7 @@ See the [development docs](https://docs.getbouncer.com/card-scan/android-integra
 Adam Wushensky, Sam King, and Zain ul Abi Din
 
 ## License
-This library is available under paid and free licenses. See the [LICENSE](LICENSE) file for the full license text.
+This library is available under paid and free licenses. See the [LICENSE](../LICENSE) file for the full license text.
 
 ### Quick summary
 In short, this library will remain free forever for non-commercial applications, but use by commercial applications is limited to 90 days, after which time a licensing agreement is required. We're also adding some legal liability protections.
@@ -66,7 +66,7 @@ After this period commercial applications need to convert to a licensing agreeme
 ### More detailed summary
 What’s allowed under the license:
 * Free use for any app for 90 days (for demos, evaluations, hackathons, etc).
-* Contributions (contributors must agree to the [Contributor License Agreement](Contributor%20License%20Agreement))
+* Contributions (contributors must agree to the [Contributor License Agreement](../Contributor%20License%20Agreement))
 * Any modifications as needed to work in your app
 
 What’s not allowed under the license:

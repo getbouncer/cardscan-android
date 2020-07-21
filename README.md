@@ -1,5 +1,7 @@
 # Overview
-This repository serves as a demonstration for the CardScan library. [CardScan](https://cardscan.io/) is a relatively small library (1.9 MB) that provides fast and accurate payment card scanning.
+This repository contains the open source code for [Bouncer](https://www.getbouncer.com) products (e.g. CardScan). See the individual sub modules for more information on each.
+
+[CardScan](https://cardscan.io/) is a relatively small library (1.9 MB) that provides fast and accurate payment card scanning.
 
 CardScan is the foundation for CardVerify enterprise libraries, which validate the authenticity of payment cards as they are scanned.
 

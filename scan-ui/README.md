@@ -3,7 +3,7 @@ This repository provides user interfaces for scanning cards. [CardScan](https://
 
 This library is the foundation for CardScan and CardVerify enterprise libraries, which validate the authenticity of payment cards as they are scanned.
 
-![demo](docs/images/demo.gif)
+![demo](../docs/images/demo.gif)
 
 ## Contents
 * [Requirements](#requirements)
@@ -26,15 +26,7 @@ Note: Your app does not have to be written in kotlin to integrate this library, 
 An app demonstrating the basic capabilities of this library is available in [github](https://github.com/getbouncer/cardscan-demo-android).
 
 ## Integration
-These libraries are published in the [jcenter](https://jcenter.bintray.com/com/getbouncer/) repository, so for most gradle configurations you only need to add the dependencies to your app's `build.gradle` file:
-
-```gradle
-dependencies {
-    implementation 'com.getbouncer:scan-framework:2.0.0014'
-    implementation 'com.getbouncer:scan-camera:2.0.0014'
-    implementation 'com.getbouncer:scan-ui:2.0.0014'
-}
-```
+See the [integration documentation](https://docs.getbouncer.com/card-scan/android-integration-guide/android-development-guide) in the Bouncer Docs.
 
 ## Using
 This library provides a framework for scanning objects (cards, identification, etc). The abstract `ScanActivity` class provides connections to the camera and a set of common scan functionality. By extending this class, you can build your own user interface for scanning.
@@ -57,7 +49,7 @@ See the [development docs](https://docs.getbouncer.com/card-scan/android-integra
 Adam Wushensky, Sam King, and Zain ul Abi Din
 
 ## License
-This library is available under paid and free licenses. See the [LICENSE](LICENSE) file for the full license text.
+This library is available under paid and free licenses. See the [LICENSE](../LICENSE) file for the full license text.
 
 ### Quick summary
 In short, this library will remain free forever for non-commercial applications, but use by commercial applications is limited to 90 days, after which time a licensing agreement is required. We're also adding some legal liability protections.
@@ -68,7 +60,7 @@ After this period commercial applications need to convert to a licensing agreeme
 ### More detailed summary
 What's allowed under the license:
 * Free use for any app for 90 days (for demos, evaluations, hackathons, etc).
-* Contributions (contributors must agree to the [Contributor License Agreement](Contributor%20License%20Agreement))
+* Contributions (contributors must agree to the [Contributor License Agreement](../Contributor%20License%20Agreement))
 * Any modifications as needed to work in your app
 
 What's not allowed under the license:
