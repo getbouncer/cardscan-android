@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.0.0017](https://github.com/getbouncer/cardscan-android/tree/2.0.0017) (2020-07-21)
+
+[Full Changelog](https://github.com/getbouncer/cardscan-android/compare/2.0.0016...2.0.0017)
+
+**Merged pull requests:**
+
+- Update api key validation check [\#156](https://github.com/getbouncer/cardscan-android/pull/156) ([awushensky](https://github.com/awushensky))
+- Update changelog [\#155](https://github.com/getbouncer/cardscan-android/pull/155) ([smkuhne](https://github.com/smkuhne))
+
 ## [2.0.0016](https://github.com/getbouncer/cardscan-android/tree/2.0.0016) (2020-07-20)
 
 [Full Changelog](https://github.com/getbouncer/cardscan-android/compare/2.0.0015...2.0.0016)
