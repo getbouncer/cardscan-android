@@ -33,7 +33,7 @@ jobs:
           project: "cardscan-android"
           repo: "getbouncer/cardscan-android"
           token: ${{ secrets.SERVICE_PERSONAL_ACCESS_TOKEN }}
-          sinceTag: "2.0.0015"
+          sinceTag: "1.0.5151"
           pullRequests: "true"
           prWoLabels: "true"
           issues: "true"
