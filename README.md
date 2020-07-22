@@ -5,6 +5,10 @@ This repository contains the open source code for [Bouncer](https://www.getbounc
 
 CardScan is the foundation for CardVerify enterprise libraries, which validate the authenticity of payment cards as they are scanned.
 
+![Lint](https://github.com/getbouncer/cardscan-android/workflows/Lint/badge.svg)
+![Instrumentation Tests](https://github.com/getbouncer/cardscan-android/workflows/Instrumentation%20Tests/badge.svg)
+![Unit Tests](https://github.com/getbouncer/cardscan-android/workflows/Unit%20Tests/badge.svg)
+
 ![demo](docs/images/demo.gif)
 
 ## Contents

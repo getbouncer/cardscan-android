@@ -1,0 +1,57 @@
+on:
+  release:
+    types: [published]
+
+jobs:
+  generate_changelog:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+        with:
+          ref: "master"
+          token: ${{secrets.SERVICE_PERSONAL_ACCESS_TOKEN}}
+
+      - name: get current tag
+        id: get_tag
+        run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
+
+      - name: upate version
+        env:
+          TAG_VERSION: ${{ steps.get_tag.outputs.VERSION }}
+        run: |
+          truncate -s $(( $(stat -c "%s" gradle.properties) - $(tail -n 1 gradle.properties | wc -c) )) gradle.properties
+          echo "version=$TAG_VERSION" >> gradle.properties
+          cat gradle.properties
+
+      - name: generate changelog
+        uses: heinrichreimer/github-changelog-generator-action@v2.1.1
+        with:
+          user: "getbouncer"
+          project: "cardscan-android"
+          repo: "getbouncer/cardscan-android"
+          token: ${{ secrets.SERVICE_PERSONAL_ACCESS_TOKEN }}
+          sinceTag: "2.0.0015"
+          pullRequests: "true"
+          prWoLabels: "true"
+          issues: "true"
+          issuesWoLabels: "true"
+          author: "true"
+          base: "HISTORY.md"
+          unreleased: "true"
+          breakingLabels: "Versioning - BREAKING"
+          enhancementLabels: "Type - Enhancement, Type - Feature"
+          bugLabels: "Type - Fix, Bug - Fixed"
+          deprecatedLabels: "Type - Deprecated"
+          removedLabels: "Type - Removal"
+          securityLabels: "Security Fix"
+          excludeLabels: "Skip-Changelog"
+
+      - name: create commit
+        id: commit
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Automatic changelog update"
+          file_pattern: "gradle.properties CHANGELOG.md"
