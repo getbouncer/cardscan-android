@@ -3,8 +3,8 @@ on:
     types: [published]
 
 jobs:
-  generate_changelog:
-
+  finalize_release:
+    name: Finalize Release
     runs-on: ubuntu-latest
 
     steps:
@@ -13,6 +13,7 @@ jobs:
         with:
           ref: "master"
           token: ${{secrets.SERVICE_PERSONAL_ACCESS_TOKEN}}
+          submodules: recursive
 
       - name: get current tag
         id: get_tag
@@ -55,3 +56,40 @@ jobs:
         with:
           commit_message: "Automatic changelog update"
           file_pattern: "gradle.properties CHANGELOG.md"
+
+  publish_to_bintray:
+    needs: finalize_release
+    name: Publish to BinTray
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+        with:
+          token: ${{secrets.SERVICE_PERSONAL_ACCESS_TOKEN}}
+          submodules: recursive
+
+      - name: set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+
+      - name: create local properties
+        env:
+          BINTRAY_USER: ${{ secrets.BINTRAY_USER }}
+          BINTRAY_API_KEY: ${{ secrets.BINTRAY_API_KEY }}
+        run: |
+          echo "bintray.user=$BINTRAY_USER" >> local.properties
+          echo "bintray.apikey=$BINTRAY_API_KEY" >> local.properties
+
+      - name: lint
+        run: ./gradlew ktlint
+
+      - name: CheckStyle
+        run: ./gradlew checkstyle
+
+      - name: test
+        run: ./gradlew test
+
+      - name: upload to bintray
+        run: ./gradlew bintrayUpload
