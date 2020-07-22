@@ -19,7 +19,7 @@ jobs:
         id: get_tag
         run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
 
-      - name: upate version
+      - name: update version
         env:
           TAG_VERSION: ${{ steps.get_tag.outputs.VERSION }}
         run: |
@@ -92,4 +92,9 @@ jobs:
         run: ./gradlew test
 
       - name: upload to bintray
-        run: ./gradlew bintrayUpload
+        run: |
+          ./gradlew scan-framework:bintrayUpload
+          ./gradlew scan-camera:bintrayUpload
+          ./graldew scan-payment:bintrayUpload
+          ./graldew scan-ui:bintrayUpload
+          ./gradlew cardscan-ui:bintrayUpload
