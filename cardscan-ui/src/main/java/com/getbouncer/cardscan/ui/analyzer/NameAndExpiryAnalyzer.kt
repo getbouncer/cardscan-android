@@ -3,6 +3,7 @@ package com.getbouncer.cardscan.ui.analyzer
 import android.graphics.Bitmap
 import android.graphics.RectF
 import android.util.Log
+import com.getbouncer.cardscan.ui.result.MainLoopState
 import com.getbouncer.scan.framework.Analyzer
 import com.getbouncer.scan.framework.AnalyzerFactory
 import com.getbouncer.scan.framework.Config
@@ -36,7 +37,7 @@ class NameAndExpiryAnalyzer private constructor(
     private val textDetector: TextDetector?,
     private val alphabetDetect: AlphabetDetect?,
     private val expiryDetect: ExpiryDetect? = null
-) : Analyzer<SSDOcr.Input, PaymentCardOcrState, NameAndExpiryAnalyzer.Output> {
+) : Analyzer<SSDOcr.Input, MainLoopState, NameAndExpiryAnalyzer.Output> {
 
     data class Output(
         val name: String?,
@@ -50,7 +51,7 @@ class NameAndExpiryAnalyzer private constructor(
 
     override suspend fun analyze(
         data: SSDOcr.Input,
-        state: PaymentCardOcrState
+        state: MainLoopState
     ) = if ((!state.runNameExtraction && !state.runExpiryExtraction) || textDetector == null || alphabetDetect == null) {
         Output(null, null, null)
     } else {

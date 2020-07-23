@@ -4,24 +4,16 @@ import androidx.test.filters.MediumTest;
 
 import com.getbouncer.scan.framework.AggregateResultListener;
 import com.getbouncer.scan.framework.ResultAggregator;
-import com.getbouncer.scan.framework.ResultAggregatorConfig;
 import com.getbouncer.scan.framework.ResultHandler;
-import com.getbouncer.scan.framework.SavedFrame;
 import com.getbouncer.scan.framework.StatefulResultHandler;
 import com.getbouncer.scan.framework.TerminatingResultHandler;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 import kotlin.Pair;
 import kotlin.Unit;
 import kotlin.coroutines.Continuation;
-import kotlin.jvm.functions.Function0;
 import kotlin.jvm.functions.Function2;
 import kotlinx.coroutines.BuildersKt;
 import kotlinx.coroutines.CoroutineScope;
@@ -182,18 +174,15 @@ public class BlockingResultTest {
     public void blockingAggregateResultListener_works() throws InterruptedException {
         final AggregateTestResult testResult = new AggregateTestResult();
 
-        final AggregateResultListener<Integer, Boolean, Integer, Boolean> resultListener =
-            new BlockingAggregateResultListener<Integer, Boolean, Integer, Boolean>() {
+        final AggregateResultListener<Integer, Boolean> resultListener =
+            new BlockingAggregateResultListener<Integer, Boolean>() {
                 @Override
-                public void onInterimResultBlocking(Integer result, Boolean state, Integer frame) {
+                public void onInterimResultBlocking(Integer result) {
                     testResult.handledInterim = true;
                 }
 
                 @Override
-                public void onResultBlocking(
-                    Boolean result,
-                    @NotNull Map<String, ? extends List<SavedFrame<Integer, Boolean, Integer>>> frames
-                ) {
+                public void onResultBlocking(Boolean result) {
                     testResult.handledFinal = true;
                 }
 
@@ -210,7 +199,7 @@ public class BlockingResultTest {
             new Function2<CoroutineScope, Continuation<? super Unit>, Object>() {
                 @Override
                 public Object invoke(CoroutineScope coroutineScope, Continuation<? super Unit> continuation) {
-                    return resultListener.onInterimResult(1, true, 2, continuation);
+                    return resultListener.onInterimResult(1, continuation);
                 }
             }
         );
@@ -222,11 +211,7 @@ public class BlockingResultTest {
             new Function2<CoroutineScope, Continuation<? super Unit>, Object>() {
                 @Override
                 public Object invoke(CoroutineScope coroutineScope, Continuation<? super Unit> continuation) {
-                    return resultListener.onResult(
-                        true,
-                        Collections.<String, List<SavedFrame<Integer, Boolean, Integer>>>emptyMap(),
-                        continuation
-                    );
+                    return resultListener.onResult(true, continuation);
                 }
             }
         );
@@ -257,43 +242,23 @@ public class BlockingResultTest {
     @Test(timeout = 1000L)
     @MediumTest
     public void blockingResultAggregator_works() throws InterruptedException {
-        final ResultAggregatorConfig config = new ResultAggregatorConfig.Builder().build();
-
-        final AggregateResultListener<Integer, Boolean, Integer, Boolean> listener =
-            new BlockingAggregateResultListener<Integer, Boolean, Integer, Boolean>() {
+        final AggregateResultListener<Integer, Boolean> listener =
+            new BlockingAggregateResultListener<Integer, Boolean>() {
                 @Override
-                public void onInterimResultBlocking(Integer result, Boolean state, Integer frame) { }
+                public void onInterimResultBlocking(Integer result) { }
 
                 @Override
-                public void onResultBlocking(
-                    Boolean result,
-                    @NotNull Map<String, ? extends List<SavedFrame<Integer, Boolean, Integer>>> frames
-                ) { }
+                public void onResultBlocking(Boolean result) { }
 
                 @Override
                 public void onResetBlocking() { }
             };
 
         final ResultAggregator<Integer, Boolean, Integer, Integer, Boolean> resultAggregator =
-            new BlockingResultAggregator<Integer, Boolean, Integer, Integer, Boolean>(config, listener, true) {
-                @Override
-                public int getFrameSizeBytes(Integer frame) {
-                    return 0;
-                }
-
-                @Nullable
-                @Override
-                public String getSaveFrameIdentifier(Integer result, Integer frame) {
-                    return null;
-                }
-
+            new BlockingResultAggregator<Integer, Boolean, Integer, Integer, Boolean>(listener, true) {
                 @NotNull
                 @Override
-                public Pair<Integer, Boolean> aggregateResultBlocking(
-                    Integer result,
-                    @NotNull Function0<Unit> startAggregationTimer,
-                    boolean mustReturnFinal
-                ) {
+                public Pair<Integer, Boolean> aggregateResultBlocking(Integer frame, Integer result) {
                     return new Pair<>(1, true);
                 }
 
@@ -311,17 +276,7 @@ public class BlockingResultTest {
             new Function2<CoroutineScope, Continuation<? super Pair<? extends Integer, ? extends Boolean>>, Object>() {
                 @Override
                 public Object invoke(CoroutineScope coroutineScope, Continuation<? super Pair<? extends Integer, ? extends Boolean>> continuation) {
-                    return resultAggregator.aggregateResult(
-                        1,
-                        new Function0<Unit>() {
-                            @Override
-                            public Unit invoke() {
-                                return Unit.INSTANCE;
-                            }
-                        },
-                        true,
-                        continuation
-                    );
+                    return resultAggregator.aggregateResult(1, 1, continuation);
                 }
             }
         );

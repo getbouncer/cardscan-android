@@ -1,5 +1,6 @@
 package com.getbouncer.cardscan.ui.analyzer
 
+import com.getbouncer.cardscan.ui.result.MainLoopState
 import com.getbouncer.scan.framework.Analyzer
 import com.getbouncer.scan.framework.AnalyzerFactory
 import com.getbouncer.scan.payment.ml.ExpiryDetect
@@ -11,7 +12,7 @@ import kotlinx.coroutines.supervisorScope
 class PaymentCardOcrAnalyzer private constructor(
     private val ssdOcr: SSDOcr?,
     private val nameAndExpiryAnalyzer: NameAndExpiryAnalyzer?
-) : Analyzer<SSDOcr.Input, PaymentCardOcrState, PaymentCardOcrAnalyzer.Prediction> {
+) : Analyzer<SSDOcr.Input, MainLoopState, PaymentCardOcrAnalyzer.Prediction> {
 
     data class Prediction(
         val pan: String?,
@@ -24,7 +25,7 @@ class PaymentCardOcrAnalyzer private constructor(
 
     override val name: String = "payment_card_ocr_analyzer"
 
-    override suspend fun analyze(data: SSDOcr.Input, state: PaymentCardOcrState) = supervisorScope {
+    override suspend fun analyze(data: SSDOcr.Input, state: MainLoopState) = supervisorScope {
         val nameAndExpiryDeferred = if ((state.runNameExtraction || state.runExpiryExtraction) && nameAndExpiryAnalyzer != null) {
             this.async {
                 nameAndExpiryAnalyzer.analyze(data, state)

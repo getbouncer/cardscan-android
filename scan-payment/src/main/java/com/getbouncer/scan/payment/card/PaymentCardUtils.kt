@@ -136,6 +136,11 @@ fun getCardIssuer(pan: String?): CardIssuer = normalizeCardNumber(pan).let { nor
 
 /**
  * Determine if a PAN is valid.
+ *
+ * TODO: this should use a contract like the following once contracts are no longer experimental:
+ * ```
+ * contract { returns(true) implies (pan != null) }
+ * ```
  */
 fun isValidPan(pan: String?): Boolean = normalizeCardNumber(pan).let { normalizedPan ->
     val iinData = getIssuerData(normalizedPan) ?: return false

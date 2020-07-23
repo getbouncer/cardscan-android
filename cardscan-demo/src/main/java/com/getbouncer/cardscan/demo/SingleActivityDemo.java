@@ -28,15 +28,12 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.getbouncer.cardscan.ui.CardScanFlow;
-import com.getbouncer.cardscan.ui.analyzer.PaymentCardOcrState;
-import com.getbouncer.cardscan.ui.result.OcrResultAggregator;
-import com.getbouncer.cardscan.ui.result.PaymentCardOcrResult;
+import com.getbouncer.cardscan.ui.result.MainLoopAggregator;
 import com.getbouncer.scan.camera.CameraErrorListener;
 import com.getbouncer.scan.camera.camera2.Camera2Adapter;
 import com.getbouncer.scan.framework.AggregateResultListener;
 import com.getbouncer.scan.framework.AnalyzerLoopErrorListener;
 import com.getbouncer.scan.framework.Config;
-import com.getbouncer.scan.framework.SavedFrame;
 import com.getbouncer.scan.framework.interop.BlockingAggregateResultListener;
 import com.getbouncer.scan.framework.time.Clock;
 import com.getbouncer.scan.framework.time.ClockMark;
@@ -47,9 +44,7 @@ import com.getbouncer.scan.payment.ml.SSDOcr;
 import com.getbouncer.scan.ui.ViewFinderBackground;
 import com.getbouncer.scan.ui.util.ViewExtensionsKt;
 
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jetbrains.annotations.NotNull;
@@ -445,21 +440,13 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
     }
 
     private AggregateResultListener<
-        SSDOcr.Input,
-        PaymentCardOcrState,
-        OcrResultAggregator.InterimResult,
-        PaymentCardOcrResult> aggregateResultListener =
+            MainLoopAggregator.InterimResult,
+            MainLoopAggregator.FinalResult> aggregateResultListener =
             new BlockingAggregateResultListener<
-                SSDOcr.Input,
-                PaymentCardOcrState,
-                OcrResultAggregator.InterimResult,
-                PaymentCardOcrResult>() {
+                    MainLoopAggregator.InterimResult,
+                    MainLoopAggregator.FinalResult>() {
         @Override
-        public void onInterimResultBlocking(
-            OcrResultAggregator.InterimResult interimResult,
-            PaymentCardOcrState paymentCardOcrState,
-            SSDOcr.Input input
-        ) {
+        public void onInterimResultBlocking(MainLoopAggregator.InterimResult interimResult) {
             boolean previousValidResult =
                     hasPreviousValidResult.getAndSet(interimResult.getHasValidPan());
             boolean isFirstValidResult = interimResult.getHasValidPan() && !previousValidResult;
@@ -489,17 +476,12 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
                     }
                 }
 
-                showDebugFrame(input);
+                showDebugFrame(interimResult.getFrame());
             });
         }
 
         @Override
-        public void onResultBlocking(
-            PaymentCardOcrResult result,
-            @NotNull Map<String, ? extends List<
-                SavedFrame<SSDOcr.Input, PaymentCardOcrState, OcrResultAggregator.InterimResult>
-                >> frames
-        ) {
+        public void onResultBlocking(MainLoopAggregator.FinalResult result) {
             // Only show the expiry dates that are not expired
             final ExpiryDetect.Expiry expiry = result.getExpiry();
 
