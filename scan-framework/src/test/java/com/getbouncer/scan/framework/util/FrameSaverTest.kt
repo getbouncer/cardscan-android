@@ -7,7 +7,7 @@ import kotlin.test.assertEquals
 
 class FrameSaverTest {
 
-    private class TestFrameSaver : FrameSaver<Int, Boolean, Int>() {
+    private class TestFrameSaver : FrameSaver<String, Int, Boolean, Int>() {
         override fun getMaxSavedFrames(savedFrameIdentifier: String): Int = 3
 
         override fun getSaveFrameIdentifier(frame: Int, result: Int): String? = when (frame) {

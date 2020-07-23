@@ -26,7 +26,7 @@ class FrameRateTracker(
 ) {
     private var firstFrameTime: ClockMark? = null
     private var lastNotifyTime: ClockMark = Clock.markNow()
-    private val totalFramesProcessed: AtomicLong = AtomicLong(0)
+    private val totalFramesProcessed: AtomicLong = AtomicLong(-1) // do not calculate a rate for the first frame
     private val framesProcessedSinceLastUpdate: AtomicLong = AtomicLong(0)
 
     private val frameRateMutex = Mutex()
@@ -40,7 +40,7 @@ class FrameRateTracker(
         val framesSinceLastUpdate = framesProcessedSinceLastUpdate.incrementAndGet()
 
         val lastNotifyTime = this.lastNotifyTime
-        val shouldNotifyOfFrameRate = frameRateMutex.withLock {
+        val shouldNotifyOfFrameRate = totalFrames > 0 && frameRateMutex.withLock {
             val shouldNotify = lastNotifyTime.elapsedSince() > notifyInterval
             if (shouldNotify) {
                 this.lastNotifyTime = Clock.markNow()
