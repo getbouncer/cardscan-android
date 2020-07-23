@@ -586,11 +586,12 @@ class CardScanActivity :
         val willRunNameAndExpiry = (enableNameExtraction || enableExpiryExtraction) && result.analyzerResult.isNameAndExpiryExtractionAvailable
         when (result.state) {
             is MainLoopState.Initial -> setStateNotFound()
-            is MainLoopState.OcrRunning, is MainLoopState.NameAndExpiryRunning -> if (willRunNameAndExpiry) {
-                setStateFoundLong()
-            } else {
-                setStateFoundShort()
-            }
+            is MainLoopState.OcrRunning, is MainLoopState.NameAndExpiryRunning ->
+                if (willRunNameAndExpiry) {
+                    setStateFoundLong()
+                } else {
+                    setStateFoundShort()
+                }
             is MainLoopState.Finished -> setStateCorrect()
         }
 
