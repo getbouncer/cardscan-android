@@ -62,7 +62,7 @@ sealed class MainLoopState(
         "${this::class.java.simpleName}(runOcr=$runOcr, runNameExtraction=$runNameExtraction, runExpiryExtraction=$runExpiryExtraction, reachedStateAt=$reachedStateAt)"
 
     init {
-        if (Config.isDebug) Log.d(Config.logTag, "Main loop transitioning to state ${this.toString()}")
+        if (Config.isDebug) Log.d(Config.logTag, "Main loop transitioning to state $this")
     }
 
     /**

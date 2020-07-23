@@ -2,8 +2,6 @@
 package com.getbouncer.scan.payment.card
 
 import android.text.TextUtils
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.contract
 
 /*
  * Payment cards always have a PAN (Primary Account Number) on one side of the card. This PAN

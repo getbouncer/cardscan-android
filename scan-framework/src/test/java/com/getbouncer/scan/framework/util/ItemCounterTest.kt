@@ -10,29 +10,29 @@ class ItemCounterTest {
     @Test
     @ExperimentalCoroutinesApi
     fun countItems() = runBlockingTest {
-        val itemCounter = ItemCounter<Int>()
+        val itemCounter = ItemCounter<String>()
 
-        assertEquals(1, itemCounter.countItem(4))
-        assertEquals(1, itemCounter.countItem(3))
-        assertEquals(2, itemCounter.countItem(4))
+        assertEquals(1, itemCounter.countItem("a"))
+        assertEquals(1, itemCounter.countItem("b"))
+        assertEquals(2, itemCounter.countItem("a"))
 
-        assertEquals(1, itemCounter.getHighestCountItem()?.second)
-        assertEquals(4, itemCounter.getHighestCountItem()?.first)
+        assertEquals("a", itemCounter.getHighestCountItem()?.second)
+        assertEquals(2, itemCounter.getHighestCountItem()?.first)
     }
 
     @Test
     @ExperimentalCoroutinesApi
     fun reset() = runBlockingTest {
-        val itemCounter = ItemCounter<Int>()
+        val itemCounter = ItemCounter<String>()
 
-        assertEquals(1, itemCounter.countItem(4))
-        assertEquals(1, itemCounter.countItem(3))
-        assertEquals(2, itemCounter.countItem(4))
+        assertEquals(1, itemCounter.countItem("a"))
+        assertEquals(1, itemCounter.countItem("b"))
+        assertEquals(2, itemCounter.countItem("a"))
 
         itemCounter.reset()
 
-        assertEquals(1, itemCounter.countItem(4))
-        assertEquals(1, itemCounter.countItem(3))
-        assertEquals(2, itemCounter.countItem(4))
+        assertEquals(1, itemCounter.countItem("a"))
+        assertEquals(1, itemCounter.countItem("b"))
+        assertEquals(2, itemCounter.countItem("a"))
     }
 }
