@@ -7,7 +7,7 @@ import java.util.LinkedList
 /**
  * Save data frames for later retrieval.
  */
-abstract class FrameSaver<Frame, State, Result> {
+abstract class FrameSaver<Identifier, Frame, State, Result> {
 
     /**
      * A frame and its result that is saved for later analysis.
@@ -15,7 +15,7 @@ abstract class FrameSaver<Frame, State, Result> {
     data class SavedFrame<DataFrame, State, Result>(val data: DataFrame, val state: State, val result: Result)
 
     private val saveFrameMutex = Mutex()
-    private val savedFrames = mutableMapOf<String, LinkedList<SavedFrame<Frame, State, Result>>>()
+    private val savedFrames = mutableMapOf<Identifier, LinkedList<SavedFrame<Frame, State, Result>>>()
 
     /**
      * Determine how frames should be classified using [getSaveFrameIdentifier], and then store them in a map of frames
@@ -42,7 +42,7 @@ abstract class FrameSaver<Frame, State, Result> {
     /**
      * Retrieve the list of saved frames.
      */
-    fun getSavedFrames(): Map<String, LinkedList<SavedFrame<Frame, State, Result>>> = savedFrames
+    fun getSavedFrames(): Map<Identifier, LinkedList<SavedFrame<Frame, State, Result>>> = savedFrames
 
     /**
      * Clear all saved frames
@@ -51,12 +51,12 @@ abstract class FrameSaver<Frame, State, Result> {
         savedFrames.clear()
     }
 
-    protected abstract fun getMaxSavedFrames(savedFrameIdentifier: String): Int
+    protected abstract fun getMaxSavedFrames(savedFrameIdentifier: Identifier): Int
 
     /**
      * Determine if a data frame should be saved for future processing.
      *
      * If this method returns a non-null string, the frame will be saved under that identifier.
      */
-    protected abstract fun getSaveFrameIdentifier(frame: Frame, result: Result): String?
+    protected abstract fun getSaveFrameIdentifier(frame: Frame, result: Result): Identifier?
 }

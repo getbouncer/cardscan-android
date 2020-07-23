@@ -8,7 +8,6 @@ import com.getbouncer.scan.framework.ResultAggregator
 import com.getbouncer.scan.framework.time.Clock
 import com.getbouncer.scan.framework.time.ClockMark
 import com.getbouncer.scan.framework.time.seconds
-import com.getbouncer.scan.framework.util.FrameSaver
 import com.getbouncer.scan.framework.util.ItemCounter
 import com.getbouncer.scan.payment.card.isValidPan
 import com.getbouncer.scan.payment.ml.ExpiryDetect
@@ -31,11 +30,11 @@ private const val NAME_OR_EXPIRY_UNAVAILABLE_RESPONSE = "<Insufficient API key p
  * Transitions between states for the main loop.
  */
 internal sealed class MainLoopTransition {
-    class FrameWithoutValidPan(val nameExtractionEnabled: Boolean, val expiryExtractionEnabled: Boolean) : MainLoopTransition()
-    class FrameWithValidPan(val pan: String, val nameExtractionEnabled: Boolean, val expiryExtractionEnabled: Boolean) : MainLoopTransition()
-    class FrameWithName(val name: String) : MainLoopTransition()
-    class FrameWithExpiry(val expiry: ExpiryDetect.Expiry) : MainLoopTransition()
-    class FrameWithNameAndExpiry(val name: String, val expiry: ExpiryDetect.Expiry) : MainLoopTransition()
+    data class FrameWithoutValidPan(val nameExtractionEnabled: Boolean, val expiryExtractionEnabled: Boolean) : MainLoopTransition()
+    data class FrameWithValidPan(val pan: String, val nameExtractionEnabled: Boolean, val expiryExtractionEnabled: Boolean) : MainLoopTransition()
+    data class FrameWithName(val name: String) : MainLoopTransition()
+    data class FrameWithExpiry(val expiry: ExpiryDetect.Expiry) : MainLoopTransition()
+    data class FrameWithNameAndExpiry(val name: String, val expiry: ExpiryDetect.Expiry) : MainLoopTransition()
     object FrameWithoutNameOrExpiry : MainLoopTransition()
     object Frame : MainLoopTransition()
 }
@@ -193,8 +192,7 @@ class MainLoopAggregator(
         val pan: String?,
         val name: String?,
         val expiry: ExpiryDetect.Expiry?,
-        val errorString: String?,
-        val savedFrames: Map<String, List<FrameSaver.SavedFrame<SSDOcr.Input, MainLoopState, InterimResult>>>
+        val errorString: String?
     )
 
     data class InterimResult(
@@ -207,7 +205,7 @@ class MainLoopAggregator(
         val state: MainLoopState
     )
 
-    override val name: String = "ocr_result_aggregator"
+    override val name: String = "cardscan_main_loop_aggregator"
 
     private fun handleOcrStates(result: PaymentCardOcrAnalyzer.Prediction): MainLoopTransition =
         if (isValidPan(result.pan) && result.pan != null) {
@@ -237,12 +235,13 @@ class MainLoopAggregator(
         val previousState = state
         val currentState = previousState.consumeTransition(
             when (previousState) {
-                is MainLoopState.Initial -> handleOcrStates(result)
-                is MainLoopState.OcrRunning -> handleOcrStates(result)
+                is MainLoopState.Initial, is MainLoopState.OcrRunning -> handleOcrStates(result)
                 is MainLoopState.NameAndExpiryRunning -> handleNameAndExpiryRunningState(result)
                 is MainLoopState.Finished -> MainLoopTransition.Frame
             }
         )
+
+        state = currentState
 
         val (pan, name, expiry) = when (currentState) {
             is MainLoopState.Initial -> Triple(null, null, null)
@@ -261,8 +260,6 @@ class MainLoopAggregator(
             state = currentState
         )
 
-        state = currentState
-
         return if (currentState is MainLoopState.Finished) {
             val errorString = if (!result.isNameAndExpiryExtractionAvailable && (isNameExtractionEnabled || isExpiryExtractionEnabled)) {
                 NAME_OR_EXPIRY_UNAVAILABLE_RESPONSE
@@ -272,8 +269,7 @@ class MainLoopAggregator(
                 pan = currentState.pan,
                 name = currentState.name,
                 expiry = currentState.expiry,
-                errorString = errorString,
-                savedFrames = emptyMap() // for cardscan, we do not need to save any frames.
+                errorString = errorString
             )
         } else {
             interimResult to null

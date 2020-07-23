@@ -18,6 +18,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.getbouncer.cardscan.ui.result.MainLoopAggregator
+import com.getbouncer.cardscan.ui.result.MainLoopState
 import com.getbouncer.scan.framework.AggregateResultListener
 import com.getbouncer.scan.framework.AnalyzerLoopErrorListener
 import com.getbouncer.scan.framework.Config
@@ -26,7 +27,6 @@ import com.getbouncer.scan.framework.time.Duration
 import com.getbouncer.scan.framework.time.seconds
 import com.getbouncer.scan.payment.card.formatPan
 import com.getbouncer.scan.payment.card.getCardIssuer
-import com.getbouncer.scan.payment.card.isPossiblyValidPan
 import com.getbouncer.scan.payment.ml.SSDOcr
 import com.getbouncer.scan.payment.ml.common.calculateCardFinderCoordinatesFromObjectDetection
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
@@ -66,7 +66,8 @@ private val MINIMUM_RESOLUTION = Size(1280, 720) // minimum size of an object sq
 
 private enum class State(val value: Int) {
     NOT_FOUND(0),
-    FOUND(1);
+    FOUND(1),
+    CORRECT(2);
 }
 
 fun DetectionBox.forDebugPan() = DebugDetectionBox(rect, confidence, label.toString())
@@ -495,6 +496,16 @@ class CardScanActivity :
         scanState = State.FOUND
     }
 
+    private fun setStateCorrect() {
+        if (scanState != State.CORRECT) {
+            fadeOut(instructionsTextView)
+            viewFinderBackground.setBackgroundColor(getColorByRes(R.color.bouncerCorrectBackground))
+            viewFinderWindow.setBackgroundResource(R.drawable.bouncer_card_background_correct)
+            setAnimated(viewFinderBorder, R.drawable.bouncer_card_border_correct)
+        }
+        scanState = State.CORRECT
+    }
+
     private fun showNameAndExpiryInitializationError() {
         AlertDialog.Builder(this)
             .setTitle(R.string.bouncer_name_and_expiry_initialization_error)
@@ -544,12 +555,7 @@ class CardScanActivity :
             scanStat.trackResult("first_image_processed")
         }
 
-        val hasPreviousValidResult = hasPreviousValidResult.getAndSet(result.hasValidPan)
-        val isFirstValidResult = result.hasValidPan && !hasPreviousValidResult
-
-        val pan = result.mostLikelyPan
-
-        if (isFirstValidResult) {
+        if (result.state is MainLoopState.OcrRunning && !hasPreviousValidResult.getAndSet(true)) {
             scanStat.trackResult("ocr_pan_observed")
             fadeOut(enterCardManuallyButtonView)
         }
@@ -566,8 +572,8 @@ class CardScanActivity :
                 fadeIn(cardNameTextView, Duration.ZERO)
             }
         } else {
-            if (displayCardPan && result.hasValidPan && !pan.isNullOrEmpty()) {
-                cardPanTextView.text = formatPan(pan)
+            if (displayCardPan && result.hasValidPan && !result.mostLikelyPan.isNullOrEmpty()) {
+                cardPanTextView.text = formatPan(result.mostLikelyPan)
                 fadeIn(cardPanTextView)
             }
 
@@ -577,12 +583,15 @@ class CardScanActivity :
             }
         }
 
-        if (isPossiblyValidPan(pan)) {
-            if ((enableNameExtraction || enableExpiryExtraction) && result.analyzerResult.isNameAndExpiryExtractionAvailable) {
+        val willRunNameAndExpiry = (enableNameExtraction || enableExpiryExtraction) && result.analyzerResult.isNameAndExpiryExtractionAvailable
+        when (result.state) {
+            is MainLoopState.Initial -> setStateNotFound()
+            is MainLoopState.OcrRunning, is MainLoopState.NameAndExpiryRunning -> if (willRunNameAndExpiry) {
                 setStateFoundLong()
             } else {
                 setStateFoundShort()
             }
+            is MainLoopState.Finished -> setStateCorrect()
         }
 
         showDebugFrame(result.frame, result.analyzerResult.panDetectionBoxes, result.analyzerResult.objDetectionBoxes)
