@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class LaunchActivity extends AppCompatActivity implements CardScanActivityResultHandler {
 
-    private static final String API_KEY = "uXDc2sbugrkmvj1Bm3xOTXBw7NW4llgn";
+    private static final String API_KEY = "qOJ_fF-WLDMbG05iBq5wvwiTNTmM2qIn";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
