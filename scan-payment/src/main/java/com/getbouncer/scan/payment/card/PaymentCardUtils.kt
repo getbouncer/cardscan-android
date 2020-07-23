@@ -2,6 +2,8 @@
 package com.getbouncer.scan.payment.card
 
 import android.text.TextUtils
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 
 /*
  * Payment cards always have a PAN (Primary Account Number) on one side of the card. This PAN
@@ -136,6 +138,11 @@ fun getCardIssuer(pan: String?): CardIssuer = normalizeCardNumber(pan).let { nor
 
 /**
  * Determine if a PAN is valid.
+ *
+ * TODO: this should use a contract like the following once contracts are no longer experimental:
+ * ```
+ * contract { returns(true) implies (pan != null) }
+ * ```
  */
 fun isValidPan(pan: String?): Boolean = normalizeCardNumber(pan).let { normalizedPan ->
     val iinData = getIssuerData(normalizedPan) ?: return false

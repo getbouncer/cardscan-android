@@ -2,9 +2,7 @@ package com.getbouncer.scan.framework.interop
 
 import com.getbouncer.scan.framework.AggregateResultListener
 import com.getbouncer.scan.framework.ResultAggregator
-import com.getbouncer.scan.framework.ResultAggregatorConfig
 import com.getbouncer.scan.framework.ResultHandler
-import com.getbouncer.scan.framework.SavedFrame
 import com.getbouncer.scan.framework.StatefulResultHandler
 import com.getbouncer.scan.framework.TerminatingResultHandler
 
@@ -53,24 +51,17 @@ abstract class BlockingTerminatingResultHandler<Input, State, Output>(
  * An implementation of a result listener that does not use suspending functions. This allows interoperability with
  * java.
  */
-abstract class BlockingAggregateResultListener<DataFrame, State, InterimResult, FinalResult> :
-    AggregateResultListener<DataFrame, State, InterimResult, FinalResult> {
-    override suspend fun onInterimResult(result: InterimResult, state: State, frame: DataFrame) =
-        onInterimResultBlocking(result, state, frame)
+abstract class BlockingAggregateResultListener<InterimResult, FinalResult> :
+    AggregateResultListener<InterimResult, FinalResult> {
+    override suspend fun onInterimResult(result: InterimResult) = onInterimResultBlocking(result)
 
-    override suspend fun onResult(
-        result: FinalResult,
-        frames: Map<String, List<SavedFrame<DataFrame, State, InterimResult>>>
-    ) = onResultBlocking(result, frames)
+    override suspend fun onResult(result: FinalResult) = onResultBlocking(result)
 
     override suspend fun onReset() = onResetBlocking()
 
-    abstract fun onInterimResultBlocking(result: InterimResult, state: State, frame: DataFrame)
+    abstract fun onInterimResultBlocking(result: InterimResult)
 
-    abstract fun onResultBlocking(
-        result: FinalResult,
-        frames: Map<String, List<SavedFrame<DataFrame, State, InterimResult>>>
-    )
+    abstract fun onResultBlocking(result: FinalResult)
 
     abstract fun onResetBlocking()
 }
@@ -80,19 +71,11 @@ abstract class BlockingAggregateResultListener<DataFrame, State, InterimResult, 
  * java.
  */
 abstract class BlockingResultAggregator<DataFrame, State, AnalyzerResult, InterimResult, FinalResult>(
-    config: ResultAggregatorConfig,
-    listener: AggregateResultListener<DataFrame, State, InterimResult, FinalResult>,
+    listener: AggregateResultListener<InterimResult, FinalResult>,
     initialState: State
-) : ResultAggregator<DataFrame, State, AnalyzerResult, InterimResult, FinalResult>(config, listener, initialState) {
-    override suspend fun aggregateResult(
-        result: AnalyzerResult,
-        startAggregationTimer: () -> Unit,
-        mustReturnFinal: Boolean
-    ): Pair<InterimResult, FinalResult?> = aggregateResultBlocking(result, startAggregationTimer, mustReturnFinal)
+) : ResultAggregator<DataFrame, State, AnalyzerResult, InterimResult, FinalResult>(listener, initialState) {
+    override suspend fun aggregateResult(frame: DataFrame, result: AnalyzerResult): Pair<InterimResult, FinalResult?> =
+        aggregateResultBlocking(frame, result)
 
-    abstract fun aggregateResultBlocking(
-        result: AnalyzerResult,
-        startAggregationTimer: () -> Unit,
-        mustReturnFinal: Boolean
-    ): Pair<InterimResult, FinalResult?>
+    abstract fun aggregateResultBlocking(frame: DataFrame, result: AnalyzerResult): Pair<InterimResult, FinalResult?>
 }

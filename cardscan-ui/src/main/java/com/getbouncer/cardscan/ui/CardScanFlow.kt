@@ -7,17 +7,13 @@ import android.util.Size
 import androidx.lifecycle.LifecycleOwner
 import com.getbouncer.cardscan.ui.analyzer.NameAndExpiryAnalyzer
 import com.getbouncer.cardscan.ui.analyzer.PaymentCardOcrAnalyzer
-import com.getbouncer.cardscan.ui.analyzer.PaymentCardOcrState
-import com.getbouncer.cardscan.ui.result.OcrResultAggregator
-import com.getbouncer.cardscan.ui.result.PaymentCardOcrResult
+import com.getbouncer.cardscan.ui.result.MainLoopAggregator
 import com.getbouncer.scan.framework.AggregateResultListener
 import com.getbouncer.scan.framework.AnalyzerLoopErrorListener
 import com.getbouncer.scan.framework.AnalyzerPoolFactory
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.ProcessBoundAnalyzerLoop
-import com.getbouncer.scan.framework.ResultAggregatorConfig
 import com.getbouncer.scan.framework.time.Clock
-import com.getbouncer.scan.framework.time.seconds
 import com.getbouncer.scan.framework.util.cacheFirstResultSuspend
 import com.getbouncer.scan.payment.ml.AlphabetDetect
 import com.getbouncer.scan.payment.ml.ExpiryDetect
@@ -38,10 +34,9 @@ import kotlinx.coroutines.runBlocking
 class CardScanFlow(
     private val enableNameExtraction: Boolean,
     private val enableExpiryExtraction: Boolean,
-    private val resultListener: AggregateResultListener<SSDOcr.Input, PaymentCardOcrState, OcrResultAggregator.InterimResult, PaymentCardOcrResult>,
+    private val resultListener: AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult>,
     private val errorListener: AnalyzerLoopErrorListener
 ) {
-
     companion object {
 
         /**
@@ -91,7 +86,7 @@ class CardScanFlow(
      */
     private var canceled = false
 
-    private lateinit var mainLoopResultAggregator: OcrResultAggregator
+    private lateinit var mainLoopResultAggregator: MainLoopAggregator
     private var mainLoopJob: Job? = null
 
     /**
@@ -113,22 +108,10 @@ class CardScanFlow(
             return
         }
 
-        mainLoopResultAggregator = OcrResultAggregator(
-            config = ResultAggregatorConfig.Builder()
-                .withMaxTotalAggregationTime(if (enableNameExtraction || enableExpiryExtraction) 15.seconds else 2.seconds)
-                .withDefaultMaxSavedFrames(0)
-                .build(),
+        mainLoopResultAggregator = MainLoopAggregator(
             listener = resultListener,
-            requiredPanAgreementCount = if (enableNameExtraction || enableExpiryExtraction) 2 else 5,
-            requiredNameAgreementCount = 2,
-            requiredExpiryAgreementCount = 3,
             isNameExtractionEnabled = enableNameExtraction,
-            isExpiryExtractionEnabled = enableExpiryExtraction,
-            initialState = PaymentCardOcrState(
-                runOcr = true,
-                runNameExtraction = false,
-                runExpiryExtraction = false
-            )
+            isExpiryExtractionEnabled = enableExpiryExtraction
         )
 
         val analyzerPool = runBlocking {

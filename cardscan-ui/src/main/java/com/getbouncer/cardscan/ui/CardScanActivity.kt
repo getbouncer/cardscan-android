@@ -17,13 +17,10 @@ import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import com.getbouncer.cardscan.ui.analyzer.PaymentCardOcrState
-import com.getbouncer.cardscan.ui.result.OcrResultAggregator
-import com.getbouncer.cardscan.ui.result.PaymentCardOcrResult
+import com.getbouncer.cardscan.ui.result.MainLoopAggregator
 import com.getbouncer.scan.framework.AggregateResultListener
 import com.getbouncer.scan.framework.AnalyzerLoopErrorListener
 import com.getbouncer.scan.framework.Config
-import com.getbouncer.scan.framework.SavedFrame
 import com.getbouncer.scan.framework.time.Clock
 import com.getbouncer.scan.framework.time.Duration
 import com.getbouncer.scan.framework.time.seconds
@@ -123,7 +120,7 @@ data class CardScanActivityResult(
 
 class CardScanActivity :
     ScanActivity(),
-    AggregateResultListener<SSDOcr.Input, PaymentCardOcrState, OcrResultAggregator.InterimResult, PaymentCardOcrResult>,
+    AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult>,
     AnalyzerLoopErrorListener {
 
     companion object {
@@ -517,17 +514,7 @@ class CardScanActivity :
     /**
      * A final result was received from the aggregator. Set the result from this activity.
      */
-    override suspend fun onResult(
-        result: PaymentCardOcrResult,
-        frames: Map<String, List<SavedFrame<SSDOcr.Input, PaymentCardOcrState, OcrResultAggregator.InterimResult>>>
-    ) = launch(Dispatchers.Main) {
-        /*
-         * TODO: awushensky - I don't understand why, but withContext instead of launch suspends
-         * indefinitely while using Camera1 APIs. My best guess is that camera1 is keeping the main
-         * thread more tied up with preview than camera2 and cameraX do, and launch is allowing the
-         * camera to close before suspending.
-         */
-
+    override suspend fun onResult(result: MainLoopAggregator.FinalResult) = launch(Dispatchers.Main) {
         // Only show the expiry dates that are not expired
         val (expiryMonth, expiryYear) = if (result.expiry?.isValidExpiry() == true) {
             (result.expiry.month.toString() to result.expiry.year.toString())
@@ -549,34 +536,10 @@ class CardScanActivity :
         )
     }.let { Unit }
 
-    private suspend fun showDebugFrame(
-        frame: SSDOcr.Input,
-        panBoxes: List<DetectionBox>?,
-        objectBoxes: List<DetectionBox>?
-    ) {
-        if (Config.isDebug && lastDebugFrameUpdate.elapsedSince() > 1.seconds) {
-            lastDebugFrameUpdate = Clock.markNow()
-            val bitmap = withContext(Dispatchers.Default) { SSDOcr.cropImage(frame) }
-            debugBitmapView.setImageBitmap(bitmap)
-            if (panBoxes != null) {
-                debugOverlayView.setBoxes(panBoxes.map { it.forDebugPan() })
-            }
-            if (objectBoxes != null) {
-                debugOverlayView.setBoxes(objectBoxes.map { it.forDebugObjDetect(frame.cardFinder, frame.previewSize) })
-            }
-
-            Log.d(Config.logTag, "Delay between capture and result for this frame was ${frame.capturedAt.elapsedSince()}")
-        }
-    }
-
     /**
      * An interim result was received from the result aggregator.
      */
-    override suspend fun onInterimResult(
-        result: OcrResultAggregator.InterimResult,
-        state: PaymentCardOcrState,
-        frame: SSDOcr.Input
-    ) = launch(Dispatchers.Main) {
+    override suspend fun onInterimResult(result: MainLoopAggregator.InterimResult) = launch(Dispatchers.Main) {
         if (!mainLoopIsProducingResults.getAndSet(true)) {
             scanStat.trackResult("first_image_processed")
         }
@@ -622,10 +585,30 @@ class CardScanActivity :
             }
         }
 
-        showDebugFrame(frame, result.analyzerResult.panDetectionBoxes, result.analyzerResult.objDetectionBoxes)
+        showDebugFrame(result.frame, result.analyzerResult.panDetectionBoxes, result.analyzerResult.objDetectionBoxes)
     }.let { Unit }
 
     override suspend fun onReset() = launch(Dispatchers.Main) { setStateNotFound() }.let { Unit }
+
+    private suspend fun showDebugFrame(
+        frame: SSDOcr.Input,
+        panBoxes: List<DetectionBox>?,
+        objectBoxes: List<DetectionBox>?
+    ) {
+        if (Config.isDebug && lastDebugFrameUpdate.elapsedSince() > 1.seconds) {
+            lastDebugFrameUpdate = Clock.markNow()
+            val bitmap = withContext(Dispatchers.Default) { SSDOcr.cropImage(frame) }
+            debugBitmapView.setImageBitmap(bitmap)
+            if (panBoxes != null) {
+                debugOverlayView.setBoxes(panBoxes.map { it.forDebugPan() })
+            }
+            if (objectBoxes != null) {
+                debugOverlayView.setBoxes(objectBoxes.map { it.forDebugObjDetect(frame.cardFinder, frame.previewSize) })
+            }
+
+            Log.d(Config.logTag, "Delay between capture and result for this frame was ${frame.capturedAt.elapsedSince()}")
+        }
+    }
 
     override fun onAnalyzerFailure(t: Throwable): Boolean {
         analyzerFailureCancelScan(t)
