@@ -505,7 +505,8 @@ class Camera2Adapter(
                             val previewRequest = previewRequestBuilder.build()
                             previewCaptureSession?.setRepeatingRequest(previewRequest, null, cameraHandler)
                         } catch (e: CameraAccessException) {
-                            cameraErrorListener.onCameraAccessError(e)
+                            // Ignore camera access errors, this occurs when the camera is closed and will fire again
+                            // when the camera is opened.
                         }
                     }
 
