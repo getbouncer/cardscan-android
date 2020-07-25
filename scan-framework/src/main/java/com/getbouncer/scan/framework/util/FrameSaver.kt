@@ -25,11 +25,11 @@ abstract class FrameSaver<Identifier, Frame> {
             val maxSavedFrames = getMaxSavedFrames(savedFrameType)
 
             val typedSavedFrames = savedFrames.getOrPut(savedFrameType) { LinkedList() }
-            typedSavedFrames.add(frame)
+            typedSavedFrames.addFirst(frame)
 
             while (typedSavedFrames.size > maxSavedFrames) {
                 // saved frames is over size limit, reduce until it's not
-                typedSavedFrames.removeFirst()
+                typedSavedFrames.removeLast()
             }
         }
     }
