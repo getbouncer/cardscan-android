@@ -41,7 +41,7 @@ class FrameSaverTest {
         )
 
         assertEquals(
-            listOf(3, 4),
+            listOf(4, 3),
             frameSaver.getSavedFrames()["else"]?.toList()
         )
     }
