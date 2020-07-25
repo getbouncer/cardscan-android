@@ -1,14 +1,17 @@
 package com.getbouncer.scan.framework.util
 
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 /**
  * A class that counts and saves items.
  */
-class ItemCounter<T> {
+class ItemCounter<T>(firstValue: T? = null) {
     private val storageMutex = Mutex()
     private val items = mutableMapOf<T, Int>()
+
+    init { if (firstValue != null) runBlocking { countItem(firstValue) } }
 
     /**
      * Increment the count for the given item. Return the new count for the given item.

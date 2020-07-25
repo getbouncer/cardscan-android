@@ -449,33 +449,39 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
                     MainLoopAggregator.FinalResult>() {
         @Override
         public void onInterimResultBlocking(MainLoopAggregator.InterimResult interimResult) {
-            final String pan = interimResult.getMostLikelyPan();
-
             new Handler(getMainLooper()).post(() -> {
                 if (interimResult.getState() instanceof MainLoopState.OcrRunning && !hasPreviousValidResult.getAndSet(true)) {
                     ViewExtensionsKt.fadeOut(SingleActivityDemo.this, enterCardManuallyButtonView);
                 }
 
-                if (interimResult.getHasValidPan() && pan != null && !pan.isEmpty()) {
-                    cardPanTextView.setText(PanFormatterKt.formatPan(pan));
-                    ViewExtensionsKt.fadeIn(SingleActivityDemo.this, cardPanTextView, null);
-                }
-
-                if (interimResult.getMostLikelyName() != null) {
-                    cardNameTextView.setText(interimResult.getMostLikelyName());
-                    ViewExtensionsKt.fadeIn(SingleActivityDemo.this, cardNameTextView, null);
-                }
-
-                if (interimResult.getState() instanceof MainLoopState.Initial) {
+                final MainLoopState mainLoopState = interimResult.getState();
+                if (mainLoopState instanceof MainLoopState.Initial) {
                     setStateNotFound();
-                } else if (interimResult.getState() instanceof MainLoopState.OcrRunning ||
-                        interimResult.getState() instanceof MainLoopState.NameAndExpiryRunning) {
+                } else if (mainLoopState instanceof MainLoopState.OcrRunning) {
+                    final String pan = ((MainLoopState.OcrRunning) mainLoopState)
+                        .getMostLikelyPan();
+                    if (pan != null && PaymentCardUtils.isValidPan(pan)) {
+                        cardPanTextView.setText(PanFormatterKt.formatPan(pan));
+                        ViewExtensionsKt.fadeIn(SingleActivityDemo.this, cardPanTextView, null);
+                    }
                     if (interimResult.getAnalyzerResult().isNameAndExpiryExtractionAvailable()) {
                         setStateFoundLong();
                     } else {
                         setStateFoundShort();
                     }
-                } else if (interimResult.getState() instanceof MainLoopState.Finished) {
+                } else if (mainLoopState instanceof MainLoopState.NameAndExpiryRunning) {
+                    final String name = ((MainLoopState.NameAndExpiryRunning) mainLoopState)
+                        .getMostLikelyName();
+                    if (name != null) {
+                        cardNameTextView.setText(name);
+                        ViewExtensionsKt.fadeIn(SingleActivityDemo.this, cardNameTextView, null);
+                    }
+                    if (interimResult.getAnalyzerResult().isNameAndExpiryExtractionAvailable()) {
+                        setStateFoundLong();
+                    } else {
+                        setStateFoundShort();
+                    }
+                } else if (mainLoopState instanceof MainLoopState.Finished) {
                     setStateCorrect();
                 }
 

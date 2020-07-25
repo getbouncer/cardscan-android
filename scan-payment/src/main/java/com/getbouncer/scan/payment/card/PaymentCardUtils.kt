@@ -212,8 +212,8 @@ fun isNotPossiblyValidPan(pan: String?) = pan == null || !TextUtils.isDigitsOnly
  * compared to another IIN. This method will not correctly compare different values, such as an IIN to a PAN.
  */
 fun numberPossiblyMatches(scanned: String?, required: String?): Boolean =
-    scanned != null && TextUtils.isDigitsOnly(scanned) &&
-        (required == null || jaccardIndex(scanned, required) > JACCARD_SIMILARITY_THRESHOLD)
+    scanned == required || (scanned != null && TextUtils.isDigitsOnly(scanned) &&
+        (required == null || jaccardIndex(scanned, required) > JACCARD_SIMILARITY_THRESHOLD))
 
 /**
  * Calculate the jaccard index (similarity) between two strings. Values can range from 0 (no

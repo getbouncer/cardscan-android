@@ -27,6 +27,7 @@ import com.getbouncer.scan.framework.time.Duration
 import com.getbouncer.scan.framework.time.seconds
 import com.getbouncer.scan.payment.card.formatPan
 import com.getbouncer.scan.payment.card.getCardIssuer
+import com.getbouncer.scan.payment.card.isValidPan
 import com.getbouncer.scan.payment.ml.SSDOcr
 import com.getbouncer.scan.payment.ml.common.calculateCardFinderCoordinatesFromObjectDetection
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
@@ -523,6 +524,36 @@ class CardScanActivity :
     }
 
     /**
+     * Display the card pan. If debug, show the instant pan. if not, show the most likely pan.
+     */
+    private fun displayPan(instantPan: String?, mostLikelyPan: String?) {
+        if (displayCardPan) {
+            if (Config.isDebug && instantPan != null) {
+                cardPanTextView.text = formatPan(instantPan)
+                fadeIn(cardPanTextView, Duration.ZERO)
+            } else if (!mostLikelyPan.isNullOrEmpty() && isValidPan(mostLikelyPan)) {
+                cardPanTextView.text = formatPan(mostLikelyPan)
+                fadeIn(cardPanTextView)
+            }
+        }
+    }
+
+    /**
+     * Display the cardholder name. If debug, show the instant name. if not, show the most likely name.
+     */
+    private fun displayName(instantName: String?, mostLikelyName: String?) {
+        if (displayCardholderName) {
+            if (Config.isDebug && instantName != null) {
+                cardNameTextView.text = instantName
+                fadeIn(cardNameTextView, Duration.ZERO)
+            } else if (!mostLikelyName.isNullOrEmpty()) {
+                cardNameTextView.text = mostLikelyName
+                fadeIn(cardNameTextView)
+            }
+        }
+    }
+
+    /**
      * A final result was received from the aggregator. Set the result from this activity.
      */
     override suspend fun onResult(result: MainLoopAggregator.FinalResult) = launch(Dispatchers.Main) {
@@ -560,38 +591,26 @@ class CardScanActivity :
             fadeOut(enterCardManuallyButtonView)
         }
 
-        // if we're using debug, always show the latest number and name from the analyzer
-        if (Config.isDebug) {
-            if (displayCardPan) {
-                cardPanTextView.text = formatPan(result.analyzerResult.pan ?: "")
-                fadeIn(cardPanTextView, Duration.ZERO)
-            }
-
-            if (displayCardholderName) {
-                cardNameTextView.text = result.analyzerResult.name ?: ""
-                fadeIn(cardNameTextView, Duration.ZERO)
-            }
-        } else {
-            if (displayCardPan && result.hasValidPan && !result.mostLikelyPan.isNullOrEmpty()) {
-                cardPanTextView.text = formatPan(result.mostLikelyPan)
-                fadeIn(cardPanTextView)
-            }
-
-            if (displayCardholderName && result.mostLikelyName != null) {
-                cardNameTextView.text = result.mostLikelyName
-                fadeIn(cardNameTextView)
-            }
-        }
-
         val willRunNameAndExpiry = (enableNameExtraction || enableExpiryExtraction) && result.analyzerResult.isNameAndExpiryExtractionAvailable
+
         when (result.state) {
             is MainLoopState.Initial -> setStateNotFound()
-            is MainLoopState.OcrRunning, is MainLoopState.NameAndExpiryRunning ->
+            is MainLoopState.OcrRunning -> {
+                displayPan(result.analyzerResult.pan, result.state.getMostLikelyPan())
                 if (willRunNameAndExpiry) {
                     setStateFoundLong()
                 } else {
                     setStateFoundShort()
                 }
+            }
+            is MainLoopState.NameAndExpiryRunning -> {
+                displayName(result.analyzerResult.pan, result.state.getMostLikelyName())
+                if (willRunNameAndExpiry) {
+                    setStateFoundLong()
+                } else {
+                    setStateFoundShort()
+                }
+            }
             is MainLoopState.Finished -> setStateCorrect()
         }
 

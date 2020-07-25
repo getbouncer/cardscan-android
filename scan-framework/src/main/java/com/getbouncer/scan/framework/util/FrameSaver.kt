@@ -7,15 +7,10 @@ import java.util.LinkedList
 /**
  * Save data frames for later retrieval.
  */
-abstract class FrameSaver<Identifier, Frame, State, Result> {
-
-    /**
-     * A frame and its result that is saved for later analysis.
-     */
-    data class SavedFrame<DataFrame, State, Result>(val data: DataFrame, val state: State, val result: Result)
+abstract class FrameSaver<Identifier, Frame> {
 
     private val saveFrameMutex = Mutex()
-    private val savedFrames = mutableMapOf<Identifier, LinkedList<SavedFrame<Frame, State, Result>>>()
+    private val savedFrames = mutableMapOf<Identifier, LinkedList<Frame>>()
 
     /**
      * Determine how frames should be classified using [getSaveFrameIdentifier], and then store them in a map of frames
@@ -24,13 +19,13 @@ abstract class FrameSaver<Identifier, Frame, State, Result> {
      * This method keeps track of the total number of saved frames. If the total number or total size exceeds the
      * maximum allowed, the oldest frames will be dropped.
      */
-    suspend fun saveFrame(data: Frame, state: State, result: Result) {
-        val savedFrameType = getSaveFrameIdentifier(data, result) ?: return
+    suspend fun saveFrame(frame: Frame) {
+        val savedFrameType = getSaveFrameIdentifier(frame) ?: return
         return saveFrameMutex.withLock {
             val maxSavedFrames = getMaxSavedFrames(savedFrameType)
 
             val typedSavedFrames = savedFrames.getOrPut(savedFrameType) { LinkedList() }
-            typedSavedFrames.add(SavedFrame(data, state, result))
+            typedSavedFrames.add(frame)
 
             while (typedSavedFrames.size > maxSavedFrames) {
                 // saved frames is over size limit, reduce until it's not
@@ -42,7 +37,7 @@ abstract class FrameSaver<Identifier, Frame, State, Result> {
     /**
      * Retrieve the list of saved frames.
      */
-    fun getSavedFrames(): Map<Identifier, LinkedList<SavedFrame<Frame, State, Result>>> = savedFrames
+    fun getSavedFrames(): Map<Identifier, LinkedList<Frame>> = savedFrames
 
     /**
      * Clear all saved frames
@@ -58,5 +53,5 @@ abstract class FrameSaver<Identifier, Frame, State, Result> {
      *
      * If this method returns a non-null string, the frame will be saved under that identifier.
      */
-    protected abstract fun getSaveFrameIdentifier(frame: Frame, result: Result): Identifier?
+    protected abstract fun getSaveFrameIdentifier(frame: Frame): Identifier?
 }

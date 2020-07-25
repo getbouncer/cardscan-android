@@ -13,7 +13,6 @@ import com.getbouncer.scan.payment.card.isValidPan
 import com.getbouncer.scan.payment.ml.ExpiryDetect
 import com.getbouncer.scan.payment.ml.SSDOcr
 import kotlinx.coroutines.runBlocking
-import java.lang.IllegalStateException
 
 private const val DESIRED_PAN_AGREEMENT = 5
 private const val DESIRED_NAME_AGREEMENT = 2
@@ -36,7 +35,6 @@ internal sealed class MainLoopTransition {
     data class FrameWithExpiry(val expiry: ExpiryDetect.Expiry) : MainLoopTransition()
     data class FrameWithNameAndExpiry(val name: String, val expiry: ExpiryDetect.Expiry) : MainLoopTransition()
     object FrameWithoutNameOrExpiry : MainLoopTransition()
-    object Frame : MainLoopTransition()
 }
 
 /**
@@ -54,14 +52,11 @@ sealed class MainLoopState(
 
     internal abstract suspend fun consumeTransition(transition: MainLoopTransition): MainLoopState
 
-    internal fun handleInvalidTransition(transition: MainLoopTransition): MainLoopState =
-        throw IllegalStateException("Invalid transition $transition passed to state $this")
-
     override fun toString(): String =
         "${this::class.java.simpleName}(runOcr=$runOcr, runNameExtraction=$runNameExtraction, runExpiryExtraction=$runExpiryExtraction, reachedStateAt=$reachedStateAt)"
 
     init {
-        if (Config.isDebug) Log.d(Config.logTag, "Main loop transitioning to state $this")
+        if (Config.isDebug) Log.d(Config.logTag, "cardscan_main_loop transitioning to state $this")
     }
 
     /**
@@ -71,7 +66,10 @@ sealed class MainLoopState(
         override suspend fun consumeTransition(transition: MainLoopTransition): MainLoopState = when (transition) {
             is MainLoopTransition.FrameWithoutValidPan -> this
             is MainLoopTransition.FrameWithValidPan -> OcrRunning(transition.pan)
-            else -> handleInvalidTransition(transition)
+            is MainLoopTransition.FrameWithName -> this
+            is MainLoopTransition.FrameWithExpiry -> this
+            is MainLoopTransition.FrameWithNameAndExpiry -> this
+            is MainLoopTransition.FrameWithoutNameOrExpiry -> this
         }
     }
 
@@ -90,10 +88,10 @@ sealed class MainLoopState(
                     panCounter.countItem(transition.pan)
                     transition.nameExtractionEnabled to transition.expiryExtractionEnabled
                 }
-                else -> {
-                    handleInvalidTransition(transition)
-                    false to false
-                }
+                is MainLoopTransition.FrameWithName -> true to true
+                is MainLoopTransition.FrameWithExpiry -> true to true
+                is MainLoopTransition.FrameWithNameAndExpiry -> true to true
+                is MainLoopTransition.FrameWithoutNameOrExpiry -> false to false
             }
 
             val nameOrExpiryEnabled = nameExtractionEnabled || expiryExtractionEnabled
@@ -143,7 +141,6 @@ sealed class MainLoopState(
                 is MainLoopTransition.FrameWithName -> nameCounter.countItem(transition.name)
                 is MainLoopTransition.FrameWithExpiry -> expiryCounter.countItem(transition.expiry)
                 is MainLoopTransition.FrameWithoutNameOrExpiry -> { /* nothing to do */ }
-                else -> handleInvalidTransition(transition)
             }
 
             val (nameAgreements, bestGuessName) = nameCounter.getHighestCountItem(minCount = MINIMUM_NAME_AGREEMENT) ?: 0 to null
@@ -197,10 +194,6 @@ class MainLoopAggregator(
 
     data class InterimResult(
         val analyzerResult: PaymentCardOcrAnalyzer.Prediction,
-        val mostLikelyPan: String?,
-        val mostLikelyExpiry: ExpiryDetect.Expiry?,
-        val mostLikelyName: String?,
-        val hasValidPan: Boolean,
         val frame: SSDOcr.Input,
         val state: MainLoopState
     )
@@ -237,25 +230,14 @@ class MainLoopAggregator(
             when (previousState) {
                 is MainLoopState.Initial, is MainLoopState.OcrRunning -> handleOcrStates(result)
                 is MainLoopState.NameAndExpiryRunning -> handleNameAndExpiryRunningState(result)
-                is MainLoopState.Finished -> MainLoopTransition.Frame
+                is MainLoopState.Finished -> MainLoopTransition.FrameWithoutNameOrExpiry
             }
         )
 
         state = currentState
 
-        val (pan, name, expiry) = when (currentState) {
-            is MainLoopState.Initial -> Triple(null, null, null)
-            is MainLoopState.OcrRunning -> Triple(currentState.getMostLikelyPan(), null, null)
-            is MainLoopState.NameAndExpiryRunning -> Triple(currentState.pan, currentState.getMostLikelyName(), currentState.getMostLikelyExpiry())
-            is MainLoopState.Finished -> Triple(currentState.pan, currentState.name, currentState.expiry)
-        }
-
         val interimResult = InterimResult(
             analyzerResult = result,
-            mostLikelyPan = pan,
-            mostLikelyExpiry = expiry,
-            mostLikelyName = name,
-            hasValidPan = isValidPan(pan),
             frame = frame,
             state = currentState
         )
