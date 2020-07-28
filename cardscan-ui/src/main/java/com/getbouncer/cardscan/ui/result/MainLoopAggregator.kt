@@ -8,7 +8,7 @@ import com.getbouncer.scan.framework.ResultAggregator
 import com.getbouncer.scan.framework.time.Clock
 import com.getbouncer.scan.framework.time.ClockMark
 import com.getbouncer.scan.framework.time.seconds
-import com.getbouncer.scan.framework.util.ItemCounter
+import com.getbouncer.scan.framework.util.ItemTotalCounter
 import com.getbouncer.scan.payment.card.isValidPan
 import com.getbouncer.scan.payment.ml.ExpiryDetect
 import com.getbouncer.scan.payment.ml.SSDOcr
@@ -77,7 +77,7 @@ sealed class MainLoopState(
      * The state of the main loop where OCR is running.
      */
     class OcrRunning(firstPan: String) : MainLoopState(runOcr = true, runNameExtraction = false, runExpiryExtraction = false) {
-        private val panCounter = ItemCounter<String>().apply { runBlocking { countItem(firstPan) } }
+        private val panCounter = ItemTotalCounter<String>().apply { runBlocking { countItem(firstPan) } }
 
         fun getMostLikelyPan() = panCounter.getHighestCountItem()?.second
 
@@ -126,8 +126,8 @@ sealed class MainLoopState(
         private val nameExtractionEnabled: Boolean,
         private val expiryExtractionEnabled: Boolean
     ) : MainLoopState(runOcr = false, runNameExtraction = nameExtractionEnabled, runExpiryExtraction = expiryExtractionEnabled) {
-        private val nameCounter = ItemCounter<String>()
-        private val expiryCounter = ItemCounter<ExpiryDetect.Expiry>()
+        private val nameCounter = ItemTotalCounter<String>()
+        private val expiryCounter = ItemTotalCounter<ExpiryDetect.Expiry>()
 
         fun getMostLikelyName() = nameCounter.getHighestCountItem(minCount = MINIMUM_NAME_AGREEMENT)?.second
         fun getMostLikelyExpiry() = expiryCounter.getHighestCountItem(minCount = MINIMUM_EXPIRY_AGREEMENT)?.second

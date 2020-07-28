@@ -450,7 +450,8 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
         @Override
         public void onInterimResultBlocking(MainLoopAggregator.InterimResult interimResult) {
             new Handler(getMainLooper()).post(() -> {
-                if (interimResult.getState() instanceof MainLoopState.OcrRunning && !hasPreviousValidResult.getAndSet(true)) {
+                if (interimResult.getState() instanceof MainLoopState.OcrRunning &&
+                        !hasPreviousValidResult.getAndSet(true)) {
                     ViewExtensionsKt.fadeOut(SingleActivityDemo.this, enterCardManuallyButtonView);
                 }
 
