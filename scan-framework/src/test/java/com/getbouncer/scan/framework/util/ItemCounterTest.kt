@@ -56,14 +56,14 @@ class ItemCounterTest {
     fun countRecentItems() = runBlockingTest {
         val itemCounter = ItemRecencyCounter<String>(3)
 
-        assertEquals(1, itemCounter.countItem("a"))  // counter = [a]
-        assertEquals(1, itemCounter.countItem("b"))  // counter = [b, a]
-        assertEquals(2, itemCounter.countItem("a"))  // counter = [a, b, a]
-        assertEquals(2, itemCounter.countItem("a"))  // counter = [a, a, b]
-        assertEquals(3, itemCounter.countItem("a"))  // counter = [a, a, a]
-        assertEquals(3, itemCounter.countItem("a"))  // counter = [a, a, a]
-        assertEquals(1, itemCounter.countItem("b"))  // counter = [b, a, a]
-        assertEquals(2, itemCounter.countItem("a"))  // counter = [a, b, a]
+        assertEquals(1, itemCounter.countItem("a")) // counter = [a]
+        assertEquals(1, itemCounter.countItem("b")) // counter = [b, a]
+        assertEquals(2, itemCounter.countItem("a")) // counter = [a, b, a]
+        assertEquals(2, itemCounter.countItem("a")) // counter = [a, a, b]
+        assertEquals(3, itemCounter.countItem("a")) // counter = [a, a, a]
+        assertEquals(3, itemCounter.countItem("a")) // counter = [a, a, a]
+        assertEquals(1, itemCounter.countItem("b")) // counter = [b, a, a]
+        assertEquals(2, itemCounter.countItem("a")) // counter = [a, b, a]
 
         assertEquals("a", itemCounter.getHighestCountItem()?.second)
         assertEquals(2, itemCounter.getHighestCountItem()?.first)
@@ -74,17 +74,17 @@ class ItemCounterTest {
     fun resetRecentItems() = runBlockingTest {
         val itemCounter = ItemRecencyCounter<String>(3)
 
-        assertEquals(1, itemCounter.countItem("a"))  // counter = [a]
-        assertEquals(1, itemCounter.countItem("b"))  // counter = [b, a]
-        assertEquals(2, itemCounter.countItem("a"))  // counter = [a, b, a]
+        assertEquals(1, itemCounter.countItem("a")) // counter = [a]
+        assertEquals(1, itemCounter.countItem("b")) // counter = [b, a]
+        assertEquals(2, itemCounter.countItem("a")) // counter = [a, b, a]
 
         itemCounter.reset()
 
         assertNull(itemCounter.getHighestCountItem())
 
-        assertEquals(1, itemCounter.countItem("a"))  // counter = [a]
-        assertEquals(1, itemCounter.countItem("b"))  // counter = [b, a]
-        assertEquals(2, itemCounter.countItem("a"))  // counter = [a, b, a]
+        assertEquals(1, itemCounter.countItem("a")) // counter = [a]
+        assertEquals(1, itemCounter.countItem("b")) // counter = [b, a]
+        assertEquals(2, itemCounter.countItem("a")) // counter = [a, b, a]
 
         assertEquals("a", itemCounter.getHighestCountItem()?.second)
         assertEquals(2, itemCounter.getHighestCountItem()?.first)
