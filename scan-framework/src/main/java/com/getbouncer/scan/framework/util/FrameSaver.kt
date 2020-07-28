@@ -20,16 +20,16 @@ abstract class FrameSaver<Identifier, Frame> {
      * maximum allowed, the oldest frames will be dropped.
      */
     suspend fun saveFrame(frame: Frame) {
-        val savedFrameType = getSaveFrameIdentifier(frame) ?: return
+        val identifier = getSaveFrameIdentifier(frame) ?: return
         return saveFrameMutex.withLock {
-            val maxSavedFrames = getMaxSavedFrames(savedFrameType)
+            val maxSavedFrames = getMaxSavedFrames(identifier)
 
-            val typedSavedFrames = savedFrames.getOrPut(savedFrameType) { LinkedList() }
-            typedSavedFrames.addFirst(frame)
+            val frames = savedFrames.getOrPut(identifier) { LinkedList() }
+            frames.addFirst(frame)
 
-            while (typedSavedFrames.size > maxSavedFrames) {
+            while (frames.size > maxSavedFrames) {
                 // saved frames is over size limit, reduce until it's not
-                typedSavedFrames.removeLast()
+                removeFrame(identifier, frames)
             }
         }
     }
@@ -54,4 +54,12 @@ abstract class FrameSaver<Identifier, Frame> {
      * If this method returns a non-null string, the frame will be saved under that identifier.
      */
     protected abstract fun getSaveFrameIdentifier(frame: Frame): Identifier?
+
+    /**
+     * Remove a frame from this list. The most recently added frames will be at the beginning of this list, while the
+     * least recently added frames will be at the end.
+     */
+    protected open fun removeFrame(identifier: Identifier, frames: LinkedList<Frame>) {
+        frames.removeLast()
+    }
 }
