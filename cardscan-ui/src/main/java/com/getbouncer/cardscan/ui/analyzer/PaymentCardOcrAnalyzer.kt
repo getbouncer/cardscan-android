@@ -20,7 +20,8 @@ class PaymentCardOcrAnalyzer private constructor(
         val name: String?,
         val expiry: ExpiryDetect.Expiry?,
         val objDetectionBoxes: List<DetectionBox>?,
-        val isNameAndExpiryExtractionAvailable: Boolean
+        val isExpiryExtractionAvailable: Boolean,
+        val isNameExtractionAvailable: Boolean
     )
 
     override val name: String = "payment_card_ocr_analyzer"
@@ -48,7 +49,8 @@ class PaymentCardOcrAnalyzer private constructor(
             name = nameAndExpiryDeferred?.await()?.name,
             expiry = nameAndExpiryDeferred?.await()?.expiry,
             objDetectionBoxes = nameAndExpiryDeferred?.await()?.boxes,
-            isNameAndExpiryExtractionAvailable = nameAndExpiryAnalyzer?.isAvailable() ?: false
+            isExpiryExtractionAvailable = nameAndExpiryAnalyzer?.isExpiryDetectorAvailable() ?: false,
+            isNameExtractionAvailable = nameAndExpiryAnalyzer?.isNameDetectorAvailable() ?: false
         )
     }
 

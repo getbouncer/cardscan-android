@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.util.Size
 import com.getbouncer.scan.framework.FetchedData
+import com.getbouncer.scan.framework.UpdatingModelWebFetcher
 import com.getbouncer.scan.framework.UpdatingResourceFetcher
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
@@ -31,7 +32,7 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
 
     data class Prediction(val character: Char, val confidence: Float)
 
-    override val name: String = "alphabet_detect"
+    override val name: String = "alphabet_recognize"
 
     override suspend fun buildEmptyMLOutput() = arrayOf(FloatArray(NUM_CLASS))
 
@@ -84,11 +85,11 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
     /**
      * A fetcher for downloading model data.
      */
-    class ModelFetcher(context: Context) : UpdatingResourceFetcher(context) {
-        override val resource: Int = R.raw.s48_a_50_char_v4_147_0_94_16
-        override val resourceModelVersion: String = "4.147.0.94.16"
-        override val resourceModelHash: String = "429791e4c8bb53000ddb7bd70c87116c5b0f52b550e1d56d3bd613d4b8f4b66a"
-        override val resourceModelHashAlgorithm: String = "SHA-256"
+    class ModelFetcher(context: Context) : UpdatingModelWebFetcher(context) {
+        override val defaultModelVersion: String = "4.147.0.94.16"
+        override val defaultModelHash: String = "429791e4c8bb53000ddb7bd70c87116c5b0f52b550e1d56d3bd613d4b8f4b66a"
+        override val defaultModelHashAlgorithm: String = "SHA-256"
+        override val defaultModelFileName: String = "s48_a_50_char_v4_147_0_94_16.tflite"
         override val modelClass: String = "char_recognize"
         override val modelFrameworkVersion: Int = 1
     }

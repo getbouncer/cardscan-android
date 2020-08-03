@@ -591,7 +591,8 @@ class CardScanActivity :
             fadeOut(enterCardManuallyButtonView)
         }
 
-        val willRunNameAndExpiry = (enableNameExtraction || enableExpiryExtraction) && result.analyzerResult.isNameAndExpiryExtractionAvailable
+        val willRunNameAndExpiry = (result.analyzerResult.isExpiryExtractionAvailable && enableExpiryExtraction) ||
+                (result.analyzerResult.isNameExtractionAvailable && result.analyzerResult.isNameExtractionAvailable)
 
         when (result.state) {
             is MainLoopState.Initial -> setStateNotFound()
