@@ -254,7 +254,7 @@ class MainLoopAggregator(
             }
 
             val errorString = if (errors.isNotEmpty()) {
-                INSUFFICIENT_PERMISSIONS_PREFIX + errors.joinToString(",", prefix="[", postfix="]")
+                INSUFFICIENT_PERMISSIONS_PREFIX + errors.joinToString(",", prefix = "[", postfix = "]")
             } else null
 
             interimResult to FinalResult(

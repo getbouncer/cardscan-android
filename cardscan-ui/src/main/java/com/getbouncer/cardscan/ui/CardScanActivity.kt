@@ -592,7 +592,7 @@ class CardScanActivity :
         }
 
         val willRunNameAndExpiry = (result.analyzerResult.isExpiryExtractionAvailable && enableExpiryExtraction) ||
-                (result.analyzerResult.isNameExtractionAvailable && result.analyzerResult.isNameExtractionAvailable)
+            (result.analyzerResult.isNameExtractionAvailable && result.analyzerResult.isNameExtractionAvailable)
 
         when (result.state) {
             is MainLoopState.Initial -> setStateNotFound()

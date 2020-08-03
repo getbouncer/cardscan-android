@@ -87,9 +87,9 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
      */
     class ModelFetcher(context: Context) : UpdatingModelWebFetcher(context) {
         override val defaultModelVersion: String = "4.147.0.94.16"
-        override val defaultModelHash: String = "429791e4c8bb53000ddb7bd70c87116c5b0f52b550e1d56d3bd613d4b8f4b66a"
+        override val defaultModelHash: String = "0693bf1962715e32f8d85ffefd8be9971d84ed554f25f4060aca2ca1f82c955b"
         override val defaultModelHashAlgorithm: String = "SHA-256"
-        override val defaultModelFileName: String = "s48_a_50_char_v4_147_0_94_16.tflite"
+        override val defaultModelFileName: String = "char_recognize.tflite"
         override val modelClass: String = "char_recognize"
         override val modelFrameworkVersion: Int = 1
     }
