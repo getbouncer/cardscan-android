@@ -36,7 +36,7 @@ class BouncerApiTest {
 
     @Before
     fun before() {
-        Config.apiKey = "uXDc2sbugrkmvj1Bm3xOTXBw7NW4llgn"
+        Config.apiKey = "qOJ_fF-WLDMbG05iBq5wvwiTNTmM2qIn"
     }
 
     @After
@@ -105,10 +105,6 @@ class BouncerApiTest {
     }
 
     /**
-     * Note, if this test is failing with an unauthorized exception, please make sure that the API
-     * key specified at the top of this file is authorized with DOWNLOAD_VERIFY_MODELS
-     *
-     *
      * TODO: this method should use runBlockingTest instead of runBlocking. However, an issue with
      * runBlockingTest currently fails when functions under test use withContext(Dispatchers.IO) or
      * withContext(Dispatchers.Default).
@@ -121,7 +117,7 @@ class BouncerApiTest {
         when (
             val result = getModelSignedUrl(
                 appContext,
-                "fake_model",
+                "four_recognize",
                 "v0.0.1",
                 "model.tflite"
             )

@@ -21,7 +21,7 @@ class FetcherTest {
 
     @Before
     fun before() {
-        Config.apiKey = "uXDc2sbugrkmvj1Bm3xOTXBw7NW4llgn"
+        Config.apiKey = "qOJ_fF-WLDMbG05iBq5wvwiTNTmM2qIn"
     }
 
     @After
@@ -55,12 +55,12 @@ class FetcherTest {
     @LargeTest
     fun fetchModelFromWebDirectly_success() = runBlocking {
         class FetcherImpl : DirectDownloadWebFetcher(testContext) {
-            override val url: URL = URL("https://downloads.getbouncer.com/bob/v0.5.64.16/android/bob.tflite")
-            override val hash: String = "137f537e9d35e98c30a1654c78b7bace90bd3d2d12e336431ff9a65b0b4bfcc8"
-            override val hashAlgorithm: String = "SHA-256"
-            override val modelVersion: String = "0.5.64.16"
-            override val modelClass: String = "bob"
-            override val modelFrameworkVersion: Int = 1
+            override val url = URL("https://downloads.getbouncer.com/ocr/darknite/android/darknite.tflite")
+            override val hash = "0ef6e590a5c8b0da63546079a0afacd8ccb72418af68972b72fda45deaca543a"
+            override val hashAlgorithm = "SHA-256"
+            override val modelVersion = "darknite"
+            override val modelClass = "ocr"
+            override val modelFrameworkVersion = 1
         }
 
         // force downloading the model for this test
@@ -85,11 +85,11 @@ class FetcherTest {
     @LargeTest
     fun fetchModelFromWebSignedUrl_success() = runBlocking {
         class FetcherImpl : SignedUrlModelWebFetcher(testContext) {
-            override val modelClass = "object_detection"
-            override val modelFrameworkVersion: Int = 2049
-            override val modelVersion = "v0.0.3"
-            override val modelFileName = "ssd.tflite"
-            override val hash: String = "7c5a294ff9a1e665f07d3e64d898062e17a2348f01b0be75b2d5295988ce6a4c"
+            override val modelClass = "four_recognize"
+            override val modelFrameworkVersion = 2049
+            override val modelVersion = "0.0.1.16"
+            override val modelFileName = "fourrecognize.tflite"
+            override val hash = "55eea0d57239a7e92904fb15209963f7236bd06919275bdeb0a765a94b559c97"
             override val hashAlgorithm = "SHA-256"
         }
 
@@ -116,10 +116,10 @@ class FetcherTest {
     fun fetchModelFromWebSignedUrl_downloadFail() = runBlocking {
         class FetcherImpl : SignedUrlModelWebFetcher(testContext) {
             override val modelClass = "invalid_model"
-            override val modelFrameworkVersion: Int = 2049
-            override val modelVersion = "v0.0.2"
-            override val modelFileName = "ssd.tflite"
-            override val hash: String = "b7331fd09bf479a20e01b77ebf1b5edbd312639edf8dd883aa7b86f4b7fbfa62"
+            override val modelFrameworkVersion = 2049
+            override val modelVersion = "0.0.1.16"
+            override val modelFileName = "fourrecognize.tflite"
+            override val hash = "55eea0d57239a7e92904fb15209963f7236bd06919275bdeb0a765a94b559c97"
             override val hashAlgorithm = "SHA-256"
         }
 
@@ -139,11 +139,11 @@ class FetcherTest {
         Config.apiKey = "__INTEGRATION_TEST_INVALID_KEY__"
 
         class FetcherImpl : SignedUrlModelWebFetcher(testContext) {
-            override val modelClass = "object_detection"
-            override val modelFrameworkVersion: Int = 2049
-            override val modelVersion = "v0.0.3"
-            override val modelFileName = "ssd.tflite"
-            override val hash: String = "7c5a294ff9a1e665f07d3e64d898062e17a2348f01b0be75b2d5295988ce6a4c"
+            override val modelClass = "four_recognize"
+            override val modelFrameworkVersion = 2049
+            override val modelVersion = "0.0.1.16"
+            override val modelFileName = "fourrecognize.tflite"
+            override val hash = "55eea0d57239a7e92904fb15209963f7236bd06919275bdeb0a765a94b559c97"
             override val hashAlgorithm = "SHA-256"
         }
 
@@ -161,11 +161,11 @@ class FetcherTest {
     @LargeTest
     fun fetchUpgradableModelFromWeb_success() = runBlocking {
         class FetcherImpl : UpdatingModelWebFetcher(testContext) {
-            override val modelClass = "object_detection"
-            override val modelFrameworkVersion: Int = 1
-            override val defaultModelVersion: String = "v0.0.3"
-            override val defaultModelFileName: String = "ssd.tflite"
-            override val defaultModelHash: String = "7c5a294ff9a1e665f07d3e64d898062e17a2348f01b0be75b2d5295988ce6a4c"
+            override val modelClass = "four_recognize"
+            override val modelFrameworkVersion = 2049
+            override val defaultModelVersion = "0.0.1.16"
+            override val defaultModelFileName = "fourrecognize.tflite"
+            override val defaultModelHash = "55eea0d57239a7e92904fb15209963f7236bd06919275bdeb0a765a94b559c97"
             override val defaultModelHashAlgorithm = "SHA-256"
         }
 
@@ -191,11 +191,11 @@ class FetcherTest {
     @LargeTest
     fun fetchUpgradableModelFromWeb_successForImmediateUse() = runBlocking {
         class FetcherImpl : UpdatingModelWebFetcher(testContext) {
-            override val modelClass = "object_detection"
-            override val modelFrameworkVersion: Int = 1
-            override val defaultModelVersion: String = "v0.0.3"
-            override val defaultModelFileName: String = "ssd.tflite"
-            override val defaultModelHash: String = "7c5a294ff9a1e665f07d3e64d898062e17a2348f01b0be75b2d5295988ce6a4c"
+            override val modelClass = "four_recognize"
+            override val modelFrameworkVersion = 2049
+            override val defaultModelVersion = "0.0.1.16"
+            override val defaultModelFileName = "fourrecognize.tflite"
+            override val defaultModelHash = "55eea0d57239a7e92904fb15209963f7236bd06919275bdeb0a765a94b559c97"
             override val defaultModelHashAlgorithm = "SHA-256"
         }
 
@@ -221,12 +221,12 @@ class FetcherTest {
     @LargeTest
     fun fetchUpgradableResourceModel_success() = runBlocking {
         class FetcherImpl : UpdatingResourceFetcher(testContext) {
-            override val resource: Int = R.raw.sample_resource
-            override val resourceModelVersion: String = "demo"
-            override val resourceModelHash: String = "0dcf3e387c68dfea8dd72a183f1f765478ebaa4d8544cfc09a16e87a795d8ccf"
-            override val resourceModelHashAlgorithm: String = "SHA-256"
-            override val modelClass: String = "ocr"
-            override val modelFrameworkVersion: Int = 1
+            override val resource = R.raw.sample_resource
+            override val resourceModelVersion = "demo"
+            override val resourceModelHash = "0dcf3e387c68dfea8dd72a183f1f765478ebaa4d8544cfc09a16e87a795d8ccf"
+            override val resourceModelHashAlgorithm = "SHA-256"
+            override val modelClass = "four_recognize"
+            override val modelFrameworkVersion = 1
         }
 
         // force downloading the model for this test
@@ -251,12 +251,12 @@ class FetcherTest {
     @LargeTest
     fun fetchUpgradableResourceModel_successForImmediateUse() = runBlocking {
         class FetcherImpl : UpdatingResourceFetcher(testContext) {
-            override val resource: Int = R.raw.sample_resource
-            override val resourceModelVersion: String = "demo"
-            override val resourceModelHash: String = "0dcf3e387c68dfea8dd72a183f1f765478ebaa4d8544cfc09a16e87a795d8ccf"
-            override val resourceModelHashAlgorithm: String = "SHA-256"
-            override val modelClass: String = "ocr"
-            override val modelFrameworkVersion: Int = 1
+            override val resource = R.raw.sample_resource
+            override val resourceModelVersion = "demo"
+            override val resourceModelHash = "0dcf3e387c68dfea8dd72a183f1f765478ebaa4d8544cfc09a16e87a795d8ccf"
+            override val resourceModelHashAlgorithm = "SHA-256"
+            override val modelClass = "four_recognize"
+            override val modelFrameworkVersion = 1
         }
 
         // force downloading the model for this test
@@ -273,12 +273,12 @@ class FetcherTest {
     @LargeTest
     fun fetchUpgradableResourceModel_downloadFail() = runBlocking {
         class FetcherImpl : UpdatingResourceFetcher(testContext) {
-            override val resource: Int = R.raw.sample_resource
-            override val resourceModelVersion: String = "demo"
-            override val resourceModelHash: String = "0dcf3e387c68dfea8dd72a183f1f765478ebaa4d8544cfc09a16e87a795d8ccf"
-            override val resourceModelHashAlgorithm: String = "SHA-256"
-            override val modelClass: String = "invalid_model_class"
-            override val modelFrameworkVersion: Int = 1
+            override val resource = R.raw.sample_resource
+            override val resourceModelVersion = "demo"
+            override val resourceModelHash = "0dcf3e387c68dfea8dd72a183f1f765478ebaa4d8544cfc09a16e87a795d8ccf"
+            override val resourceModelHashAlgorithm = "SHA-256"
+            override val modelClass = "invalid_model_class"
+            override val modelFrameworkVersion = 1
         }
 
         // force downloading the model for this test

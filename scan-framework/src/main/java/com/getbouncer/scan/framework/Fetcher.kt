@@ -403,7 +403,7 @@ abstract class UpdatingModelWebFetcher(private val context: Context) : SignedUrl
  * A [WebFetcher] that queries Bouncer servers for updated data. If a new version is found, download it. If the data
  * details match what is cached, return the cached version instead.
  */
-abstract class UpdatingResourceFetcher(private val context: Context) : UpdatingModelWebFetcher(context) {
+abstract class UpdatingResourceFetcher(context: Context) : UpdatingModelWebFetcher(context) {
     protected abstract val resource: Int
     protected abstract val resourceModelVersion: String
     protected abstract val resourceModelHash: String
