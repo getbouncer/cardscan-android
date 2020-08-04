@@ -465,7 +465,8 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
                         cardPanTextView.setText(PanFormatterKt.formatPan(pan));
                         ViewExtensionsKt.fadeIn(SingleActivityDemo.this, cardPanTextView, null);
                     }
-                    if (interimResult.getAnalyzerResult().isNameExtractionAvailable() || interimResult.getAnalyzerResult().isExpiryExtractionAvailable()) {
+                    if (interimResult.getAnalyzerResult().isNameExtractionAvailable() ||
+                            interimResult.getAnalyzerResult().isExpiryExtractionAvailable()) {
                         setStateFoundLong();
                     } else {
                         setStateFoundShort();
@@ -477,7 +478,8 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
                         cardNameTextView.setText(name);
                         ViewExtensionsKt.fadeIn(SingleActivityDemo.this, cardNameTextView, null);
                     }
-                    if (interimResult.getAnalyzerResult().isNameExtractionAvailable() || interimResult.getAnalyzerResult().isExpiryExtractionAvailable()) {
+                    if (interimResult.getAnalyzerResult().isNameExtractionAvailable() ||
+                            interimResult.getAnalyzerResult().isExpiryExtractionAvailable()) {
                         setStateFoundLong();
                     } else {
                         setStateFoundShort();
