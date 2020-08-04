@@ -7,13 +7,11 @@ import android.graphics.RectF
 import android.util.Size
 import com.getbouncer.scan.framework.FetchedData
 import com.getbouncer.scan.framework.UpdatingModelWebFetcher
-import com.getbouncer.scan.framework.UpdatingResourceFetcher
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.ml.greedyNonMaxSuppression
 import com.getbouncer.scan.framework.util.indexOfMax
 import com.getbouncer.scan.framework.util.scaled
-import com.getbouncer.scan.payment.R
 import com.getbouncer.scan.payment.card.formatExpiry
 import com.getbouncer.scan.payment.card.isValidExpiry
 import com.getbouncer.scan.payment.card.isValidMonth

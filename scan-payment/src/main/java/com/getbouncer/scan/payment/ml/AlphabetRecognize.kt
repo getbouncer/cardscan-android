@@ -5,11 +5,9 @@ import android.graphics.Bitmap
 import android.util.Size
 import com.getbouncer.scan.framework.FetchedData
 import com.getbouncer.scan.framework.UpdatingModelWebFetcher
-import com.getbouncer.scan.framework.UpdatingResourceFetcher
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.util.indexOfMax
-import com.getbouncer.scan.payment.R
 import com.getbouncer.scan.payment.hasOpenGl31
 import com.getbouncer.scan.payment.scale
 import com.getbouncer.scan.payment.toRGBByteBuffer
