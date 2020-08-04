@@ -63,7 +63,7 @@ class FetcherTest {
             override val modelFrameworkVersion = 1
         }
 
-        // force downloading the model for this testexit
+        // force downloading the model for this test
         val fetcher = FetcherImpl()
         fetcher.clearCache()
 
