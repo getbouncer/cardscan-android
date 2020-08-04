@@ -36,7 +36,7 @@ class BouncerApiTest {
 
     @Before
     fun before() {
-        Config.apiKey = "uXDc2sbugrkmvj1Bm3xOTXBw7NW4llgn"
+        Config.apiKey = "qOJ_fF-WLDMbG05iBq5wvwiTNTmM2qIn"
     }
 
     @After
