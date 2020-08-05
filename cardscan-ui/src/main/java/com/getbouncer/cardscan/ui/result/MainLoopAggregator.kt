@@ -21,9 +21,10 @@ private const val DESIRED_EXPIRY_AGREEMENT = 3
 private const val MINIMUM_EXPIRY_AGREEMENT = 3
 private val OCR_TIMEOUT_WITH_NAME_AND_EXPIRY = 2.seconds
 private val OCR_TIMEOUT_WITHOUT_NAME_AND_EXPIRY = 5.seconds
-private val NAME_AND_EXPIRY_TIMEOUT = 13.seconds
+private val EXPIRY_TIMEOUT = 3.seconds
+private val NAME_TIMEOUT = 13.seconds
 
-private const val NAME_OR_EXPIRY_UNAVAILABLE_RESPONSE = "<Insufficient API key permissions>"
+private const val INSUFFICIENT_PERMISSIONS_PREFIX = "Insufficient API key permissions - "
 
 /**
  * Transitions between states for the main loop.
@@ -151,7 +152,8 @@ sealed class MainLoopState(
 
             return when {
                 nameSatisfied && expirySatisfied -> Finished(pan, bestGuessName, bestGuessExpiry)
-                reachedStateAt.elapsedSince() > NAME_AND_EXPIRY_TIMEOUT -> Finished(pan, bestGuessName, bestGuessExpiry)
+                !nameExtractionEnabled && reachedStateAt.elapsedSince() > EXPIRY_TIMEOUT -> Finished(pan, bestGuessName, bestGuessExpiry)
+                reachedStateAt.elapsedSince() > NAME_TIMEOUT -> Finished(pan, bestGuessName, bestGuessExpiry)
                 else -> this
             }
         }
@@ -204,13 +206,13 @@ class MainLoopAggregator(
         if (isValidPan(result.pan) && result.pan != null) {
             MainLoopTransition.FrameWithValidPan(
                 pan = result.pan,
-                nameExtractionEnabled = isNameExtractionEnabled && result.isNameAndExpiryExtractionAvailable,
-                expiryExtractionEnabled = isExpiryExtractionEnabled && result.isNameAndExpiryExtractionAvailable
+                nameExtractionEnabled = isNameExtractionEnabled && result.isNameExtractionAvailable,
+                expiryExtractionEnabled = isExpiryExtractionEnabled && result.isExpiryExtractionAvailable
             )
         } else {
             MainLoopTransition.FrameWithoutValidPan(
-                nameExtractionEnabled = isNameExtractionEnabled && result.isNameAndExpiryExtractionAvailable,
-                expiryExtractionEnabled = isExpiryExtractionEnabled && result.isNameAndExpiryExtractionAvailable
+                nameExtractionEnabled = isNameExtractionEnabled && result.isNameExtractionAvailable,
+                expiryExtractionEnabled = isExpiryExtractionEnabled && result.isExpiryExtractionAvailable
             )
         }
 
@@ -243,8 +245,16 @@ class MainLoopAggregator(
         )
 
         return if (currentState is MainLoopState.Finished) {
-            val errorString = if (!result.isNameAndExpiryExtractionAvailable && (isNameExtractionEnabled || isExpiryExtractionEnabled)) {
-                NAME_OR_EXPIRY_UNAVAILABLE_RESPONSE
+            val errors = mutableListOf<String>()
+            if (!result.isNameExtractionAvailable && isNameExtractionEnabled) {
+                errors.add("name")
+            }
+            if (!result.isExpiryExtractionAvailable && isExpiryExtractionEnabled) {
+                errors.add("expiry")
+            }
+
+            val errorString = if (errors.isNotEmpty()) {
+                INSUFFICIENT_PERMISSIONS_PREFIX + errors.joinToString(",", prefix = "[", postfix = "]")
             } else null
 
             interimResult to FinalResult(

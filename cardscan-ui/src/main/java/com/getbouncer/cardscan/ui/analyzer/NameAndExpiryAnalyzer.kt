@@ -45,14 +45,16 @@ class NameAndExpiryAnalyzer private constructor(
         val expiry: ExpiryDetect.Expiry?
     )
 
-    fun isAvailable() = textDetector != null
+    fun isExpiryDetectorAvailable() = textDetector != null && expiryDetect != null
+
+    fun isNameDetectorAvailable() = textDetector != null && alphabetDetect != null
 
     override val name: String = "name_detect_analyzer"
 
     override suspend fun analyze(
         data: SSDOcr.Input,
         state: MainLoopState
-    ) = if ((!state.runNameExtraction && !state.runExpiryExtraction) || textDetector == null || alphabetDetect == null) {
+    ) = if ((!state.runNameExtraction && !state.runExpiryExtraction) || textDetector == null) {
         Output(null, null, null)
     } else {
         val objDetectBitmap = cropImageForObjectDetect(

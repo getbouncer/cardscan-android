@@ -6,13 +6,12 @@ import android.graphics.Rect
 import android.graphics.RectF
 import android.util.Size
 import com.getbouncer.scan.framework.FetchedData
-import com.getbouncer.scan.framework.UpdatingResourceFetcher
+import com.getbouncer.scan.framework.UpdatingModelWebFetcher
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.ml.greedyNonMaxSuppression
 import com.getbouncer.scan.framework.util.indexOfMax
 import com.getbouncer.scan.framework.util.scaled
-import com.getbouncer.scan.payment.R
 import com.getbouncer.scan.payment.card.formatExpiry
 import com.getbouncer.scan.payment.card.isValidExpiry
 import com.getbouncer.scan.payment.card.isValidMonth
@@ -55,7 +54,7 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
 
     private data class Digit(val digit: Int, val confidence: Float)
 
-    override val name: String = "expiry_detect"
+    override val name: String = "expiry_recognize"
 
     override suspend fun buildEmptyMLOutput() = arrayOf(arrayOf(Array(NUM_PREDICTIONS) { FloatArray(NUM_CLASS) }))
 
@@ -140,11 +139,11 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
     /**
      * A fetcher for downloading model data.
      */
-    class ModelFetcher(context: Context) : UpdatingResourceFetcher(context) {
-        override val resource: Int = R.raw.fourrecognize
-        override val resourceModelVersion: String = "0.0.1.16"
-        override val resourceModelHash: String = "55eea0d57239a7e92904fb15209963f7236bd06919275bdeb0a765a94b559c97"
-        override val resourceModelHashAlgorithm: String = "SHA-256"
+    class ModelFetcher(context: Context) : UpdatingModelWebFetcher(context) {
+        override val defaultModelVersion: String = "0.0.1.16"
+        override val defaultModelHash: String = "55eea0d57239a7e92904fb15209963f7236bd06919275bdeb0a765a94b559c97"
+        override val defaultModelHashAlgorithm: String = "SHA-256"
+        override val defaultModelFileName: String = "fourrecognize.tflite"
         override val modelClass: String = "four_recognize"
         override val modelFrameworkVersion: Int = 1
     }
