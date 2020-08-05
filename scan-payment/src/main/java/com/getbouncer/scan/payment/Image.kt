@@ -248,6 +248,244 @@ fun Bitmap.zoom(
     return this.fragment(fromSegments, toSegments, toSize)
 }
 
+fun Bitmap.zoomOffset(
+    centerSize: Size,
+    previewSize: Size,
+    cardFinder: Rect,
+    toCenterDimension: Int,
+    toBorderWidth: Int
+): Bitmap {
+    val newLeft = cardFinder.left * this.width / previewSize.height
+    val newTop = cardFinder.top * this.height / previewSize.height
+    val newRight = cardFinder.right * this.width / previewSize.width
+    val newBottom = cardFinder.bottom * this.height / previewSize.height
+
+    val scaledCardFinderRect = Rect(newLeft, newTop, newRight, newBottom)
+
+    val x = scaledCardFinderRect.centerX()
+    val y = scaledCardFinderRect.centerY()
+
+    val totalHeight = this.height - centerSize.height
+    val totalWidth = this.width - centerSize.width
+
+    val toSize = Size((2 * toBorderWidth + toCenterDimension), (2 * toBorderWidth + toCenterDimension))
+    var r1: Pair<Int, Int>
+    val r2: Pair<Int, Int>
+    val r3: Pair<Int, Int>
+    val r4: Pair<Int, Int>
+    var c1: Pair<Int, Int>
+    val c2: Pair<Int, Int>
+    val c3: Pair<Int, Int>
+    val c4: Pair<Int, Int>
+    var tr1: Pair<Int, Int>
+    val tr2: Pair<Int, Int>
+    val tr3: Pair<Int, Int>
+    val tr4: Pair<Int, Int>
+    var tc1: Pair<Int, Int>
+    val tc2: Pair<Int, Int>
+    val tc3: Pair<Int, Int>
+    val tc4: Pair<Int, Int>
+
+    if (x < this.width / 2) {
+        if (y < this.height / 2) {
+            r1 = Pair(0, y - centerSize.height / 2)
+            r2 = Pair(y - centerSize.height / 2, y + centerSize.height / 2)
+            r3 = Pair(y + centerSize.height / 2, y + centerSize.height / 2 + totalHeight / 2)
+            r4 = Pair(y + centerSize.height / 2 + totalHeight / 2, this.height)
+            c1 = Pair(0, x - centerSize.width / 2)
+            c2 = Pair(x - centerSize.width / 2, x + centerSize.width / 2)
+            c3 = Pair(x + centerSize.width / 2, x + centerSize.width / 2 + totalWidth / 2)
+            c4 = Pair(x + centerSize.width / 2 + totalWidth / 2, this.width)
+            tr1 = Pair(
+                toBorderWidth - ((r1.second - r1.first) * toBorderWidth / (totalHeight / 2)),
+                toBorderWidth
+            )
+            tr2 = Pair(toBorderWidth, toBorderWidth + toCenterDimension)
+            tr3 = Pair(toBorderWidth + toCenterDimension, 2 * toBorderWidth + toCenterDimension)
+            tr4 = Pair(
+                0,
+                toBorderWidth - ((r1.second - r1.first) * toBorderWidth / (totalHeight / 2))
+            )
+            tc1 = Pair(
+                toBorderWidth - ((c1.second - c1.first) * toBorderWidth / (totalWidth / 2)),
+                toBorderWidth
+            )
+            tc2 = Pair(toBorderWidth, toBorderWidth + toCenterDimension)
+            tc3 = Pair(toBorderWidth + toCenterDimension, 2 * toBorderWidth + toCenterDimension)
+            tc4 = Pair(
+                0,
+                toBorderWidth - ((c1.second - c1.first) * toBorderWidth / (totalWidth / 2))
+            )
+        } else {
+            r1 = Pair(0, y - centerSize.height / 2 - totalHeight / 2)
+            r2 = Pair(y - centerSize.height / 2 - totalHeight / 2, y - centerSize.height / 2)
+            r3 = Pair(y - centerSize.height / 2, y + centerSize.height / 2)
+            r4 = Pair(y + centerSize.height / 2, this.height)
+            c1 = Pair(0, x - centerSize.width / 2)
+            c2 = Pair(x - centerSize.width / 2, x + centerSize.width / 2)
+            c3 = Pair(x + centerSize.width / 2, x + centerSize.width / 2 + totalWidth / 2)
+            c4 = Pair(x + centerSize.width / 2 + totalWidth / 2, this.width)
+
+            if (y == this.height / 2) {
+                r1 = r2
+            }
+
+            tr1 = Pair(
+                toBorderWidth + toCenterDimension + (r1.second - r1.first) * toBorderWidth /
+                    (totalHeight / 2),
+                (2 * toBorderWidth) + toCenterDimension
+            )
+            tr2 = Pair(0, toBorderWidth)
+            tr3 = Pair(toBorderWidth, toBorderWidth + toCenterDimension)
+            tr4 = Pair(
+                toBorderWidth + toCenterDimension,
+                toBorderWidth + toCenterDimension + (r1.second - r1.first) * toBorderWidth /
+                    (totalHeight / 2)
+            )
+            tc1 = Pair(
+                toBorderWidth - ((c1.second - c1.first) * toBorderWidth / (totalWidth / 2)),
+                toBorderWidth
+            )
+            tc2 = Pair(toBorderWidth, toBorderWidth + toCenterDimension)
+            tc3 = Pair(toBorderWidth + toCenterDimension, 2 * toBorderWidth + toCenterDimension)
+            tc4 = Pair(
+                0,
+                toBorderWidth - ((c1.second - c1.first) * toBorderWidth / (totalWidth / 2))
+            )
+
+            if (y == this.height / 2) {
+                tr1 = tr2
+            }
+        }
+    } else {
+        if (y < this.height / 2) {
+            r1 = Pair(0, y - centerSize.height / 2)
+            r2 = Pair(y - centerSize.height / 2, y + centerSize.height / 2)
+            r3 = Pair(y + centerSize.height / 2, y + centerSize.height / 2 + totalHeight / 2)
+            r4 = Pair(y + centerSize.height / 2 + totalHeight / 2, this.height)
+            c1 = Pair(0, x - centerSize.width / 2 - totalWidth / 2)
+            c2 = Pair(x - centerSize.width / 2 - totalWidth / 2, x - centerSize.width / 2)
+            c3 = Pair(x - centerSize.width / 2, x + centerSize.width / 2)
+            c4 = Pair(x + centerSize.width / 2, this.width)
+
+            if (x == this.width / 2) {
+                c1 = c2
+            }
+
+            tr1 = Pair(
+                toBorderWidth - ((r1.second - r1.first) * toBorderWidth / (totalHeight / 2)),
+                toBorderWidth
+            )
+            tr2 = Pair(toBorderWidth, toBorderWidth + toCenterDimension)
+            tr3 = Pair(toBorderWidth + toCenterDimension, 2 * toBorderWidth + toCenterDimension)
+            tr4 = Pair(
+                0,
+                toBorderWidth - ((r1.second - r1.first) * toBorderWidth / (totalHeight / 2))
+            )
+            tc1 = Pair(
+                toBorderWidth + toCenterDimension + (c1.second - c1.first) * toBorderWidth /
+                    (totalWidth / 2),
+                (2 * toBorderWidth) + toCenterDimension
+            )
+            tc2 = Pair(0, toBorderWidth)
+            tc3 = Pair(toBorderWidth, toBorderWidth + toCenterDimension)
+            tc4 = Pair(
+                toBorderWidth + toCenterDimension,
+                toBorderWidth + toCenterDimension + (c1.second - c1.first) * toBorderWidth /
+                    (totalWidth / 2)
+            )
+        } else {
+            r1 = Pair(0, y - centerSize.height / 2 - totalHeight / 2)
+            r2 = Pair(y - centerSize.height / 2 - totalHeight / 2, y - centerSize.height / 2)
+            r3 = Pair(y - centerSize.height / 2, y + centerSize.height / 2)
+            r4 = Pair(y + centerSize.height / 2, this.height)
+            c1 = Pair(0, x - centerSize.width / 2 - totalWidth / 2)
+            c2 = Pair(x - centerSize.width / 2 - totalWidth / 2, x - centerSize.width / 2)
+            c3 = Pair(x - centerSize.width / 2, x + centerSize.width / 2)
+            c4 = Pair(x + centerSize.width / 2, this.width)
+
+            if (y == this.height / 2) {
+                r1 = r2
+            }
+
+            if (x == this.width / 2) {
+                c1 = c2
+            }
+
+            tr1 = Pair(
+                toBorderWidth + toCenterDimension + (r1.second - r1.first) * toBorderWidth /
+                    (totalHeight / 2),
+                (2 * toBorderWidth) + toCenterDimension
+            )
+            tr2 = Pair(0, toBorderWidth)
+            tr3 = Pair(toBorderWidth, toBorderWidth + toCenterDimension)
+            tr4 = Pair(
+                toBorderWidth + toCenterDimension,
+                toBorderWidth + toCenterDimension + (r1.second - r1.first) * toBorderWidth /
+                    (totalHeight / 2)
+            )
+            tc1 = Pair(
+                toBorderWidth + toCenterDimension + (c1.second - c1.first) * toBorderWidth /
+                    (totalWidth / 2),
+                (2 * toBorderWidth) + toCenterDimension
+            )
+            tc2 = Pair(0, toBorderWidth)
+            tc3 = Pair(toBorderWidth, toBorderWidth + toCenterDimension)
+            tc4 = Pair(
+                toBorderWidth + toCenterDimension,
+                toBorderWidth + toCenterDimension + (c1.second - c1.first) * toBorderWidth /
+                    (totalWidth / 2)
+            )
+
+            if (y == this.height / 2) {
+                tr1 = tr2
+            }
+        }
+
+        if (x == this.width / 2) {
+            tc1 = tc2
+        }
+    }
+
+    val fromSegments = arrayOf(
+        Rect(c1.first, r1.first, c1.second, r1.second),
+        Rect(c2.first, r1.first, c2.second, r1.second),
+        Rect(c3.first, r1.first, c3.second, r1.second),
+        Rect(c4.first, r1.first, c4.second, r1.second),
+        Rect(c1.first, r2.first, c1.second, r2.second),
+        Rect(c2.first, r2.first, c2.second, r2.second),
+        Rect(c3.first, r2.first, c3.second, r2.second),
+        Rect(c4.first, r2.first, c4.second, r2.second),
+        Rect(c1.first, r3.first, c1.second, r3.second),
+        Rect(c2.first, r3.first, c2.second, r3.second),
+        Rect(c3.first, r3.first, c3.second, r3.second),
+        Rect(c4.first, r3.first, c4.second, r3.second),
+        Rect(c1.first, r4.first, c1.second, r4.second),
+        Rect(c2.first, r4.first, c2.second, r4.second),
+        Rect(c3.first, r4.first, c3.second, r4.second),
+        Rect(c4.first, r4.first, c4.second, r4.second)
+    )
+    val toSegments = arrayOf(
+        Rect(tc1.first, tr1.first, tc1.second, tr1.second),
+        Rect(tc2.first, tr1.first, tc2.second, tr1.second),
+        Rect(tc3.first, tr1.first, tc3.second, tr1.second),
+        Rect(tc4.first, tr1.first, tc4.second, tr1.second),
+        Rect(tc1.first, tr2.first, tc1.second, tr2.second),
+        Rect(tc2.first, tr2.first, tc2.second, tr2.second),
+        Rect(tc3.first, tr2.first, tc3.second, tr2.second),
+        Rect(tc4.first, tr2.first, tc4.second, tr2.second),
+        Rect(tc1.first, tr3.first, tc1.second, tr3.second),
+        Rect(tc2.first, tr3.first, tc2.second, tr3.second),
+        Rect(tc3.first, tr3.first, tc3.second, tr3.second),
+        Rect(tc4.first, tr3.first, tc4.second, tr3.second),
+        Rect(tc1.first, tr4.first, tc1.second, tr4.second),
+        Rect(tc2.first, tr4.first, tc2.second, tr4.second),
+        Rect(tc3.first, tr4.first, tc3.second, tr4.second),
+        Rect(tc4.first, tr4.first, tc4.second, tr4.second)
+    )
+    return this.fragment(fromSegments, toSegments, toSize)
+}
+
 /**
  * Crop an image to a given rectangle. The rectangle must not exceed the bounds of the image.
  */
