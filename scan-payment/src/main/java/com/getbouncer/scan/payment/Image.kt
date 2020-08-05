@@ -255,6 +255,9 @@ fun Bitmap.zoomOffset(
     toCenterDimension: Int,
     toBorderWidth: Int
 ): Bitmap {
+    require(cardFinder.left > 0 && cardFinder.right < previewSize.width && cardFinder.top > 0 && cardFinder.bottom < previewSize.height) {
+        "Card viewfinder window extends beyond preview boundary"
+    }
     val newLeft = cardFinder.left * this.width / previewSize.height
     val newTop = cardFinder.top * this.height / previewSize.height
     val newRight = cardFinder.right * this.width / previewSize.width
@@ -264,6 +267,14 @@ fun Bitmap.zoomOffset(
 
     val x = scaledCardFinderRect.centerX()
     val y = scaledCardFinderRect.centerY()
+
+    require(x + centerSize.width < this.width && x - centerSize.width > 0 && y + centerSize.height < this.height && y - centerSize.height > 0) {
+        "Card viewfinder is to close to the edge of the screen"
+    }
+
+    require(toCenterDimension > 0 && toBorderWidth > 0) {
+        "Cannot create an image without a border or without a center"
+    }
 
     val totalHeight = this.height - centerSize.height
     val totalWidth = this.width - centerSize.width
