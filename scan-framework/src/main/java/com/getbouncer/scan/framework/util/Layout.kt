@@ -36,15 +36,16 @@ fun maxAspectRatioInSize(area: Size, aspectRatio: Float): Size {
 }
 
 /**
- * Calculate the position of the [Size] within the [containingSize]. This makes a few
- * assumptions:
- * 1. the [Size] and the [containingSize] are centered relative to each other.
- * 2. the [Size] and the [containingSize] have the same orientation
- * 3. the [containingSize] and the [Size] share either a horizontal or vertical field of view
- * 4. the non-shared field of view must be smaller on the [Size] than the [containingSize]
+ * Calculate the maximum [Size] that fits within the [containingSize] and maintains the same aspect ratio as the subject
+ * of this method. This is often used to project a preview image onto a full camera image.
  *
- * Note that the [Size] and the [containingSize] are allowed to have completely independent
- * resolutions.
+ * If using this to project a preview image onto a full camera image, This makes a few assumptions:
+ * 1. the preview image [Size] and the full image [containingSize] are centered relative to each other
+ * 2. the preview image and the full image have the same orientation
+ * 3. the preview image and the full image share either a horizontal or vertical field of view
+ * 4. the non-shared field of view must be smaller on the preview image than the full image
+ *
+ * Note that the [Size] and the [containingSize] are allowed to have completely independent resolutions.
  */
 @CheckResult
 fun Size.scaleAndCenterWithin(containingSize: Size): Rect {
@@ -63,6 +64,22 @@ fun Size.scaleAndCenterWithin(containingSize: Size): Rect {
     )
 }
 
+/**
+ * Center a size on a given rectangle. The size may be larger or smaller than the rect.
+ */
+@CheckResult
+fun Size.centerOn(rect: Rect) = Rect(
+    /* left */ rect.centerX() - this.width / 2,
+    /* top */ rect.centerY() - this.height / 2,
+    /* right */ rect.centerX() + this.width / 2,
+    /* bottom */ rect.centerY() + this.height / 2
+)
+
+/**
+ * Scale a [Rect] to have a size equivalent to the [scaledSize]. This will also scale the position of the [Rect].
+ *
+ * For example, scaling a Rect(1, 2, 3, 4) by Size(5, 6) will result in a Rect(5, 12, 15, 24)
+ */
 fun RectF.scaled(scaledSize: Size): RectF {
     return RectF(
         this.left * scaledSize.width,
@@ -72,6 +89,11 @@ fun RectF.scaled(scaledSize: Size): RectF {
     )
 }
 
+/**
+ * Scale a [Rect] to have a size equivalent to the [scaledSize]. This will maintain the center position of the [Rect].
+ *
+ * For example, scaling a Rect(5, 6, 7, 8) by Size(2, 0.5) will result
+ */
 fun RectF.centerScaled(scaleX: Float, scaleY: Float): RectF {
     return RectF(
         this.centerX() - this.width() * scaleX / 2,
