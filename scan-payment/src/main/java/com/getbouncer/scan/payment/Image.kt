@@ -5,9 +5,17 @@ import android.content.Context
 import android.content.pm.ConfigurationInfo
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import android.graphics.Rect
 import android.util.Size
 import androidx.annotation.CheckResult
+import com.getbouncer.scan.framework.util.centerOn
+import com.getbouncer.scan.framework.util.expandToAspectRatio
+import com.getbouncer.scan.framework.util.intersection
+import com.getbouncer.scan.framework.util.projectRegionOfInterest
+import com.getbouncer.scan.framework.util.rect
+import com.getbouncer.scan.framework.util.relative
 import com.getbouncer.scan.framework.util.size
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -92,31 +100,132 @@ fun hasOpenGl31(context: Context): Boolean {
  * Fragments the image into multiple segments and places them in new segments.
  */
 @CheckResult
-fun Bitmap.fragment(
-    fromSegments: Array<Rect>,
-    toSegments: Array<Rect>,
-    toSize: Size
+fun Bitmap.rearrangeBySegments(
+    fromSegments: Map<Rect, Rect>,
+    futureImageSize: Size
 ): Bitmap {
-    require(fromSegments.size == toSegments.size) {
-        "Number of source segments does not match number of destination segments"
-    }
-
     val current = this
-    val result = Bitmap.createBitmap(toSize.width, toSize.height, this.config)
+    val result = Bitmap.createBitmap(futureImageSize.width, futureImageSize.height, this.config)
     val canvas = Canvas(result)
 
-    (0 until fromSegments.size).map {
-        val image = current.crop(fromSegments[it]).scale(toSegments[it].size())
+    for ((from, to) in fromSegments) {
+        val image = current.crop(from).scale(to.size())
         canvas.drawBitmap(
             image,
-            toSegments[it].left.toFloat(),
-            toSegments[it].top.toFloat(),
+            to.left.toFloat(),
+            to.top.toFloat(),
             null
         )
     }
 
     return result
 }
+
+fun Bitmap.resizeRegion(
+    originalCenterRect: Rect,
+    futureCenterRect: Rect,
+    futureImageSize: Size
+): Map<Rect, Rect> = mapOf(
+    Rect(
+        0,
+        0,
+        originalCenterRect.left,
+        originalCenterRect.top
+    ) to Rect(
+        0,
+        0,
+        futureCenterRect.left,
+        futureCenterRect.top
+    ),
+    Rect(
+        originalCenterRect.left,
+        0,
+        originalCenterRect.right,
+        originalCenterRect.top
+    ) to Rect(
+        futureCenterRect.left,
+        0,
+        futureCenterRect.right,
+        futureCenterRect.top
+    ),
+    Rect(
+        originalCenterRect.right,
+        0,
+        this.width,
+        originalCenterRect.top
+    ) to Rect(
+        futureCenterRect.right,
+        0,
+        futureImageSize.width,
+        futureCenterRect.top
+    ),
+    Rect(
+        0,
+        originalCenterRect.top,
+        originalCenterRect.left,
+        originalCenterRect.bottom
+    ) to Rect(
+        0,
+        futureCenterRect.top,
+        futureCenterRect.left,
+        futureCenterRect.bottom
+    ),
+    Rect(
+        originalCenterRect.left,
+        originalCenterRect.top,
+        originalCenterRect.right,
+        originalCenterRect.bottom
+    ) to Rect(
+        futureCenterRect.left,
+        futureCenterRect.top,
+        futureCenterRect.right,
+        futureCenterRect.bottom
+    ),
+    Rect(
+        originalCenterRect.right,
+        originalCenterRect.top,
+        this.width,
+        originalCenterRect.bottom
+    ) to Rect(
+        futureCenterRect.right,
+        futureCenterRect.top,
+        futureImageSize.width,
+        futureCenterRect.bottom
+    ),
+    Rect(
+        0,
+        originalCenterRect.bottom,
+        originalCenterRect.left,
+        this.height
+    ) to Rect(
+        0,
+        futureCenterRect.bottom,
+        futureCenterRect.left,
+        futureImageSize.height
+    ),
+    Rect(
+        originalCenterRect.left,
+        originalCenterRect.bottom,
+        originalCenterRect.right,
+        this.height
+    ) to Rect(
+        futureCenterRect.left,
+        futureCenterRect.bottom,
+        futureCenterRect.right,
+        futureImageSize.height
+    ),
+    Rect(
+        originalCenterRect.right,
+        originalCenterRect.bottom,
+        this.width,
+        this.height
+    ) to Rect(
+        futureCenterRect.right,
+        futureCenterRect.bottom,
+        futureImageSize.width,
+        futureImageSize.height
+    )
+)
 
 /**
  * Crops a piece from the center of the source image, resizing that to fit the new center dimension,
@@ -125,376 +234,49 @@ fun Bitmap.fragment(
  */
 @CheckResult
 fun Bitmap.zoom(
-    centerSize: Size,
-    toCenterDimension: Int,
-    toBorderWidth: Int
-): Bitmap {
-    val widthOffset = (centerSize.width / 2)
-    val heightOffset = (centerSize.height / 2)
-    val fromSegments = arrayOf(
-        Rect(
-            0,
-            0,
-            (this.width / 2) - widthOffset,
-            (this.height / 2) - heightOffset
-        ),
-        Rect(
-            (this.width / 2) - widthOffset,
-            0,
-            (this.width / 2) + widthOffset,
-            this.height / 2 - heightOffset
-        ),
-        Rect(
-            (this.width / 2) + widthOffset,
-            0,
-            this.width,
-            (this.height / 2) - heightOffset
-        ),
-        Rect(
-            0,
-            (this.height / 2) - heightOffset,
-            (this.width / 2) - widthOffset,
-            (this.height / 2) + heightOffset
-        ),
-        Rect(
-            (this.width / 2) - widthOffset,
-            (this.height / 2) - heightOffset,
-            (this.width / 2) + widthOffset,
-            (this.height / 2) + heightOffset
-        ),
-        Rect(
-            (this.width / 2) + widthOffset,
-            (this.height / 2) - heightOffset,
-            this.width,
-            (this.height / 2) + heightOffset
-        ),
-        Rect(
-            0,
-            (this.height / 2) + heightOffset,
-            (this.width / 2) - widthOffset,
-            this.height
-        ),
-        Rect(
-            (this.width / 2) - widthOffset,
-            (this.height / 2) + heightOffset,
-            (this.width / 2) + widthOffset,
-            this.height
-        ),
-        Rect(
-            (this.width / 2) + widthOffset,
-            (this.height / 2) + heightOffset,
-            this.width,
-            this.height
-        )
-    )
-    val toSegments = arrayOf(
-        Rect(
-            0,
-            0,
-            toBorderWidth,
-            toBorderWidth
-        ),
-        Rect(
-            toBorderWidth,
-            0,
-            toBorderWidth + toCenterDimension,
-            toBorderWidth
-        ),
-        Rect(
-            toBorderWidth + toCenterDimension,
-            0,
-            (2 * toBorderWidth + toCenterDimension),
-            toBorderWidth
-        ),
-        Rect(
-            0,
-            toBorderWidth,
-            toBorderWidth,
-            toBorderWidth + toCenterDimension
-        ),
-        Rect(
-            toBorderWidth,
-            toBorderWidth,
-            toBorderWidth + toCenterDimension,
-            toBorderWidth + toCenterDimension
-        ),
-        Rect(
-            toBorderWidth + toCenterDimension,
-            112,
-            (2 * toBorderWidth + toCenterDimension),
-            toBorderWidth + toCenterDimension
-        ),
-        Rect(
-            0,
-            toBorderWidth + toCenterDimension,
-            toBorderWidth,
-            (2 * toBorderWidth + toCenterDimension)
-        ),
-        Rect(
-            toBorderWidth,
-            toBorderWidth + toCenterDimension,
-            toBorderWidth + toCenterDimension,
-            (2 * toBorderWidth + toCenterDimension)
-        ),
-        Rect(
-            toBorderWidth + toCenterDimension,
-            toBorderWidth + toCenterDimension,
-            (2 * toBorderWidth + toCenterDimension),
-            (2 * toBorderWidth + toCenterDimension)
-        )
-    )
-    val toSize = Size((2 * toBorderWidth + toCenterDimension), (2 * toBorderWidth + toCenterDimension))
-
-    return this.fragment(fromSegments, toSegments, toSize)
-}
-
-fun Bitmap.zoomOffset(
-    centerSize: Size,
     previewSize: Size,
     cardFinder: Rect,
-    toCenterDimension: Int,
-    toBorderWidth: Int
+    originalCenterSize: Size,
+    futureCenterRect: Rect,
+    futureImageSize: Size
 ): Bitmap {
-    require(cardFinder.left > 0 && cardFinder.right < previewSize.width && cardFinder.top > 0 && cardFinder.bottom < previewSize.height) {
-        "Card viewfinder window extends beyond preview boundary"
-    }
-    val newLeft = cardFinder.left * this.width / previewSize.height
-    val newTop = cardFinder.top * this.height / previewSize.height
-    val newRight = cardFinder.right * this.width / previewSize.width
-    val newBottom = cardFinder.bottom * this.height / previewSize.height
+    // Transforms the viewfinder from the preview to the image size
+    val projectedViewFinder = previewSize.projectRegionOfInterest(toSize = this.size(), regionOfInterest = cardFinder)
+    // Creates a square version of the viewfinder
+    val projectedViewFinderSquare = Size(projectedViewFinder.width(), projectedViewFinder.width())
+    // Creates a rect of a certain aspect ratio surrounding the view finder
+    val aspectRatioCrop = projectedViewFinderSquare.centerOn(projectedViewFinder).expandToAspectRatio(9, 16)
+    // Crops the image and fills the rest of the aspect-ratio image with gray
+    val croppedImage = this.cropWithFill(aspectRatioCrop, aspectRatioCrop.intersection(this.size().rect()))
+    // Finds the center rectangle of the newly cropped image
+    val originalCenterRect = originalCenterSize.centerOn(croppedImage.size().rect())
+    // Produces a map of rects to rects which are used to map segments of the old image onto the new one
+    val regionMap = croppedImage.resizeRegion(originalCenterRect, futureCenterRect, futureImageSize)
+    // construct the bitmap from the region map
+    return croppedImage.rearrangeBySegments(regionMap, futureImageSize)
+}
 
-    val scaledCardFinderRect = Rect(newLeft, newTop, newRight, newBottom)
+/**
+ * Crops and image using originalImageRect and places it on finalImageRect, which is filled with
+ * gray for the best results
+ */
+fun Bitmap.cropWithFill(finalImageRect: Rect, originalImageRect: Rect): Bitmap {
+    val result = Bitmap.createBitmap(finalImageRect.width(), finalImageRect.height(), this.config)
+    val canvas = Canvas(result)
 
-    val x = scaledCardFinderRect.centerX()
-    val y = scaledCardFinderRect.centerY()
+    val paint = Paint()
+    paint.setColor(Color.GRAY)
+    paint.setStyle(Paint.Style.FILL)
+    canvas.drawPaint(paint)
 
-    require(x + centerSize.width < this.width && x - centerSize.width > 0 && y + centerSize.height < this.height && y - centerSize.height > 0) {
-        "Card viewfinder is to close to the edge of the screen"
-    }
-
-    require(toCenterDimension > 0 && toBorderWidth > 0) {
-        "Cannot create an image without a border or without a center"
-    }
-
-    val totalHeight = this.height - centerSize.height
-    val totalWidth = this.width - centerSize.width
-
-    val toSize = Size((2 * toBorderWidth + toCenterDimension), (2 * toBorderWidth + toCenterDimension))
-    var r1: Pair<Int, Int>
-    val r2: Pair<Int, Int>
-    val r3: Pair<Int, Int>
-    val r4: Pair<Int, Int>
-    var c1: Pair<Int, Int>
-    val c2: Pair<Int, Int>
-    val c3: Pair<Int, Int>
-    val c4: Pair<Int, Int>
-    var tr1: Pair<Int, Int>
-    val tr2: Pair<Int, Int>
-    val tr3: Pair<Int, Int>
-    val tr4: Pair<Int, Int>
-    var tc1: Pair<Int, Int>
-    val tc2: Pair<Int, Int>
-    val tc3: Pair<Int, Int>
-    val tc4: Pair<Int, Int>
-
-    if (x < this.width / 2) {
-        if (y < this.height / 2) {
-            r1 = Pair(0, y - centerSize.height / 2)
-            r2 = Pair(y - centerSize.height / 2, y + centerSize.height / 2)
-            r3 = Pair(y + centerSize.height / 2, y + centerSize.height / 2 + totalHeight / 2)
-            r4 = Pair(y + centerSize.height / 2 + totalHeight / 2, this.height)
-            c1 = Pair(0, x - centerSize.width / 2)
-            c2 = Pair(x - centerSize.width / 2, x + centerSize.width / 2)
-            c3 = Pair(x + centerSize.width / 2, x + centerSize.width / 2 + totalWidth / 2)
-            c4 = Pair(x + centerSize.width / 2 + totalWidth / 2, this.width)
-            tr1 = Pair(
-                toBorderWidth - ((r1.second - r1.first) * toBorderWidth / (totalHeight / 2)),
-                toBorderWidth
-            )
-            tr2 = Pair(toBorderWidth, toBorderWidth + toCenterDimension)
-            tr3 = Pair(toBorderWidth + toCenterDimension, 2 * toBorderWidth + toCenterDimension)
-            tr4 = Pair(
-                0,
-                toBorderWidth - ((r1.second - r1.first) * toBorderWidth / (totalHeight / 2))
-            )
-            tc1 = Pair(
-                toBorderWidth - ((c1.second - c1.first) * toBorderWidth / (totalWidth / 2)),
-                toBorderWidth
-            )
-            tc2 = Pair(toBorderWidth, toBorderWidth + toCenterDimension)
-            tc3 = Pair(toBorderWidth + toCenterDimension, 2 * toBorderWidth + toCenterDimension)
-            tc4 = Pair(
-                0,
-                toBorderWidth - ((c1.second - c1.first) * toBorderWidth / (totalWidth / 2))
-            )
-        } else {
-            r1 = Pair(0, y - centerSize.height / 2 - totalHeight / 2)
-            r2 = Pair(y - centerSize.height / 2 - totalHeight / 2, y - centerSize.height / 2)
-            r3 = Pair(y - centerSize.height / 2, y + centerSize.height / 2)
-            r4 = Pair(y + centerSize.height / 2, this.height)
-            c1 = Pair(0, x - centerSize.width / 2)
-            c2 = Pair(x - centerSize.width / 2, x + centerSize.width / 2)
-            c3 = Pair(x + centerSize.width / 2, x + centerSize.width / 2 + totalWidth / 2)
-            c4 = Pair(x + centerSize.width / 2 + totalWidth / 2, this.width)
-
-            if (y == this.height / 2) {
-                r1 = r2
-            }
-
-            tr1 = Pair(
-                toBorderWidth + toCenterDimension + (r1.second - r1.first) * toBorderWidth /
-                    (totalHeight / 2),
-                (2 * toBorderWidth) + toCenterDimension
-            )
-            tr2 = Pair(0, toBorderWidth)
-            tr3 = Pair(toBorderWidth, toBorderWidth + toCenterDimension)
-            tr4 = Pair(
-                toBorderWidth + toCenterDimension,
-                toBorderWidth + toCenterDimension + (r1.second - r1.first) * toBorderWidth /
-                    (totalHeight / 2)
-            )
-            tc1 = Pair(
-                toBorderWidth - ((c1.second - c1.first) * toBorderWidth / (totalWidth / 2)),
-                toBorderWidth
-            )
-            tc2 = Pair(toBorderWidth, toBorderWidth + toCenterDimension)
-            tc3 = Pair(toBorderWidth + toCenterDimension, 2 * toBorderWidth + toCenterDimension)
-            tc4 = Pair(
-                0,
-                toBorderWidth - ((c1.second - c1.first) * toBorderWidth / (totalWidth / 2))
-            )
-
-            if (y == this.height / 2) {
-                tr1 = tr2
-            }
-        }
-    } else {
-        if (y < this.height / 2) {
-            r1 = Pair(0, y - centerSize.height / 2)
-            r2 = Pair(y - centerSize.height / 2, y + centerSize.height / 2)
-            r3 = Pair(y + centerSize.height / 2, y + centerSize.height / 2 + totalHeight / 2)
-            r4 = Pair(y + centerSize.height / 2 + totalHeight / 2, this.height)
-            c1 = Pair(0, x - centerSize.width / 2 - totalWidth / 2)
-            c2 = Pair(x - centerSize.width / 2 - totalWidth / 2, x - centerSize.width / 2)
-            c3 = Pair(x - centerSize.width / 2, x + centerSize.width / 2)
-            c4 = Pair(x + centerSize.width / 2, this.width)
-
-            if (x == this.width / 2) {
-                c1 = c2
-            }
-
-            tr1 = Pair(
-                toBorderWidth - ((r1.second - r1.first) * toBorderWidth / (totalHeight / 2)),
-                toBorderWidth
-            )
-            tr2 = Pair(toBorderWidth, toBorderWidth + toCenterDimension)
-            tr3 = Pair(toBorderWidth + toCenterDimension, 2 * toBorderWidth + toCenterDimension)
-            tr4 = Pair(
-                0,
-                toBorderWidth - ((r1.second - r1.first) * toBorderWidth / (totalHeight / 2))
-            )
-            tc1 = Pair(
-                toBorderWidth + toCenterDimension + (c1.second - c1.first) * toBorderWidth /
-                    (totalWidth / 2),
-                (2 * toBorderWidth) + toCenterDimension
-            )
-            tc2 = Pair(0, toBorderWidth)
-            tc3 = Pair(toBorderWidth, toBorderWidth + toCenterDimension)
-            tc4 = Pair(
-                toBorderWidth + toCenterDimension,
-                toBorderWidth + toCenterDimension + (c1.second - c1.first) * toBorderWidth /
-                    (totalWidth / 2)
-            )
-        } else {
-            r1 = Pair(0, y - centerSize.height / 2 - totalHeight / 2)
-            r2 = Pair(y - centerSize.height / 2 - totalHeight / 2, y - centerSize.height / 2)
-            r3 = Pair(y - centerSize.height / 2, y + centerSize.height / 2)
-            r4 = Pair(y + centerSize.height / 2, this.height)
-            c1 = Pair(0, x - centerSize.width / 2 - totalWidth / 2)
-            c2 = Pair(x - centerSize.width / 2 - totalWidth / 2, x - centerSize.width / 2)
-            c3 = Pair(x - centerSize.width / 2, x + centerSize.width / 2)
-            c4 = Pair(x + centerSize.width / 2, this.width)
-
-            if (y == this.height / 2) {
-                r1 = r2
-            }
-
-            if (x == this.width / 2) {
-                c1 = c2
-            }
-
-            tr1 = Pair(
-                toBorderWidth + toCenterDimension + (r1.second - r1.first) * toBorderWidth /
-                    (totalHeight / 2),
-                (2 * toBorderWidth) + toCenterDimension
-            )
-            tr2 = Pair(0, toBorderWidth)
-            tr3 = Pair(toBorderWidth, toBorderWidth + toCenterDimension)
-            tr4 = Pair(
-                toBorderWidth + toCenterDimension,
-                toBorderWidth + toCenterDimension + (r1.second - r1.first) * toBorderWidth /
-                    (totalHeight / 2)
-            )
-            tc1 = Pair(
-                toBorderWidth + toCenterDimension + (c1.second - c1.first) * toBorderWidth /
-                    (totalWidth / 2),
-                (2 * toBorderWidth) + toCenterDimension
-            )
-            tc2 = Pair(0, toBorderWidth)
-            tc3 = Pair(toBorderWidth, toBorderWidth + toCenterDimension)
-            tc4 = Pair(
-                toBorderWidth + toCenterDimension,
-                toBorderWidth + toCenterDimension + (c1.second - c1.first) * toBorderWidth /
-                    (totalWidth / 2)
-            )
-
-            if (y == this.height / 2) {
-                tr1 = tr2
-            }
-        }
-
-        if (x == this.width / 2) {
-            tc1 = tc2
-        }
-    }
-
-    val fromSegments = arrayOf(
-        Rect(c1.first, r1.first, c1.second, r1.second),
-        Rect(c2.first, r1.first, c2.second, r1.second),
-        Rect(c3.first, r1.first, c3.second, r1.second),
-        Rect(c4.first, r1.first, c4.second, r1.second),
-        Rect(c1.first, r2.first, c1.second, r2.second),
-        Rect(c2.first, r2.first, c2.second, r2.second),
-        Rect(c3.first, r2.first, c3.second, r2.second),
-        Rect(c4.first, r2.first, c4.second, r2.second),
-        Rect(c1.first, r3.first, c1.second, r3.second),
-        Rect(c2.first, r3.first, c2.second, r3.second),
-        Rect(c3.first, r3.first, c3.second, r3.second),
-        Rect(c4.first, r3.first, c4.second, r3.second),
-        Rect(c1.first, r4.first, c1.second, r4.second),
-        Rect(c2.first, r4.first, c2.second, r4.second),
-        Rect(c3.first, r4.first, c3.second, r4.second),
-        Rect(c4.first, r4.first, c4.second, r4.second)
+    canvas.drawBitmap(
+        this.crop(originalImageRect),
+        originalImageRect.relative(finalImageRect).left.toFloat(),
+        originalImageRect.relative(finalImageRect).top.toFloat(),
+        null
     )
-    val toSegments = arrayOf(
-        Rect(tc1.first, tr1.first, tc1.second, tr1.second),
-        Rect(tc2.first, tr1.first, tc2.second, tr1.second),
-        Rect(tc3.first, tr1.first, tc3.second, tr1.second),
-        Rect(tc4.first, tr1.first, tc4.second, tr1.second),
-        Rect(tc1.first, tr2.first, tc1.second, tr2.second),
-        Rect(tc2.first, tr2.first, tc2.second, tr2.second),
-        Rect(tc3.first, tr2.first, tc3.second, tr2.second),
-        Rect(tc4.first, tr2.first, tc4.second, tr2.second),
-        Rect(tc1.first, tr3.first, tc1.second, tr3.second),
-        Rect(tc2.first, tr3.first, tc2.second, tr3.second),
-        Rect(tc3.first, tr3.first, tc3.second, tr3.second),
-        Rect(tc4.first, tr3.first, tc4.second, tr3.second),
-        Rect(tc1.first, tr4.first, tc1.second, tr4.second),
-        Rect(tc2.first, tr4.first, tc2.second, tr4.second),
-        Rect(tc3.first, tr4.first, tc3.second, tr4.second),
-        Rect(tc4.first, tr4.first, tc4.second, tr4.second)
-    )
-    return this.fragment(fromSegments, toSegments, toSize)
+
+    return result
 }
 
 /**
@@ -516,6 +298,8 @@ fun Bitmap.crop(crop: Rect): Bitmap {
 fun Bitmap.size(): Size = Size(this.width, this.height)
 
 @CheckResult
+fun Bitmap.rect(): Rect = Rect(0, 0, this.width, this.height)
+
 fun Bitmap.scale(size: Size, filter: Boolean = false): Bitmap =
     if (size.width == width && size.height == height) {
         this

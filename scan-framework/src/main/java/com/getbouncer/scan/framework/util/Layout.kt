@@ -102,4 +102,78 @@ fun RectF.centerScaled(scaleX: Float, scaleY: Float) = RectF(
 )
 
 @CheckResult
+fun Rect.scale(scaleX: Float, scaleY: Float) = Rect(
+    this.centerX() - (this.width() * scaleX / 2).toInt(),
+    this.centerY() - (this.height() * scaleY / 2).toInt(),
+    this.centerX() + (this.width() * scaleX / 2).toInt(),
+    this.centerY() + (this.height() * scaleY / 2).toInt()
+)
+
+/**
+ * Creates a rectangle of the given aspect ratio, so that the original rect fits directly inside
+ */
+fun Rect.expandToAspectRatio(widthRatio: Int, heightRatio: Int): Rect {
+    val orientation = widthRatio > heightRatio // True if width greater, false if less than
+
+    return Rect(
+        if (orientation)
+            this.centerX() - (this.height() * widthRatio / heightRatio / 2)
+        else
+            this.left,
+        if (orientation)
+            this.top
+        else
+            this.centerY() - (this.width() * heightRatio / widthRatio / 2),
+        if (orientation)
+            this.centerX() + (this.height() * widthRatio / heightRatio / 2)
+        else
+            this.right,
+        if (orientation)
+            this.bottom
+        else
+            this.centerY() + (this.width() * heightRatio / widthRatio / 2)
+    )
+}
+
+/**
+ * Converts a size to rectangle with the top left corner at 0,0
+ */
+fun Size.rect() = Rect(
+    0,
+    0,
+    this.width,
+    this.height
+)
+
+/**
+ * Return a rect that is the intersection of two other rects
+ */
+fun Rect.intersection(rect: Rect) = Rect(
+    if (rect.left > this.left) rect.left else this.left,
+    if (rect.top > this.top) rect.top else this.top,
+    if (rect.right < this.right) rect.right else this.right,
+    if (rect.bottom < this.bottom) rect.bottom else this.bottom
+)
+
+/**
+ * Reevalutate the bounds to be relative to another rect
+ */
+fun Rect.relative(rect: Rect) = Rect(
+    this.left - rect.left,
+    this.top - rect.top,
+    this.left - rect.left + this.width(),
+    this.top - rect.top + this.height()
+)
+
+/**
+ * Takes a relation between a region of interest and a size and projects the region of interest
+ * to that new location
+ */
+fun Size.projectRegionOfInterest(toSize: Size, regionOfInterest: Rect) = Rect(
+    regionOfInterest.left * toSize.width / this.width,
+    regionOfInterest.top * toSize.height / this.height,
+    regionOfInterest.right * toSize.width / this.width,
+    regionOfInterest.bottom * toSize.height / this.height
+)
+
 fun Rect.size() = Size(width(), height())
