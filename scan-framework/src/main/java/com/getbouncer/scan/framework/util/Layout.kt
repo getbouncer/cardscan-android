@@ -141,7 +141,7 @@ fun RectF.centerScaled(scaleX: Float, scaleY: Float) = RectF(
 )
 
 @CheckResult
-fun Rect.centerScale(scaleX: Float, scaleY: Float) = Rect(
+fun Rect.centerScaled(scaleX: Float, scaleY: Float) = Rect(
     this.centerX() - (this.width() * scaleX / 2).toInt(),
     this.centerY() - (this.height() * scaleY / 2).toInt(),
     this.centerX() + (this.width() * scaleX / 2).toInt(),
