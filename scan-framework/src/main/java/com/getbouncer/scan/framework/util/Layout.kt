@@ -1,9 +1,11 @@
 package com.getbouncer.scan.framework.util
 
+import android.graphics.Bitmap
 import android.graphics.Rect
 import android.graphics.RectF
 import android.util.Size
 import androidx.annotation.CheckResult
+import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
@@ -36,8 +38,45 @@ fun maxAspectRatioInSize(area: Size, aspectRatio: Float): Size {
 }
 
 /**
+<<<<<<< HEAD
  * Calculate the maximum [Size] that fits within the [containingSize] and maintains the same aspect ratio as the subject
  * of this method. This is often used to project a preview image onto a full camera image.
+=======
+ * Determine the minimum size of rectangle with a given aspect ratio (X/Y) that a specified area
+ * can fit inside it.
+ *
+ * For example, if the aspect ratio is 1/2 and the area is 1x1, the resulting rectangle would be
+ * size 1x2 and look like this:
+ * ```
+ *  ____
+ * |____|
+ * |    |
+ * |____|
+ * |____|
+ * ```
+ */
+@CheckResult
+fun minAspectRatioSurroundingSize(area: Size, aspectRatio: Float): Size {
+    var width = area.width
+    var height = (width / aspectRatio).roundToInt()
+
+    return if (height >= area.height) {
+        Size(area.width, height)
+    } else {
+        height = area.height
+        width = (height * aspectRatio).roundToInt()
+        Size(max(width, area.width), height)
+    }
+}
+
+/**
+ * Calculate the position of the [Size] within the [containingSize]. This makes a few
+ * assumptions:
+ * 1. the [Size] and the [containingSize] are centered relative to each other.
+ * 2. the [Size] and the [containingSize] have the same orientation
+ * 3. the [containingSize] and the [Size] share either a horizontal or vertical field of view
+ * 4. the non-shared field of view must be smaller on the [Size] than the [containingSize]
+>>>>>>> Implement changes
  *
  * If using this to project a preview image onto a full camera image, This makes a few assumptions:
  * 1. the preview image [Size] and the full image [containingSize] are centered relative to each other
@@ -102,7 +141,7 @@ fun RectF.centerScaled(scaleX: Float, scaleY: Float) = RectF(
 )
 
 @CheckResult
-fun Rect.scale(scaleX: Float, scaleY: Float) = Rect(
+fun Rect.centerScale(scaleX: Float, scaleY: Float) = Rect(
     this.centerX() - (this.width() * scaleX / 2).toInt(),
     this.centerY() - (this.height() * scaleY / 2).toInt(),
     this.centerX() + (this.width() * scaleX / 2).toInt(),
@@ -110,70 +149,153 @@ fun Rect.scale(scaleX: Float, scaleY: Float) = Rect(
 )
 
 /**
- * Creates a rectangle of the given aspect ratio, so that the original rect fits directly inside
- */
-fun Rect.expandToAspectRatio(widthRatio: Int, heightRatio: Int): Rect {
-    val orientation = widthRatio > heightRatio // True if width greater, false if less than
-
-    return Rect(
-        if (orientation)
-            this.centerX() - (this.height() * widthRatio / heightRatio / 2)
-        else
-            this.left,
-        if (orientation)
-            this.top
-        else
-            this.centerY() - (this.width() * heightRatio / widthRatio / 2),
-        if (orientation)
-            this.centerX() + (this.height() * widthRatio / heightRatio / 2)
-        else
-            this.right,
-        if (orientation)
-            this.bottom
-        else
-            this.centerY() + (this.width() * heightRatio / widthRatio / 2)
-    )
-}
-
-/**
  * Converts a size to rectangle with the top left corner at 0,0
  */
-fun Size.rect() = Rect(
-    0,
-    0,
-    this.width,
-    this.height
-)
+@CheckResult
+fun Size.toRect() = Rect(0, 0, this.width, this.height)
 
 /**
  * Return a rect that is the intersection of two other rects
  */
-fun Rect.intersection(rect: Rect) = Rect(
-    if (rect.left > this.left) rect.left else this.left,
-    if (rect.top > this.top) rect.top else this.top,
-    if (rect.right < this.right) rect.right else this.right,
-    if (rect.bottom < this.bottom) rect.bottom else this.bottom
+@CheckResult
+fun Rect.intersectionWith(rect: Rect) = Rect(
+    max(this.left, rect.left),
+    max(this.top, rect.top),
+    min(this.right, rect.right),
+    min(this.bottom, rect.bottom)
 )
 
 /**
  * Reevalutate the bounds to be relative to another rect
  */
-fun Rect.relative(rect: Rect) = Rect(
-    this.left - rect.left,
-    this.top - rect.top,
-    this.left - rect.left + this.width(),
-    this.top - rect.top + this.height()
+@CheckResult
+fun Rect.move(relativeX: Int, relativeY: Int) = Rect(
+    this.left - relativeX,
+    this.top - relativeY,
+    this.right - relativeX,
+    this.bottom - relativeY
 )
 
 /**
  * Takes a relation between a region of interest and a size and projects the region of interest
  * to that new location
  */
+@CheckResult
 fun Size.projectRegionOfInterest(toSize: Size, regionOfInterest: Rect) = Rect(
     regionOfInterest.left * toSize.width / this.width,
     regionOfInterest.top * toSize.height / this.height,
     regionOfInterest.right * toSize.width / this.width,
     regionOfInterest.bottom * toSize.height / this.height
+)
+
+/**
+ * Resizes a region of the image and places it somewhere else
+ */
+@CheckResult
+fun Bitmap.resizeRegion(
+    originalCenterRect: Rect,
+    toCenterRect: Rect,
+    toImageSize: Size
+): Map<Rect, Rect> = mapOf(
+    Rect(
+        0,
+        0,
+        originalCenterRect.left,
+        originalCenterRect.top
+    ) to Rect(
+        0,
+        0,
+        toCenterRect.left,
+        toCenterRect.top
+    ),
+    Rect(
+        originalCenterRect.left,
+        0,
+        originalCenterRect.right,
+        originalCenterRect.top
+    ) to Rect(
+        toCenterRect.left,
+        0,
+        toCenterRect.right,
+        toCenterRect.top
+    ),
+    Rect(
+        originalCenterRect.right,
+        0,
+        this.width,
+        originalCenterRect.top
+    ) to Rect(
+        toCenterRect.right,
+        0,
+        toImageSize.width,
+        toCenterRect.top
+    ),
+    Rect(
+        0,
+        originalCenterRect.top,
+        originalCenterRect.left,
+        originalCenterRect.bottom
+    ) to Rect(
+        0,
+        toCenterRect.top,
+        toCenterRect.left,
+        toCenterRect.bottom
+    ),
+    Rect(
+        originalCenterRect.left,
+        originalCenterRect.top,
+        originalCenterRect.right,
+        originalCenterRect.bottom
+    ) to Rect(
+        toCenterRect.left,
+        toCenterRect.top,
+        toCenterRect.right,
+        toCenterRect.bottom
+    ),
+    Rect(
+        originalCenterRect.right,
+        originalCenterRect.top,
+        this.width,
+        originalCenterRect.bottom
+    ) to Rect(
+        toCenterRect.right,
+        toCenterRect.top,
+        toImageSize.width,
+        toCenterRect.bottom
+    ),
+    Rect(
+        0,
+        originalCenterRect.bottom,
+        originalCenterRect.left,
+        this.height
+    ) to Rect(
+        0,
+        toCenterRect.bottom,
+        toCenterRect.left,
+        toImageSize.height
+    ),
+    Rect(
+        originalCenterRect.left,
+        originalCenterRect.bottom,
+        originalCenterRect.right,
+        this.height
+    ) to Rect(
+        toCenterRect.left,
+        toCenterRect.bottom,
+        toCenterRect.right,
+        toImageSize.height
+    ),
+    Rect(
+        originalCenterRect.right,
+        originalCenterRect.bottom,
+        this.width,
+        this.height
+    ) to Rect(
+        toCenterRect.right,
+        toCenterRect.bottom,
+        toImageSize.width,
+        toImageSize.height
+    )
 )
 
 fun Rect.size() = Size(width(), height())

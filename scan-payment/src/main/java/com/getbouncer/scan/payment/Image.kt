@@ -11,15 +11,18 @@ import android.graphics.Rect
 import android.util.Size
 import androidx.annotation.CheckResult
 import com.getbouncer.scan.framework.util.centerOn
-import com.getbouncer.scan.framework.util.expandToAspectRatio
-import com.getbouncer.scan.framework.util.intersection
+import com.getbouncer.scan.framework.util.intersectionWith
+import com.getbouncer.scan.framework.util.minAspectRatioSurroundingSize
+import com.getbouncer.scan.framework.util.move
 import com.getbouncer.scan.framework.util.projectRegionOfInterest
-import com.getbouncer.scan.framework.util.rect
-import com.getbouncer.scan.framework.util.relative
+import com.getbouncer.scan.framework.util.resizeRegion
 import com.getbouncer.scan.framework.util.size
+import com.getbouncer.scan.framework.util.toRect
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.IntBuffer
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 private const val DIM_PIXEL_SIZE = 3
@@ -101,17 +104,30 @@ fun hasOpenGl31(context: Context): Boolean {
  */
 @CheckResult
 fun Bitmap.rearrangeBySegments(
-    fromSegments: Map<Rect, Rect>,
-    futureImageSize: Size
+    segmentMap: Map<Rect, Rect>
 ): Bitmap {
-    val current = this
-    val result = Bitmap.createBitmap(futureImageSize.width, futureImageSize.height, this.config)
+    if (segmentMap.isEmpty()) {
+        return Bitmap.createBitmap(0, 0, this.config)
+    }
+    val newImageDimensions = segmentMap.values.reduce { a, b ->
+        Rect(
+            min(a.left, b.left),
+            min(a.top, b.top),
+            max(a.right, b.right),
+            max(a.bottom, b.bottom)
+        )
+    }
+    val newImageSize = newImageDimensions.size()
+    val result = Bitmap.createBitmap(newImageSize.width, newImageSize.height, this.config)
     val canvas = Canvas(result)
 
-    for ((from, to) in fromSegments) {
-        val image = current.crop(from).scale(to.size())
+    segmentMap.forEach { entry ->
+        val from = entry.key
+        val to = entry.value.move(-newImageDimensions.left, -newImageDimensions.top)
+
+        val segment = this.crop(from).scale(to.size())
         canvas.drawBitmap(
-            image,
+            segment,
             to.left.toFloat(),
             to.top.toFloat(),
             null
@@ -120,112 +136,6 @@ fun Bitmap.rearrangeBySegments(
 
     return result
 }
-
-fun Bitmap.resizeRegion(
-    originalCenterRect: Rect,
-    futureCenterRect: Rect,
-    futureImageSize: Size
-): Map<Rect, Rect> = mapOf(
-    Rect(
-        0,
-        0,
-        originalCenterRect.left,
-        originalCenterRect.top
-    ) to Rect(
-        0,
-        0,
-        futureCenterRect.left,
-        futureCenterRect.top
-    ),
-    Rect(
-        originalCenterRect.left,
-        0,
-        originalCenterRect.right,
-        originalCenterRect.top
-    ) to Rect(
-        futureCenterRect.left,
-        0,
-        futureCenterRect.right,
-        futureCenterRect.top
-    ),
-    Rect(
-        originalCenterRect.right,
-        0,
-        this.width,
-        originalCenterRect.top
-    ) to Rect(
-        futureCenterRect.right,
-        0,
-        futureImageSize.width,
-        futureCenterRect.top
-    ),
-    Rect(
-        0,
-        originalCenterRect.top,
-        originalCenterRect.left,
-        originalCenterRect.bottom
-    ) to Rect(
-        0,
-        futureCenterRect.top,
-        futureCenterRect.left,
-        futureCenterRect.bottom
-    ),
-    Rect(
-        originalCenterRect.left,
-        originalCenterRect.top,
-        originalCenterRect.right,
-        originalCenterRect.bottom
-    ) to Rect(
-        futureCenterRect.left,
-        futureCenterRect.top,
-        futureCenterRect.right,
-        futureCenterRect.bottom
-    ),
-    Rect(
-        originalCenterRect.right,
-        originalCenterRect.top,
-        this.width,
-        originalCenterRect.bottom
-    ) to Rect(
-        futureCenterRect.right,
-        futureCenterRect.top,
-        futureImageSize.width,
-        futureCenterRect.bottom
-    ),
-    Rect(
-        0,
-        originalCenterRect.bottom,
-        originalCenterRect.left,
-        this.height
-    ) to Rect(
-        0,
-        futureCenterRect.bottom,
-        futureCenterRect.left,
-        futureImageSize.height
-    ),
-    Rect(
-        originalCenterRect.left,
-        originalCenterRect.bottom,
-        originalCenterRect.right,
-        this.height
-    ) to Rect(
-        futureCenterRect.left,
-        futureCenterRect.bottom,
-        futureCenterRect.right,
-        futureImageSize.height
-    ),
-    Rect(
-        originalCenterRect.right,
-        originalCenterRect.bottom,
-        this.width,
-        this.height
-    ) to Rect(
-        futureCenterRect.right,
-        futureCenterRect.bottom,
-        futureImageSize.width,
-        futureImageSize.height
-    )
-)
 
 /**
  * Crops a piece from the center of the source image, resizing that to fit the new center dimension,
@@ -243,25 +153,34 @@ fun Bitmap.zoom(
     // Transforms the viewfinder from the preview to the image size
     val projectedViewFinder = previewSize.projectRegionOfInterest(toSize = this.size(), regionOfInterest = cardFinder)
     // Creates a square version of the viewfinder
-    val projectedViewFinderSquare = Size(projectedViewFinder.width(), projectedViewFinder.width())
+    val projectViewFinderGreatestDimension = max(projectedViewFinder.width(), projectedViewFinder.height())
+    val projectedViewFinderSquare = Size(projectViewFinderGreatestDimension, projectViewFinderGreatestDimension)
+
+    require(this.size().toRect().contains(projectedViewFinderSquare.centerOn(projectedViewFinder))) {
+        "Viewfinder too close to edge of the screen"
+    }
+
+    val aspectRatio = 9.0f / 16.0f
     // Creates a rect of a certain aspect ratio surrounding the view finder
-    val aspectRatioCrop = projectedViewFinderSquare.centerOn(projectedViewFinder).expandToAspectRatio(9, 16)
+    val aspectRatioCrop = minAspectRatioSurroundingSize(projectedViewFinderSquare, aspectRatio).centerOn(projectedViewFinder)
     // Crops the image and fills the rest of the aspect-ratio image with gray
-    val croppedImage = this.cropWithFill(aspectRatioCrop, aspectRatioCrop.intersection(this.size().rect()))
+    val croppedImage = this.cropWithFill(aspectRatioCrop)
     // Finds the center rectangle of the newly cropped image
-    val originalCenterRect = originalCenterSize.centerOn(croppedImage.size().rect())
+    val originalCenterRect = originalCenterSize.centerOn(croppedImage.size().toRect())
     // Produces a map of rects to rects which are used to map segments of the old image onto the new one
     val regionMap = croppedImage.resizeRegion(originalCenterRect, futureCenterRect, futureImageSize)
     // construct the bitmap from the region map
-    return croppedImage.rearrangeBySegments(regionMap, futureImageSize)
+    return croppedImage.rearrangeBySegments(regionMap)
 }
 
 /**
  * Crops and image using originalImageRect and places it on finalImageRect, which is filled with
  * gray for the best results
  */
-fun Bitmap.cropWithFill(finalImageRect: Rect, originalImageRect: Rect): Bitmap {
-    val result = Bitmap.createBitmap(finalImageRect.width(), finalImageRect.height(), this.config)
+@CheckResult
+fun Bitmap.cropWithFill(cropRegion: Rect): Bitmap {
+    val intersectionRegion = cropRegion.intersectionWith(this.size().toRect())
+    val result = Bitmap.createBitmap(cropRegion.width(), cropRegion.height(), this.config)
     val canvas = Canvas(result)
 
     val paint = Paint()
@@ -270,9 +189,9 @@ fun Bitmap.cropWithFill(finalImageRect: Rect, originalImageRect: Rect): Bitmap {
     canvas.drawPaint(paint)
 
     canvas.drawBitmap(
-        this.crop(originalImageRect),
-        originalImageRect.relative(finalImageRect).left.toFloat(),
-        originalImageRect.relative(finalImageRect).top.toFloat(),
+        this.crop(intersectionRegion),
+        intersectionRegion.move(cropRegion.left, cropRegion.top).left.toFloat(),
+        intersectionRegion.move(cropRegion.left, cropRegion.top).top.toFloat(),
         null
     )
 
