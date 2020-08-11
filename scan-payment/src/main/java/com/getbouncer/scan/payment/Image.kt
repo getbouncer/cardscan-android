@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Rect
 import android.util.Size
+import androidx.annotation.CheckResult
 import com.getbouncer.scan.framework.util.size
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -21,6 +22,7 @@ data class ImageTransformValues(val red: Float, val green: Float, val blue: Floa
 /**
  * Convert a bitmap to an RGB byte buffer for use in TensorFlow Lite ML models.
  */
+@CheckResult
 fun Bitmap.toRGBByteBuffer(mean: Float = 0F, std: Float = 255F): ByteBuffer = this.toRGBByteBuffer(
     ImageTransformValues(mean, mean, mean),
     ImageTransformValues(std, std, std)
@@ -29,6 +31,7 @@ fun Bitmap.toRGBByteBuffer(mean: Float = 0F, std: Float = 255F): ByteBuffer = th
 /**
  * Convert a bitmap to an RGB byte buffer for use in TensorFlow Lite ML models.
  */
+@CheckResult
 fun Bitmap.toRGBByteBuffer(mean: ImageTransformValues, std: ImageTransformValues): ByteBuffer {
     val argb = IntArray(width * height).also { getPixels(it, 0, width, 0, 0, width, height) }
 
@@ -50,6 +53,7 @@ fun Bitmap.toRGBByteBuffer(mean: ImageTransformValues, std: ImageTransformValues
 /**
  * Convert an RGB byte buffer to a bitmap. This is primarily used in testing.
  */
+@CheckResult
 fun ByteBuffer.rbgaToBitmap(size: Size, mean: Float = 0F, std: Float = 255F): Bitmap {
     this.rewind()
     check(this.limit() == size.width * size.height) { "ByteBuffer limit does not match expected size" }
@@ -71,6 +75,7 @@ fun ByteBuffer.rbgaToBitmap(size: Size, mean: Float = 0F, std: Float = 255F): Bi
 /**
  * Determine if the device supports OpenGL version 3.1.
  */
+@CheckResult
 fun hasOpenGl31(context: Context): Boolean {
     val openGlVersion = 0x00030001
     val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
@@ -86,6 +91,7 @@ fun hasOpenGl31(context: Context): Boolean {
 /**
  * Fragments the image into multiple segments and places them in new segments.
  */
+@CheckResult
 fun Bitmap.fragment(
     fromSegments: Array<Rect>,
     toSegments: Array<Rect>,
@@ -117,6 +123,7 @@ fun Bitmap.fragment(
  * and squeezes the remainder of the image into a border. The returned image is guaranteed to be
  * square.
  */
+@CheckResult
 fun Bitmap.zoom(
     centerSize: Size,
     toCenterDimension: Int,
@@ -244,6 +251,7 @@ fun Bitmap.zoom(
 /**
  * Crop an image to a given rectangle. The rectangle must not exceed the bounds of the image.
  */
+@CheckResult
 fun Bitmap.crop(crop: Rect): Bitmap {
     require(crop.left < crop.right && crop.top < crop.bottom) { "Cannot use negative crop" }
     require(crop.left >= 0 && crop.top >= 0 && crop.bottom <= this.height && crop.right <= this.width) {
@@ -255,8 +263,10 @@ fun Bitmap.crop(crop: Rect): Bitmap {
 /**
  * Get the size of a bitmap.
  */
+@CheckResult
 fun Bitmap.size(): Size = Size(this.width, this.height)
 
+@CheckResult
 fun Bitmap.scale(size: Size, filter: Boolean = false): Bitmap =
     if (size.width == width && size.height == height) {
         this

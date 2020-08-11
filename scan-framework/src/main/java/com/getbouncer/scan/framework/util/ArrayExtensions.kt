@@ -1,5 +1,6 @@
 package com.getbouncer.scan.framework.util
 
+import androidx.annotation.CheckResult
 import kotlin.math.max
 import kotlin.math.min
 
@@ -24,18 +25,21 @@ fun FloatArray.updateEach(operation: (original: Float) -> Float) {
 /**
  * Filter an array to only those values specified in an index array.
  */
+@CheckResult
 inline fun <reified T> Array<T>.filterByIndexes(indexesToKeep: IntArray) =
     Array(indexesToKeep.size) { this[indexesToKeep[it]] }
 
 /**
  * Filter an array to only those values specified in an index array.
  */
+@CheckResult
 fun FloatArray.filterByIndexes(indexesToKeep: IntArray) =
     FloatArray(indexesToKeep.size) { this[indexesToKeep[it]] }
 
 /**
  * Flatten an array of arrays into a single array of sequential values.
  */
+@CheckResult
 fun Array<FloatArray>.flatten() = if (this.isNotEmpty()) {
     this.reshape(this.size * this[0].size)[0]
 } else {
@@ -45,6 +49,7 @@ fun Array<FloatArray>.flatten() = if (this.isNotEmpty()) {
 /**
  * Transpose an array of float arrays.
  */
+@CheckResult
 fun Array<FloatArray>.transpose() = if (this.isNotEmpty()) {
     val oldRows = this.size
     val oldColumns = this[0].size
@@ -57,6 +62,7 @@ fun Array<FloatArray>.transpose() = if (this.isNotEmpty()) {
  * Reshape a two-dimensional array. Assume all rows of the original array are the same length, and
  * that the array is evenly divisible by the new columns.
  */
+@CheckResult
 fun Array<FloatArray>.reshape(newColumns: Int): Array<FloatArray> {
     val oldRows = this.size
     val oldColumns = if (this.isNotEmpty()) this[0].size else 0
@@ -80,12 +86,14 @@ fun Array<FloatArray>.reshape(newColumns: Int): Array<FloatArray> {
 /**
  * Clamp the value between min and max
  */
+@CheckResult
 fun clamp(value: Float, minimum: Float, maximum: Float): Float =
     max(minimum, min(maximum, value))
 
 /**
  * Return a list of indexes that pass the filter.
  */
+@CheckResult
 fun FloatArray.filteredIndexes(predicate: (Float) -> Boolean): IntArray {
     val filteredIndexes = ArrayList<Int>()
     for (index in this.indices) {
@@ -100,6 +108,7 @@ fun FloatArray.filteredIndexes(predicate: (Float) -> Boolean): IntArray {
  * Divide a [ByteArray] into an array of byte arrays of a given size. If the original array is not
  * evenly divisible by the [chunkSize], the last ByteArray may be smaller than the chunk size.
  */
+@CheckResult
 fun ByteArray.chunk(chunkSize: Int): Array<ByteArray> =
     Array(this.size / chunkSize + if (this.size % chunkSize == 0) 0 else 1) {
         copyOfRange(it * chunkSize, min((it + 1) * chunkSize, this.size))
@@ -108,6 +117,7 @@ fun ByteArray.chunk(chunkSize: Int): Array<ByteArray> =
 /**
  * Find the index of the maximum value in the array.
  */
+@CheckResult
 fun FloatArray.indexOfMax(): Int? {
     if (isEmpty()) {
         return null
