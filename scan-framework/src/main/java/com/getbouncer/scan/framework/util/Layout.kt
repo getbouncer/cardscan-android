@@ -80,27 +80,26 @@ fun Size.centerOn(rect: Rect) = Rect(
  *
  * For example, scaling a Rect(1, 2, 3, 4) by Size(5, 6) will result in a Rect(5, 12, 15, 24)
  */
-fun RectF.scaled(scaledSize: Size): RectF {
-    return RectF(
-        this.left * scaledSize.width,
-        this.top * scaledSize.height,
-        this.right * scaledSize.width,
-        this.bottom * scaledSize.height
-    )
-}
+@CheckResult
+fun RectF.scaled(scaledSize: Size) = RectF(
+    this.left * scaledSize.width,
+    this.top * scaledSize.height,
+    this.right * scaledSize.width,
+    this.bottom * scaledSize.height
+)
 
 /**
  * Scale a [Rect] to have a size equivalent to the [scaledSize]. This will maintain the center position of the [Rect].
  *
  * For example, scaling a Rect(5, 6, 7, 8) by Size(2, 0.5) will result
  */
-fun RectF.centerScaled(scaleX: Float, scaleY: Float): RectF {
-    return RectF(
-        this.centerX() - this.width() * scaleX / 2,
-        this.centerY() - this.height() * scaleY / 2,
-        this.centerX() + this.width() * scaleX / 2,
-        this.centerY() + this.height() * scaleY / 2
-    )
-}
+@CheckResult
+fun RectF.centerScaled(scaleX: Float, scaleY: Float) = RectF(
+    this.centerX() - this.width() * scaleX / 2,
+    this.centerY() - this.height() * scaleY / 2,
+    this.centerX() + this.width() * scaleX / 2,
+    this.centerY() + this.height() * scaleY / 2
+)
 
+@CheckResult
 fun Rect.size() = Size(width(), height())

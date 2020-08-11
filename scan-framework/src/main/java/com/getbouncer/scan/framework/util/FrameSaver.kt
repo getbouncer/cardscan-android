@@ -1,5 +1,6 @@
 package com.getbouncer.scan.framework.util
 
+import androidx.annotation.CheckResult
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.LinkedList
@@ -37,6 +38,7 @@ abstract class FrameSaver<Identifier, Frame> {
     /**
      * Retrieve the list of saved frames.
      */
+    @CheckResult
     fun getSavedFrames(): Map<Identifier, LinkedList<Frame>> = savedFrames
 
     /**

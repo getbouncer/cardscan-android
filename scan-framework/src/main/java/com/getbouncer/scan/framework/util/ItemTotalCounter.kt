@@ -1,5 +1,6 @@
 package com.getbouncer.scan.framework.util
 
+import androidx.annotation.CheckResult
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -34,6 +35,7 @@ class ItemTotalCounter<T>(firstValue: T? = null) : ItemCounter<T> {
      *
      * @param minCount the minimum times an item must have been counted.
      */
+    @CheckResult
     override fun getHighestCountItem(minCount: Int): Pair<Int, T>? =
         items.maxBy { it.value }?.let { if (items[it.key] ?: 0 >= minCount) it.value to it.key else null }
 
@@ -72,6 +74,7 @@ class ItemRecencyCounter<T>(private val maxItemsToTrack: Int, firstValue: T? = n
      *
      * @param minCount the minimum times an item must have been counted.
      */
+    @CheckResult
     override fun getHighestCountItem(minCount: Int): Pair<Int, T>? =
         items.groupingBy { it }.eachCount().filter { it.value >= minCount }.maxBy { it.value }?.let { it.value to it.key }
 
