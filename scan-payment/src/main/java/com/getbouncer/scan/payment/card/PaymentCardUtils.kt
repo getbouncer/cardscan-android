@@ -2,6 +2,7 @@
 package com.getbouncer.scan.payment.card
 
 import android.text.TextUtils
+import androidx.annotation.CheckResult
 
 /*
  * Payment cards always have a PAN (Primary Account Number) on one side of the card. This PAN
@@ -130,6 +131,7 @@ private val ISSUER_TABLE: List<IssuerData> = listOf(
  * Get an issuer from a complete or partial card number. If the pan is null, return an unknown
  * issuer
  */
+@CheckResult
 fun getCardIssuer(pan: String?): CardIssuer = normalizeCardNumber(pan).let { normalizedPan ->
     getIssuerData(normalizedPan)?.issuer ?: CardIssuer.Unknown
 }
@@ -142,6 +144,7 @@ fun getCardIssuer(pan: String?): CardIssuer = normalizeCardNumber(pan).let { nor
  * contract { returns(true) implies (pan != null) }
  * ```
  */
+@CheckResult
 fun isValidPan(pan: String?): Boolean = normalizeCardNumber(pan).let { normalizedPan ->
     val iinData = getIssuerData(normalizedPan) ?: return false
     return iinData.panValidator.isValidPan(normalizedPan)
@@ -150,6 +153,7 @@ fun isValidPan(pan: String?): Boolean = normalizeCardNumber(pan).let { normalize
 /**
  * Determine if an IIN is valid.
  */
+@CheckResult
 fun isValidIin(iin: String?): Boolean = normalizeCardNumber(iin).let { normalizedPan ->
     getIssuerData(normalizedPan)?.issuer ?: CardIssuer.Unknown != CardIssuer.Unknown
 }
@@ -157,6 +161,7 @@ fun isValidIin(iin: String?): Boolean = normalizeCardNumber(iin).let { normalize
 /**
  * Determine if a CVC is valid based on an issuer.
  */
+@CheckResult
 fun isValidCvc(cvc: String?, issuer: CardIssuer?) = normalizeCardNumber(cvc).let { cvcNumber ->
     val issuerDataList = getIssuerData(issuer ?: CardIssuer.Unknown)
     if (issuerDataList.isEmpty()) {
@@ -169,41 +174,74 @@ fun isValidCvc(cvc: String?, issuer: CardIssuer?) = normalizeCardNumber(cvc).let
 /**
  * Determine if the provided last four digits are valid.
  */
+@CheckResult
 fun isValidPanLastFour(panLastFour: String?): Boolean =
     normalizeCardNumber(panLastFour).length == LAST_FOUR_LENGTH
 
 /**
+ * Get an IIN for a given PAN.
+ */
+@CheckResult
+fun iinFromPan(pan: String): String =
+    if (pan.length < IIN_LENGTH) {
+        pan.padEnd(IIN_LENGTH, '0')
+    } else {
+        pan.take(IIN_LENGTH)
+    }
+
+/**
+ * Format a string as an IIN.
+ */
+@CheckResult
+fun String.iin(): String = iinFromPan(this)
+
+/**
+ * Get the last four digits from a given PAN.
+ */
+@CheckResult
+fun lastFourFromPan(pan: String): String =
+    if (pan.length < LAST_FOUR_LENGTH) {
+        pan
+    } else {
+        pan.takeLast(LAST_FOUR_LENGTH)
+    }
+
+/**
+ * Format a string as a payment card last four digits.
+ */
+@CheckResult
+fun String.lastFour(): String = lastFourFromPan(this)
+
+/**
  * Get data for a given IIN or PAN.
  */
-internal fun getIssuerData(cardNumber: String): IssuerData? {
-    val iin = if (cardNumber.length < IIN_LENGTH) {
-        cardNumber.padEnd(IIN_LENGTH, '0')
-    } else {
-        cardNumber.take(IIN_LENGTH)
-    }.toInt()
-
-    return ISSUER_TABLE.firstOrNull { iin in it.iinRange }
-}
+@CheckResult
+internal fun getIssuerData(cardNumber: String): IssuerData? =
+    ISSUER_TABLE.firstOrNull { iinFromPan(cardNumber).toInt() in it.iinRange }
 
 /**
  * Get data for a given [CardIssuer].
  */
+@CheckResult
 private fun getIssuerData(issuer: CardIssuer): List<IssuerData> =
     ISSUER_TABLE.filter { it.issuer == issuer }
 
 /**
  * Normalize a PAN by removing all non-numeric characters.
  */
+@CheckResult
 internal fun normalizeCardNumber(cardNumber: String?) = cardNumber?.filter { it.isDigit() } ?: ""
 
 /**
  * Determine if the pan is valid or close to valid.
  */
+@CheckResult
 fun isPossiblyValidPan(pan: String?) = pan != null && TextUtils.isDigitsOnly(pan) && pan.length >= 7
 
 /**
  * Determine if the pan is not close to being valid.
  */
+@CheckResult
 fun isNotPossiblyValidPan(pan: String?) = pan == null || !TextUtils.isDigitsOnly(pan) || pan.length < 10
 
 /**
@@ -211,6 +249,7 @@ fun isNotPossiblyValidPan(pan: String?) = pan == null || !TextUtils.isDigitsOnly
  * method is designed to compare the same kinds of numbers. for example, a PAN compared to another PAN, or an IIN
  * compared to another IIN. This method will not correctly compare different values, such as an IIN to a PAN.
  */
+@CheckResult
 fun numberPossiblyMatches(scanned: String?, required: String?): Boolean =
     scanned == required || (
         scanned != null && TextUtils.isDigitsOnly(scanned) &&
@@ -222,6 +261,7 @@ fun numberPossiblyMatches(scanned: String?, required: String?): Boolean =
  * similarities) to 1 (the same). Note that this does not account for character order, so two
  * strings "abcd" and "bdca" have a jaccard index of 1.
  */
+@CheckResult
 private fun jaccardIndex(string1: String, string2: String): Double {
     val set1 = string1.toSet()
     val set2 = string2.toSet()
