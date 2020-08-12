@@ -10,10 +10,6 @@ import android.util.Size
 import androidx.core.graphics.drawable.toBitmap
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
-import com.getbouncer.scan.framework.util.centerOn
-import com.getbouncer.scan.framework.util.intersectionWith
-import com.getbouncer.scan.framework.util.move
-import com.getbouncer.scan.framework.util.toRect
 import com.getbouncer.scan.payment.test.R
 import org.junit.Test
 import java.nio.ByteBuffer
@@ -205,7 +201,7 @@ class ImageTest {
             for (y in 0 until bitmap.height) {
                 val croppedPixel = croppedBitmap.getPixel(x + 100, y + 100)
                 val originalPixel = bitmap.getPixel(x, y)
-                assertEquals(originalPixel, croppedPixel, "Difference at pixel ${x}, ${y}")
+                assertEquals(originalPixel, croppedPixel, "Difference at pixel $x, $y")
                 encounteredNonZeroPixel = encounteredNonZeroPixel || croppedPixel != 0
             }
         }

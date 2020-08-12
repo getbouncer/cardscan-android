@@ -6,15 +6,12 @@ import android.content.pm.ConfigurationInfo
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Paint
 import android.graphics.Rect
 import android.util.Size
 import androidx.annotation.CheckResult
 import com.getbouncer.scan.framework.util.centerOn
 import com.getbouncer.scan.framework.util.intersectionWith
-import com.getbouncer.scan.framework.util.minAspectRatioSurroundingSize
 import com.getbouncer.scan.framework.util.move
-import com.getbouncer.scan.framework.util.projectRegionOfInterest
 import com.getbouncer.scan.framework.util.resizeRegion
 import com.getbouncer.scan.framework.util.size
 import com.getbouncer.scan.framework.util.toRect
