@@ -3,7 +3,13 @@ package com.getbouncer.scan.framework.layout
 import android.graphics.Rect
 import android.util.Size
 import androidx.test.filters.SmallTest
-import com.getbouncer.scan.framework.util.*
+import com.getbouncer.scan.framework.util.centerScaled
+import com.getbouncer.scan.framework.util.intersectionWith
+import com.getbouncer.scan.framework.util.maxAspectRatioInSize
+import com.getbouncer.scan.framework.util.minAspectRatioSurroundingSize
+import com.getbouncer.scan.framework.util.move
+import com.getbouncer.scan.framework.util.projectRegionOfInterest
+import com.getbouncer.scan.framework.util.scaleAndCenterWithin
 import org.junit.Test
 import java.lang.IllegalArgumentException
 import kotlin.test.assertEquals
@@ -140,19 +146,19 @@ class LayoutTest {
     @Test
     @SmallTest
     fun projectRegionOfInterest_smaller() {
-        assertEquals(Rect(2, 14, 16, 28), Size(36, 84).projectRegionOfInterest(Size( 18, 42), Rect(4, 28, 32, 56)))
+        assertEquals(Rect(2, 14, 16, 28), Size(36, 84).projectRegionOfInterest(Size(18, 42), Rect(4, 28, 32, 56)))
     }
 
     @Test
     @SmallTest
     fun projectRegionOfInterest_exactFit() {
-        assertEquals(Rect(0, 0, 18, 42), Size(36, 84).projectRegionOfInterest(Size( 18, 42), Rect(0, 0, 36, 84)))
+        assertEquals(Rect(0, 0, 18, 42), Size(36, 84).projectRegionOfInterest(Size(18, 42), Rect(0, 0, 36, 84)))
     }
 
     @Test
     @SmallTest
     fun projectRegionOfInterest_larger() {
-        assertEquals(Rect(0, -1, 19, 42), Size(36, 84).projectRegionOfInterest(Size( 18, 42), Rect(0, -2, 38, 84)))
+        assertEquals(Rect(0, -1, 19, 42), Size(36, 84).projectRegionOfInterest(Size(18, 42), Rect(0, -2, 38, 84)))
     }
 
     @Test
@@ -161,7 +167,7 @@ class LayoutTest {
         assertFailsWith<IllegalArgumentException>(
             "Cannot project from container with non-positive dimensions",
             fun () {
-                Size(0, 0).projectRegionOfInterest(Size( 18, 42), Rect(0, -2, 38, 84))
+                Size(0, 0).projectRegionOfInterest(Size(18, 42), Rect(0, -2, 38, 84))
             }
         )
     }
@@ -169,9 +175,8 @@ class LayoutTest {
     @Test
     @SmallTest
     fun projectRegionOfInterest_offCenter() {
-        assertEquals(Rect(6, 14, 16, 20), Size(36, 84).projectRegionOfInterest(Size( 18, 42), Rect(12, 28, 32, 40)))
+        assertEquals(Rect(6, 14, 16, 20), Size(36, 84).projectRegionOfInterest(Size(18, 42), Rect(12, 28, 32, 40)))
     }
-
 
     @Test
     @SmallTest

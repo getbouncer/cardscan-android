@@ -195,9 +195,6 @@ fun Bitmap.crop(crop: Rect): Bitmap {
 @CheckResult
 fun Bitmap.size(): Size = Size(this.width, this.height)
 
-@CheckResult
-fun Bitmap.rect(): Rect = Rect(0, 0, this.width, this.height)
-
 fun Bitmap.scale(size: Size, filter: Boolean = false): Bitmap =
     if (size.width == width && size.height == height) {
         this
