@@ -5,13 +5,21 @@ import android.content.Context
 import android.content.pm.ConfigurationInfo
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Rect
 import android.util.Size
 import androidx.annotation.CheckResult
+import com.getbouncer.scan.framework.util.centerOn
+import com.getbouncer.scan.framework.util.intersectionWith
+import com.getbouncer.scan.framework.util.move
+import com.getbouncer.scan.framework.util.resizeRegion
 import com.getbouncer.scan.framework.util.size
+import com.getbouncer.scan.framework.util.toRect
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.IntBuffer
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 private const val DIM_PIXEL_SIZE = 3
@@ -92,25 +100,33 @@ fun hasOpenGl31(context: Context): Boolean {
  * Fragments the image into multiple segments and places them in new segments.
  */
 @CheckResult
-fun Bitmap.fragment(
-    fromSegments: Array<Rect>,
-    toSegments: Array<Rect>,
-    toSize: Size
+fun Bitmap.rearrangeBySegments(
+    segmentMap: Map<Rect, Rect>
 ): Bitmap {
-    require(fromSegments.size == toSegments.size) {
-        "Number of source segments does not match number of destination segments"
+    if (segmentMap.isEmpty()) {
+        return Bitmap.createBitmap(0, 0, this.config)
     }
-
-    val current = this
-    val result = Bitmap.createBitmap(toSize.width, toSize.height, this.config)
+    val newImageDimensions = segmentMap.values.reduce { a, b ->
+        Rect(
+            min(a.left, b.left),
+            min(a.top, b.top),
+            max(a.right, b.right),
+            max(a.bottom, b.bottom)
+        )
+    }
+    val newImageSize = newImageDimensions.size()
+    val result = Bitmap.createBitmap(newImageSize.width, newImageSize.height, this.config)
     val canvas = Canvas(result)
 
-    (0 until fromSegments.size).map {
-        val image = current.crop(fromSegments[it]).scale(toSegments[it].size())
+    segmentMap.forEach { entry ->
+        val from = entry.key
+        val to = entry.value.move(-newImageDimensions.left, -newImageDimensions.top)
+
+        val segment = this.crop(from).scale(to.size())
         canvas.drawBitmap(
-            image,
-            toSegments[it].left.toFloat(),
-            toSegments[it].top.toFloat(),
+            segment,
+            to.left.toFloat(),
+            to.top.toFloat(),
             null
         )
     }
@@ -125,127 +141,40 @@ fun Bitmap.fragment(
  */
 @CheckResult
 fun Bitmap.zoom(
-    centerSize: Size,
-    toCenterDimension: Int,
-    toBorderWidth: Int
+    originalCenterSize: Size,
+    futureCenterRect: Rect,
+    futureImageSize: Size
 ): Bitmap {
-    val widthOffset = (centerSize.width / 2)
-    val heightOffset = (centerSize.height / 2)
-    val fromSegments = arrayOf(
-        Rect(
-            0,
-            0,
-            (this.width / 2) - widthOffset,
-            (this.height / 2) - heightOffset
-        ),
-        Rect(
-            (this.width / 2) - widthOffset,
-            0,
-            (this.width / 2) + widthOffset,
-            this.height / 2 - heightOffset
-        ),
-        Rect(
-            (this.width / 2) + widthOffset,
-            0,
-            this.width,
-            (this.height / 2) - heightOffset
-        ),
-        Rect(
-            0,
-            (this.height / 2) - heightOffset,
-            (this.width / 2) - widthOffset,
-            (this.height / 2) + heightOffset
-        ),
-        Rect(
-            (this.width / 2) - widthOffset,
-            (this.height / 2) - heightOffset,
-            (this.width / 2) + widthOffset,
-            (this.height / 2) + heightOffset
-        ),
-        Rect(
-            (this.width / 2) + widthOffset,
-            (this.height / 2) - heightOffset,
-            this.width,
-            (this.height / 2) + heightOffset
-        ),
-        Rect(
-            0,
-            (this.height / 2) + heightOffset,
-            (this.width / 2) - widthOffset,
-            this.height
-        ),
-        Rect(
-            (this.width / 2) - widthOffset,
-            (this.height / 2) + heightOffset,
-            (this.width / 2) + widthOffset,
-            this.height
-        ),
-        Rect(
-            (this.width / 2) + widthOffset,
-            (this.height / 2) + heightOffset,
-            this.width,
-            this.height
-        )
-    )
-    val toSegments = arrayOf(
-        Rect(
-            0,
-            0,
-            toBorderWidth,
-            toBorderWidth
-        ),
-        Rect(
-            toBorderWidth,
-            0,
-            toBorderWidth + toCenterDimension,
-            toBorderWidth
-        ),
-        Rect(
-            toBorderWidth + toCenterDimension,
-            0,
-            (2 * toBorderWidth + toCenterDimension),
-            toBorderWidth
-        ),
-        Rect(
-            0,
-            toBorderWidth,
-            toBorderWidth,
-            toBorderWidth + toCenterDimension
-        ),
-        Rect(
-            toBorderWidth,
-            toBorderWidth,
-            toBorderWidth + toCenterDimension,
-            toBorderWidth + toCenterDimension
-        ),
-        Rect(
-            toBorderWidth + toCenterDimension,
-            112,
-            (2 * toBorderWidth + toCenterDimension),
-            toBorderWidth + toCenterDimension
-        ),
-        Rect(
-            0,
-            toBorderWidth + toCenterDimension,
-            toBorderWidth,
-            (2 * toBorderWidth + toCenterDimension)
-        ),
-        Rect(
-            toBorderWidth,
-            toBorderWidth + toCenterDimension,
-            toBorderWidth + toCenterDimension,
-            (2 * toBorderWidth + toCenterDimension)
-        ),
-        Rect(
-            toBorderWidth + toCenterDimension,
-            toBorderWidth + toCenterDimension,
-            (2 * toBorderWidth + toCenterDimension),
-            (2 * toBorderWidth + toCenterDimension)
-        )
-    )
-    val toSize = Size((2 * toBorderWidth + toCenterDimension), (2 * toBorderWidth + toCenterDimension))
+    // Finds the center rectangle of the newly cropped image
+    val originalCenterRect = originalCenterSize.centerOn(this.size().toRect())
+    // Produces a map of rects to rects which are used to map segments of the old image onto the new one
+    val regionMap = this.size().resizeRegion(originalCenterRect, futureCenterRect, futureImageSize)
+    // construct the bitmap from the region map
+    return this.rearrangeBySegments(regionMap)
+}
 
-    return this.fragment(fromSegments, toSegments, toSize)
+/**
+ * Crops and image using originalImageRect and places it on finalImageRect, which is filled with
+ * gray for the best results
+ */
+@CheckResult
+fun Bitmap.cropWithFill(cropRegion: Rect): Bitmap {
+    val intersectionRegion = this.size().toRect().intersectionWith(cropRegion)
+    val result = Bitmap.createBitmap(cropRegion.width(), cropRegion.height(), this.config)
+    val canvas = Canvas(result)
+
+    canvas.drawColor(Color.GRAY)
+
+    val croppedImage = this.crop(intersectionRegion)
+
+    canvas.drawBitmap(
+        croppedImage,
+        croppedImage.size().toRect(),
+        intersectionRegion.move(-cropRegion.left, -cropRegion.top),
+        null
+    )
+
+    return result
 }
 
 /**
@@ -266,7 +195,6 @@ fun Bitmap.crop(crop: Rect): Bitmap {
 @CheckResult
 fun Bitmap.size(): Size = Size(this.width, this.height)
 
-@CheckResult
 fun Bitmap.scale(size: Size, filter: Boolean = false): Bitmap =
     if (size.width == width && size.height == height) {
         this

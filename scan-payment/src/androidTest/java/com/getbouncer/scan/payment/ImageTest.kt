@@ -158,6 +158,59 @@ class ImageTest {
 
     @Test
     @SmallTest
+    fun bitmap_cropWithFill_isCorrect() {
+        val bitmap = testResources.getDrawable(R.drawable.ocr_card_numbers_clear, null).toBitmap()
+        assertNotNull(bitmap)
+        assertEquals(600, bitmap.width, "Bitmap width is not expected")
+        assertEquals(375, bitmap.height, "Bitmap height is not expected")
+
+        val cropRegion = Rect(
+            -100,
+            -100,
+            bitmap.width + 100,
+            bitmap.height + 100
+        )
+
+        // crop the bitmap
+        val croppedBitmap = bitmap.cropWithFill(
+            cropRegion
+        )
+
+        // check the expected sizes of the images
+        assertEquals(
+            Size(
+                bitmap.width + 200,
+                bitmap.height + 200
+            ),
+            Size(croppedBitmap.width, croppedBitmap.height),
+            "Cropped image is the wrong size"
+        )
+
+        for (y in 0 until croppedBitmap.height) {
+            for (x in 0 until croppedBitmap.width) {
+                if (x < 100 || x > 700 || y < 100 || y > 475) {
+                    val croppedPixel = croppedBitmap.getPixel(x, y)
+                    assertEquals(Color.GRAY, croppedPixel, "Pixel $x, $y not gray")
+                }
+            }
+        }
+
+        // check each pixel of the images
+        var encounteredNonZeroPixel = false
+        for (x in 0 until bitmap.width) {
+            for (y in 0 until bitmap.height) {
+                val croppedPixel = croppedBitmap.getPixel(x + 100, y + 100)
+                val originalPixel = bitmap.getPixel(x, y)
+                assertEquals(originalPixel, croppedPixel, "Difference at pixel $x, $y")
+                encounteredNonZeroPixel = encounteredNonZeroPixel || croppedPixel != 0
+            }
+        }
+
+        assertTrue(encounteredNonZeroPixel, "Pixels were all zero")
+    }
+
+    @Test
+    @SmallTest
     fun zoom_isCorrect() {
         val bitmap = testResources.getDrawable(R.drawable.ocr_card_numbers_clear, null).toBitmap()
         assertNotNull(bitmap)
@@ -166,9 +219,9 @@ class ImageTest {
 
         // zoom the bitmap
         val zoomedBitmap = bitmap.zoom(
-            centerSize = Size(224, 224),
-            toCenterDimension = 224,
-            toBorderWidth = 112
+            originalCenterSize = Size(224, 224),
+            futureCenterRect = Rect(112, 112, 336, 336),
+            futureImageSize = Size(448, 448)
         )
 
         // check the expected sizes of the images

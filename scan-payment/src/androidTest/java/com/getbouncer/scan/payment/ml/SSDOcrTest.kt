@@ -1,11 +1,10 @@
 package com.getbouncer.scan.payment.ml
 
-import android.graphics.Rect
-import android.util.Size
 import androidx.core.graphics.drawable.toBitmap
 import androidx.test.filters.MediumTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.getbouncer.scan.framework.time.Clock
+import com.getbouncer.scan.framework.util.toRect
 import com.getbouncer.scan.payment.size
 import com.getbouncer.scan.payment.test.R
 import kotlinx.coroutines.runBlocking
@@ -58,6 +57,4 @@ class SSDOcrTest {
         assertNotNull(prediction2)
         assertEquals("4557095462268383", prediction2.pan)
     }
-
-    private fun Size.toRect(): Rect = Rect(0, 0, width, height)
 }
