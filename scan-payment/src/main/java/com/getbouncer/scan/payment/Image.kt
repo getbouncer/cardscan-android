@@ -144,33 +144,16 @@ fun Bitmap.rearrangeBySegments(
  */
 @CheckResult
 fun Bitmap.zoom(
-    previewSize: Size,
-    cardFinder: Rect,
     originalCenterSize: Size,
     futureCenterRect: Rect,
     futureImageSize: Size
 ): Bitmap {
-    // Transforms the viewfinder from the preview to the image size
-    val projectedViewFinder = previewSize.projectRegionOfInterest(toSize = this.size(), regionOfInterest = cardFinder)
-    // Creates a square version of the viewfinder
-    val projectViewFinderGreatestDimension = max(projectedViewFinder.width(), projectedViewFinder.height())
-    val projectedViewFinderSquare = Size(projectViewFinderGreatestDimension, projectViewFinderGreatestDimension)
-
-    require(this.size().toRect().contains(projectedViewFinderSquare.centerOn(projectedViewFinder))) {
-        "Viewfinder too close to edge of the screen"
-    }
-
-    val aspectRatio = 9.0f / 16.0f
-    // Creates a rect of a certain aspect ratio surrounding the view finder
-    val aspectRatioCrop = minAspectRatioSurroundingSize(projectedViewFinderSquare, aspectRatio).centerOn(projectedViewFinder)
-    // Crops the image and fills the rest of the aspect-ratio image with gray
-    val croppedImage = this.cropWithFill(aspectRatioCrop)
     // Finds the center rectangle of the newly cropped image
-    val originalCenterRect = originalCenterSize.centerOn(croppedImage.size().toRect())
+    val originalCenterRect = originalCenterSize.centerOn(this.size().toRect())
     // Produces a map of rects to rects which are used to map segments of the old image onto the new one
-    val regionMap = croppedImage.resizeRegion(originalCenterRect, futureCenterRect, futureImageSize)
+    val regionMap = this.size().resizeRegion(originalCenterRect, futureCenterRect, futureImageSize)
     // construct the bitmap from the region map
-    return croppedImage.rearrangeBySegments(regionMap)
+    return this.rearrangeBySegments(regionMap)
 }
 
 /**
@@ -179,19 +162,18 @@ fun Bitmap.zoom(
  */
 @CheckResult
 fun Bitmap.cropWithFill(cropRegion: Rect): Bitmap {
-    val intersectionRegion = cropRegion.intersectionWith(this.size().toRect())
+    val intersectionRegion = this.size().toRect().intersectionWith(cropRegion)
     val result = Bitmap.createBitmap(cropRegion.width(), cropRegion.height(), this.config)
     val canvas = Canvas(result)
 
-    val paint = Paint()
-    paint.setColor(Color.GRAY)
-    paint.setStyle(Paint.Style.FILL)
-    canvas.drawPaint(paint)
+    canvas.drawColor(Color.GRAY)
+
+    val croppedImage = this.crop(intersectionRegion)
 
     canvas.drawBitmap(
-        this.crop(intersectionRegion),
-        intersectionRegion.move(cropRegion.left, cropRegion.top).left.toFloat(),
-        intersectionRegion.move(cropRegion.left, cropRegion.top).top.toFloat(),
+        croppedImage,
+        croppedImage.size().toRect(),
+        intersectionRegion.move(-cropRegion.left, -cropRegion.top),
         null
     )
 

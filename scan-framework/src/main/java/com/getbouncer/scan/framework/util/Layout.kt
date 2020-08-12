@@ -1,6 +1,5 @@
 package com.getbouncer.scan.framework.util
 
-import android.graphics.Bitmap
 import android.graphics.Rect
 import android.graphics.RectF
 import android.util.Size
@@ -38,10 +37,8 @@ fun maxAspectRatioInSize(area: Size, aspectRatio: Float): Size {
 }
 
 /**
-<<<<<<< HEAD
  * Calculate the maximum [Size] that fits within the [containingSize] and maintains the same aspect ratio as the subject
  * of this method. This is often used to project a preview image onto a full camera image.
-=======
  * Determine the minimum size of rectangle with a given aspect ratio (X/Y) that a specified area
  * can fit inside it.
  *
@@ -76,7 +73,6 @@ fun minAspectRatioSurroundingSize(area: Size, aspectRatio: Float): Size {
  * 2. the [Size] and the [containingSize] have the same orientation
  * 3. the [containingSize] and the [Size] share either a horizontal or vertical field of view
  * 4. the non-shared field of view must be smaller on the [Size] than the [containingSize]
->>>>>>> Implement changes
  *
  * If using this to project a preview image onto a full camera image, This makes a few assumptions:
  * 1. the preview image [Size] and the full image [containingSize] are centered relative to each other
@@ -158,22 +154,28 @@ fun Size.toRect() = Rect(0, 0, this.width, this.height)
  * Return a rect that is the intersection of two other rects
  */
 @CheckResult
-fun Rect.intersectionWith(rect: Rect) = Rect(
-    max(this.left, rect.left),
-    max(this.top, rect.top),
-    min(this.right, rect.right),
-    min(this.bottom, rect.bottom)
-)
+fun Rect.intersectionWith(rect: Rect): Rect {
+    require(this.intersect(rect)) {
+        "Given rects do not intersect"
+    }
+
+    return Rect(
+        max(this.left, rect.left),
+        max(this.top, rect.top),
+        min(this.right, rect.right),
+        min(this.bottom, rect.bottom)
+    )
+}
 
 /**
- * Reevalutate the bounds to be relative to another rect
+ * Move relative to its current position
  */
 @CheckResult
 fun Rect.move(relativeX: Int, relativeY: Int) = Rect(
-    this.left - relativeX,
-    this.top - relativeY,
-    this.right - relativeX,
-    this.bottom - relativeY
+    this.left + relativeX,
+    this.top + relativeY,
+    this.right + relativeX,
+    this.bottom + relativeY
 )
 
 /**
@@ -181,18 +183,24 @@ fun Rect.move(relativeX: Int, relativeY: Int) = Rect(
  * to that new location
  */
 @CheckResult
-fun Size.projectRegionOfInterest(toSize: Size, regionOfInterest: Rect) = Rect(
-    regionOfInterest.left * toSize.width / this.width,
-    regionOfInterest.top * toSize.height / this.height,
-    regionOfInterest.right * toSize.width / this.width,
-    regionOfInterest.bottom * toSize.height / this.height
-)
+fun Size.projectRegionOfInterest(toSize: Size, regionOfInterest: Rect): Rect {
+    require(this.width > 0 || this.height > 0) {
+        "Cannot project from container with non-positive dimensions"
+    }
+
+    return Rect(
+        regionOfInterest.left * toSize.width / this.width,
+        regionOfInterest.top * toSize.height / this.height,
+        regionOfInterest.right * toSize.width / this.width,
+        regionOfInterest.bottom * toSize.height / this.height
+    )
+}
 
 /**
  * Resizes a region of the image and places it somewhere else
  */
 @CheckResult
-fun Bitmap.resizeRegion(
+fun Size.resizeRegion(
     originalCenterRect: Rect,
     toCenterRect: Rect,
     toImageSize: Size
