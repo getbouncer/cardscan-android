@@ -66,6 +66,12 @@ fun minAspectRatioSurroundingSize(area: Size, aspectRatio: Float): Size {
     }
 }
 
+@CheckResult
+fun matchSizeToAspectRatio(area: Size, aspectRatio: Float): Size {
+    return if (aspectRatio < 1) Size(area.width, (area.width / aspectRatio).roundToInt())
+    else Size((area.height * aspectRatio).roundToInt(), area.height)
+}
+
 /**
  * Calculate the position of the [Size] within the [containingSize]. This makes a few
  * assumptions:
@@ -307,3 +313,5 @@ fun Size.resizeRegion(
 )
 
 fun Rect.size() = Size(width(), height())
+
+fun Size.aspectRatio() = width.toFloat() / height.toFloat()
