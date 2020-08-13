@@ -6,6 +6,7 @@ import com.getbouncer.scan.framework.Analyzer
 import com.getbouncer.scan.framework.AnalyzerFactory
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.FetchedData
+import com.getbouncer.scan.framework.FetchedFile
 import com.getbouncer.scan.framework.Loader
 import com.getbouncer.scan.framework.time.Timer
 import kotlinx.coroutines.sync.Mutex
@@ -69,17 +70,28 @@ abstract class TFLAnalyzerFactory<Output : Analyzer<*, *, *>>(
 
     private var loadedModel: ByteBuffer? = null
 
-    protected suspend fun createInterpreter(): Interpreter? {
-        val modelData = loadModel()
-        return if (modelData == null) {
-            Log.e(Config.logTag, "Unable to load model")
-            null
-        } else {
-            Interpreter(modelData, tfOptions)
+    protected suspend fun createInterpreter(): Interpreter? =
+        createInterpreter(fetchedModel)
+
+    private suspend fun createInterpreter(fetchedModel: FetchedData): Interpreter? = try {
+        loadModel(fetchedModel)?.let { Interpreter(it, tfOptions) }
+    } catch (t: Throwable) {
+        Log.e(Config.logTag, "Error occurred while loading model ${fetchedModel.modelClass} version ${fetchedModel.modelVersion}", t)
+        if (fetchedModel is FetchedFile) {
+            try {
+                fetchedModel.file?.delete()
+            } catch (t: Throwable) {
+                Log.w(Config.logTag, "Unable to delete file ${fetchedModel.file}")
+            }
+        }
+        null
+    }.apply {
+        if (this == null) {
+            Log.w(Config.logTag, "Unable to load model ${fetchedModel.modelClass} version ${fetchedModel.modelVersion}")
         }
     }
 
-    private suspend fun loadModel(): ByteBuffer? = loadModelMutex.withLock {
+    private suspend fun loadModel(fetchedModel: FetchedData): ByteBuffer? = loadModelMutex.withLock {
         loadedModel ?: run { loader.loadData(fetchedModel) }
     }
 }

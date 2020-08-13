@@ -86,7 +86,7 @@ class FetcherTest {
     fun fetchModelFromWebSignedUrl_success() = runBlocking {
         class FetcherImpl : SignedUrlModelWebFetcher(testContext) {
             override val modelClass = "four_recognize"
-            override val modelFrameworkVersion = 2049
+            override val modelFrameworkVersion = 1
             override val modelVersion = "0.0.1.16"
             override val modelFileName = "fourrecognize.tflite"
             override val hash = "55eea0d57239a7e92904fb15209963f7236bd06919275bdeb0a765a94b559c97"
@@ -116,7 +116,7 @@ class FetcherTest {
     fun fetchModelFromWebSignedUrl_downloadFail() = runBlocking {
         class FetcherImpl : SignedUrlModelWebFetcher(testContext) {
             override val modelClass = "invalid_model"
-            override val modelFrameworkVersion = 2049
+            override val modelFrameworkVersion = 1
             override val modelVersion = "0.0.1.16"
             override val modelFileName = "fourrecognize.tflite"
             override val hash = "55eea0d57239a7e92904fb15209963f7236bd06919275bdeb0a765a94b559c97"
@@ -140,7 +140,7 @@ class FetcherTest {
 
         class FetcherImpl : SignedUrlModelWebFetcher(testContext) {
             override val modelClass = "four_recognize"
-            override val modelFrameworkVersion = 2049
+            override val modelFrameworkVersion = 1
             override val modelVersion = "0.0.1.16"
             override val modelFileName = "fourrecognize.tflite"
             override val hash = "55eea0d57239a7e92904fb15209963f7236bd06919275bdeb0a765a94b559c97"
@@ -160,6 +160,36 @@ class FetcherTest {
     @Test
     @LargeTest
     fun fetchUpgradableModelFromWeb_success() = runBlocking {
+        class FetcherImpl : UpdatingModelWebFetcher(testContext) {
+            override val modelClass = "four_recognize"
+            override val modelFrameworkVersion = 1
+            override val defaultModelVersion = "0.0.1.16"
+            override val defaultModelFileName = "fourrecognize.tflite"
+            override val defaultModelHash = "abc"
+            override val defaultModelHashAlgorithm = "SHA-256"
+        }
+
+        // force downloading the model for this test
+        val fetcher = FetcherImpl()
+        fetcher.clearCache()
+
+        val fetchedModel = fetcher.fetchData(false)
+        assertTrue { fetchedModel is FetchedFile }
+
+        val file = (fetchedModel as FetchedFile).file
+        assertNotNull(file)
+
+        val reader = file.reader()
+        reader.skip(4)
+        assertEquals('T', reader.read().toChar())
+        assertEquals('F', reader.read().toChar())
+        assertEquals('L', reader.read().toChar())
+        assertEquals('3', reader.read().toChar())
+    }
+
+    @Test
+    @LargeTest
+    fun fetchUpgradableModelFromWeb_fallbackSuccess() = runBlocking {
         class FetcherImpl : UpdatingModelWebFetcher(testContext) {
             override val modelClass = "four_recognize"
             override val modelFrameworkVersion = 2049
@@ -215,6 +245,28 @@ class FetcherTest {
         assertEquals('F', reader.read().toChar())
         assertEquals('L', reader.read().toChar())
         assertEquals('3', reader.read().toChar())
+    }
+
+    @Test
+    @LargeTest
+    fun fetchUpgradableModelFromWeb_fail() = runBlocking {
+        class FetcherImpl : UpdatingModelWebFetcher(testContext) {
+            override val modelClass = "four_recognize"
+            override val modelFrameworkVersion = 2049
+            override val defaultModelVersion = "0.0.1.16"
+            override val defaultModelFileName = "fourrecognize.tflite"
+            override val defaultModelHash = "abc"
+            override val defaultModelHashAlgorithm = "SHA-256"
+        }
+
+        // force downloading the model for this test
+        val fetcher = FetcherImpl()
+        fetcher.clearCache()
+
+        val fetchedModel = fetcher.fetchData(false)
+        assertTrue { fetchedModel is FetchedFile }
+
+        assertNull((fetchedModel as FetchedFile).file)
     }
 
     @Test

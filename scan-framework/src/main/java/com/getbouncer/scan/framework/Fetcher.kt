@@ -119,16 +119,16 @@ sealed class WebFetcher : Fetcher {
 
     override suspend fun fetchData(forImmediateUse: Boolean): FetchedData = fetchDataMutex.withLock {
         val stat = Stats.trackRepeatingTask("web_fetcher_$modelClass")
+        val cachedData = FetchedData.fromFetchedModelMeta(modelClass, modelFrameworkVersion, tryFetchLatestCachedData())
 
         // if a previous exception was encountered, attempt to fetch cached data
         fetchException?.run {
-            val data = FetchedData.fromFetchedModelMeta(modelClass, modelFrameworkVersion, tryFetchLatestCachedData())
-            if (data.successfullyFetched) {
+            if (cachedData.successfullyFetched) {
                 stat.trackResult("success")
             } else {
                 stat.trackResult(this::class.java.simpleName)
             }
-            return@withLock data
+            return@withLock cachedData
         }
 
         // attempt to fetch the data from local cache if it's needed immediately
@@ -145,7 +145,7 @@ sealed class WebFetcher : Fetcher {
         // get details for downloading the data. If download details cannot be retrieved, use the latest cached version
         val downloadDetails = getDownloadDetails() ?: run {
             stat.trackResult("download_details_failure")
-            return@withLock FetchedData.fromFetchedModelMeta(modelClass, modelFrameworkVersion, tryFetchLatestCachedData())
+            return@withLock cachedData
         }
 
         // check the local cache for a matching model
@@ -158,31 +158,31 @@ sealed class WebFetcher : Fetcher {
         }
 
         // download the model
-        val downloadedFile = try {
+        val downloadOutputFile = getDownloadOutputFile(downloadDetails.modelVersion)
+        try {
             downloadAndVerify(
                 downloadDetails.url,
-                getDownloadOutputFile(downloadDetails.modelVersion),
+                downloadOutputFile,
                 downloadDetails.hash,
                 downloadDetails.hashAlgorithm
             )
         } catch (t: Throwable) {
             fetchException = t
-            val data = FetchedData.fromFetchedModelMeta(modelClass, modelFrameworkVersion, tryFetchLatestCachedData())
-            if (data.successfullyFetched) {
+            if (cachedData.successfullyFetched) {
                 stat.trackResult("success")
             } else {
                 stat.trackResult(t::class.java.simpleName)
             }
-            return@withLock data
+            return@withLock cachedData
         }
 
-        cleanUpPostDownload(downloadedFile)
+        cleanUpPostDownload(downloadOutputFile)
 
         FetchedFile(
             modelClass,
             modelFrameworkVersion,
             downloadDetails.modelVersion,
-            downloadedFile
+            downloadOutputFile
         )
     }
 
@@ -460,16 +460,14 @@ private suspend fun downloadAndVerify(
     outputFile: File,
     hash: String,
     hashAlgorithm: String
-): File {
-    val downloadedFile = downloadFile(url, outputFile)
-    val calculatedHash = calculateHash(downloadedFile, hashAlgorithm)
+) {
+    downloadFile(url, outputFile)
+    val calculatedHash = calculateHash(outputFile, hashAlgorithm)
 
     if (hash != calculatedHash) {
-        withContext(Dispatchers.IO) { downloadedFile.delete() }
+        withContext(Dispatchers.IO) { outputFile.delete() }
         throw HashMismatchException(hashAlgorithm, hash, calculatedHash)
     }
-
-    return downloadedFile
 }
 
 /**
@@ -508,8 +506,6 @@ private suspend fun downloadFile(url: URL, outputFile: File) = withContext(Dispa
         urlConnection.getInputStream().use { stream ->
             FileOutputStream(outputFile).use { it.write(stream.readBytes()) }
         }
-
-        outputFile
     }
 }
 
