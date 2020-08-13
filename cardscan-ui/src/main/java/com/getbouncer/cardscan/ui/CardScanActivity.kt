@@ -213,7 +213,7 @@ class CardScanActivity :
             enableEnterCardManually: Boolean = false,
             enableExpiryExtraction: Boolean = false,
             enableNameExtraction: Boolean = false,
-            displayCardPan: Boolean = false,
+            displayCardPan: Boolean = true,
             displayCardholderName: Boolean = false,
             displayCardScanLogo: Boolean = true,
             enableDebug: Boolean = Config.isDebug
@@ -257,7 +257,7 @@ class CardScanActivity :
             enableEnterCardManually: Boolean = false,
             enableExpiryExtraction: Boolean = false,
             enableNameExtraction: Boolean = false,
-            displayCardPan: Boolean = false,
+            displayCardPan: Boolean = true,
             displayCardholderName: Boolean = false,
             displayCardScanLogo: Boolean = true,
             enableDebug: Boolean = Config.isDebug
@@ -311,7 +311,7 @@ class CardScanActivity :
     }
 
     private val displayCardPan: Boolean by lazy {
-        intent.getBooleanExtra(PARAM_DISPLAY_CARD_PAN, false)
+        intent.getBooleanExtra(PARAM_DISPLAY_CARD_PAN, true)
     }
 
     private val displayCardholderName: Boolean by lazy {
@@ -323,11 +323,11 @@ class CardScanActivity :
     }
 
     private val enableNameExtraction: Boolean by lazy {
-        intent.getBooleanExtra(PARAM_ENABLE_NAME_EXTRACTION, true)
+        intent.getBooleanExtra(PARAM_ENABLE_NAME_EXTRACTION, false)
     }
 
     private val enableExpiryExtraction: Boolean by lazy {
-        intent.getBooleanExtra(PARAM_ENABLE_EXPIRY_EXTRACTION, true)
+        intent.getBooleanExtra(PARAM_ENABLE_EXPIRY_EXTRACTION, false)
     }
 
     private var mainLoopIsProducingResults = AtomicBoolean(false)
@@ -592,7 +592,7 @@ class CardScanActivity :
         }
 
         val willRunNameAndExpiry = (result.analyzerResult.isExpiryExtractionAvailable && enableExpiryExtraction) ||
-            (result.analyzerResult.isNameExtractionAvailable && result.analyzerResult.isNameExtractionAvailable)
+            (result.analyzerResult.isNameExtractionAvailable && enableNameExtraction)
 
         when (result.state) {
             is MainLoopState.Initial -> setStateNotFound()
