@@ -67,6 +67,19 @@ fun minAspectRatioSurroundingSize(area: Size, aspectRatio: Float): Size {
 }
 
 /**
+ * Given a size and an aspect ratio, resize the area to fit that aspect ratio. If the desired aspect
+ * ratio is smaller than the one of the provided size, the size will be cropped to match. If the
+ * desired aspect ratio is larger than the that of the provided size, then the size will be expanded
+ * to match.
+ */
+@CheckResult
+fun adjustSizeToAspectRatio(area: Size, aspectRatio: Float): Size = if (aspectRatio < 1) {
+    Size(area.width, (area.width / aspectRatio).roundToInt())
+} else {
+    Size((area.height * aspectRatio).roundToInt(), area.height)
+}
+
+/**
  * Calculate the position of the [Size] within the [containingSize]. This makes a few
  * assumptions:
  * 1. the [Size] and the [containingSize] are centered relative to each other.
@@ -307,3 +320,5 @@ fun Size.resizeRegion(
 )
 
 fun Rect.size() = Size(width(), height())
+
+fun Size.aspectRatio() = width.toFloat() / height.toFloat()
