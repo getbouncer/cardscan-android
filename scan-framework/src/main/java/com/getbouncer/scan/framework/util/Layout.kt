@@ -66,10 +66,17 @@ fun minAspectRatioSurroundingSize(area: Size, aspectRatio: Float): Size {
     }
 }
 
+/**
+ * Given a size and an aspect ratio, resize the area to fit that aspect ratio. If the desired aspect
+ * ratio is smaller than the one of the provided size, the size will be cropped to match. If the
+ * desired aspect ratio is larger than the that of the provided size, then the size will be expanded
+ * to match.
+ */
 @CheckResult
-fun matchSizeToAspectRatio(area: Size, aspectRatio: Float): Size {
-    return if (aspectRatio < 1) Size(area.width, (area.width / aspectRatio).roundToInt())
-    else Size((area.height * aspectRatio).roundToInt(), area.height)
+fun adjustSizeToAspectRatio(area: Size, aspectRatio: Float): Size = if (aspectRatio < 1) {
+    Size(area.width, (area.width / aspectRatio).roundToInt())
+} else {
+    Size((area.height * aspectRatio).roundToInt(), area.height)
 }
 
 /**

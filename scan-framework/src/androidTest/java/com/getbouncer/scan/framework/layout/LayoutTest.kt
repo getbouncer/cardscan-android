@@ -3,9 +3,9 @@ package com.getbouncer.scan.framework.layout
 import android.graphics.Rect
 import android.util.Size
 import androidx.test.filters.SmallTest
+import com.getbouncer.scan.framework.util.adjustSizeToAspectRatio
 import com.getbouncer.scan.framework.util.centerScaled
 import com.getbouncer.scan.framework.util.intersectionWith
-import com.getbouncer.scan.framework.util.matchSizeToAspectRatio
 import com.getbouncer.scan.framework.util.maxAspectRatioInSize
 import com.getbouncer.scan.framework.util.minAspectRatioSurroundingSize
 import com.getbouncer.scan.framework.util.move
@@ -217,25 +217,25 @@ class LayoutTest {
 
     @Test
     @SmallTest
-    fun  matchSizeToAspectRatio_verticalCrop() {
-        assertEquals(Size(900, 1800), matchSizeToAspectRatio(Size(900, 2200), 0.5F))
+    fun adjustSizeToAspectRatio_verticalCrop() {
+        assertEquals(Size(900, 1800), adjustSizeToAspectRatio(Size(900, 2200), 0.5F))
     }
 
     @Test
     @SmallTest
-    fun  matchSizeToAspectRatio_verticalExpand() {
-        assertEquals(Size(900, 1800), matchSizeToAspectRatio(Size(900, 1600), 0.5F))
+    fun adjustSizeToAspectRatio_verticalExpand() {
+        assertEquals(Size(900, 1800), adjustSizeToAspectRatio(Size(900, 1600), 0.5F))
     }
 
     @Test
     @SmallTest
-    fun  matchSizeToAspectRatio_horizontalCrop() {
-        assertEquals(Size(1800, 900), matchSizeToAspectRatio(Size(2200, 900), 2F))
+    fun adjustSizeToAspectRatio_horizontalCrop() {
+        assertEquals(Size(1800, 900), adjustSizeToAspectRatio(Size(2200, 900), 2F))
     }
 
     @Test
     @SmallTest
-    fun  matchSizeToAspectRatio_horizontalExpand() {
-        assertEquals(Size(1800, 900), matchSizeToAspectRatio(Size(1600, 900), 2F))
+    fun adjustSizeToAspectRatio_horizontalExpand() {
+        assertEquals(Size(1800, 900), adjustSizeToAspectRatio(Size(1600, 900), 2F))
     }
 }
