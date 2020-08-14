@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0020](https://github.com/getbouncer/cardscan-android/tree/2.0.0020) (2020-08-13)
+
+**Closed issues:**
+
+- Crash on android 5 Lenovo [\#89](https://github.com/getbouncer/cardscan-android/issues/89)
+
+**Merged pull requests:**
+
+- Add aspect ratio method [\#173](https://github.com/getbouncer/cardscan-android/pull/173) ([smkuhne](https://github.com/smkuhne))
+- Prevent crash on bad model download [\#172](https://github.com/getbouncer/cardscan-android/pull/172) ([awushensky](https://github.com/awushensky))
+
 ## [2.0.0019](https://github.com/getbouncer/cardscan-android/tree/2.0.0019) (2020-08-12)
 
 **Merged pull requests:**
@@ -12,7 +23,6 @@
 - Use key without permissions for test [\#166](https://github.com/getbouncer/cardscan-android/pull/166) ([awushensky](https://github.com/awushensky))
 - Update expiry timeout, handle new permissions [\#165](https://github.com/getbouncer/cardscan-android/pull/165) ([xsl](https://github.com/xsl))
 - Add documentation [\#164](https://github.com/getbouncer/cardscan-android/pull/164) ([awushensky](https://github.com/awushensky))
-- Bump tensorflow-lite from 2.2.0 to 2.3.0 [\#163](https://github.com/getbouncer/cardscan-android/pull/163) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Bump core-ktx from 1.3.0 to 1.3.1 [\#159](https://github.com/getbouncer/cardscan-android/pull/159) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 
 ## [2.0.0018](https://github.com/getbouncer/cardscan-android/tree/2.0.0018) (2020-07-28)
@@ -23,8 +33,10 @@
 
 **Merged pull requests:**
 
+- Bump tensorflow-lite from 2.2.0 to 2.3.0 [\#163](https://github.com/getbouncer/cardscan-android/pull/163) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Clean up counters [\#162](https://github.com/getbouncer/cardscan-android/pull/162) ([awushensky](https://github.com/awushensky))
 - Clean up state machine logic [\#161](https://github.com/getbouncer/cardscan-android/pull/161) ([awushensky](https://github.com/awushensky))
+- Clean up state machine [\#160](https://github.com/getbouncer/cardscan-android/pull/160) ([awushensky](https://github.com/awushensky))
 - Main loop state machine [\#158](https://github.com/getbouncer/cardscan-android/pull/158) ([awushensky](https://github.com/awushensky))
 
 ## [2.0.0017](https://github.com/getbouncer/cardscan-android/tree/2.0.0017) (2020-07-22)
@@ -46,7 +58,6 @@
 
 **Merged pull requests:**
 
-- Clean up state machine [\#160](https://github.com/getbouncer/cardscan-android/pull/160) ([awushensky](https://github.com/awushensky))
 - Restructure 2.0 [\#151](https://github.com/getbouncer/cardscan-android/pull/151) ([awushensky](https://github.com/awushensky))
 
 ## [2.0.0014](https://github.com/getbouncer/cardscan-demo-android/tree/2.0.0014) (2020-07-14)
