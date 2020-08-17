@@ -89,7 +89,7 @@ class NameAndExpiryAnalyzer private constructor(
                     ),
                     Unit
                 )?.expiry
-            }.maxBy { it.year * 100 + it.month }
+            }.maxByOrNull { it.year * 100 + it.month }
         } else {
             null
         }

@@ -97,7 +97,7 @@ class ArrayExtensionsTest {
     @SmallTest
     fun indexOfMax() {
         val array = generateTestFloatArray(10_000)
-        val maxIndex = array.mapIndexed { index, value -> Pair(index, value) }.maxBy { it.second }?.first
+        val maxIndex = array.mapIndexed { index, value -> Pair(index, value) }.maxByOrNull { it.second }?.first
 
         assertEquals(maxIndex, array.indexOfMax())
         assertNull(FloatArray(0).indexOfMax())
