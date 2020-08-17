@@ -373,7 +373,7 @@ abstract class UpdatingModelWebFetcher(private val context: Context) : SignedUrl
      * Get the most recently created file in the cache folder. Return null if no files in this
      */
     private suspend fun getLatestFile() = withContext(Dispatchers.IO) {
-        getCacheFolder().listFiles()?.maxBy { it.lastModified() }
+        getCacheFolder().listFiles()?.maxByOrNull { it.lastModified() }
     }
 
     /**

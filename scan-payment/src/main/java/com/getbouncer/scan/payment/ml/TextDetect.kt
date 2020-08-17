@@ -234,7 +234,7 @@ class TextDetect private constructor(interpreter: Interpreter) :
             }.map {
                 // gather the name score for this box
                 Pair(predictionToNameScoreNew(it, panMetaBox), it)
-            }.maxBy {
+            }.maxByOrNull {
                 // get the box for the highest score
                 it.first
             }?.second
@@ -258,7 +258,7 @@ class TextDetect private constructor(interpreter: Interpreter) :
      * Find the MergedBox who's the most like to be the PAN.
      * Returns the mergedbox that has the most number of merged digit boxes
      */
-    private fun getPanBox(boxes: List<MergedBox>) = boxes.maxBy { mergedBox ->
+    private fun getPanBox(boxes: List<MergedBox>) = boxes.maxByOrNull { mergedBox ->
         mergedBox.subBoxes.filter {
             it.label == 2
         }.size
@@ -277,7 +277,7 @@ class TextDetect private constructor(interpreter: Interpreter) :
         while (unmergedBoxes.isNotEmpty()) {
             val candidateBox = unmergedBoxes.first()
             val subBoxes = getCloseBoxes(candidateBox, unmergedBoxes)
-            val metaConfidence = subBoxes.maxBy { it.confidence }?.confidence ?: 0f
+            val metaConfidence = subBoxes.maxByOrNull { it.confidence }?.confidence ?: 0f
             mergedBoxes.add(
                 MergedBox(
                     DetectionBox(
