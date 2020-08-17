@@ -12,6 +12,7 @@ import android.util.Log
 import android.util.Size
 import android.view.View
 import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
 import androidx.annotation.LayoutRes
 import androidx.annotation.StringRes
@@ -33,6 +34,7 @@ import com.getbouncer.scan.framework.util.AppDetails
 import com.getbouncer.scan.framework.util.Device
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -79,12 +81,9 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
         fun getCanceledReason(data: Intent?): Int =
             data?.getIntExtra(RESULT_CANCELED_REASON, Int.MIN_VALUE) ?: Int.MIN_VALUE
 
-        fun Intent?.isUserCanceled(): Boolean = getCanceledReason(this) ==
-            CANCELED_REASON_USER
-        fun Intent?.isCameraError(): Boolean = getCanceledReason(this) ==
-            CANCELED_REASON_CAMERA_ERROR
-        fun Intent?.isAnalyzerFailure(): Boolean = getCanceledReason(this) ==
-            CANCELED_REASON_ANALYZER_FAILURE
+        fun Intent?.isUserCanceled(): Boolean = getCanceledReason(this) == CANCELED_REASON_USER
+        fun Intent?.isCameraError(): Boolean = getCanceledReason(this) == CANCELED_REASON_CAMERA_ERROR
+        fun Intent?.isAnalyzerFailure(): Boolean = getCanceledReason(this) == CANCELED_REASON_ANALYZER_FAILURE
 
         fun Intent?.instanceId(): String? = this?.getStringExtra(RESULT_INSTANCE_ID)
         fun Intent?.scanId(): String? = this?.getStringExtra(RESULT_SCAN_ID)
@@ -109,21 +108,6 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Prevent screenshots and keep the screen on while scanning.
-        window.setFlags(
-            WindowManager.LayoutParams.FLAG_SECURE + WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
-            WindowManager.LayoutParams.FLAG_SECURE + WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-        )
-
-        // Hide both the navigation bar and the status bar. Allow system gestures to show the navigation and status bar,
-        // but prevent the UI from resizing when they are shown.
-        window.decorView.apply {
-            systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
-                View.SYSTEM_UI_FLAG_FULLSCREEN or
-                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-        }
-
         setContentView(getLayoutRes())
 
         runBlocking { Stats.startScan() }
@@ -139,6 +123,35 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
         } else {
             runBlocking { permissionStat.trackResult("already_granted") }
             prepareCamera { onCameraReady() }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        hideSystemUi()
+
+        launch {
+            delay(1500)
+            hideSystemUi()
+        }
+    }
+
+    private fun hideSystemUi() {
+        // Prevent screenshots and keep the screen on while scanning.
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_SECURE + WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+            WindowManager.LayoutParams.FLAG_SECURE + WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+        )
+
+        // Hide both the navigation bar and the status bar. Allow system gestures to show the navigation and status bar,
+        // but prevent the UI from resizing when they are shown.
+        window.decorView.apply {
+            systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+                    View.SYSTEM_UI_FLAG_FULLSCREEN or
+                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
         }
     }
 
@@ -210,34 +223,21 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
                 when (val apiKeyValidateResult = validateApiKey(this@ScanActivity)) {
                     is NetworkResult.Success -> {
                         if (!apiKeyValidateResult.body.isApiKeyValid) {
-                            Log.e(
-                                Config.logTag,
-                                "API key is invalid: ${apiKeyValidateResult.body.keyInvalidReason}"
-                            )
+                            Log.e(Config.logTag, "API key is invalid: ${apiKeyValidateResult.body.keyInvalidReason}")
                             onInvalidApiKey()
                             showApiKeyInvalidError()
                         }
                     }
                     is NetworkResult.Error -> {
                         if (apiKeyValidateResult.error.errorCode == ERROR_CODE_NOT_AUTHENTICATED) {
-                            Log.e(
-                                Config.logTag,
-                                "API key is invalid: ${apiKeyValidateResult.error.errorMessage}"
-                            )
+                            Log.e(Config.logTag, "API key is invalid: ${apiKeyValidateResult.error.errorMessage}")
                             onInvalidApiKey()
                             showApiKeyInvalidError()
                         } else {
-                            Log.w(
-                                Config.logTag,
-                                "Unable to validate API key: ${apiKeyValidateResult.error.errorMessage}"
-                            )
+                            Log.w(Config.logTag, "Unable to validate API key: ${apiKeyValidateResult.error.errorMessage}")
                         }
                     }
-                    is NetworkResult.Exception -> Log.w(
-                        Config.logTag,
-                        "Unable to validate API key",
-                        apiKeyValidateResult.exception
-                    )
+                    is NetworkResult.Exception -> Log.w(Config.logTag, "Unable to validate API key", apiKeyValidateResult.exception)
                 }
             }
         }

@@ -14,7 +14,7 @@ import com.getbouncer.scan.framework.util.scaled
 import com.getbouncer.scan.payment.ml.AlphabetDetect
 import com.getbouncer.scan.payment.ml.ExpiryDetect
 import com.getbouncer.scan.payment.ml.SSDOcr
-import com.getbouncer.scan.payment.ml.TextDetector
+import com.getbouncer.scan.payment.ml.TextDetect
 import com.getbouncer.scan.payment.ml.common.cropImageForObjectDetect
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
 import com.getbouncer.scan.payment.size
@@ -34,7 +34,7 @@ private const val EXPIRY_BOX_X_SCALE_RATIO = 1.1F
 private const val EXPIRY_BOX_Y_SCALE_RATIO = 1.2F
 
 class NameAndExpiryAnalyzer private constructor(
-    private val textDetector: TextDetector?,
+    private val textDetect: TextDetect?,
     private val alphabetDetect: AlphabetDetect?,
     private val expiryDetect: ExpiryDetect? = null
 ) : Analyzer<SSDOcr.Input, MainLoopState, NameAndExpiryAnalyzer.Output> {
@@ -45,16 +45,16 @@ class NameAndExpiryAnalyzer private constructor(
         val expiry: ExpiryDetect.Expiry?
     )
 
-    fun isExpiryDetectorAvailable() = textDetector != null && expiryDetect != null
+    fun isExpiryDetectorAvailable() = textDetect != null && expiryDetect != null
 
-    fun isNameDetectorAvailable() = textDetector != null && alphabetDetect != null
+    fun isNameDetectorAvailable() = textDetect != null && alphabetDetect != null
 
     override val name: String = "name_detect_analyzer"
 
     override suspend fun analyze(
         data: SSDOcr.Input,
         state: MainLoopState
-    ) = if ((!state.runNameExtraction && !state.runExpiryExtraction) || textDetector == null) {
+    ) = if ((!state.runNameExtraction && !state.runExpiryExtraction) || textDetect == null) {
         Output(null, null, null)
     } else {
         val objDetectBitmap = cropImageForObjectDetect(
@@ -63,8 +63,8 @@ class NameAndExpiryAnalyzer private constructor(
             data.cardFinder
         )
 
-        val textDetectorPrediction = textDetector.analyze(
-            TextDetector.Input(
+        val textDetectorPrediction = textDetect.analyze(
+            TextDetect.Input(
                 data.fullImage,
                 data.previewSize,
                 data.cardFinder
@@ -299,12 +299,12 @@ class NameAndExpiryAnalyzer private constructor(
     }
 
     class Factory(
-        private val textDetectorFactory: TextDetector.Factory,
+        private val textDetectFactory: TextDetect.Factory,
         private val alphabetDetectFactory: AlphabetDetect.Factory? = null,
         private val expiryDetectFactory: ExpiryDetect.Factory? = null
     ) : AnalyzerFactory<NameAndExpiryAnalyzer> {
         override suspend fun newInstance() = NameAndExpiryAnalyzer(
-            textDetectorFactory.newInstance(),
+            textDetectFactory.newInstance(),
             alphabetDetectFactory?.newInstance(),
             expiryDetectFactory?.newInstance()
         )

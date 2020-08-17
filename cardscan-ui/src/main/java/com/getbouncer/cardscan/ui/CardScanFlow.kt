@@ -18,12 +18,13 @@ import com.getbouncer.scan.framework.util.cacheFirstResultSuspend
 import com.getbouncer.scan.payment.ml.AlphabetDetect
 import com.getbouncer.scan.payment.ml.ExpiryDetect
 import com.getbouncer.scan.payment.ml.SSDOcr
-import com.getbouncer.scan.payment.ml.TextDetector
+import com.getbouncer.scan.payment.ml.TextDetect
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.internal.ChannelFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -46,7 +47,7 @@ class CardScanFlow(
             private set
 
         private val getTextDetectorModel = cacheFirstResultSuspend { context: Context, forImmediateUse: Boolean ->
-            TextDetector.ModelFetcher(context).fetchData(forImmediateUse)
+            TextDetect.ModelFetcher(context).fetchData(forImmediateUse)
         }
         private val getAlphabetDetectorModel = cacheFirstResultSuspend { context: Context, forImmediateUse: Boolean ->
             AlphabetDetect.ModelFetcher(context).fetchData(forImmediateUse)
@@ -117,7 +118,7 @@ class CardScanFlow(
         val analyzerPool = runBlocking {
             val nameDetect = if (attemptedNameAndExpiryInitialization) {
                 NameAndExpiryAnalyzer.Factory(
-                    TextDetector.Factory(context, getTextDetectorModel(context, true)),
+                    TextDetect.Factory(context, getTextDetectorModel(context, true)),
                     AlphabetDetect.Factory(context, getAlphabetDetectorModel(context, true)),
                     ExpiryDetect.Factory(context, getExpiryDetectorModel(context, true))
                 )

@@ -68,9 +68,9 @@ private val DIM_Z = (NUM_CLASS + 5) * 3
 private const val BOX_TOP_DELTA_THRESHOLD = 0.4F
 private const val HEIGHT_RATIO_THRESHOLD = 0.3F
 
-class TextDetector private constructor(interpreter: Interpreter) :
-    TensorFlowLiteAnalyzer<TextDetector.Input, Array<ByteBuffer>,
-        TextDetector.Prediction,
+class TextDetect private constructor(interpreter: Interpreter) :
+    TensorFlowLiteAnalyzer<TextDetect.Input, Array<ByteBuffer>,
+        TextDetect.Prediction,
         Map<Int, Array<Array<Array<FloatArray>>>>>(interpreter) {
 
     data class Input(
@@ -379,7 +379,7 @@ class TextDetector private constructor(interpreter: Interpreter) :
         context: Context,
         fetchedModel: FetchedData,
         threads: Int = DEFAULT_THREADS
-    ) : TFLAnalyzerFactory<TextDetector>(context, fetchedModel) {
+    ) : TFLAnalyzerFactory<TextDetect>(context, fetchedModel) {
         companion object {
             private const val USE_GPU = false
             private const val DEFAULT_THREADS = 2
@@ -390,7 +390,7 @@ class TextDetector private constructor(interpreter: Interpreter) :
             .setUseNNAPI(USE_GPU && hasOpenGl31(context))
             .setNumThreads(threads)
 
-        override suspend fun newInstance(): TextDetector? = createInterpreter()?.let { TextDetector(it) }
+        override suspend fun newInstance(): TextDetect? = createInterpreter()?.let { TextDetect(it) }
     }
 
     /**
