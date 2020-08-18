@@ -49,8 +49,8 @@ fun formatPan(pan: String) = normalizeCardNumber(pan).let {
 /**
  * Add a new way to format a PAN
  */
-fun addFormatPan(customCardIssuer: CustomCardIssuer, length: Int, vararg blockSizes: Int) {
-    CUSTOM_PAN_FORMAT_TABLE.getOrPut(customCardIssuer, { mutableMapOf<Int, PanFormatter>() })[length] =
+fun addFormatPan(cardIssuer: CardIssuer, length: Int, vararg blockSizes: Int) {
+    CUSTOM_PAN_FORMAT_TABLE.getOrPut(cardIssuer, { mutableMapOf<Int, PanFormatter>() })[length] =
         PanFormatter(*blockSizes)
 }
 

@@ -5,6 +5,7 @@ package com.getbouncer.scan.payment.card
  */
 sealed class CardIssuer(open val displayName: String) {
     object AmericanExpress : CardIssuer("American Express")
+    object Custom : CardIssuer("Custom")
     object DinersClub : CardIssuer("Diners Club")
     object Discover : CardIssuer("Discover")
     object JCB : CardIssuer("JCB")
@@ -13,11 +14,6 @@ sealed class CardIssuer(open val displayName: String) {
     object Unknown : CardIssuer("Unknown")
     object Visa : CardIssuer("Visa")
 }
-
-/**
- * A data class for custom card issuers
- */
-data class CustomCardIssuer(override val displayName: String) : CardIssuer(displayName)
 
 /**
  * Format the card network as a human readable format.
