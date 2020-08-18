@@ -4,7 +4,6 @@ import com.getbouncer.scan.framework.exception.InvalidBouncerApiKeyException
 import com.getbouncer.scan.framework.time.Duration
 import com.getbouncer.scan.framework.time.seconds
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
 
 private const val REQUIRED_API_KEY_LENGTH = 32
 
@@ -38,7 +37,7 @@ object Config {
      * The JSON configuration to use throughout this SDK.
      */
     @JvmStatic
-    var json: Json = Json(JsonConfiguration.Stable.copy(ignoreUnknownKeys = false))
+    var json: Json = Json { ignoreUnknownKeys = false }
 
     /**
      * Whether or not to track stats
