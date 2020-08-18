@@ -30,7 +30,39 @@ private const val SAMPLE_VISA_IIN = "411111"
 private const val SAMPLE_AMEX_CVC = "1234"
 private const val SAMPLE_NORMAL_CVC = "123"
 
+private const val SAMPLE_CUSTOM_16_PAN = "9900000000000101"
+private const val SAMPLE_CUSTOM_17_PAN = "99000000000000002"
+private const val SAMPLE_CUSTOM_18_PAN = "990000000000000903"
+private const val SAMPLE_CUSTOM_19_PAN = "9900000000000000804"
+private const val SAMPLE_ADVANCED_CUSTOM_20_PAN = "99100000000000000505"
+
+private const val SAMPLE_CUSTOM_IIN = "990023"
+private const val SAMPLE_ADVANCED_CUSTOM_IIN = "991456"
+
+private const val SAMPLE_CUSTOM_CVC = "123"
+private const val SAMPLE_ADVANCED_CUSTOM_CVC = "1234"
+
+private val CustomCardIssuer = CustomCardIssuer("Custom")
+private val AdvancedCustomCardIssuer = CustomCardIssuer("Advanced Custom")
+
 class PaymentCardTest {
+
+    @Test
+    @SmallTest
+    fun addCustomCardIssuers() {
+        supportCardIssuer(990000..990024, CustomCardIssuer, (16..19).toList(), listOf(3))
+        supportCardIssuer(991000..991999, AdvancedCustomCardIssuer, listOf(20), listOf(4))
+    }
+
+    @Test
+    @SmallTest
+    fun addCustomPanFormatters() {
+        addFormatPan(CustomCardIssuer, 16, 4, 3, 5, 4)
+        addFormatPan(CustomCardIssuer, 17, 4, 4, 5, 4)
+        addFormatPan(CustomCardIssuer, 18, 4, 5, 5, 4)
+        addFormatPan(CustomCardIssuer, 19, 5, 5, 5, 4)
+        addFormatPan(AdvancedCustomCardIssuer, 20, 5, 5, 5, 5)
+    }
 
     @Test
     @SmallTest
@@ -46,6 +78,16 @@ class PaymentCardTest {
         assertEquals(CardIssuer.UnionPay, getCardIssuer(SAMPLE_UNIONPAY_18_PAN))
         assertEquals(CardIssuer.UnionPay, getCardIssuer(SAMPLE_UNIONPAY_19_PAN))
         assertEquals(CardIssuer.Visa, getCardIssuer(SAMPLE_VISA_PAN))
+    }
+
+    @Test
+    @SmallTest
+    fun getCustomCardIssuer() {
+        assertEquals(CustomCardIssuer, getCardIssuer(SAMPLE_CUSTOM_16_PAN))
+        assertEquals(CustomCardIssuer, getCardIssuer(SAMPLE_CUSTOM_17_PAN))
+        assertEquals(CustomCardIssuer, getCardIssuer(SAMPLE_CUSTOM_18_PAN))
+        assertEquals(CustomCardIssuer, getCardIssuer(SAMPLE_CUSTOM_19_PAN))
+        assertEquals(AdvancedCustomCardIssuer, getCardIssuer(SAMPLE_ADVANCED_CUSTOM_20_PAN))
     }
 
     @Test
@@ -66,6 +108,16 @@ class PaymentCardTest {
 
     @Test
     @SmallTest
+    fun isValidCustomPan() {
+        assertTrue { isValidPan(SAMPLE_CUSTOM_16_PAN) }
+        assertTrue { isValidPan(SAMPLE_CUSTOM_17_PAN) }
+        assertTrue { isValidPan(SAMPLE_CUSTOM_18_PAN) }
+        assertTrue { isValidPan(SAMPLE_CUSTOM_19_PAN) }
+        assertTrue { isValidPan(SAMPLE_ADVANCED_CUSTOM_20_PAN) }
+    }
+
+    @Test
+    @SmallTest
     fun isValidIin() {
         assertTrue { isValidIin(SAMPLE_AMEX_IIN) }
         assertTrue { isValidIin(SAMPLE_DINERS_CLUB_IIN) }
@@ -78,12 +130,28 @@ class PaymentCardTest {
 
     @Test
     @SmallTest
+    fun isValidCustomIin() {
+        assertTrue { isValidIin(SAMPLE_CUSTOM_IIN) }
+        assertTrue { isValidIin(SAMPLE_ADVANCED_CUSTOM_IIN) }
+    }
+
+    @Test
+    @SmallTest
     fun isValidCvc() {
         assertTrue { isValidCvc(SAMPLE_AMEX_CVC, CardIssuer.AmericanExpress) }
         assertTrue { isValidCvc(SAMPLE_NORMAL_CVC, CardIssuer.Visa) }
         assertFalse { isValidCvc(SAMPLE_AMEX_CVC, CardIssuer.MasterCard) }
         assertFalse { isValidCvc(SAMPLE_NORMAL_CVC, CardIssuer.AmericanExpress) }
         assertFalse { isValidCvc("a12", CardIssuer.Visa) }
+    }
+
+    @Test
+    @SmallTest
+    fun isValidCustomCvc() {
+        assertTrue { isValidCvc(SAMPLE_CUSTOM_CVC, CustomCardIssuer) }
+        assertTrue { isValidCvc(SAMPLE_ADVANCED_CUSTOM_CVC, AdvancedCustomCardIssuer) }
+        assertFalse { isValidCvc(SAMPLE_ADVANCED_CUSTOM_CVC, CustomCardIssuer) }
+        assertFalse { isValidCvc(SAMPLE_CUSTOM_CVC, AdvancedCustomCardIssuer) }
     }
 
     @Test
@@ -179,6 +247,16 @@ class PaymentCardTest {
 
     @Test
     @SmallTest
+    fun formatCustomPan() {
+        assertEquals("9900 000 00000 0101", formatPan(SAMPLE_CUSTOM_16_PAN))
+        assertEquals("9900 0000 00000 0002", formatPan(SAMPLE_CUSTOM_17_PAN))
+        assertEquals("9900 00000 00000 0903", formatPan(SAMPLE_CUSTOM_18_PAN))
+        assertEquals("99000 00000 00000 0804", formatPan(SAMPLE_CUSTOM_19_PAN))
+        assertEquals("99100 00000 00000 00505", formatPan(SAMPLE_ADVANCED_CUSTOM_20_PAN))
+    }
+
+    @Test
+    @SmallTest
     fun formatIssuer() {
         assertEquals("American Express", formatIssuer(CardIssuer.AmericanExpress))
         assertEquals("Diners Club", formatIssuer(CardIssuer.DinersClub))
@@ -188,6 +266,13 @@ class PaymentCardTest {
         assertEquals("UnionPay", formatIssuer(CardIssuer.UnionPay))
         assertEquals("Unknown", formatIssuer(CardIssuer.Unknown))
         assertEquals("Visa", formatIssuer(CardIssuer.Visa))
+    }
+
+    @Test
+    @SmallTest
+    fun formatCustomIssuer() {
+        assertEquals("Custom", formatIssuer(CustomCardIssuer))
+        assertEquals("Advanced Custom", formatIssuer(AdvancedCustomCardIssuer))
     }
 
     @Test

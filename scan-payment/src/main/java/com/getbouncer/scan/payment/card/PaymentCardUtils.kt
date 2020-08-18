@@ -128,6 +128,12 @@ private val ISSUER_TABLE: List<IssuerData> = listOf(
 )
 
 /**
+ * This list is an extension of the list above and includes any custom card configurations as
+ * required by certain users.
+ */
+private var CUSTOM_ISSUER_TABLE: MutableList<IssuerData> = mutableListOf()
+
+/**
  * Get an issuer from a complete or partial card number. If the pan is null, return an unknown
  * issuer
  */
@@ -217,14 +223,31 @@ fun String.lastFour(): String = lastFourFromPan(this)
  */
 @CheckResult
 internal fun getIssuerData(cardNumber: String): IssuerData? =
-    ISSUER_TABLE.firstOrNull { iinFromPan(cardNumber).toInt() in it.iinRange }
+    CUSTOM_ISSUER_TABLE.firstOrNull { iinFromPan(cardNumber).toInt() in it.iinRange }
+        ?: ISSUER_TABLE.firstOrNull { iinFromPan(cardNumber).toInt() in it.iinRange }
 
 /**
  * Get data for a given [CardIssuer].
  */
 @CheckResult
-private fun getIssuerData(issuer: CardIssuer): List<IssuerData> =
-    ISSUER_TABLE.filter { it.issuer == issuer }
+private fun getIssuerData(issuer: CardIssuer): List<IssuerData> {
+    val mutualIssuerData = CUSTOM_ISSUER_TABLE.filter { it.issuer == issuer }.toMutableList()
+    mutualIssuerData.addAll(ISSUER_TABLE.filter { it.issuer == issuer })
+
+    return mutualIssuerData.toList()
+}
+
+/**
+ * Adds support for a new [CardIssuer]
+ */
+@CheckResult
+fun supportCardIssuer(
+    validIins: IntRange,
+    validCardIssuer: CardIssuer,
+    validPanLengths: List<Int>,
+    validCvcLengths: List<Int>,
+    validationFunction: PanValidator = LengthPanValidator + LuhnPanValidator
+) = CUSTOM_ISSUER_TABLE.add(IssuerData(validIins, validCardIssuer, validPanLengths, validCvcLengths, validationFunction))
 
 /**
  * Normalize a PAN by removing all non-numeric characters.

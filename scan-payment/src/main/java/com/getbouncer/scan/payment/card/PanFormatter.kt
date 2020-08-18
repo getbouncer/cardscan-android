@@ -41,8 +41,17 @@ package com.getbouncer.scan.payment.card
  */
 fun formatPan(pan: String) = normalizeCardNumber(pan).let {
     val issuer = getCardIssuer(pan)
-    val formatter = PAN_FORMAT_TABLE[issuer]?.get(pan.length) ?: DEFAULT_PAN_FORMATTERS[pan.length]
+    val formatter = CUSTOM_PAN_FORMAT_TABLE[issuer]?.get(pan.length)
+        ?: PAN_FORMAT_TABLE[issuer]?.get(pan.length) ?: DEFAULT_PAN_FORMATTERS[pan.length]
     formatter?.formatPan(pan) ?: pan
+}
+
+/**
+ * Add a new way to format a PAN
+ */
+fun addFormatPan(customCardIssuer: CustomCardIssuer, length: Int, vararg blockSizes: Int) {
+    CUSTOM_PAN_FORMAT_TABLE.getOrPut(customCardIssuer, { mutableMapOf<Int, PanFormatter>() })[length] =
+        PanFormatter(*blockSizes)
 }
 
 /**
@@ -136,3 +145,8 @@ private val DEFAULT_PAN_FORMATTERS: Map<Int, PanFormatter> = mapOf(
     18 to PanFormatter(4, 4, 4, 2),
     19 to PanFormatter(4, 4, 4, 4, 3)
 )
+
+/**
+ * A mapping of [CardIssuer] to length and [PanFormatter]
+ */
+private val CUSTOM_PAN_FORMAT_TABLE: MutableMap<CardIssuer, MutableMap<Int, PanFormatter>> = mutableMapOf()
