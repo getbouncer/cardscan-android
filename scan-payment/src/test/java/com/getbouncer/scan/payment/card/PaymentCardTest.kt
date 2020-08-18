@@ -46,7 +46,6 @@ private const val SAMPLE_ADVANCED_CUSTOM_CVC = "1234"
 private val SAMPLE_CUSTOM_CARD_ISSUER = CardIssuer.Custom("Custom")
 private val SAMPLE_ADVANCED_CUSTOM_CARD_ISSUER = CardIssuer.Custom("Advanced Custom")
 
-
 class PaymentCardTest {
 
     @Before
