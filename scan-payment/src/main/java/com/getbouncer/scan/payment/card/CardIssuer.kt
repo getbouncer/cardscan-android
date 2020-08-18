@@ -3,8 +3,9 @@ package com.getbouncer.scan.payment.card
 /**
  * A list of supported card issuers.
  */
-sealed class CardIssuer(val displayName: String) {
+sealed class CardIssuer(open val displayName: String) {
     object AmericanExpress : CardIssuer("American Express")
+    object Custom : CardIssuer("Custom")
     object DinersClub : CardIssuer("Diners Club")
     object Discover : CardIssuer("Discover")
     object JCB : CardIssuer("JCB")

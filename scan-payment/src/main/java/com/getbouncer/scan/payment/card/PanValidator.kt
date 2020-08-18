@@ -3,7 +3,7 @@ package com.getbouncer.scan.payment.card
 /**
  * A class that provides a method to determine if a PAN is valid.
  */
-internal interface PanValidator {
+interface PanValidator {
     fun isValidPan(pan: String): Boolean
 
     operator fun plus(other: PanValidator): PanValidator = CompositePanValidator(this, other)
