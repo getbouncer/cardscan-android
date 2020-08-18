@@ -116,7 +116,7 @@ class Camera2Adapter(
                     it.second.height >= minimumResolution.height
             }
 
-            return allowedCameraSizes.minBy {
+            return allowedCameraSizes.minByOrNull {
                 it.second.width * it.second.height
             } ?: DEFAULT_IMAGE_FORMAT to Size(MAX_RESOLUTION_WIDTH, MAX_RESOLUTION_HEIGHT)
         }
@@ -386,11 +386,12 @@ class Camera2Adapter(
                 else -> it
             }
         }
-        return formats.flatMap { format ->
+        val formatToOutputSizes = formats.map { format ->
             (map.getOutputSizes(format) ?: emptyArray())
                 .asIterable()
                 .map { format to it }
         }
+        return formatToOutputSizes.flatten()
     }
 
     /**

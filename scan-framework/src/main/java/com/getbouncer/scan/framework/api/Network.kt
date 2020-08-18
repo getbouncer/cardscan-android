@@ -60,7 +60,7 @@ suspend fun <Request, Response, Error> postForResult(
         networkResult = postJsonWithRetries(
             context = context,
             path = path,
-            jsonData = Config.json.stringify(requestSerializer, data)
+            jsonData = Config.json.encodeToString(requestSerializer, data)
         ),
         responseSerializer = responseSerializer,
         errorSerializer = errorSerializer
@@ -78,7 +78,7 @@ suspend fun <Request> postData(
     postJsonWithRetries(
         context = context,
         path = path,
-        jsonData = Config.json.stringify(requestSerializer, data)
+        jsonData = Config.json.encodeToString(requestSerializer, data)
     )
 }
 
@@ -105,13 +105,13 @@ private fun <Response, Error> translateNetworkResult(
         try {
             NetworkResult.Success(
                 responseCode = networkResult.responseCode,
-                body = Config.json.parse(responseSerializer, networkResult.body)
+                body = Config.json.decodeFromString(responseSerializer, networkResult.body)
             )
         } catch (t: Throwable) {
             try {
                 NetworkResult.Error(
                     responseCode = networkResult.responseCode,
-                    error = Config.json.parse(errorSerializer, networkResult.body)
+                    error = Config.json.decodeFromString(errorSerializer, networkResult.body)
                 )
             } catch (et: Throwable) {
                 NetworkResult.Exception(networkResult.responseCode, t)
@@ -121,7 +121,7 @@ private fun <Response, Error> translateNetworkResult(
         try {
             NetworkResult.Error(
                 responseCode = networkResult.responseCode,
-                error = Config.json.parse(errorSerializer, networkResult.error)
+                error = Config.json.decodeFromString(errorSerializer, networkResult.error)
             )
         } catch (t: Throwable) {
             NetworkResult.Exception(networkResult.responseCode, t)
@@ -306,7 +306,7 @@ private data class DeviceIdStructure(
 private val buildDeviceId = memoize { context: Context ->
     DeviceIds.fromContext(context).run {
         Base64.encodeToString(
-            Config.json.stringify(
+            Config.json.encodeToString(
                 DeviceIdStructure.serializer(),
                 DeviceIdStructure(a = androidId ?: "", v = "", d = "")
             ).toByteArray(Charsets.UTF_8),
