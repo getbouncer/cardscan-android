@@ -1,5 +1,7 @@
 # Changelog
 
+## [2.0.0022](https://github.com/getbouncer/cardscan-android/tree/2.0.0022) (2020-08-18)
+
 ## [2.0.0021](https://github.com/getbouncer/cardscan-android/tree/2.0.0021) (2020-08-18)
 
 **Closed issues:**
