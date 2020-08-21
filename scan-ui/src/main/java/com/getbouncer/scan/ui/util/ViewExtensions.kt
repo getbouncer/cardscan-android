@@ -10,6 +10,7 @@ import android.widget.ImageView
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
+import androidx.core.content.ContextCompat
 import com.getbouncer.scan.framework.time.Duration
 import com.getbouncer.scan.ui.R
 
@@ -48,7 +49,7 @@ fun Context.fadeOut(view: View) {
 }
 
 fun Context.setAnimated(imageView: ImageView, @DrawableRes drawable: Int) {
-    val d = getDrawable(drawable)
+    val d = ContextCompat.getDrawable(this, drawable)
     imageView.setImageDrawable(d)
     if (d is Animatable) {
         d.start()

@@ -1,19 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-apply plugin: 'checkstyle'
-
-assemble.dependsOn('lint')
-check.dependsOn('checkstyle')
-
-configurations {
-    javadocDeps
-    ktlint
-}
-
-checkstyle {
-    toolVersion '8.29'
-}
 
 android {
     compileSdkVersion 29
@@ -72,26 +59,4 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:1.1.1"
     androidTestImplementation "androidx.test.espresso:espresso-core:3.2.0"
     androidTestImplementation "org.jetbrains.kotlin:kotlin-test:1.4.0"
-}
-
-dependencies {
-    ktlint "com.pinterest:ktlint:0.37.2"
-}
-
-task ktlint(type: JavaExec, group: "verification") {
-    description = "Check Kotlin code style."
-    main = "com.pinterest.ktlint.Main"
-    classpath = configurations.ktlint
-    args "src/**/*.kt"
-    // to generate report in checkstyle format prepend following args:
-    // "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/ktlint.xml"
-    // see https://github.com/pinterest/ktlint#usage for more
-}
-check.dependsOn ktlint
-
-task ktlintFormat(type: JavaExec, group: "formatting") {
-    description = "Fix Kotlin code style deviations."
-    main = "com.pinterest.ktlint.Main"
-    classpath = configurations.ktlint
-    args "-F", "src/**/*.kt"
 }

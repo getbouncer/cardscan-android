@@ -9,6 +9,8 @@
 
     <!-- Base application theme. -->
     <style name="BouncerDefaultTheme" parent="Theme.AppCompat.Light.NoActionBar.FullScreen">
+        <item name="background">@color/bouncerNotFoundBackground</item>
+
         <item name="bouncerNotFoundBackgroundColor">@color/bouncerNotFoundBackground</item>
         <item name="bouncerNotFoundOutlineColor">@color/bouncerNotFoundOutline</item>
         <item name="bouncerNotFoundOutlineWidth">@dimen/bouncerNotFoundOutlineWidth</item>
