@@ -1,5 +1,7 @@
 # Changelog
 
+## [2.0.0024](https://github.com/getbouncer/cardscan-android/tree/2.0.0024) (2020-08-21)
+
 ## [2.0.0023](https://github.com/getbouncer/cardscan-android/tree/2.0.0023) (2020-08-21)
 
 **Merged pull requests:**
@@ -62,13 +64,13 @@
 - Clean up state machine logic [\#161](https://github.com/getbouncer/cardscan-android/pull/161) ([awushensky](https://github.com/awushensky))
 - Clean up state machine [\#160](https://github.com/getbouncer/cardscan-android/pull/160) ([awushensky](https://github.com/awushensky))
 - Main loop state machine [\#158](https://github.com/getbouncer/cardscan-android/pull/158) ([awushensky](https://github.com/awushensky))
-- Update changelog [\#155](https://github.com/getbouncer/cardscan-android/pull/155) ([smkuhne](https://github.com/smkuhne))
 
 ## [2.0.0017](https://github.com/getbouncer/cardscan-android/tree/2.0.0017) (2020-07-22)
 
 **Merged pull requests:**
 
 - Update api key validation check [\#156](https://github.com/getbouncer/cardscan-android/pull/156) ([awushensky](https://github.com/awushensky))
+- Update changelog [\#155](https://github.com/getbouncer/cardscan-android/pull/155) ([smkuhne](https://github.com/smkuhne))
 
 ## [2.0.0016](https://github.com/getbouncer/cardscan-android/tree/2.0.0016) (2020-07-20)
 
