@@ -4,12 +4,10 @@ import android.content.Context
 import androidx.annotation.CheckResult
 import androidx.annotation.RawRes
 import com.getbouncer.scan.framework.util.cacheFirstResultSuspend
-import com.getbouncer.scan.framework.util.memoizeSuspend
 import com.getbouncer.scan.payment.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.BufferedInputStream
-import java.io.BufferedReader
+import java.io.ByteArrayInputStream
 import java.io.FileInputStream
 import java.nio.ByteBuffer
 import java.util.zip.ZipInputStream
@@ -22,7 +20,7 @@ sealed class CardType {
 }
 
 val getTypeTable: suspend (Context) -> Map<IntRange, CardType> = cacheFirstResultSuspend { context: Context ->
-    readRawZippedResourceToStringArray(context, R.raw.card_types).map {
+    readRawZippedResourceToStringArray(context, R.raw.payment_card_types).map {
         val fields = it.split(",")
         fields[0].toInt()..fields[1].toInt() to when (fields[2]) {
             "CREDIT" -> CardType.Credit
@@ -39,14 +37,25 @@ val getTypeTable: suspend (Context) -> Map<IntRange, CardType> = cacheFirstResul
 @CheckResult
 private suspend fun readRawZippedResourceToStringArray(context: Context, @RawRes resourceId: Int) =
     withContext(Dispatchers.IO) {
-        context.resources.openRawResourceFd(resourceId).use { fileDescriptor ->
+        val byteArray = context.resources.openRawResourceFd(resourceId).use { fileDescriptor ->
+            val byteBuffer = ByteBuffer.allocate(fileDescriptor.declaredLength.toInt())
             FileInputStream(fileDescriptor.fileDescriptor).use { fileInputStream ->
-                BufferedInputStream(fileInputStream).use { bufferedInputStream ->
-                    ZipInputStream(bufferedInputStream).use { zipInputStream ->
-                        BufferedReader(zipInputStream.reader()).use { bufferedReader ->
-                            bufferedReader.readLines()
-                        }
-                    }
+                fileInputStream.channel.read(byteBuffer, fileDescriptor.startOffset)
+                byteBuffer.rewind()
+                byteBuffer.array()
+            }
+        }
+
+        ByteArrayInputStream(byteArray).use { byteArrayInputStream ->
+            ZipInputStream(byteArrayInputStream).use { zipInputStream ->
+                var entry = zipInputStream.nextEntry
+                while (entry != null && !entry.name.endsWith(".txt")) {
+                    entry = zipInputStream.nextEntry
+                }
+                if (entry != null) {
+                    zipInputStream.bufferedReader().readLines()
+                } else {
+                    emptyList()
                 }
             }
         }
