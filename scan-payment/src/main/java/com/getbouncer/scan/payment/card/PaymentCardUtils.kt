@@ -1,8 +1,11 @@
 @file:JvmName("PaymentCardUtils")
 package com.getbouncer.scan.payment.card
 
+import android.content.Context
 import android.text.TextUtils
 import androidx.annotation.CheckResult
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /*
  * Payment cards always have a PAN (Primary Account Number) on one side of the card. This PAN
@@ -95,7 +98,7 @@ internal data class IssuerData(
     val issuer: CardIssuer,
     val panLengths: List<Int>,
     val cvcLengths: List<Int>,
-    val panValidator: PanValidator
+    val panValidator: PanValidator,
 )
 
 /**
@@ -124,22 +127,31 @@ private val ISSUER_TABLE: List<IssuerData> = listOf(
     IssuerData(675900..675999, CardIssuer.MasterCard, (16..19).toList(), listOf(3), LengthPanValidator + LuhnPanValidator),
     IssuerData(676770..676770, CardIssuer.MasterCard, (16..19).toList(), listOf(3), LengthPanValidator + LuhnPanValidator),
     IssuerData(676774..676774, CardIssuer.MasterCard, (16..19).toList(), listOf(3), LengthPanValidator + LuhnPanValidator),
-    IssuerData(400000..499999, CardIssuer.Visa, (16..19).toList(), listOf(3), LengthPanValidator + LuhnPanValidator)
+    IssuerData(400000..499999, CardIssuer.Visa, (16..19).toList(), listOf(3), LengthPanValidator + LuhnPanValidator),
 )
 
 /**
- * This list is an extension of the list above and includes any custom card configurations as
- * required by certain users.
+ * This list is an extension of the list above and includes any custom card configurations as required by certain users.
  */
 private var CUSTOM_ISSUER_TABLE: MutableList<IssuerData> = mutableListOf()
 
 /**
- * Get an issuer from a complete or partial card number. If the pan is null, return an unknown
- * issuer
+ * Get an issuer from a complete or partial card number. If the pan is null, return an unknown issuer.
  */
 @CheckResult
 fun getCardIssuer(pan: String?): CardIssuer = normalizeCardNumber(pan).let { normalizedPan ->
     getIssuerData(normalizedPan)?.issuer ?: CardIssuer.Unknown
+}
+
+/**
+ * Get the type of card from a complete or partial card number. If the pan is null, return an unknown type.
+ */
+@CheckResult
+suspend fun getCardType(context: Context, pan: String?): CardType = withContext(Dispatchers.IO) {
+    normalizeCardNumber(pan).let { normalizedPan ->
+        val iin = normalizedPan.iin().toIntOrNull() ?: -1
+        getTypeTable(context).filter { it.key.contains(iin) }.values.firstOrNull() ?: CardType.Unknown
+    }
 }
 
 /**
@@ -241,7 +253,7 @@ fun supportCardIssuer(
     cardIssuer: CardIssuer,
     panLengths: List<Int>,
     cvcLengths: List<Int>,
-    validationFunction: PanValidator = LengthPanValidator + LuhnPanValidator
+    validationFunction: PanValidator = LengthPanValidator + LuhnPanValidator,
 ) = CUSTOM_ISSUER_TABLE.add(IssuerData(iins, cardIssuer, panLengths, cvcLengths, validationFunction))
 
 /**
