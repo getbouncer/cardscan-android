@@ -3,7 +3,6 @@ package com.getbouncer.scan.payment.card
 
 import android.content.Context
 import android.text.TextUtils
-import android.util.Log
 import androidx.annotation.CheckResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
