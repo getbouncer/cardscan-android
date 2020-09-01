@@ -14,8 +14,8 @@ import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.ml.hardNonMaximumSuppression
 import com.getbouncer.scan.framework.ml.ssd.rectForm
 import com.getbouncer.scan.payment.hasOpenGl31
-import com.getbouncer.scan.payment.ml.ssd.cropImageForObjectDetect
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
+import com.getbouncer.scan.payment.ml.ssd.cropImageForObjectDetect
 import com.getbouncer.scan.payment.ml.yolo.processYoloLayer
 import com.getbouncer.scan.payment.scale
 import com.getbouncer.scan.payment.toRGBByteBuffer

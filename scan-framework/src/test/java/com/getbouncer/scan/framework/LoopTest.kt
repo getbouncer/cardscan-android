@@ -49,7 +49,6 @@ class LoopTest {
                 override fun onAnalyzerFailure(t: Throwable): Boolean { fail(t.message) }
                 override fun onResultFailure(t: Throwable): Boolean { fail(t.message) }
             },
-            name = "TestAnalyzerLoop",
             resultHandler = TestResultHandler()
         )
 
@@ -103,7 +102,6 @@ class LoopTest {
                 override fun onAnalyzerFailure(t: Throwable): Boolean { fail(t.message) }
                 override fun onResultFailure(t: Throwable): Boolean { fail(t.message) }
             },
-            name = "TestAnalyzerLoop",
             resultHandler = TestResultHandler()
         )
 
@@ -150,7 +148,6 @@ class LoopTest {
                 override fun onAnalyzerFailure(t: Throwable): Boolean { analyzerFailure = true; return true }
                 override fun onResultFailure(t: Throwable): Boolean { fail(t.message) }
             },
-            name = "TestAnalyzerLoop",
             resultHandler = TestResultHandler()
         )
 
@@ -196,7 +193,6 @@ class LoopTest {
                 override fun onAnalyzerFailure(t: Throwable): Boolean { fail(t.message) }
                 override fun onResultFailure(t: Throwable): Boolean { fail(t.message) }
             },
-            name = "TestAnalyzerLoop",
             resultHandler = TestResultHandler(),
             timeLimit = Duration.INFINITE
         )
@@ -243,7 +239,6 @@ class LoopTest {
                 override fun onAnalyzerFailure(t: Throwable): Boolean { fail(t.message) }
                 override fun onResultFailure(t: Throwable): Boolean { fail(t.message) }
             },
-            name = "TestAnalyzerLoop",
             resultHandler = TestResultHandler(),
             timeLimit = 1.nanoseconds
         )
@@ -280,7 +275,6 @@ class LoopTest {
                 override fun onAnalyzerFailure(t: Throwable): Boolean { fail(t.message) }
                 override fun onResultFailure(t: Throwable): Boolean { fail(t.message) }
             },
-            name = "TestAnalyzerLoop",
             resultHandler = TestResultHandler(),
             timeLimit = Duration.INFINITE
         )
@@ -297,7 +291,6 @@ class LoopTest {
             private val analyzerCounter = AtomicInteger(0)
         }
 
-        override val name: String = "TestAnalyzer"
         private val analyzerNumber = analyzerCounter.getAndIncrement()
         override suspend fun analyze(data: Int, state: Int): String = "Analyzer=$analyzerNumber, data=$data, state=$state"
     }
