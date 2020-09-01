@@ -91,7 +91,7 @@ class FrameRateTracker(
         }
 
         if (Config.isDebug) {
-            Log.d(Config.logTag, "Aggregator $name processing avg=$overallFps, inst=$instantFps")
+            Log.d(Config.logTag, "$name processing avg=$overallFps, inst=$instantFps")
         }
     }
 }

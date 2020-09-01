@@ -287,6 +287,20 @@ fun numberPossiblyMatches(scanned: String?, required: String?): Boolean =
         )
 
 /**
+ * Determine if a given [pan] matches a required IIN and Last4
+ */
+@CheckResult
+fun panMatches(
+    requiredIin: String?,
+    requiredLastFour: String?,
+    pan: String
+): Boolean {
+    val matchesIin = requiredIin == null || requiredIin == pan.take(requiredIin.length)
+    val matchesLastFour = requiredLastFour == null || requiredLastFour == pan.takeLast(requiredLastFour.length)
+    return matchesIin && matchesLastFour
+}
+
+/**
  * Calculate the jaccard index (similarity) between two strings. Values can range from 0 (no
  * similarities) to 1 (the same). Note that this does not account for character order, so two
  * strings "abcd" and "bdca" have a jaccard index of 1.

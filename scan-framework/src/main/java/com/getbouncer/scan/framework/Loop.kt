@@ -65,8 +65,6 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
 
     private val cancelMutex = Mutex()
 
-    internal abstract val name: String
-
     private lateinit var loopExecutionStatTracker: StatTracker
 
     private var workerJob: Job? = null
@@ -79,7 +77,7 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
             return null
         }
 
-        loopExecutionStatTracker = Stats.trackTask("loop_execution:$name")
+        loopExecutionStatTracker = Stats.trackTask("${this::class.java.simpleName}_execution")
 
         if (analyzerPool.analyzers.isEmpty()) {
             runBlocking { loopExecutionStatTracker.trackResult("canceled") }
@@ -114,7 +112,7 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
     ) {
         flow.collect { frame ->
             yield() // allow for this to be canceled
-            val stat = Stats.trackRepeatingTask("analyzer_execution:$name:${analyzer.name}")
+            val stat = Stats.trackRepeatingTask("analyzer_execution:${analyzer::class.java.simpleName}")
             measureTime {
                 try {
                     val analyzerResult = analyzer.analyze(frame, getState())
@@ -169,7 +167,6 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
 class ProcessBoundAnalyzerLoop<DataFrame, State, Output>(
     private val analyzerPool: AnalyzerPool<DataFrame, State, Output>,
     private val resultHandler: StatefulResultHandler<DataFrame, State, Output, Boolean>,
-    override val name: String,
     analyzerLoopErrorListener: AnalyzerLoopErrorListener
 ) : AnalyzerLoop<DataFrame, State, Output>(
     analyzerPool,
@@ -205,7 +202,6 @@ class ProcessBoundAnalyzerLoop<DataFrame, State, Output>(
 class FiniteAnalyzerLoop<DataFrame, State, Output>(
     analyzerPool: AnalyzerPool<DataFrame, State, Output>,
     private val resultHandler: TerminatingResultHandler<DataFrame, State, Output>,
-    override val name: String,
     analyzerLoopErrorListener: AnalyzerLoopErrorListener,
     private val timeLimit: Duration = Duration.INFINITE
 ) : AnalyzerLoop<DataFrame, State, Output>(

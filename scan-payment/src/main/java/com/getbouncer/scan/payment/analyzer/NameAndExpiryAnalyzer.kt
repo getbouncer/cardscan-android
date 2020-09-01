@@ -1,9 +1,8 @@
-package com.getbouncer.cardscan.ui.analyzer
+package com.getbouncer.scan.payment.analyzer
 
 import android.graphics.Bitmap
 import android.graphics.RectF
 import android.util.Log
-import com.getbouncer.cardscan.ui.result.MainLoopState
 import com.getbouncer.scan.framework.Analyzer
 import com.getbouncer.scan.framework.AnalyzerFactory
 import com.getbouncer.scan.framework.Config
@@ -33,11 +32,16 @@ private const val NAME_BOX_Y_SCALE_RATIO = 1.4F
 private const val EXPIRY_BOX_X_SCALE_RATIO = 1.1F
 private const val EXPIRY_BOX_Y_SCALE_RATIO = 1.2F
 
-class NameAndExpiryAnalyzer private constructor(
+class NameAndExpiryAnalyzer<State : NameAndExpiryAnalyzer.State> private constructor(
     private val textDetect: TextDetect?,
     private val alphabetDetect: AlphabetDetect?,
     private val expiryDetect: ExpiryDetect? = null
-) : Analyzer<SSDOcr.Input, MainLoopState, NameAndExpiryAnalyzer.Prediction> {
+) : Analyzer<SSDOcr.Input, State, NameAndExpiryAnalyzer.Prediction> {
+
+    interface State {
+        val runNameExtraction: Boolean
+        val runExpiryExtraction: Boolean
+    }
 
     data class Prediction(
         val name: String?,
@@ -51,7 +55,7 @@ class NameAndExpiryAnalyzer private constructor(
 
     override suspend fun analyze(
         data: SSDOcr.Input,
-        state: MainLoopState
+        state: State
     ) = if ((!state.runNameExtraction && !state.runExpiryExtraction) || textDetect == null) {
         Prediction(null, null, null)
     } else {
@@ -296,12 +300,12 @@ class NameAndExpiryAnalyzer private constructor(
         return word.toString().trim { it <= ' ' }
     }
 
-    class Factory(
+    class Factory<State : NameAndExpiryAnalyzer.State>(
         private val textDetectFactory: TextDetect.Factory,
         private val alphabetDetectFactory: AlphabetDetect.Factory? = null,
         private val expiryDetectFactory: ExpiryDetect.Factory? = null
-    ) : AnalyzerFactory<NameAndExpiryAnalyzer> {
-        override suspend fun newInstance() = NameAndExpiryAnalyzer(
+    ) : AnalyzerFactory<NameAndExpiryAnalyzer<State>> {
+        override suspend fun newInstance() = NameAndExpiryAnalyzer<State>(
             textDetectFactory.newInstance(),
             alphabetDetectFactory?.newInstance(),
             expiryDetectFactory?.newInstance()

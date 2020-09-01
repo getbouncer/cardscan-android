@@ -30,8 +30,6 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
 
     data class Prediction(val character: Char, val confidence: Float)
 
-    override val name: String = "alphabet_recognize"
-
     override suspend fun buildEmptyMLOutput() = arrayOf(FloatArray(NUM_CLASS))
 
     override suspend fun interpretMLOutput(data: Input, mlOutput: Array<FloatArray>): Prediction {

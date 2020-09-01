@@ -54,8 +54,6 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
 
     private data class Digit(val digit: Int, val confidence: Float)
 
-    override val name: String = "expiry_recognize"
-
     override suspend fun buildEmptyMLOutput() = arrayOf(arrayOf(Array(NUM_PREDICTIONS) { FloatArray(NUM_CLASS) }))
 
     override suspend fun interpretMLOutput(data: Input, mlOutput: Array<Array<Array<FloatArray>>>): Prediction {
