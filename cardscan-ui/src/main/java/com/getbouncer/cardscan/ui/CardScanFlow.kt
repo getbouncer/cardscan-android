@@ -5,9 +5,9 @@ import android.graphics.Bitmap
 import android.graphics.Rect
 import android.util.Size
 import androidx.lifecycle.LifecycleOwner
-import com.getbouncer.cardscan.ui.analyzer.NameAndExpiryAnalyzer
 import com.getbouncer.cardscan.ui.analyzer.PaymentCardOcrAnalyzer
 import com.getbouncer.cardscan.ui.result.MainLoopAggregator
+import com.getbouncer.cardscan.ui.result.MainLoopState
 import com.getbouncer.scan.framework.AggregateResultListener
 import com.getbouncer.scan.framework.AnalyzerLoopErrorListener
 import com.getbouncer.scan.framework.AnalyzerPoolFactory
@@ -15,6 +15,7 @@ import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.ProcessBoundAnalyzerLoop
 import com.getbouncer.scan.framework.time.Clock
 import com.getbouncer.scan.framework.util.cacheFirstResultSuspend
+import com.getbouncer.scan.payment.analyzer.NameAndExpiryAnalyzer
 import com.getbouncer.scan.payment.ml.AlphabetDetect
 import com.getbouncer.scan.payment.ml.ExpiryDetect
 import com.getbouncer.scan.payment.ml.SSDOcr
@@ -110,13 +111,13 @@ class CardScanFlow(
 
         mainLoopResultAggregator = MainLoopAggregator(
             listener = resultListener,
-            isNameExtractionEnabled = enableNameExtraction,
-            isExpiryExtractionEnabled = enableExpiryExtraction
+            enableNameExtraction = enableNameExtraction,
+            enableExpiryExtraction = enableExpiryExtraction
         )
 
         val analyzerPool = runBlocking {
             val nameDetect = if (attemptedNameAndExpiryInitialization) {
-                NameAndExpiryAnalyzer.Factory(
+                NameAndExpiryAnalyzer.Factory<MainLoopState>(
                     TextDetect.Factory(context, getTextDetectorModel(context, true)),
                     AlphabetDetect.Factory(context, getAlphabetDetectorModel(context, true)),
                     ExpiryDetect.Factory(context, getExpiryDetectorModel(context, true))
@@ -136,7 +137,6 @@ class CardScanFlow(
         val mainLoop = ProcessBoundAnalyzerLoop(
             analyzerPool = analyzerPool,
             resultHandler = mainLoopResultAggregator,
-            name = "main_loop",
             analyzerLoopErrorListener = errorListener
         )
 

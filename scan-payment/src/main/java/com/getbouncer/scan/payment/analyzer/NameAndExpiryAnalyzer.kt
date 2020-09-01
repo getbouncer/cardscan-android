@@ -1,9 +1,8 @@
-package com.getbouncer.cardscan.ui.analyzer
+package com.getbouncer.scan.payment.analyzer
 
 import android.graphics.Bitmap
 import android.graphics.RectF
 import android.util.Log
-import com.getbouncer.cardscan.ui.result.MainLoopState
 import com.getbouncer.scan.framework.Analyzer
 import com.getbouncer.scan.framework.AnalyzerFactory
 import com.getbouncer.scan.framework.Config
@@ -15,8 +14,8 @@ import com.getbouncer.scan.payment.ml.AlphabetDetect
 import com.getbouncer.scan.payment.ml.ExpiryDetect
 import com.getbouncer.scan.payment.ml.SSDOcr
 import com.getbouncer.scan.payment.ml.TextDetect
-import com.getbouncer.scan.payment.ml.common.cropImageForObjectDetect
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
+import com.getbouncer.scan.payment.ml.ssd.cropImageForObjectDetect
 import com.getbouncer.scan.payment.size
 import kotlin.math.max
 import kotlin.math.min
@@ -33,13 +32,18 @@ private const val NAME_BOX_Y_SCALE_RATIO = 1.4F
 private const val EXPIRY_BOX_X_SCALE_RATIO = 1.1F
 private const val EXPIRY_BOX_Y_SCALE_RATIO = 1.2F
 
-class NameAndExpiryAnalyzer private constructor(
+class NameAndExpiryAnalyzer<State : NameAndExpiryAnalyzer.State> private constructor(
     private val textDetect: TextDetect?,
     private val alphabetDetect: AlphabetDetect?,
     private val expiryDetect: ExpiryDetect? = null
-) : Analyzer<SSDOcr.Input, MainLoopState, NameAndExpiryAnalyzer.Output> {
+) : Analyzer<SSDOcr.Input, State, NameAndExpiryAnalyzer.Prediction> {
 
-    data class Output(
+    interface State {
+        val runNameExtraction: Boolean
+        val runExpiryExtraction: Boolean
+    }
+
+    data class Prediction(
         val name: String?,
         val boxes: List<DetectionBox>?,
         val expiry: ExpiryDetect.Expiry?
@@ -49,13 +53,11 @@ class NameAndExpiryAnalyzer private constructor(
 
     fun isNameDetectorAvailable() = textDetect != null && alphabetDetect != null
 
-    override val name: String = "name_detect_analyzer"
-
     override suspend fun analyze(
         data: SSDOcr.Input,
-        state: MainLoopState
+        state: State
     ) = if ((!state.runNameExtraction && !state.runExpiryExtraction) || textDetect == null) {
-        Output(null, null, null)
+        Prediction(null, null, null)
     } else {
         val objDetectBitmap = cropImageForObjectDetect(
             data.fullImage,
@@ -110,7 +112,7 @@ class NameAndExpiryAnalyzer private constructor(
             null
         }
 
-        Output(name, textDetectorPrediction.allObjects, expiry)
+        Prediction(name, textDetectorPrediction.allObjects, expiry)
     }
 
     private data class CharPredictionWithBox(val characterPrediction: AlphabetDetect.Prediction, val box: RectF) {
@@ -145,7 +147,7 @@ class NameAndExpiryAnalyzer private constructor(
         val nameWidth = min(bitmapForObjectDetection.width - xStart, width + charWidth / 2)
 
         if (y < 0 || height < 0 || y + height > bitmapForObjectDetection.height || xStart + nameWidth > bitmapForObjectDetection.width) {
-            Log.w(Config.logTag, "$name Invalid name dimensions. height=$height, y=$y")
+            Log.w(Config.logTag, "Invalid name dimensions. height=$height, y=$y")
             return null
         }
 
@@ -298,12 +300,12 @@ class NameAndExpiryAnalyzer private constructor(
         return word.toString().trim { it <= ' ' }
     }
 
-    class Factory(
+    class Factory<State : NameAndExpiryAnalyzer.State>(
         private val textDetectFactory: TextDetect.Factory,
         private val alphabetDetectFactory: AlphabetDetect.Factory? = null,
         private val expiryDetectFactory: ExpiryDetect.Factory? = null
-    ) : AnalyzerFactory<NameAndExpiryAnalyzer> {
-        override suspend fun newInstance() = NameAndExpiryAnalyzer(
+    ) : AnalyzerFactory<NameAndExpiryAnalyzer<State>> {
+        override suspend fun newInstance() = NameAndExpiryAnalyzer<State>(
             textDetectFactory.newInstance(),
             alphabetDetectFactory?.newInstance(),
             expiryDetectFactory?.newInstance()

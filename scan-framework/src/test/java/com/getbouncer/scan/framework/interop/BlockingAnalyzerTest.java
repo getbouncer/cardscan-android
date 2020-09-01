@@ -25,12 +25,6 @@ public class BlockingAnalyzerTest {
     @MediumTest
     public void blockingAnalyzer_works() throws InterruptedException {
         final Analyzer<Integer, Boolean, Boolean> analyzer = new BlockingAnalyzer<Integer, Boolean, Boolean>() {
-            @NotNull
-            @Override
-            public String getName() {
-                return "test_blocking_analyzer";
-            }
-
             @Override
             public Boolean analyzeBlocking(Integer data, Boolean state) {
                 return data > 0 && state;
@@ -64,12 +58,6 @@ public class BlockingAnalyzerTest {
                 @Override
                 public Analyzer<Integer, Boolean, Boolean> newInstanceBlocking() {
                     return new Analyzer<Integer, Boolean, Boolean>() {
-                        @NotNull
-                        @Override
-                        public String getName() {
-                            return "test_analyzer";
-                        }
-
                         @Nullable
                         @Override
                         public Object analyze(
@@ -113,12 +101,6 @@ public class BlockingAnalyzerTest {
                 @Override
                 public Analyzer<Integer, Boolean, Boolean> newInstanceBlocking() {
                     return new Analyzer<Integer, Boolean, Boolean>() {
-                        @NotNull
-                        @Override
-                        public String getName() {
-                            return "test_analyzer";
-                        }
-
                         @Nullable
                         @Override
                         public Object analyze(

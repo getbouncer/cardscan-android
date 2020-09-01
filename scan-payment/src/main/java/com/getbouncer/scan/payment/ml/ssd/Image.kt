@@ -1,4 +1,4 @@
-package com.getbouncer.scan.payment.ml.common
+package com.getbouncer.scan.payment.ml.ssd
 
 import android.graphics.Bitmap
 import android.graphics.Rect
@@ -28,7 +28,7 @@ internal fun calculateObjectDetectionFromCardFinder(previewImage: Size, cardFind
  * Calculate what portion of the full image should be cropped for object detection based on
  * the position of card finder within the preview image.
  */
-private fun calculateImageCrop(
+private fun calculateObjectDetectionImageCrop(
     fullImage: Bitmap,
     previewSize: Size,
     cardFinder: Rect
@@ -76,7 +76,7 @@ fun cropImageForObjectDetect(
     previewSize: Size,
     cardFinder: Rect
 ): Bitmap = fullImage.crop(
-    calculateImageCrop(
+    calculateObjectDetectionImageCrop(
         fullImage,
         previewSize,
         cardFinder

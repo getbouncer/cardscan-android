@@ -141,8 +141,6 @@ class SSDOcr private constructor(interpreter: Interpreter) :
         }
     }
 
-    override val name: String = "ssd_ocr"
-
     /**
      * The model reshapes all the data to 1 x [All Data Points]
      */

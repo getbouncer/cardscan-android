@@ -11,8 +11,6 @@ internal const val DEFAULT_ANALYZER_PARALLEL_COUNT = 4
  * some form of result.
  */
 interface Analyzer<Input, State, Output> {
-    val name: String
-
     suspend fun analyze(data: Input, state: State): Output
 }
 

@@ -3,6 +3,7 @@ package com.getbouncer.cardscan.ui.analyzer
 import com.getbouncer.cardscan.ui.result.MainLoopState
 import com.getbouncer.scan.framework.Analyzer
 import com.getbouncer.scan.framework.AnalyzerFactory
+import com.getbouncer.scan.payment.analyzer.NameAndExpiryAnalyzer
 import com.getbouncer.scan.payment.ml.ExpiryDetect
 import com.getbouncer.scan.payment.ml.SSDOcr
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
@@ -11,7 +12,7 @@ import kotlinx.coroutines.supervisorScope
 
 class PaymentCardOcrAnalyzer private constructor(
     private val ssdOcr: SSDOcr?,
-    private val nameAndExpiryAnalyzer: NameAndExpiryAnalyzer?
+    private val nameAndExpiryAnalyzer: NameAndExpiryAnalyzer<MainLoopState>?
 ) : Analyzer<SSDOcr.Input, MainLoopState, PaymentCardOcrAnalyzer.Prediction> {
 
     data class Prediction(
@@ -23,8 +24,6 @@ class PaymentCardOcrAnalyzer private constructor(
         val isExpiryExtractionAvailable: Boolean,
         val isNameExtractionAvailable: Boolean
     )
-
-    override val name: String = "payment_card_ocr_analyzer"
 
     override suspend fun analyze(data: SSDOcr.Input, state: MainLoopState) = supervisorScope {
         val nameAndExpiryDeferred = if ((state.runNameExtraction || state.runExpiryExtraction) && nameAndExpiryAnalyzer != null) {
@@ -56,7 +55,7 @@ class PaymentCardOcrAnalyzer private constructor(
 
     class Factory(
         private val ssdOcrFactory: SSDOcr.Factory,
-        private val nameDetectFactory: NameAndExpiryAnalyzer.Factory?
+        private val nameDetectFactory: NameAndExpiryAnalyzer.Factory<MainLoopState>?
     ) : AnalyzerFactory<PaymentCardOcrAnalyzer> {
         override suspend fun newInstance(): PaymentCardOcrAnalyzer? = PaymentCardOcrAnalyzer(
             ssdOcrFactory.newInstance(),

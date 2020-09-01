@@ -261,12 +261,6 @@ public class BlockingResultTest {
                 public Pair<Integer, Boolean> aggregateResultBlocking(Integer frame, Integer result) {
                     return new Pair<>(1, true);
                 }
-
-                @NotNull
-                @Override
-                protected String getName() {
-                    return "test_blocking_result_aggregator";
-                }
             };
 
         final Deferred<Pair<? extends Integer, ? extends Boolean>> deferred = BuildersKt.async(

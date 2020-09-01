@@ -14,8 +14,8 @@ import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.ml.hardNonMaximumSuppression
 import com.getbouncer.scan.framework.ml.ssd.rectForm
 import com.getbouncer.scan.payment.hasOpenGl31
-import com.getbouncer.scan.payment.ml.common.cropImageForObjectDetect
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
+import com.getbouncer.scan.payment.ml.ssd.cropImageForObjectDetect
 import com.getbouncer.scan.payment.ml.yolo.processYoloLayer
 import com.getbouncer.scan.payment.scale
 import com.getbouncer.scan.payment.toRGBByteBuffer
@@ -87,8 +87,6 @@ class TextDetect private constructor(interpreter: Interpreter) :
 
     private data class MergedBox(val box: DetectionBox, val subBoxes: List<DetectionBox>)
 
-    override val name: String = "text_detect"
-
     override suspend fun buildEmptyMLOutput() = mapOf(
         0 to arrayOf(
             Array(LAYER_1_SIZE.width) {
@@ -121,7 +119,7 @@ class TextDetect private constructor(interpreter: Interpreter) :
                 )
             )
         } else {
-            Log.w(Config.logTag, "$name is unable to resolve YOLO layer 0")
+            Log.w(Config.logTag, "Unable to resolve YOLO layer 0")
         }
 
         val layerOne = rawMlOutput[1]
@@ -136,7 +134,7 @@ class TextDetect private constructor(interpreter: Interpreter) :
                 )
             )
         } else {
-            Log.w(Config.logTag, "$name is unable to resolve YOLO layer 1")
+            Log.w(Config.logTag, "Unable to resolve YOLO layer 1")
         }
 
         return results
