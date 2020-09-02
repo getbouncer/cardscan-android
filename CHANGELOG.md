@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.0027](https://github.com/getbouncer/cardscan-android/tree/2.0.0027) (2020-09-01)
+
+**Merged pull requests:**
+
+- Clean up state machine [\#199](https://github.com/getbouncer/cardscan-android/pull/199) ([awushensky](https://github.com/awushensky))
+
 ## [2.0.0026](https://github.com/getbouncer/cardscan-android/tree/2.0.0026) (2020-08-27)
 
 **Merged pull requests:**
@@ -8,6 +14,7 @@
 - Bump junit from 1.1.1 to 1.1.2 [\#197](https://github.com/getbouncer/cardscan-android/pull/197) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Bump espresso-core from 3.2.0 to 3.3.0 [\#196](https://github.com/getbouncer/cardscan-android/pull/196) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Bump runner from 1.2.0 to 1.3.0 [\#195](https://github.com/getbouncer/cardscan-android/pull/195) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
+- Bump core from 1.2.0 to 1.3.0 [\#194](https://github.com/getbouncer/cardscan-android/pull/194) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Bump constraintlayout from 2.0.0 to 2.0.1 [\#193](https://github.com/getbouncer/cardscan-android/pull/193) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 
 ## [2.0.0025](https://github.com/getbouncer/cardscan-android/tree/2.0.0025) (2020-08-24)
@@ -22,9 +29,9 @@
 
 **Merged pull requests:**
 
-- Bump core from 1.2.0 to 1.3.0 [\#194](https://github.com/getbouncer/cardscan-android/pull/194) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Enable minification on cardscan demo [\#191](https://github.com/getbouncer/cardscan-android/pull/191) ([awushensky](https://github.com/awushensky))
 - Relocate ktlint [\#190](https://github.com/getbouncer/cardscan-android/pull/190) ([awushensky](https://github.com/awushensky))
+- Fix accessibility descriptions [\#189](https://github.com/getbouncer/cardscan-android/pull/189) ([awushensky](https://github.com/awushensky))
 
 ## [2.0.0022](https://github.com/getbouncer/cardscan-android/tree/2.0.0022) (2020-08-18)
 
@@ -36,12 +43,12 @@
 
 **Merged pull requests:**
 
-- Fix accessibility descriptions [\#189](https://github.com/getbouncer/cardscan-android/pull/189) ([awushensky](https://github.com/awushensky))
 - Chang custom card issuer [\#185](https://github.com/getbouncer/cardscan-android/pull/185) ([smkuhne](https://github.com/smkuhne))
 - Bump kotlinx-serialization-runtime from 1.0-M1-1.4.0-rc to 1.0-M1-1.4.0-rc-218 [\#184](https://github.com/getbouncer/cardscan-android/pull/184) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Add custom pans [\#183](https://github.com/getbouncer/cardscan-android/pull/183) ([smkuhne](https://github.com/smkuhne))
 - Update dependencies [\#182](https://github.com/getbouncer/cardscan-android/pull/182) ([awushensky](https://github.com/awushensky))
 - Local rules [\#181](https://github.com/getbouncer/cardscan-android/pull/181) ([awushensky](https://github.com/awushensky))
+- Add aspect ratio method [\#173](https://github.com/getbouncer/cardscan-android/pull/173) ([smkuhne](https://github.com/smkuhne))
 
 ## [2.0.0020](https://github.com/getbouncer/cardscan-android/tree/2.0.0020) (2020-08-13)
 
@@ -51,7 +58,6 @@
 
 **Merged pull requests:**
 
-- Add aspect ratio method [\#173](https://github.com/getbouncer/cardscan-android/pull/173) ([smkuhne](https://github.com/smkuhne))
 - Prevent crash on bad model download [\#172](https://github.com/getbouncer/cardscan-android/pull/172) ([awushensky](https://github.com/awushensky))
 
 ## [2.0.0019](https://github.com/getbouncer/cardscan-android/tree/2.0.0019) (2020-08-12)
