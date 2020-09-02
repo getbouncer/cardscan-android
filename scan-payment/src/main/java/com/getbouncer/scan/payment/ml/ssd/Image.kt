@@ -17,10 +17,14 @@ import kotlin.math.roundToInt
 internal fun calculateObjectDetectionFromCardFinder(previewImage: Size, cardFinder: Rect): Rect {
     val objectDetectionSquareSize = maxAspectRatioInSize(previewImage, 1F)
     return Rect(
-        /* left */ max(0, cardFinder.centerX() - objectDetectionSquareSize.width / 2),
-        /* top */ max(0, cardFinder.centerY() - objectDetectionSquareSize.height / 2),
-        /* right */ min(previewImage.width, cardFinder.centerX() + objectDetectionSquareSize.width / 2),
-        /* bottom */ min(previewImage.height, cardFinder.centerY() + objectDetectionSquareSize.height / 2)
+        /* left */
+        max(0, cardFinder.centerX() - objectDetectionSquareSize.width / 2),
+        /* top */
+        max(0, cardFinder.centerY() - objectDetectionSquareSize.height / 2),
+        /* right */
+        min(previewImage.width, cardFinder.centerX() + objectDetectionSquareSize.width / 2),
+        /* bottom */
+        min(previewImage.height, cardFinder.centerY() + objectDetectionSquareSize.height / 2)
     )
 }
 
@@ -91,9 +95,13 @@ fun calculateCardFinderCoordinatesFromObjectDetection(rect: RectF, previewImage:
         )
     val scaled = rect.scaled(objectDetection.size())
     return RectF(
-        /* left */ (scaled.left - (objectDetection.width() / 2 - cardFinder.width() / 2)) / cardFinder.width(),
-        /* top */ (scaled.top - (objectDetection.height() / 2 - cardFinder.height() / 2)) / cardFinder.height(),
-        /* right */ (scaled.right - (objectDetection.width() / 2 - cardFinder.width() / 2)) / cardFinder.width(),
-        /* bottom */ (scaled.bottom - (objectDetection.height() / 2 - cardFinder.height() / 2)) / cardFinder.height()
+        /* left */
+        (scaled.left - (objectDetection.width() / 2 - cardFinder.width() / 2)) / cardFinder.width(),
+        /* top */
+        (scaled.top - (objectDetection.height() / 2 - cardFinder.height() / 2)) / cardFinder.height(),
+        /* right */
+        (scaled.right - (objectDetection.width() / 2 - cardFinder.width() / 2)) / cardFinder.width(),
+        /* bottom */
+        (scaled.bottom - (objectDetection.height() / 2 - cardFinder.height() / 2)) / cardFinder.height()
     )
 }

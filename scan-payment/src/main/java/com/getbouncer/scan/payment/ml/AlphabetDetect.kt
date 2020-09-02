@@ -42,7 +42,8 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
         }
         val confidence = if (index != null) prediction[index] else 0F
         return Prediction(
-            character, confidence
+            character,
+            confidence
         )
     }
 

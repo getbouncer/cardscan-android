@@ -70,8 +70,10 @@ abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
          * Convert a size on the screen to a resolution.
          */
         internal fun sizeToResolution(size: Size): Size = Size(
-            /* width */ max(size.width, size.height),
-            /* height */ min(size.width, size.height)
+            /* width */
+            max(size.width, size.height),
+            /* height */
+            min(size.width, size.height)
         )
 
         /**

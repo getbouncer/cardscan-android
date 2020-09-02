@@ -105,10 +105,14 @@ fun Size.scaleAndCenterWithin(containingSize: Size): Rect {
     val left = (containingSize.width - scaledSize.width) / 2
     val top = (containingSize.height - scaledSize.height) / 2
     return Rect(
-        /* left */ left,
-        /* top */ top,
-        /* right */ left + scaledSize.width,
-        /* bottom */ top + scaledSize.height
+        /* left */
+        left,
+        /* top */
+        top,
+        /* right */
+        left + scaledSize.width,
+        /* bottom */
+        top + scaledSize.height
     )
 }
 
@@ -117,10 +121,14 @@ fun Size.scaleAndCenterWithin(containingSize: Size): Rect {
  */
 @CheckResult
 fun Size.centerOn(rect: Rect) = Rect(
-    /* left */ rect.centerX() - this.width / 2,
-    /* top */ rect.centerY() - this.height / 2,
-    /* right */ rect.centerX() + this.width / 2,
-    /* bottom */ rect.centerY() + this.height / 2
+    /* left */
+    rect.centerX() - this.width / 2,
+    /* top */
+    rect.centerY() - this.height / 2,
+    /* right */
+    rect.centerX() + this.width / 2,
+    /* bottom */
+    rect.centerY() + this.height / 2
 )
 
 /**

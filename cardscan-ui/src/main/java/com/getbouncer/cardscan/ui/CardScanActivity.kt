@@ -73,7 +73,9 @@ private enum class State(val value: Int) {
 
 fun DetectionBox.forDebugPan() = DebugDetectionBox(rect, confidence, label.toString())
 fun DetectionBox.forDebugObjDetect(cardFinder: Rect, previewImage: Size) = DebugDetectionBox(
-    calculateCardFinderCoordinatesFromObjectDetection(rect, previewImage, cardFinder), confidence, label.toString()
+    calculateCardFinderCoordinatesFromObjectDetection(rect, previewImage, cardFinder),
+    confidence,
+    label.toString()
 )
 
 interface CardScanActivityResultHandler {
