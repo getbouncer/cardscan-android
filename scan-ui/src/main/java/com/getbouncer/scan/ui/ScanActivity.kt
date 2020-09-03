@@ -67,15 +67,15 @@ class CameraErrorListenerImpl(
 abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
 
     companion object {
-        private const val PERMISSION_REQUEST_CODE = 1200
+        const val PERMISSION_REQUEST_CODE = 1200
 
-        private const val RESULT_INSTANCE_ID = "instanceId"
-        private const val RESULT_SCAN_ID = "scanId"
+        const val RESULT_INSTANCE_ID = "instanceId"
+        const val RESULT_SCAN_ID = "scanId"
 
-        private const val RESULT_CANCELED_REASON = "canceledReason"
-        private const val CANCELED_REASON_USER = -1
-        private const val CANCELED_REASON_CAMERA_ERROR = -2
-        private const val CANCELED_REASON_ANALYZER_FAILURE = -3
+        const val RESULT_CANCELED_REASON = "canceledReason"
+        const val CANCELED_REASON_USER = -1
+        const val CANCELED_REASON_CAMERA_ERROR = -2
+        const val CANCELED_REASON_ANALYZER_FAILURE = -3
 
         fun getCanceledReason(data: Intent?): Int =
             data?.getIntExtra(RESULT_CANCELED_REASON, Int.MIN_VALUE) ?: Int.MIN_VALUE
