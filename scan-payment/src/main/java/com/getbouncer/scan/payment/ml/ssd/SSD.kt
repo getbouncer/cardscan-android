@@ -1,5 +1,6 @@
 package com.getbouncer.scan.payment.ml.ssd
 
+import android.util.Log
 import com.getbouncer.scan.framework.ml.hardNonMaximumSuppression
 import com.getbouncer.scan.framework.ml.ssd.ClassifierScores
 import com.getbouncer.scan.framework.ml.ssd.RectForm
@@ -8,6 +9,8 @@ import com.getbouncer.scan.framework.util.filterByIndexes
 import com.getbouncer.scan.framework.util.filteredIndexes
 import com.getbouncer.scan.framework.util.transpose
 import kotlin.math.abs
+import com.getbouncer.scan.payment.card.QUICK_READ_GROUP_LENGTH
+import com.getbouncer.scan.payment.card.QUICK_READ_LENGTH
 
 internal data class OcrFeatureMapSizes(
     val layerOneWidth: Int,
@@ -133,4 +136,30 @@ fun filterVerticalBoxes(detectedBoxes: List<DetectionBox>): List<DetectionBox> {
     val medianHeight = heights.elementAt(heights.size / 2)
 
     return detectedBoxes.filter { abs(it.rect.centerY() - medianCenter) <= medianHeight }
+}
+
+fun determineLayoutAndFilter(detectedBoxes: List<DetectionBox>, verticalOffset: Float ): List<DetectionBox> {
+
+    if (detectedBoxes.isEmpty()) {
+        return detectedBoxes
+    }
+
+    // calculate the median center and height of each digit in the image
+    val centers = detectedBoxes.map { it.rect.centerY() }.sorted()
+    val heights = detectedBoxes.map { it.rect.height() }.sorted()
+
+    val medianCenter = centers.elementAt(centers.size / 2)
+    val medianHeight = heights.elementAt(heights.size / 2)
+    val aggregateDeviation = centers.map { abs(it - medianCenter) }.sum()
+
+    if (aggregateDeviation > verticalOffset * medianHeight && detectedBoxes.size == QUICK_READ_LENGTH ) {
+        Log.e("In Quick Read", "Quick Read")
+        return detectedBoxes.filter { abs(it.rect.centerY() - medianCenter) <= medianHeight }
+
+    }
+    else {
+        return detectedBoxes.filter { abs(it.rect.centerY() - medianCenter) <= medianHeight }
+    }
+
+
 }

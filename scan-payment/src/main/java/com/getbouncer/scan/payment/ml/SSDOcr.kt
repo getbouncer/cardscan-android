@@ -17,11 +17,9 @@ import com.getbouncer.scan.framework.util.scaleAndCenterWithin
 import com.getbouncer.scan.payment.R
 import com.getbouncer.scan.payment.crop
 import com.getbouncer.scan.payment.hasOpenGl31
-import com.getbouncer.scan.payment.ml.ssd.DetectionBox
+import com.getbouncer.scan.payment.ml.ssd.*
 import com.getbouncer.scan.payment.ml.ssd.OcrFeatureMapSizes
 import com.getbouncer.scan.payment.ml.ssd.combinePriors
-import com.getbouncer.scan.payment.ml.ssd.extractPredictions
-import com.getbouncer.scan.payment.ml.ssd.filterVerticalBoxes
 import com.getbouncer.scan.payment.ml.ssd.rearrangeOCRArray
 import com.getbouncer.scan.payment.scale
 import com.getbouncer.scan.payment.size
@@ -74,6 +72,7 @@ private const val PROB_THRESHOLD = 0.50f
 private const val IOU_THRESHOLD = 0.50f
 private const val CENTER_VARIANCE = 0.1f
 private const val SIZE_VARIANCE = 0.2f
+private const val VERTICAL_THRESHOLD = 2.0f
 private const val LIMIT = 20
 
 private val FEATURE_MAP_SIZES =
@@ -183,7 +182,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
         ).reshape(NUM_OF_CLASSES)
         scores.forEach { it.softMax() }
 
-        val detectedBoxes = filterVerticalBoxes(
+        val detectedBoxes = determineLayoutAndFilter(
             extractPredictions(
                 scores = scores,
                 boxes = boxes,
@@ -191,7 +190,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
                 intersectionOverUnionThreshold = IOU_THRESHOLD,
                 limit = LIMIT,
                 classifierToLabel = { if (it == 10) 0 else it }
-            ).sortedBy { it.rect.left }
+            ).sortedBy { it.rect.left }, VERTICAL_THRESHOLD
         )
 
         val predictedNumber = detectedBoxes.map { it.label }.joinToString("")
@@ -231,9 +230,9 @@ class SSDOcr private constructor(interpreter: Interpreter) :
      * A fetcher for downloading model data.
      */
     class ModelFetcher(context: Context) : UpdatingResourceFetcher(context) {
-        override val resource: Int = R.raw.darknite
-        override val resourceModelVersion: String = "darknite"
-        override val resourceModelHash: String = "0ef6e590a5c8b0da63546079a0afacd8ccb72418af68972b72fda45deaca543a"
+        override val resource: Int = R.raw.darkniterises
+        override val resourceModelVersion: String = "darkniterises"
+        override val resourceModelHash: String = "cdbfc498bf86979448ed98274a81f16c79fdc8230e09da0d73843b7702347bc9"
         override val resourceModelHashAlgorithm: String = "SHA-256"
         override val modelClass: String = "ocr"
         override val modelFrameworkVersion: Int = 1
