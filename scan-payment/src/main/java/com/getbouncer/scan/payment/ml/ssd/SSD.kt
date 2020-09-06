@@ -1,6 +1,5 @@
 package com.getbouncer.scan.payment.ml.ssd
 
-import android.util.Log
 import com.getbouncer.scan.framework.ml.hardNonMaximumSuppression
 import com.getbouncer.scan.framework.ml.ssd.ClassifierScores
 import com.getbouncer.scan.framework.ml.ssd.RectForm
@@ -123,20 +122,6 @@ fun extractPredictions(
 /**
  * Filter out boxes that are outside of the same vertical line. This is done to exclude
  */
-fun filterVerticalBoxes(detectedBoxes: List<DetectionBox>): List<DetectionBox> {
-    if (detectedBoxes.isEmpty()) {
-        return detectedBoxes
-    }
-
-    // calculate the median center and height of each digit in the image
-    val centers = detectedBoxes.map { it.rect.centerY() }.sorted()
-    val heights = detectedBoxes.map { it.rect.height() }.sorted()
-
-    val medianCenter = centers.elementAt(centers.size / 2)
-    val medianHeight = heights.elementAt(heights.size / 2)
-
-    return detectedBoxes.filter { abs(it.rect.centerY() - medianCenter) <= medianHeight }
-}
 
 fun determineLayoutAndFilter(detectedBoxes: List<DetectionBox>, verticalOffset: Float ): List<DetectionBox> {
 
@@ -152,13 +137,13 @@ fun determineLayoutAndFilter(detectedBoxes: List<DetectionBox>, verticalOffset: 
     val medianHeight = heights.elementAt(heights.size / 2)
     val aggregateDeviation = centers.map { abs(it - medianCenter) }.sum()
 
-    if (aggregateDeviation > verticalOffset * medianHeight && detectedBoxes.size == QUICK_READ_LENGTH ) {
-        Log.e("In Quick Read", "Quick Read")
-        return detectedBoxes.filter { abs(it.rect.centerY() - medianCenter) <= medianHeight }
-
+    return if (aggregateDeviation > verticalOffset * medianHeight && detectedBoxes.size == QUICK_READ_LENGTH ) {
+        return detectedBoxes.sortedBy { it.rect.centerY() }
+            .chunked(QUICK_READ_GROUP_LENGTH)
+            .map { it.sortedBy { detectionBox -> detectionBox.rect.left }}.flatten()
     }
     else {
-        return detectedBoxes.filter { abs(it.rect.centerY() - medianCenter) <= medianHeight }
+        detectedBoxes.filter { abs(it.rect.centerY() - medianCenter) <= medianHeight }
     }
 
 
