@@ -120,7 +120,16 @@ fun extractPredictions(
 }
 
 /**
- * Filter out boxes that are outside of the same vertical line. This is done to exclude
+ * Determine if the numbers is displayed horizontally or both horizontally and vertically.
+ * We do this by finding the median vertical coordinate center. Now, if the number is
+ * displayed horizontally the deviation of all the number boxes and the median
+ * center should be minimal since they are laid on roughly the same horizontal line. In this,
+ * case we just need to sort from left to right to extract order the number boxes.
+ * Additionally, we also filter out boxes that are outside of the same horizontal line.
+ * This is done to exclude information such as phone numbers or expiry.
+ * On the other hand, ff the aggregate deviation of the number box centers from the
+ * median center is above a threshold, i.e. the number has both vertical and horizontal components
+ * we need to sort from left to right and top to bottom.
  */
 
 fun determineLayoutAndFilter(detectedBoxes: List<DetectionBox>, verticalOffset: Float ): List<DetectionBox> {
