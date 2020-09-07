@@ -230,9 +230,9 @@ class SSDOcr private constructor(interpreter: Interpreter) :
      * A fetcher for downloading model data.
      */
     class ModelFetcher(context: Context) : UpdatingResourceFetcher(context) {
-        override val resource: Int = R.raw.darkniterises
-        override val resourceModelVersion: String = "darkniterises"
-        override val resourceModelHash: String = "cdbfc498bf86979448ed98274a81f16c79fdc8230e09da0d73843b7702347bc9"
+        override val resource: Int = R.raw.darknite_1_1_1_16
+        override val resourceModelVersion: String = "darknite_1_1_1_16"
+        override val resourceModelHash: String = "8d8e3f79aa0783ab0cfa5c8d65d663a9da6ba99401efb2298aaaee387c3b00d6"
         override val resourceModelHashAlgorithm: String = "SHA-256"
         override val modelClass: String = "ocr"
         override val modelFrameworkVersion: Int = 1
