@@ -85,7 +85,8 @@ import kotlinx.coroutines.withContext
 
 private const val IIN_LENGTH = 6
 private const val LAST_FOUR_LENGTH = 4
-
+const val QUICK_READ_LENGTH = 16
+const val QUICK_READ_GROUP_LENGTH = 4
 /**
  * The Jaccard similarity threshold for determining if two numbers are possibly the same.
  */

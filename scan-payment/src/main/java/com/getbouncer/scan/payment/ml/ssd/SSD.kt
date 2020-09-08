@@ -7,6 +7,8 @@ import com.getbouncer.scan.framework.ml.ssd.toRectF
 import com.getbouncer.scan.framework.util.filterByIndexes
 import com.getbouncer.scan.framework.util.filteredIndexes
 import com.getbouncer.scan.framework.util.transpose
+import com.getbouncer.scan.payment.card.QUICK_READ_GROUP_LENGTH
+import com.getbouncer.scan.payment.card.QUICK_READ_LENGTH
 import kotlin.math.abs
 
 internal data class OcrFeatureMapSizes(
@@ -118,9 +120,21 @@ fun extractPredictions(
 }
 
 /**
- * Filter out boxes that are outside of the same vertical line. This is done to exclude
+ * Determine if the number is displayed horizontally or both horizontally and vertically.
+ * We do this by finding the median vertical coordinate center. Now, if the number is
+ * displayed horizontally the deviation of all the number boxes and the median
+ * center should be minimal since they are laid on roughly the same horizontal line. In this,
+ * case we just need to sort from left to right to order the number boxes.
+ * Additionally, we also filter out boxes that are outside the same horizontal line.
+ * This is done to exclude information such as phone numbers or expiry.
+ * On the other hand, if the aggregate deviation of the number box centers from the
+ * median center is above a threshold, i.e. the number has both vertical and horizontal components
+ * we need to sort from left to right and top to bottom to order the boxes according to the
+ * card number.
  */
-fun filterVerticalBoxes(detectedBoxes: List<DetectionBox>): List<DetectionBox> {
+
+fun determineLayoutAndFilter(detectedBoxes: List<DetectionBox>, verticalOffset: Float): List<DetectionBox> {
+
     if (detectedBoxes.isEmpty()) {
         return detectedBoxes
     }
@@ -131,6 +145,13 @@ fun filterVerticalBoxes(detectedBoxes: List<DetectionBox>): List<DetectionBox> {
 
     val medianCenter = centers.elementAt(centers.size / 2)
     val medianHeight = heights.elementAt(heights.size / 2)
+    val aggregateDeviation = centers.map { abs(it - medianCenter) }.sum()
 
-    return detectedBoxes.filter { abs(it.rect.centerY() - medianCenter) <= medianHeight }
+    return if (aggregateDeviation > verticalOffset * medianHeight && detectedBoxes.size == QUICK_READ_LENGTH) {
+        detectedBoxes.sortedBy { it.rect.centerY() }
+            .chunked(QUICK_READ_GROUP_LENGTH)
+            .map { it.sortedBy { detectionBox -> detectionBox.rect.left } }.flatten()
+    } else {
+        detectedBoxes.filter { abs(it.rect.centerY() - medianCenter) <= medianHeight }
+    }
 }
