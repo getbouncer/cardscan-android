@@ -9,7 +9,7 @@ abstract class MachineState {
     /**
      * Keep track of when this state was reached
      */
-    protected val reachedStateAt: ClockMark = Clock.markNow()
+    protected open val reachedStateAt: ClockMark = Clock.markNow()
 
     override fun toString(): String = "${this::class.java.simpleName}(reachedStateAt=$reachedStateAt)"
 
