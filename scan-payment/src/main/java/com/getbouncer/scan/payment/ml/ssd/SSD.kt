@@ -133,7 +133,7 @@ fun extractPredictions(
  * card number.
  */
 
-fun determineLayoutAndFilter(detectedBoxes: List<DetectionBox>, verticalOffset: Float ): List<DetectionBox> {
+fun determineLayoutAndFilter(detectedBoxes: List<DetectionBox>, verticalOffset: Float): List<DetectionBox> {
 
     if (detectedBoxes.isEmpty()) {
         return detectedBoxes
@@ -147,10 +147,10 @@ fun determineLayoutAndFilter(detectedBoxes: List<DetectionBox>, verticalOffset: 
     val medianHeight = heights.elementAt(heights.size / 2)
     val aggregateDeviation = centers.map { abs(it - medianCenter) }.sum()
 
-    return if (aggregateDeviation > verticalOffset * medianHeight && detectedBoxes.size == QUICK_READ_LENGTH ) {
+    return if (aggregateDeviation > verticalOffset * medianHeight && detectedBoxes.size == QUICK_READ_LENGTH) {
         return detectedBoxes.sortedBy { it.rect.centerY() }
             .chunked(QUICK_READ_GROUP_LENGTH)
-            .map { it.sortedBy { detectionBox -> detectionBox.rect.left }}.flatten()
+            .map { it.sortedBy { detectionBox -> detectionBox.rect.left } }.flatten()
     } else {
         detectedBoxes.filter { abs(it.rect.centerY() - medianCenter) <= medianHeight }
     }
