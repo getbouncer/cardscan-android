@@ -376,8 +376,8 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
      * Complete a scan
      */
     private void completeScan(
-        @Nullable Integer expiryMonth,
-        @Nullable Integer expiryYear,
+        @Nullable String expiryMonth,
+        @Nullable String expiryYear,
         @Nullable String cardNumber,
         @Nullable String issuer,
         @Nullable String name,

@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.0029](https://github.com/getbouncer/cardscan-android/tree/2.0.0029) (2020-09-08)
+
+**Merged pull requests:**
+
+- Add proguard rules for tensorflow [\#205](https://github.com/getbouncer/cardscan-android/pull/205) ([awushensky](https://github.com/awushensky))
+- Standardize expiry to strings [\#204](https://github.com/getbouncer/cardscan-android/pull/204) ([awushensky](https://github.com/awushensky))
+
 ## [2.0.0028](https://github.com/getbouncer/cardscan-android/tree/2.0.0028) (2020-09-03)
 
 **Merged pull requests:**
@@ -78,7 +85,6 @@
 - Use key without permissions for test [\#166](https://github.com/getbouncer/cardscan-android/pull/166) ([awushensky](https://github.com/awushensky))
 - Update expiry timeout, handle new permissions [\#165](https://github.com/getbouncer/cardscan-android/pull/165) ([xsl](https://github.com/xsl))
 - Add documentation [\#164](https://github.com/getbouncer/cardscan-android/pull/164) ([awushensky](https://github.com/awushensky))
-- Bump tensorflow-lite from 2.2.0 to 2.3.0 [\#163](https://github.com/getbouncer/cardscan-android/pull/163) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Bump core-ktx from 1.3.0 to 1.3.1 [\#159](https://github.com/getbouncer/cardscan-android/pull/159) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 
 ## [2.0.0018](https://github.com/getbouncer/cardscan-android/tree/2.0.0018) (2020-07-28)
@@ -89,6 +95,7 @@
 
 **Merged pull requests:**
 
+- Bump tensorflow-lite from 2.2.0 to 2.3.0 [\#163](https://github.com/getbouncer/cardscan-android/pull/163) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Clean up counters [\#162](https://github.com/getbouncer/cardscan-android/pull/162) ([awushensky](https://github.com/awushensky))
 - Clean up state machine logic [\#161](https://github.com/getbouncer/cardscan-android/pull/161) ([awushensky](https://github.com/awushensky))
 - Clean up state machine [\#160](https://github.com/getbouncer/cardscan-android/pull/160) ([awushensky](https://github.com/awushensky))

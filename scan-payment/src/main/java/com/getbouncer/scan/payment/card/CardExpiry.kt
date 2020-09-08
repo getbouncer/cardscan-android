@@ -53,6 +53,14 @@ fun formatExpiry(day: String?, month: String, year: String): String {
     return "$formattedDay${formatExpiryMonth(month)}/${formatExpiryYear(year)}"
 }
 
+/**
+ * Determine if a month string is valid.
+ */
+fun isValidMonth(month: String) = month.toIntOrNull()?.let { isValidMonth(it) } ?: false
+
+/**
+ * Determine if a month integer is valid.
+ */
 fun isValidMonth(month: Int) = month in 1..12
 
 /**
