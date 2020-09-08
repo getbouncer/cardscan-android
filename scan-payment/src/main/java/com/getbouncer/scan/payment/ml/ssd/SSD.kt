@@ -7,9 +7,9 @@ import com.getbouncer.scan.framework.ml.ssd.toRectF
 import com.getbouncer.scan.framework.util.filterByIndexes
 import com.getbouncer.scan.framework.util.filteredIndexes
 import com.getbouncer.scan.framework.util.transpose
-import kotlin.math.abs
 import com.getbouncer.scan.payment.card.QUICK_READ_GROUP_LENGTH
 import com.getbouncer.scan.payment.card.QUICK_READ_LENGTH
+import kotlin.math.abs
 
 internal data class OcrFeatureMapSizes(
     val layerOneWidth: Int,
