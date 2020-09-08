@@ -17,10 +17,12 @@ import com.getbouncer.scan.framework.util.scaleAndCenterWithin
 import com.getbouncer.scan.payment.R
 import com.getbouncer.scan.payment.crop
 import com.getbouncer.scan.payment.hasOpenGl31
-import com.getbouncer.scan.payment.ml.ssd.*
+import com.getbouncer.scan.payment.ml.ssd.DetectionBox
 import com.getbouncer.scan.payment.ml.ssd.OcrFeatureMapSizes
 import com.getbouncer.scan.payment.ml.ssd.combinePriors
 import com.getbouncer.scan.payment.ml.ssd.rearrangeOCRArray
+import com.getbouncer.scan.payment.ml.ssd.extractPredictions
+import com.getbouncer.scan.payment.ml.ssd.determineLayoutAndFilter
 import com.getbouncer.scan.payment.scale
 import com.getbouncer.scan.payment.size
 import com.getbouncer.scan.payment.toRGBByteBuffer
@@ -190,7 +192,8 @@ class SSDOcr private constructor(interpreter: Interpreter) :
                 intersectionOverUnionThreshold = IOU_THRESHOLD,
                 limit = LIMIT,
                 classifierToLabel = { if (it == 10) 0 else it }
-            ).sortedBy { it.rect.left }, VERTICAL_THRESHOLD
+            ).sortedBy { it.rect.left },
+            VERTICAL_THRESHOLD
         )
 
         val predictedNumber = detectedBoxes.map { it.label }.joinToString("")

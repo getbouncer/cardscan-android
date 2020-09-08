@@ -151,10 +151,7 @@ fun determineLayoutAndFilter(detectedBoxes: List<DetectionBox>, verticalOffset: 
         return detectedBoxes.sortedBy { it.rect.centerY() }
             .chunked(QUICK_READ_GROUP_LENGTH)
             .map { it.sortedBy { detectionBox -> detectionBox.rect.left }}.flatten()
-    }
-    else {
+    } else {
         detectedBoxes.filter { abs(it.rect.centerY() - medianCenter) <= medianHeight }
     }
-
-
 }
