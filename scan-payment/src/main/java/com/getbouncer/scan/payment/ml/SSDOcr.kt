@@ -20,9 +20,9 @@ import com.getbouncer.scan.payment.hasOpenGl31
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
 import com.getbouncer.scan.payment.ml.ssd.OcrFeatureMapSizes
 import com.getbouncer.scan.payment.ml.ssd.combinePriors
-import com.getbouncer.scan.payment.ml.ssd.rearrangeOCRArray
-import com.getbouncer.scan.payment.ml.ssd.extractPredictions
 import com.getbouncer.scan.payment.ml.ssd.determineLayoutAndFilter
+import com.getbouncer.scan.payment.ml.ssd.extractPredictions
+import com.getbouncer.scan.payment.ml.ssd.rearrangeOCRArray
 import com.getbouncer.scan.payment.scale
 import com.getbouncer.scan.payment.size
 import com.getbouncer.scan.payment.toRGBByteBuffer
