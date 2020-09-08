@@ -42,14 +42,18 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
 
     data class Prediction(val expiry: Expiry?)
 
-    data class Expiry(val month: Int, val year: Int) {
+    data class Expiry(val month: String, val year: String) : Comparable<Expiry> {
         override fun toString() = formatExpiry(
             day = null,
-            month = month.toString(),
-            year = year.toString()
+            month = month,
+            year = year
         )
 
-        fun isValidExpiry() = isValidExpiry(null, month.toString(), year.toString())
+        override fun compareTo(other: Expiry): Int =
+            (year.toIntOrNull() ?: 0) * 100 + (month.toIntOrNull() ?: 0)
+                .compareTo((other.year.toIntOrNull() ?: 0) * 100 + (other.month.toIntOrNull() ?: 0))
+
+        fun isValidExpiry() = isValidExpiry(null, month, year)
     }
 
     private data class Digit(val digit: Int, val confidence: Float)
@@ -76,8 +80,8 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
         return if (digits.size == 4 || (digits.size == 5 && digits[2] == 1)) {
             // process if we get exactly 4 digits, OR it's five digits and the middle prediction
             // is a 1 - this is because we sometimes mistake '/' for '1'
-            val month = digits[0] * 10 + digits[1]
-            val year = 2000 + digits[digits.size - 2] * 10 + digits[digits.size - 1]
+            val month = "${digits[0]}${digits[1]}"
+            val year = "20${digits[digits.size - 2]}${digits[digits.size - 1]}"
             if (isValidMonth(month)) {
                 Prediction(Expiry(month, year))
             } else {
