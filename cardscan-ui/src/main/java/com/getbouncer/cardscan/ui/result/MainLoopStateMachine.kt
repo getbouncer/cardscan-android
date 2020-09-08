@@ -1,5 +1,6 @@
 package com.getbouncer.cardscan.ui.result
 
+import androidx.annotation.VisibleForTesting
 import com.getbouncer.cardscan.ui.analyzer.PaymentCardOcrAnalyzer
 import com.getbouncer.scan.framework.MachineState
 import com.getbouncer.scan.framework.time.seconds
@@ -8,15 +9,32 @@ import com.getbouncer.scan.payment.analyzer.NameAndExpiryAnalyzer
 import com.getbouncer.scan.payment.card.isValidPan
 import com.getbouncer.scan.payment.ml.ExpiryDetect
 
-private const val DESIRED_PAN_AGREEMENT = 5
-private const val DESIRED_NAME_AGREEMENT = 2
-private const val MINIMUM_NAME_AGREEMENT = 2
-private const val DESIRED_EXPIRY_AGREEMENT = 3
-private const val MINIMUM_EXPIRY_AGREEMENT = 3
-private val OCR_TIMEOUT_WITH_NAME_AND_EXPIRY = 2.seconds
-private val OCR_TIMEOUT_WITHOUT_NAME_AND_EXPIRY = 5.seconds
-private val EXPIRY_TIMEOUT = 3.seconds
-private val NAME_TIMEOUT = 13.seconds
+@VisibleForTesting
+internal const val DESIRED_PAN_AGREEMENT = 5
+
+@VisibleForTesting
+internal const val DESIRED_NAME_AGREEMENT = 2
+
+@VisibleForTesting
+internal const val DESIRED_EXPIRY_AGREEMENT = 3
+
+@VisibleForTesting
+internal const val MINIMUM_NAME_AGREEMENT = 2
+
+@VisibleForTesting
+internal const val MINIMUM_EXPIRY_AGREEMENT = 3
+
+@VisibleForTesting
+internal val OCR_TIMEOUT_WITH_NAME_AND_EXPIRY = 2.seconds
+
+@VisibleForTesting
+internal val OCR_TIMEOUT_WITHOUT_NAME_AND_EXPIRY = 5.seconds
+
+@VisibleForTesting
+internal val EXPIRY_TIMEOUT = 3.seconds
+
+@VisibleForTesting
+internal val NAME_TIMEOUT = 13.seconds
 
 /**
  * All possible states of the main loop and the logic for transitions to other states.
@@ -56,6 +74,10 @@ sealed class MainLoopState(
         fun getMostLikelyPan() = panCounter.getHighestCountItem()?.second
 
         override suspend fun consumeTransition(transition: PaymentCardOcrAnalyzer.Prediction): MainLoopState {
+            if (isValidPan(transition.pan) && transition.pan != null) {
+                panCounter.countItem(transition.pan)
+            }
+
             val nameOrExpiryEnabled = enableNameExtraction || enableExpiryExtraction
             val (panAgreements, mostLikelyPan) = panCounter.getHighestCountItem() ?: 0 to null
             val timeElapsed = reachedStateAt.elapsedSince()
@@ -87,7 +109,7 @@ sealed class MainLoopState(
     /**
      * The state of the main loop where name and expiry extraction are running.
      */
-    class NameAndExpiryRunning(
+    open class NameAndExpiryRunning(
         val pan: String,
         private val enableNameExtraction: Boolean,
         private val enableExpiryExtraction: Boolean,
@@ -112,11 +134,20 @@ sealed class MainLoopState(
 
             val nameSatisfied = !enableNameExtraction || !transition.isNameExtractionAvailable || nameAgreements >= DESIRED_NAME_AGREEMENT
             val expirySatisfied = !enableExpiryExtraction || !transition.isExpiryExtractionAvailable || expiryAgreements >= DESIRED_EXPIRY_AGREEMENT
+            val originalReachedStateAt = reachedStateAt
 
             return when {
                 nameSatisfied && expirySatisfied -> Finished(pan, mostLikelyName, mostLikelyExpiry)
-                !enableNameExtraction && reachedStateAt.elapsedSince() > EXPIRY_TIMEOUT -> Finished(pan, mostLikelyName, mostLikelyExpiry)
+                !enableNameExtraction && mostLikelyName == null && reachedStateAt.elapsedSince() > EXPIRY_TIMEOUT -> Finished(pan, mostLikelyName, mostLikelyExpiry)
                 reachedStateAt.elapsedSince() > NAME_TIMEOUT -> Finished(pan, mostLikelyName, mostLikelyExpiry)
+                nameSatisfied && !expirySatisfied ->
+                    object : NameAndExpiryRunning(pan, enableNameExtraction = false, enableExpiryExtraction = enableExpiryExtraction) {
+                        override val reachedStateAt = originalReachedStateAt
+                    }
+                !nameSatisfied && expirySatisfied ->
+                    object : NameAndExpiryRunning(pan, enableNameExtraction = enableNameExtraction, enableExpiryExtraction = false) {
+                        override val reachedStateAt = originalReachedStateAt
+                    }
                 else -> this
             }
         }
