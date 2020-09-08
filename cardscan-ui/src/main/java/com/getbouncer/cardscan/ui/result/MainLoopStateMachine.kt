@@ -13,10 +13,10 @@ import com.getbouncer.scan.payment.ml.ExpiryDetect
 internal const val DESIRED_PAN_AGREEMENT = 5
 
 @VisibleForTesting
-internal const val DESIRED_NAME_AGREEMENT = 2
+internal const val DESIRED_NAME_AGREEMENT = 3
 
 @VisibleForTesting
-internal const val DESIRED_EXPIRY_AGREEMENT = 3
+internal const val DESIRED_EXPIRY_AGREEMENT = 4
 
 @VisibleForTesting
 internal const val MINIMUM_NAME_AGREEMENT = 2
@@ -114,8 +114,8 @@ sealed class MainLoopState(
         private val enableNameExtraction: Boolean,
         private val enableExpiryExtraction: Boolean,
     ) : MainLoopState(runOcr = false, runNameExtraction = enableNameExtraction, runExpiryExtraction = enableExpiryExtraction) {
-        private val nameCounter = ItemTotalCounter<String>()
-        private val expiryCounter = ItemTotalCounter<ExpiryDetect.Expiry>()
+        protected open val nameCounter = ItemTotalCounter<String>()
+        protected open val expiryCounter = ItemTotalCounter<ExpiryDetect.Expiry>()
 
         fun getMostLikelyName() = nameCounter.getHighestCountItem(minCount = MINIMUM_NAME_AGREEMENT)?.second
         fun getMostLikelyExpiry() = expiryCounter.getHighestCountItem(minCount = MINIMUM_EXPIRY_AGREEMENT)?.second
@@ -134,7 +134,6 @@ sealed class MainLoopState(
 
             val nameSatisfied = !enableNameExtraction || !transition.isNameExtractionAvailable || nameAgreements >= DESIRED_NAME_AGREEMENT
             val expirySatisfied = !enableExpiryExtraction || !transition.isExpiryExtractionAvailable || expiryAgreements >= DESIRED_EXPIRY_AGREEMENT
-            val originalReachedStateAt = reachedStateAt
 
             return when {
                 nameSatisfied && expirySatisfied -> Finished(pan, mostLikelyName, mostLikelyExpiry)
@@ -142,11 +141,15 @@ sealed class MainLoopState(
                 reachedStateAt.elapsedSince() > NAME_TIMEOUT -> Finished(pan, mostLikelyName, mostLikelyExpiry)
                 nameSatisfied && !expirySatisfied ->
                     object : NameAndExpiryRunning(pan, enableNameExtraction = false, enableExpiryExtraction = enableExpiryExtraction) {
-                        override val reachedStateAt = originalReachedStateAt
+                        override val reachedStateAt = this@NameAndExpiryRunning.reachedStateAt
+                        override val nameCounter = this@NameAndExpiryRunning.nameCounter
+                        override val expiryCounter = this@NameAndExpiryRunning.expiryCounter
                     }
                 !nameSatisfied && expirySatisfied ->
                     object : NameAndExpiryRunning(pan, enableNameExtraction = enableNameExtraction, enableExpiryExtraction = false) {
-                        override val reachedStateAt = originalReachedStateAt
+                        override val reachedStateAt = this@NameAndExpiryRunning.reachedStateAt
+                        override val nameCounter = this@NameAndExpiryRunning.nameCounter
+                        override val expiryCounter = this@NameAndExpiryRunning.expiryCounter
                     }
                 else -> this
             }
