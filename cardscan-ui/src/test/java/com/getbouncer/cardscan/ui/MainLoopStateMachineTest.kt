@@ -188,7 +188,7 @@ class MainLoopStateMachineTest {
 
         val newState = state.consumeTransition(prediction1)
         assertTrue(newState is MainLoopState.NameAndExpiryRunning, "$newState is not NameAndExpiryRunning")
-        assertEquals("4847186095118770", (newState as MainLoopState.NameAndExpiryRunning).pan)
+        assertEquals("4847186095118770", newState.pan)
     }
 
     /**
