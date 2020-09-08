@@ -91,7 +91,7 @@ class NameAndExpiryAnalyzer<State : NameAndExpiryAnalyzer.State> private constru
                     ),
                     Unit
                 )?.expiry
-            }.maxByOrNull { it.year * 100 + it.month }
+            }.maxOrNull()
         } else {
             null
         }

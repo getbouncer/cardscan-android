@@ -42,12 +42,16 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
 
     data class Prediction(val expiry: Expiry?)
 
-    data class Expiry(val month: String, val year: String) {
+    data class Expiry(val month: String, val year: String) : Comparable<Expiry> {
         override fun toString() = formatExpiry(
             day = null,
             month = month,
             year = year
         )
+
+        override fun compareTo(other: Expiry): Int =
+            (year.toIntOrNull() ?: 0) * 100 + (month.toIntOrNull() ?: 0)
+                .compareTo((other.year.toIntOrNull() ?: 0) * 100 + (other.month.toIntOrNull() ?: 0))
 
         fun isValidExpiry() = isValidExpiry(null, month, year)
     }
