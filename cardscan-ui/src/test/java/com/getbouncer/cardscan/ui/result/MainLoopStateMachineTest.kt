@@ -1,17 +1,7 @@
-package com.getbouncer.cardscan.ui
+package com.getbouncer.cardscan.ui.result
 
 import androidx.test.filters.LargeTest
 import com.getbouncer.cardscan.ui.analyzer.PaymentCardOcrAnalyzer
-import com.getbouncer.cardscan.ui.result.DESIRED_EXPIRY_AGREEMENT
-import com.getbouncer.cardscan.ui.result.DESIRED_NAME_AGREEMENT
-import com.getbouncer.cardscan.ui.result.DESIRED_PAN_AGREEMENT
-import com.getbouncer.cardscan.ui.result.EXPIRY_TIMEOUT
-import com.getbouncer.cardscan.ui.result.MINIMUM_EXPIRY_AGREEMENT
-import com.getbouncer.cardscan.ui.result.MINIMUM_NAME_AGREEMENT
-import com.getbouncer.cardscan.ui.result.MainLoopState
-import com.getbouncer.cardscan.ui.result.NAME_TIMEOUT
-import com.getbouncer.cardscan.ui.result.OCR_TIMEOUT_WITHOUT_NAME_AND_EXPIRY
-import com.getbouncer.cardscan.ui.result.OCR_TIMEOUT_WITH_NAME_AND_EXPIRY
 import com.getbouncer.scan.payment.ml.ExpiryDetect
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
