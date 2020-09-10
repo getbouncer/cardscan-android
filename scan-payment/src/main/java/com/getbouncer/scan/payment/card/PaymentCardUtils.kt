@@ -2,7 +2,6 @@
 package com.getbouncer.scan.payment.card
 
 import android.content.Context
-import android.text.TextUtils
 import androidx.annotation.CheckResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -267,13 +266,13 @@ internal fun normalizeCardNumber(cardNumber: String?) = cardNumber?.filter { it.
  * Determine if the pan is valid or close to valid.
  */
 @CheckResult
-fun isPossiblyValidPan(pan: String?) = pan != null && TextUtils.isDigitsOnly(pan) && pan.length >= 7
+fun isPossiblyValidPan(pan: String?) = pan != null && pan.isDigitsOnly() && pan.length >= 7
 
 /**
  * Determine if the pan is not close to being valid.
  */
 @CheckResult
-fun isNotPossiblyValidPan(pan: String?) = pan == null || !TextUtils.isDigitsOnly(pan) || pan.length < 10
+fun isNotPossiblyValidPan(pan: String?) = pan == null || !pan.isDigitsOnly() || pan.length < 10
 
 /**
  * Determine if a card number (PAN, IIN, last four) possibly matches a required number (PAN, IIN, last four). This
@@ -283,7 +282,7 @@ fun isNotPossiblyValidPan(pan: String?) = pan == null || !TextUtils.isDigitsOnly
 @CheckResult
 fun numberPossiblyMatches(scanned: String?, required: String?): Boolean =
     scanned == required || (
-        scanned != null && TextUtils.isDigitsOnly(scanned) &&
+        scanned != null && scanned.isDigitsOnly() &&
             (required == null || jaccardIndex(scanned, required) > JACCARD_SIMILARITY_THRESHOLD)
         )
 
@@ -315,3 +314,8 @@ private fun jaccardIndex(string1: String, string2: String): Double {
 
     return intersection.size.toDouble() / (set1.size + set2.size - intersection.size)
 }
+
+/**
+ * Determine if a string is digits only without using android libraries.
+ */
+private fun String.isDigitsOnly() = this.toCharArray().all { it.isDigit() }

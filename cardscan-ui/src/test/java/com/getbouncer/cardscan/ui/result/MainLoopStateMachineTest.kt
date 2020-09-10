@@ -96,7 +96,7 @@ class MainLoopStateMachineTest {
     @Test
     @ExperimentalCoroutinesApi
     fun ocrRunning_cardAgreement_nameAndExpiry() = runBlockingTest {
-        val state = MainLoopState.OcrRunning(firstPan = "4847186095118770", enableNameExtraction = true, enableExpiryExtraction = true)
+        var state: MainLoopState = MainLoopState.OcrRunning(firstPan = "4847186095118770", enableNameExtraction = true, enableExpiryExtraction = true)
 
         val prediction = PaymentCardOcrAnalyzer.Prediction(
             pan = "4847186095118770",
@@ -109,7 +109,8 @@ class MainLoopStateMachineTest {
         )
 
         repeat(DESIRED_PAN_AGREEMENT - 2) { // -2 because of the `firstPan` above and to get to a state right before the transition occurs
-            assertEquals(state, state.consumeTransition(prediction))
+            state = state.consumeTransition(prediction)
+            assertTrue(state is MainLoopState.OcrRunning)
         }
 
         val newState = state.consumeTransition(prediction)
@@ -120,7 +121,7 @@ class MainLoopStateMachineTest {
     @Test
     @ExperimentalCoroutinesApi
     fun ocrRunning_cardAgreement_noNameNorExpiry() = runBlockingTest {
-        val state = MainLoopState.OcrRunning(firstPan = "4847186095118770", enableNameExtraction = false, enableExpiryExtraction = false)
+        var state: MainLoopState = MainLoopState.OcrRunning(firstPan = "4847186095118770", enableNameExtraction = false, enableExpiryExtraction = false)
 
         val prediction = PaymentCardOcrAnalyzer.Prediction(
             pan = "4847186095118770",
@@ -133,7 +134,8 @@ class MainLoopStateMachineTest {
         )
 
         repeat(DESIRED_PAN_AGREEMENT - 2) { // -2 because of the `firstPan` above and to get to a state right before the transition occurs
-            assertEquals(state, state.consumeTransition(prediction))
+            state = state.consumeTransition(prediction)
+            assertTrue(state is MainLoopState.OcrRunning)
         }
 
         val newState = state.consumeTransition(prediction)
@@ -146,7 +148,7 @@ class MainLoopStateMachineTest {
     @Test
     @ExperimentalCoroutinesApi
     fun ocrRunning_cardAgreement_multiplePansFound() = runBlockingTest {
-        val state = MainLoopState.OcrRunning(firstPan = "4847186095118770", enableNameExtraction = true, enableExpiryExtraction = true)
+        var state: MainLoopState = MainLoopState.OcrRunning(firstPan = "4847186095118770", enableNameExtraction = true, enableExpiryExtraction = true)
 
         val prediction1 = PaymentCardOcrAnalyzer.Prediction(
             pan = "4847186095118770",
@@ -169,11 +171,13 @@ class MainLoopStateMachineTest {
         )
 
         repeat(DESIRED_PAN_AGREEMENT - 1) { // does not match initial, so we can go one more
-            assertEquals(state, state.consumeTransition(prediction2))
+            state = state.consumeTransition(prediction2)
+            assertTrue(state is MainLoopState.OcrRunning)
         }
 
         repeat(DESIRED_PAN_AGREEMENT - 2) { // -2 because of the `firstPan` above and to get to a state right before the transition occurs
-            assertEquals(state, state.consumeTransition(prediction1))
+            state = state.consumeTransition(prediction1)
+            assertTrue(state is MainLoopState.OcrRunning)
         }
 
         val newState = state.consumeTransition(prediction1)
@@ -283,7 +287,7 @@ class MainLoopStateMachineTest {
     @Test
     @ExperimentalCoroutinesApi
     fun nameAndExpiry_name_noExpiry_noTimeout() = runBlockingTest {
-        val state = MainLoopState.NameAndExpiryRunning("4847186095118770", enableNameExtraction = true, enableExpiryExtraction = true)
+        var state: MainLoopState = MainLoopState.NameAndExpiryRunning("4847186095118770", enableNameExtraction = true, enableExpiryExtraction = true)
 
         val prediction = PaymentCardOcrAnalyzer.Prediction(
             pan = null,
@@ -296,8 +300,9 @@ class MainLoopStateMachineTest {
         )
 
         repeat(DESIRED_NAME_AGREEMENT - 1) {
-            val tempState = state.consumeTransition(prediction)
-            assertTrue(tempState is MainLoopState.NameAndExpiryRunning)
+            state = state.consumeTransition(prediction)
+            assertTrue(state is MainLoopState.NameAndExpiryRunning)
+            val tempState = state as MainLoopState.NameAndExpiryRunning
             assertFalse(tempState.runExpiryExtraction)
         }
 
@@ -311,7 +316,7 @@ class MainLoopStateMachineTest {
     @Test
     @ExperimentalCoroutinesApi
     fun nameAndExpiry_noName_expiry_noTimeout() = runBlockingTest {
-        val state = MainLoopState.NameAndExpiryRunning("4847186095118770", enableNameExtraction = true, enableExpiryExtraction = true)
+        var state: MainLoopState = MainLoopState.NameAndExpiryRunning("4847186095118770", enableNameExtraction = true, enableExpiryExtraction = true)
 
         val prediction = PaymentCardOcrAnalyzer.Prediction(
             pan = null,
@@ -324,8 +329,9 @@ class MainLoopStateMachineTest {
         )
 
         repeat(DESIRED_EXPIRY_AGREEMENT - 1) {
-            val tempState = state.consumeTransition(prediction)
-            assertTrue(tempState is MainLoopState.NameAndExpiryRunning)
+            state = state.consumeTransition(prediction)
+            assertTrue(state is MainLoopState.NameAndExpiryRunning)
+            val tempState = state as MainLoopState.NameAndExpiryRunning
             assertFalse(tempState.runNameExtraction)
         }
 
@@ -339,7 +345,7 @@ class MainLoopStateMachineTest {
     @Test
     @ExperimentalCoroutinesApi
     fun nameAndExpiry_name_expiry_noTimeout() = runBlockingTest {
-        val state = MainLoopState.NameAndExpiryRunning("4847186095118770", enableNameExtraction = true, enableExpiryExtraction = true)
+        var state: MainLoopState = MainLoopState.NameAndExpiryRunning("4847186095118770", enableNameExtraction = true, enableExpiryExtraction = true)
 
         val prediction = PaymentCardOcrAnalyzer.Prediction(
             pan = null,
@@ -352,8 +358,9 @@ class MainLoopStateMachineTest {
         )
 
         repeat(max(DESIRED_EXPIRY_AGREEMENT, DESIRED_NAME_AGREEMENT) - 1) {
-            val tempState = state.consumeTransition(prediction)
-            assertTrue(tempState is MainLoopState.NameAndExpiryRunning)
+            state = state.consumeTransition(prediction)
+            assertTrue(state is MainLoopState.NameAndExpiryRunning)
+            val tempState = state as MainLoopState.NameAndExpiryRunning
 
             if (it >= DESIRED_EXPIRY_AGREEMENT) {
                 assertFalse(tempState.runExpiryExtraction)
@@ -379,7 +386,7 @@ class MainLoopStateMachineTest {
     @Test
     @LargeTest
     fun nameAndExpiry_expiryTimeout() = runBlocking {
-        val state = MainLoopState.NameAndExpiryRunning("4847186095118770", enableNameExtraction = false, enableExpiryExtraction = true)
+        var state: MainLoopState = MainLoopState.NameAndExpiryRunning("4847186095118770", enableNameExtraction = false, enableExpiryExtraction = true)
 
         val prediction = PaymentCardOcrAnalyzer.Prediction(
             pan = null,
@@ -392,7 +399,8 @@ class MainLoopStateMachineTest {
         )
 
         repeat(MINIMUM_EXPIRY_AGREEMENT - 1) {
-            assertTrue(state.consumeTransition(prediction) is MainLoopState.NameAndExpiryRunning)
+            state = state.consumeTransition(prediction)
+            assertTrue(state is MainLoopState.NameAndExpiryRunning)
         }
 
         delay(EXPIRY_TIMEOUT.inMilliseconds.toLong() + 1)
@@ -412,7 +420,7 @@ class MainLoopStateMachineTest {
     @Test
     @LargeTest
     fun nameAndExpiry_nameTimeout() = runBlocking {
-        val state = MainLoopState.NameAndExpiryRunning("4847186095118770", enableNameExtraction = true, enableExpiryExtraction = false)
+        var state: MainLoopState = MainLoopState.NameAndExpiryRunning("4847186095118770", enableNameExtraction = true, enableExpiryExtraction = false)
 
         val prediction = PaymentCardOcrAnalyzer.Prediction(
             pan = null,
@@ -425,7 +433,8 @@ class MainLoopStateMachineTest {
         )
 
         repeat(MINIMUM_NAME_AGREEMENT - 1) {
-            assertTrue(state.consumeTransition(prediction) is MainLoopState.NameAndExpiryRunning)
+            state = state.consumeTransition(prediction)
+            assertTrue(state is MainLoopState.NameAndExpiryRunning)
         }
 
         delay(NAME_TIMEOUT.inMilliseconds.toLong() + 1)
@@ -445,7 +454,7 @@ class MainLoopStateMachineTest {
     @Test
     @LargeTest
     fun nameAndExpiry_nameAndExpiryTimeout() = runBlocking {
-        val state = MainLoopState.NameAndExpiryRunning("4847186095118770", enableNameExtraction = true, enableExpiryExtraction = true)
+        var state: MainLoopState = MainLoopState.NameAndExpiryRunning("4847186095118770", enableNameExtraction = true, enableExpiryExtraction = true)
 
         val prediction = PaymentCardOcrAnalyzer.Prediction(
             pan = null,
@@ -458,8 +467,9 @@ class MainLoopStateMachineTest {
         )
 
         repeat(max(MINIMUM_NAME_AGREEMENT, MINIMUM_EXPIRY_AGREEMENT) - 1) {
-            val tempState = state.consumeTransition(prediction)
-            assertTrue(tempState is MainLoopState.NameAndExpiryRunning)
+            state = state.consumeTransition(prediction)
+            assertTrue(state is MainLoopState.NameAndExpiryRunning)
+            val tempState = state as MainLoopState.NameAndExpiryRunning
 
             if (it >= DESIRED_EXPIRY_AGREEMENT) {
                 assertFalse(tempState.runExpiryExtraction)
@@ -474,6 +484,45 @@ class MainLoopStateMachineTest {
 
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopState.Finished, "$newState is not Finished")
+        assertEquals("4847186095118770", newState.pan)
+        assertEquals("some name", newState.name)
+        assertEquals(ExpiryDetect.Expiry("00", "00"), newState.expiry)
+    }
+
+    @Test
+    fun finished_runsNothing() {
+        val state = MainLoopState.Finished(
+            pan = "4847186095118770",
+            name = "some name",
+            expiry = ExpiryDetect.Expiry("00", "00")
+        )
+
+        assertFalse(state.runOcr)
+        assertFalse(state.runNameExtraction)
+        assertFalse(state.runExpiryExtraction)
+    }
+
+    @Test
+    @ExperimentalCoroutinesApi
+    fun finished_goesNowhere() = runBlockingTest {
+        val state = MainLoopState.Finished(
+            pan = "4847186095118770",
+            name = "some name",
+            expiry = ExpiryDetect.Expiry("00", "00")
+        )
+
+        val prediction = PaymentCardOcrAnalyzer.Prediction(
+            pan = "4847186095118770",
+            panDetectionBoxes = null,
+            name = "some name",
+            expiry = ExpiryDetect.Expiry("00", "00"),
+            objDetectionBoxes = null,
+            isExpiryExtractionAvailable = true,
+            isNameExtractionAvailable = true,
+        )
+
+        val newState = state.consumeTransition(prediction)
+        assertTrue(newState is MainLoopState.Finished)
         assertEquals("4847186095118770", newState.pan)
         assertEquals("some name", newState.name)
         assertEquals(ExpiryDetect.Expiry("00", "00"), newState.expiry)
