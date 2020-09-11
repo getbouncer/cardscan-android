@@ -12,6 +12,7 @@ import kotlin.math.max
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class MainLoopStateMachineTest {
@@ -522,9 +523,6 @@ class MainLoopStateMachineTest {
         )
 
         val newState = state.consumeTransition(prediction)
-        assertTrue(newState is MainLoopState.Finished)
-        assertEquals("4847186095118770", newState.pan)
-        assertEquals("some name", newState.name)
-        assertEquals(ExpiryDetect.Expiry("00", "00"), newState.expiry)
+        assertSame(state, newState)
     }
 }
