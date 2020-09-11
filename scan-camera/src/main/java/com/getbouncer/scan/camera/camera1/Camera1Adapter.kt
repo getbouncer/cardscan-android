@@ -12,7 +12,6 @@ import android.hardware.Camera
 import android.hardware.Camera.AutoFocusCallback
 import android.hardware.Camera.PreviewCallback
 import android.util.DisplayMetrics
-import android.util.Log
 import android.util.Size
 import android.view.Surface
 import android.view.SurfaceHolder
