@@ -378,6 +378,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
             setFlashlightState(cameraAdapter.isTorchOn())
             onFlashSupported(it)
         }
+        cameraAdapter.setFocus(previewFrame.centerPoint())
 
         onCameraStreamAvailable(cameraAdapter.getImageStream())
     }
@@ -421,4 +422,6 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      * The API key was invalid.
      */
     protected abstract fun onInvalidApiKey()
+
+    private fun FrameLayout.centerPoint() = PointF(left + width / 2F, top + height / 2F)
 }

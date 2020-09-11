@@ -383,7 +383,7 @@ class CardScanActivity :
         flashButtonView.setOnClickListener { toggleFlashlight() }
 
         viewFinderWindow.setOnTouchListener { _, e ->
-            setFocus(PointF(e.x, e.y))
+            setFocus(PointF(e.x + viewFinderWindow.left, e.y + viewFinderWindow.top))
             true
         }
 

@@ -30,6 +30,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
@@ -57,6 +58,7 @@ class Camera1Adapter(
     private var cameraPreview: CameraPreview? = null
     private var mRotation = 0
     private var focusJob: Job? = null
+    private var focusPoint = PointF(previewView.width / 2F, previewView.height / 2F)
     private var onCameraAvailableListener: WeakReference<((Camera) -> Unit)?> = WeakReference(null)
 
     override fun withFlashSupport(task: (Boolean) -> Unit) {
@@ -90,6 +92,7 @@ class Camera1Adapter(
 
     override fun setFocus(point: PointF) {
         mCamera?.apply {
+            focusPoint = point
             val parameters = parameters
             if (parameters.maxNumFocusAreas > 0) {
                 val focusRect = Rect(
@@ -152,16 +155,19 @@ class Camera1Adapter(
         }
 
         // For some devices (especially Samsung), we need to continuously refocus the camera.
+        focusJob?.cancel()
         focusJob = GlobalScope.launch {
-            while (true) {
+            while (isActive) {
                 delay(5000)
                 val variance = Random().nextFloat() - 0.5F
+                val originalFocusPoint = focusPoint
                 setFocus(
                     PointF(
-                        previewView.width / 2F + variance,
-                        previewView.height / 2F + variance
+                        focusPoint.x + variance,
+                        focusPoint.y + variance
                     )
                 )
+                focusPoint = originalFocusPoint
             }
         }
     }
