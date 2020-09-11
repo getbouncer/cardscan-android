@@ -54,6 +54,7 @@ jobs:
 
       - name: create commit
         id: commit
+        branch: master
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "Automatic changelog update"
