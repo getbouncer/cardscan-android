@@ -39,6 +39,7 @@ import android.media.ImageReader
 import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
+import android.util.Log
 import android.util.Size
 import android.view.Surface
 import android.view.TextureView
@@ -52,7 +53,13 @@ import com.getbouncer.scan.camera.rotate
 import com.getbouncer.scan.camera.scale
 import com.getbouncer.scan.camera.toBitmap
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import java.util.Locale
+import java.util.Random
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -164,6 +171,9 @@ class Camera2Adapter(
 
     private val mainThreadHandler = Handler(activity.mainLooper)
 
+    private var focusPoint = previewView?.let { PointF(previewView.width / 2F, previewView.height / 2F) }
+    private var focusJob: Job? = null
+
     private val surfaceTextureListener = object : TextureView.SurfaceTextureListener {
         override fun onSurfaceTextureAvailable(surface: SurfaceTexture?, width: Int, height: Int) {
             openCamera()
@@ -242,10 +252,25 @@ class Camera2Adapter(
         } else {
             previewView.surfaceTextureListener = surfaceTextureListener
         }
+
+        // For some devices (especially Samsung), we need to continuously refocus the camera.
+        focusJob?.cancel()
+        focusJob = GlobalScope.launch {
+            while (isActive) {
+                delay(5000)
+                val variance = Random().nextFloat() - 0.5F
+                val originalFocusPoint = focusPoint
+                focusPoint?.let {
+                    setFocus(PointF(it.x + variance, it.y + variance))
+                } ?: break
+                focusPoint = originalFocusPoint
+            }
+        }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     fun onPause() {
+        focusJob?.cancel()
         closeCamera()
         stopCameraThread()
     }
@@ -556,6 +581,8 @@ class Camera2Adapter(
             return
         }
 
+        focusPoint = point
+
         previewCaptureSession?.stopRepeating()
 
         previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)
@@ -588,7 +615,7 @@ class Camera2Adapter(
                 override fun onCaptureCompleted(
                     session: CameraCaptureSession,
                     request: CaptureRequest,
-                    result: TotalCaptureResult
+                    result: TotalCaptureResult,
                 ) {
                     super.onCaptureCompleted(session, request, result)
 
