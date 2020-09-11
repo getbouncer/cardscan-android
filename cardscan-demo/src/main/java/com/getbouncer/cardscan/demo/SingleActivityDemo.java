@@ -148,7 +148,10 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
         flashButtonView.setOnClickListener(v -> toggleFlashlight());
 
         viewFinderWindow.setOnTouchListener((v, event) -> {
-            setFocus(new PointF(event.getX() + viewFinderWindow.getLeft(), event.getY() + viewFinderWindow.getTop()));
+            setFocus(new PointF(
+                event.getX() + viewFinderWindow.getLeft(), 
+                event.getY() + viewFinderWindow.getTop())
+            );
             return true;
         });
     }
