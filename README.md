@@ -68,13 +68,13 @@ CardScanActivity.warmup(this, API_KEY, true)
 CardScan is built to be customized to fit your UI.
 
 ### Basic modifications
-To modify text, colors, or padding of the default UI, see the [customization](https://docs.getbouncer.com/card-scan/android-integration-guide/android-customization-guide) documentation.
+To modify text, colors, or padding of the default UI, see the [customization](https://docs.getbouncer.com/card-scan/android-integration-guide/customization-guide) documentation.
 
 ### Extensive modifications
 To modify arrangement or UI functionality, CardScan can be used as a library for your custom implementation. See the [example single-activity demo app](demo/src/main/java/com/getbouncer/cardscan/demo/SingleActivityDemo.java).
 
 ## Developing
-See the [development docs](https://docs.getbouncer.com/card-scan/android-integration-guide/android-development-guide) for details on developing for CardScan.
+See the [development docs](https://docs.getbouncer.com/card-scan/android-integration-guide/development-guide) for details on developing for CardScan.
 
 ## Authors
 Adam Wushensky, Sam King, and Zain ul Abi Din
