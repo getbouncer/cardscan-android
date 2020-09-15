@@ -50,7 +50,7 @@ This repository contains a demonstration app for the CardScan product. To build 
     This will create a release APK in the `cardscan-demo/build/outputs/apk` directory. Copy this file to your device and install it.
 
 ## Integration
-See the [integration documentation](https://docs.getbouncer.com/card-scan/android-integration-guide/android-development-guide) in the Bouncer Docs.
+See the [integration documentation](https://docs.getbouncer.com/card-scan/android-integration-guide) in the Bouncer Docs.
 
 ### Provisioning an API key
 CardScan requires a valid API key to run. To provision an API key, visit the [Bouncer API console](https://api.getbouncer.com/console).
