@@ -26,7 +26,6 @@ import com.getbouncer.scan.camera.rotate
 import com.getbouncer.scan.camera.scale
 import com.getbouncer.scan.camera.toBitmap
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -39,6 +38,7 @@ import java.util.Random
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 private const val ASPECT_TOLERANCE = 0.2
 
@@ -109,18 +109,22 @@ class Camera1Adapter(
         }
     }
 
-    @ExperimentalCoroutinesApi
-    override fun onPreviewFrame(bytes: ByteArray, camera: Camera) {
+    override fun onPreviewFrame(bytes: ByteArray?, camera: Camera) {
         val imageWidth = camera.parameters.previewSize.width
         val imageHeight = camera.parameters.previewSize.height
         val scale = max(
             minimumResolution.width.toFloat() / imageWidth,
             minimumResolution.height.toFloat() / imageHeight
         )
-        val bitmap = bytes.nv21ToYuv(imageWidth, imageHeight).toBitmap().scale(scale).rotate(mRotation.toFloat())
-        camera.addCallbackBuffer(bytes)
 
-        sendImageToStream(bitmap)
+        if (bytes != null) {
+            val bitmap = bytes.nv21ToYuv(imageWidth, imageHeight).toBitmap().scale(scale).rotate(mRotation.toFloat())
+            camera.addCallbackBuffer(bytes)
+
+            sendImageToStream(bitmap)
+        } else {
+            camera.addCallbackBuffer(ByteArray((imageWidth * imageHeight * 1.5).roundToInt()))
+        }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
