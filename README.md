@@ -1,7 +1,7 @@
 # Overview
 This repository contains the open source code for [Bouncer](https://www.getbouncer.com) products (e.g. CardScan). See the individual sub modules for more information on each.
 
-[CardScan](https://cardscan.io/) is a relatively small library that provides fast and accurate payment card scanning.
+[CardScan](https://getbouncer.com/scan) is a relatively small library that provides fast and accurate payment card scanning.
 
 CardScan is the foundation for CardVerify enterprise libraries, which validate the authenticity of payment cards as they are scanned.
 
@@ -30,24 +30,7 @@ CardScan is the foundation for CardVerify enterprise libraries, which validate t
 Note: Your app does not have to be written in kotlin to integrate this library, but must be able to depend on kotlin functionality.
 
 ## Demo
-This repository contains a demonstration app for the CardScan product. To build and install this library follow the following steps:
-
-1. Clone the repository from github
-    ```bash
-    git clone --recursive https://github.com/getbouncer/cardscan-demo-android
-    ```
-    
-2. Build the library using gradle or [android studio](https://developer.android.com/studio).
-    a. Using android studio, open the directory `cardscan-demo-android`. Install the app on your device or an emulator by clicking the play button in the top right of android studio.
-    
-    ![build_android_studio](docs/images/build_android_studio.png)
-    
-    b. Using gradle, build the demo app by executing the following command:
-    
-    ```bash
-    ./gradlew demo:assembleRelease
-    ```
-    This will create a release APK in the `cardscan-demo/build/outputs/apk` directory. Copy this file to your device and install it.
+This repository contains a demonstration app for the CardScan product. To build and run the demo app, follow the instructions in the [demo documentation](https://docs.getbouncer.com/card-scan/android-integration-guide#demo).
 
 ## Integration
 See the [integration documentation](https://docs.getbouncer.com/card-scan/android-integration-guide) in the Bouncer Docs.
