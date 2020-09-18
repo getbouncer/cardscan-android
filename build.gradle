@@ -35,7 +35,7 @@ allprojects {
     }
 
     dependencies {
-        kotlinlint "com.pinterest:ktlint:0.38.1"
+        kotlinlint "com.pinterest:ktlint:0.39.0"
     }
 
     repositories {
