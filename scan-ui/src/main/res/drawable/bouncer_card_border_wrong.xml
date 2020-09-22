@@ -22,7 +22,7 @@
                     a 5,5,0,0,1,-5,-5
                     Z"
                 android:strokeColor="@color/bouncerWrongOutline"
-                android:strokeWidth="@dimen/bouncerNotFoundOutlineWidth"/>
+                android:strokeWidth="@integer/bouncerNotFoundOutlineWidth"/>
         </vector>
     </aapt:attr>
     <target android:name="card_border">
@@ -31,16 +31,16 @@
                 <objectAnimator
                     android:propertyName="strokeWidth"
                     android:duration="250"
-                    android:valueFrom="@dimen/bouncerNotFoundOutlineWidth"
-                    android:valueTo="@dimen/bouncerWrongOutlineWidth"
+                    android:valueFrom="@integer/bouncerNotFoundOutlineWidth"
+                    android:valueTo="@integer/bouncerWrongOutlineWidth"
                     android:valueType="floatType"
                     android:interpolator="@android:interpolator/linear_out_slow_in"/>
                 <objectAnimator
                     android:propertyName="strokeWidth"
                     android:startOffset="250"
                     android:duration="250"
-                    android:valueFrom="@dimen/bouncerWrongOutlineWidth"
-                    android:valueTo="@dimen/bouncerNotFoundOutlineWidth"
+                    android:valueFrom="@integer/bouncerWrongOutlineWidth"
+                    android:valueTo="@integer/bouncerNotFoundOutlineWidth"
                     android:valueType="floatType"
                     android:interpolator="@android:interpolator/fast_out_slow_in"/>
             </set>

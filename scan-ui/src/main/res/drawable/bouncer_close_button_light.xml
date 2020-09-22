@@ -10,6 +10,6 @@
            M 36,64
            L 64,36"
         android:strokeColor="@color/bouncerCloseButtonLightColor"
-        android:strokeWidth="@dimen/bouncerIconStrokeWidth"
+        android:strokeWidth="@integer/bouncerIconStrokeWidth"
         android:strokeLineCap="round" />
 </vector>

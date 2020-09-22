@@ -1,7 +1,6 @@
 package com.getbouncer.scan.ui
 
 import android.annotation.SuppressLint
-import android.graphics.Bitmap
 import android.graphics.PointF
 import android.graphics.Typeface
 import android.os.Bundle
@@ -12,6 +11,7 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.util.getSdkVersion
@@ -20,14 +20,19 @@ import com.getbouncer.scan.ui.util.dpToPixels
 import com.getbouncer.scan.ui.util.fadeIn
 import com.getbouncer.scan.ui.util.fadeOut
 import com.getbouncer.scan.ui.util.getColorByRes
+import com.getbouncer.scan.ui.util.getFloatResource
 import com.getbouncer.scan.ui.util.hide
-import com.getbouncer.scan.ui.util.setAnimated
+import com.getbouncer.scan.ui.util.startAnimation
 import com.getbouncer.scan.ui.util.setDrawable
+import com.getbouncer.scan.ui.util.setTextSize
 import com.getbouncer.scan.ui.util.setVisible
-import kotlinx.coroutines.flow.Flow
 
 abstract class SimpleScanActivity : ScanActivity() {
 
+    /**
+     * The state of the scan flow. This can be expanded if [displayState] is overridden to handle
+     * the added states.
+     */
     abstract class ScanState {
         object NotFound : ScanState()
         object FoundShort : ScanState()
@@ -40,6 +45,9 @@ abstract class SimpleScanActivity : ScanActivity() {
         private const val LOGO_WIDTH_DP = 100
     }
 
+    /**
+     * The main layout used to render the scan view.
+     */
     protected open val layout: ConstraintLayout by lazy { ConstraintLayout(this) }
 
     /**
@@ -105,7 +113,7 @@ abstract class SimpleScanActivity : ScanActivity() {
     /**
      * The overlay that shows details about the currently processing frame.
      */
-    private val debugOverlayView: DebugOverlay by lazy { DebugOverlay(this) }
+    protected open val debugOverlayView: DebugOverlay by lazy { DebugOverlay(this) }
 
     private val logoView: ImageView by lazy { ImageView(this) }
 
@@ -114,12 +122,12 @@ abstract class SimpleScanActivity : ScanActivity() {
     /**
      * Determine whether to show the logo at the top of the screen.
      */
-    protected var displayCardScanLogo: Boolean = true
+    protected open val displayCardScanLogo: Boolean = true
 
     /**
      * The aspect ratio of the view finder.
      */
-    protected open val viewFinderAspectRatio = "H,200:126"
+    protected open val viewFinderAspectRatio = "200:126"
 
     /**
      * Determine if the flashlight is supported.
@@ -131,7 +139,7 @@ abstract class SimpleScanActivity : ScanActivity() {
      * text and images.
      */
     protected open fun isBackgroundDark(): Boolean =
-        viewFinderBackgroundView.getBackgroundLuminance() > 127
+        viewFinderBackgroundView.getBackgroundLuminance() < 128
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -155,6 +163,7 @@ abstract class SimpleScanActivity : ScanActivity() {
             true
         }
 
+        displayState(scanState, scanStatePrevious)
         setContentView(layout)
     }
 
@@ -173,6 +182,8 @@ abstract class SimpleScanActivity : ScanActivity() {
      * Add the UI components to the root view.
      */
     protected open fun addUiComponents() {
+        layout.id = View.generateViewId()
+
         listOf(
             previewFrame,
             viewFinderBackgroundView,
@@ -256,7 +267,7 @@ abstract class SimpleScanActivity : ScanActivity() {
     }
 
     protected open fun setupInstructionsViewUi() {
-        instructionsTextView.textSize = resources.getDimension(R.dimen.bouncerInstructionsTextSize)
+        instructionsTextView.setTextSize(R.dimen.bouncerInstructionsTextSize)
         instructionsTextView.typeface = Typeface.DEFAULT_BOLD
         instructionsTextView.gravity = Gravity.CENTER
 
@@ -268,7 +279,8 @@ abstract class SimpleScanActivity : ScanActivity() {
     }
 
     protected open fun setupSecurityNoticeUi() {
-        securityTextView.textSize = resources.getDimension(R.dimen.bouncerSecurityTextSize)
+        securityTextView.text = resources.getString(R.string.bouncer_card_scan_security)
+        securityTextView.setTextSize(R.dimen.bouncerSecurityTextSize)
         securityIconView.contentDescription = resources.getString(R.string.bouncer_security_description)
 
         if (isBackgroundDark()) {
@@ -282,16 +294,16 @@ abstract class SimpleScanActivity : ScanActivity() {
 
     protected open fun setupCardDetailsUi() {
         cardNumberTextView.setTextColor(getColorByRes(R.color.bouncerCardPanColor))
-        cardNumberTextView.textSize = resources.getDimension(R.dimen.bouncerPanTextSize)
+        cardNumberTextView.setTextSize(R.dimen.bouncerPanTextSize)
         cardNumberTextView.gravity = Gravity.CENTER
         cardNumberTextView.typeface = Typeface.DEFAULT_BOLD
-        cardNumberTextView.setShadowLayer(resources.getDimension(R.dimen.bouncerPanStrokeSize), 0F, 0F, getColorByRes(R.color.bouncerCardPanOutlineColor))
+        cardNumberTextView.setShadowLayer(getFloatResource(R.dimen.bouncerPanStrokeSize), 0F, 0F, getColorByRes(R.color.bouncerCardPanOutlineColor))
 
         cardNameTextView.setTextColor(getColorByRes(R.color.bouncerCardNameColor))
-        cardNameTextView.textSize = resources.getDimension(R.dimen.bouncerNameTextSize)
+        cardNameTextView.setTextSize(R.dimen.bouncerNameTextSize)
         cardNameTextView.gravity = Gravity.CENTER
         cardNameTextView.typeface = Typeface.DEFAULT_BOLD
-        cardNameTextView.setShadowLayer(resources.getDimension(R.dimen.bouncerNameStrokeSize), 0F, 0F, getColorByRes(R.color.bouncerCardNameOutlineColor))
+        cardNameTextView.setShadowLayer(getFloatResource(R.dimen.bouncerNameStrokeSize), 0F, 0F, getColorByRes(R.color.bouncerCardNameOutlineColor))
     }
 
     protected open fun setupDebugUi() {
@@ -317,7 +329,7 @@ abstract class SimpleScanActivity : ScanActivity() {
 
     private fun setupVersionUi() {
         versionTextView.text = getSdkVersion()
-        versionTextView.textSize = resources.getDimension(R.dimen.bouncerSecurityTextSize)
+        versionTextView.setTextSize(R.dimen.bouncerSecurityTextSize)
         versionTextView.setVisible(Config.isDebug)
 
         if (isBackgroundDark()) {
@@ -326,6 +338,7 @@ abstract class SimpleScanActivity : ScanActivity() {
     }
 
     protected open fun setupUiConstraints() {
+        setupPreviewFrameConstraints()
         setupCloseButtonViewConstraints()
         setupTorchButtonViewConstraints()
         setupViewFinderConstraints()
@@ -335,121 +348,118 @@ abstract class SimpleScanActivity : ScanActivity() {
         setupDebugConstraints()
     }
 
+    protected open fun setupPreviewFrameConstraints() {
+        previewFrame.layoutParams = ConstraintLayout.LayoutParams(0, 0)
+        previewFrame.constrainToParent()
+    }
+
     protected open fun setupCloseButtonViewConstraints() {
-        ConstraintLayout.LayoutParams(
+        closeButtonView.layoutParams = ConstraintLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT, // width
             ViewGroup.LayoutParams.WRAP_CONTENT, // height
-        ).apply {
-            topToTop = ConstraintLayout.LayoutParams.PARENT_ID
-            startToStart = ConstraintLayout.LayoutParams.PARENT_ID
-            closeButtonView.layoutParams = this
+        )
+
+        closeButtonView.addConstraints {
+            connect(it.id, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
+            connect(it.id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
         }
     }
 
     protected open fun setupTorchButtonViewConstraints() {
-        ConstraintLayout.LayoutParams(
+        torchButtonView.layoutParams = ConstraintLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT, // width
             ViewGroup.LayoutParams.WRAP_CONTENT, // height
-        ).apply {
-            topToTop = ConstraintLayout.LayoutParams.PARENT_ID
-            endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
-            torchButtonView.layoutParams = this
+        )
+
+        torchButtonView.addConstraints {
+            connect(it.id, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
+            connect(it.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
         }
     }
 
     protected open fun setupViewFinderConstraints() {
-        ConstraintLayout.LayoutParams(0, 0).apply {
-            topToTop = ConstraintLayout.LayoutParams.PARENT_ID
-            bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
-            startToStart = ConstraintLayout.LayoutParams.PARENT_ID
-            endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
-            viewFinderBackgroundView.layoutParams = this
-        }
+        viewFinderBackgroundView.layoutParams = ConstraintLayout.LayoutParams(0, 0)
 
-        ConstraintLayout.LayoutParams(0, 0).apply {
-            topMargin = resources.getDimensionPixelSize(R.dimen.bouncerViewFinderMargin)
-            bottomMargin = resources.getDimensionPixelSize(R.dimen.bouncerViewFinderMargin)
-            marginStart = resources.getDimensionPixelSize(R.dimen.bouncerViewFinderMargin)
-            marginEnd = resources.getDimensionPixelSize(R.dimen.bouncerViewFinderMargin)
+        viewFinderBackgroundView.constrainToParent()
 
-            topToTop = ConstraintLayout.LayoutParams.PARENT_ID
-            bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
-            startToStart = ConstraintLayout.LayoutParams.PARENT_ID
-            endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+        listOf(viewFinderWindowView, viewFinderBorderView).forEach { view ->
+            view.layoutParams = ConstraintLayout.LayoutParams(0, 0).apply {
+                topMargin = resources.getDimensionPixelSize(R.dimen.bouncerViewFinderMargin)
+                bottomMargin = resources.getDimensionPixelSize(R.dimen.bouncerViewFinderMargin)
+                marginStart = resources.getDimensionPixelSize(R.dimen.bouncerViewFinderMargin)
+                marginEnd = resources.getDimensionPixelSize(R.dimen.bouncerViewFinderMargin)
+            }
 
-            verticalBias = resources.getDimension(R.dimen.bouncerViewFinderVerticalBias)
-            horizontalBias = resources.getDimension(R.dimen.bouncerViewFinderHorizontalBias)
+            view.constrainToParent()
+            view.addConstraints {
+                setVerticalBias(it.id, resources.getFraction(R.fraction.bouncerViewFinderVerticalBias, 1, 0))
+                setHorizontalBias(it.id, resources.getFraction(R.fraction.bouncerViewFinderHorizontalBias, 1, 0))
 
-            dimensionRatio = viewFinderAspectRatio
-
-            viewFinderWindowView.layoutParams = this
-            viewFinderBorderView.layoutParams = this
+                setDimensionRatio(it.id, viewFinderAspectRatio)
+            }
         }
     }
 
     protected open fun setupInstructionsViewConstraints() {
-        ConstraintLayout.LayoutParams(
+        instructionsTextView.layoutParams = ConstraintLayout.LayoutParams(
             0, // width
             ViewGroup.LayoutParams.WRAP_CONTENT, // height
         ).apply {
-            bottomToTop = viewFinderWindowView.id
-            startToStart = ConstraintLayout.LayoutParams.PARENT_ID
-            endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
-
             topMargin = resources.getDimensionPixelSize(R.dimen.bouncerInstructionsMargin)
             bottomMargin = resources.getDimensionPixelSize(R.dimen.bouncerInstructionsMargin)
             marginStart = resources.getDimensionPixelSize(R.dimen.bouncerInstructionsMargin)
             marginEnd = resources.getDimensionPixelSize(R.dimen.bouncerInstructionsMargin)
+        }
 
-            instructionsTextView.layoutParams = this
+        instructionsTextView.addConstraints {
+            connect(it.id, ConstraintSet.BOTTOM, viewFinderWindowView.id, ConstraintSet.TOP)
+            connect(it.id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
+            connect(it.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
         }
     }
 
     protected open fun setupSecurityNoticeConstraints() {
-        ConstraintLayout.LayoutParams(
+        securityIconView.layoutParams = ConstraintLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT, // width
             0, // height
         ).apply {
             marginEnd = resources.getDimensionPixelSize(R.dimen.bouncerSecurityIconMargin)
-            horizontalChainStyle = ConstraintLayout.LayoutParams.CHAIN_PACKED
-
-            topToTop = securityTextView.id
-            bottomToBottom = securityTextView.id
-            startToStart = ConstraintLayout.LayoutParams.PARENT_ID
-            endToStart = securityTextView.id
-
-            securityIconView.layoutParams = this
         }
 
-        ConstraintLayout.LayoutParams(
+        securityTextView.layoutParams = ConstraintLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT, // width
             ViewGroup.LayoutParams.WRAP_CONTENT, // height
         ).apply {
             topMargin = resources.getDimensionPixelSize(R.dimen.bouncerSecurityMargin)
             bottomMargin = resources.getDimensionPixelSize(R.dimen.bouncerSecurityMargin)
+        }
 
-            securityTextView.layoutParams = this
+        securityIconView.addConstraints {
+            connect(it.id, ConstraintSet.TOP, securityTextView.id, ConstraintSet.TOP)
+            connect(it.id, ConstraintSet.BOTTOM, securityTextView.id, ConstraintSet.BOTTOM)
+            connect(it.id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
+            connect(it.id, ConstraintSet.END, securityTextView.id, ConstraintSet.START)
+
+            setHorizontalChainStyle(it.id, ConstraintSet.CHAIN_PACKED)
+        }
+
+        securityTextView.addConstraints {
+            connect(it.id, ConstraintSet.TOP, viewFinderWindowView.id, ConstraintSet.BOTTOM)
+            connect(it.id, ConstraintSet.START, securityIconView.id, ConstraintSet.END)
+            connect(it.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
         }
     }
 
     protected open fun setupCardDetailsConstraints() {
-        ConstraintLayout.LayoutParams(
+        cardNumberTextView.layoutParams = ConstraintLayout.LayoutParams(
             0, // width
             ViewGroup.LayoutParams.WRAP_CONTENT, // height
         ).apply {
             marginStart = resources.getDimensionPixelSize(R.dimen.bouncerCardDetailsMargin)
             marginEnd = resources.getDimensionPixelSize(R.dimen.bouncerCardDetailsMargin)
-            verticalChainStyle = ConstraintLayout.LayoutParams.CHAIN_PACKED
-
-            topToTop = ConstraintLayout.LayoutParams.PARENT_ID
-            bottomToTop = cardNameTextView.id
-            startToStart = ConstraintLayout.LayoutParams.PARENT_ID
-            endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
-
-            cardNumberTextView.layoutParams = this
         }
 
-        ConstraintLayout.LayoutParams(
+        cardNameTextView.layoutParams = ConstraintLayout.LayoutParams(
             0, // width
             ViewGroup.LayoutParams.WRAP_CONTENT, // height
         ).apply {
@@ -460,46 +470,68 @@ abstract class SimpleScanActivity : ScanActivity() {
             bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
             startToStart = ConstraintLayout.LayoutParams.PARENT_ID
             endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+        }
 
-            cardNameTextView.layoutParams = this
+        cardNumberTextView.addConstraints {
+            connect(it.id, ConstraintSet.TOP, viewFinderWindowView.id, ConstraintSet.TOP)
+            connect(it.id, ConstraintSet.BOTTOM, cardNameTextView.id, ConstraintSet.TOP)
+            connect(it.id, ConstraintSet.START, viewFinderWindowView.id, ConstraintSet.START)
+            connect(it.id, ConstraintSet.END, viewFinderWindowView.id, ConstraintSet.END)
+
+            setVerticalChainStyle(it.id, ConstraintSet.CHAIN_PACKED)
+        }
+
+        cardNameTextView.addConstraints {
+            connect(it.id, ConstraintSet.TOP, cardNumberTextView.id, ConstraintSet.BOTTOM)
+            connect(it.id, ConstraintSet.BOTTOM, viewFinderWindowView.id, ConstraintSet.BOTTOM)
+            connect(it.id, ConstraintSet.START, viewFinderWindowView.id, ConstraintSet.START)
+            connect(it.id, ConstraintSet.END, viewFinderWindowView.id, ConstraintSet.END)
         }
     }
 
     protected open fun setupDebugConstraints() {
-        ConstraintLayout.LayoutParams(
-            resources.getDimensionPixelSize(R.dimen.bouncerDebugWindowWidth), // width
-            0, // height
-        ).apply {
-            dimensionRatio = viewFinderAspectRatio
+        listOf(debugImageView, debugOverlayView).forEach { view ->
+            view.layoutParams = ConstraintLayout.LayoutParams(
+                resources.getDimensionPixelSize(R.dimen.bouncerDebugWindowWidth), // width
+                0, // height
+            )
 
-            startToStart = ConstraintLayout.LayoutParams.PARENT_ID
-            bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+            view.addConstraints {
+                setDimensionRatio(it.id, viewFinderAspectRatio)
 
-            debugImageView.layoutParams = this
-            debugOverlayView.layoutParams = this
+                connect(it.id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
+                connect(it.id, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
+            }
         }
-
     }
 
     private fun setupLogoConstraints() {
-        ConstraintLayout.LayoutParams(
+        logoView.layoutParams = ConstraintLayout.LayoutParams(
             dpToPixels(LOGO_WIDTH_DP),           // width
             ViewGroup.LayoutParams.WRAP_CONTENT, // height
         ).apply {
             topMargin = resources.getDimensionPixelSize(R.dimen.bouncerButtonMargin)
-            topToTop = ConstraintLayout.LayoutParams.PARENT_ID
-            startToStart = ConstraintLayout.LayoutParams.PARENT_ID
-            endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
-            logoView.layoutParams = this
+        }
+
+        logoView.addConstraints {
+            connect(it.id, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
+            connect(it.id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
+            connect(it.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
         }
     }
 
     private fun setupVersionConstraints() {
-        ConstraintLayout.LayoutParams(
+        versionTextView.layoutParams = ConstraintLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT, // width
             ViewGroup.LayoutParams.WRAP_CONTENT, // height
         ).apply {
+            bottomMargin = resources.getDimensionPixelSize(R.dimen.bouncerButtonMargin)
+        }
 
+        versionTextView.addConstraints {
+            connect(it.id, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
+            connect(it.id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
+            connect(it.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
         }
     }
 
@@ -526,7 +558,7 @@ abstract class SimpleScanActivity : ScanActivity() {
             is ScanState.NotFound -> {
                 viewFinderBackgroundView.setBackgroundColor(getColorByRes(R.color.bouncerNotFoundBackground))
                 viewFinderWindowView.setBackgroundResource(R.drawable.bouncer_card_background_not_found)
-                viewFinderBorderView.setAnimated(R.drawable.bouncer_card_border_not_found)
+                viewFinderBorderView.startAnimation(R.drawable.bouncer_card_border_not_found)
                 instructionsTextView.setText(R.string.bouncer_card_scan_instructions)
                 cardNumberTextView.hide()
                 cardNameTextView.hide()
@@ -534,27 +566,27 @@ abstract class SimpleScanActivity : ScanActivity() {
             is ScanState.FoundShort -> {
                 viewFinderBackgroundView.setBackgroundColor(getColorByRes(R.color.bouncerFoundBackground))
                 viewFinderWindowView.setBackgroundResource(R.drawable.bouncer_card_background_found)
-                viewFinderBorderView.setAnimated(R.drawable.bouncer_card_border_found)
+                viewFinderBorderView.startAnimation(R.drawable.bouncer_card_border_found)
                 instructionsTextView.setText(R.string.bouncer_card_scan_instructions)
                 instructionsTextView.fadeIn()
             }
             is ScanState.FoundLong -> {
                 viewFinderBackgroundView.setBackgroundColor(getColorByRes(R.color.bouncerFoundBackground))
                 viewFinderWindowView.setBackgroundResource(R.drawable.bouncer_card_background_found)
-                viewFinderBorderView.setAnimated(R.drawable.bouncer_card_border_found_long)
+                viewFinderBorderView.startAnimation(R.drawable.bouncer_card_border_found_long)
                 instructionsTextView.setText(R.string.bouncer_card_scan_instructions)
                 instructionsTextView.fadeIn()
             }
             is ScanState.Correct -> {
                 viewFinderBackgroundView.setBackgroundColor(getColorByRes(R.color.bouncerCorrectBackground))
                 viewFinderWindowView.setBackgroundResource(R.drawable.bouncer_card_background_correct)
-                viewFinderBorderView.setAnimated(R.drawable.bouncer_card_border_correct)
+                viewFinderBorderView.startAnimation(R.drawable.bouncer_card_border_correct)
                 instructionsTextView.fadeOut()
             }
             is ScanState.Wrong -> {
                 viewFinderBackgroundView.setBackgroundColor(getColorByRes(R.color.bouncerWrongBackground))
                 viewFinderWindowView.setBackgroundResource(R.drawable.bouncer_card_background_wrong)
-                viewFinderBorderView.setAnimated(R.drawable.bouncer_card_border_wrong)
+                viewFinderBorderView.startAnimation(R.drawable.bouncer_card_border_wrong)
                 instructionsTextView.setText(R.string.bouncer_scanned_wrong_card)
             }
         }
@@ -576,11 +608,26 @@ abstract class SimpleScanActivity : ScanActivity() {
         torchButtonView.setVisible(supported)
     }
 
-    override fun onCameraStreamAvailable(cameraStream: Flow<Bitmap>) {
-        TODO("Not yet implemented")
+    /**
+     * Add constraints to a view.
+     */
+    protected inline fun <T : View> T.addConstraints(block: ConstraintSet.(view: T) -> Unit) {
+        ConstraintSet().apply {
+            clone(layout)
+            block(this, this@addConstraints)
+            applyTo(layout)
+        }
     }
 
-    override fun onInvalidApiKey() {
-        TODO("Not yet implemented")
+    /**
+     * Constrain a view to the top, bottom, start, and end of its parent.
+     */
+    protected fun <T : View> T.constrainToParent() {
+        addConstraints {
+            connect(it.id, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
+            connect(it.id, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
+            connect(it.id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
+            connect(it.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
+        }
     }
 }

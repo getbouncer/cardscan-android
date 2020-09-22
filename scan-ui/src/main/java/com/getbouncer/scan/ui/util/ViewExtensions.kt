@@ -1,15 +1,19 @@
 package com.getbouncer.scan.ui.util
 
 import android.content.Context
+import android.content.res.Resources.NotFoundException
+import android.graphics.PointF
 import android.graphics.Rect
 import android.graphics.drawable.Animatable
-import android.os.Build
 import android.os.Handler
+import android.util.TypedValue
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
+import androidx.annotation.DimenRes
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import com.getbouncer.scan.framework.time.Duration
@@ -75,7 +79,10 @@ fun Context.getColorByRes(@ColorRes colorRes: Int) = ContextCompat.getColor(this
 /**
  * Get a [Drawable] from a [DrawableRes]
  */
-fun Context.getDrawableByRes(@DrawableRes drawableRes: Int) = ContextCompat.getDrawable(this, drawableRes)
+fun Context.getDrawableByRes(@DrawableRes drawableRes: Int) = ContextCompat.getDrawable(
+    this,
+    drawableRes
+)
 
 /**
  * Set the image of an [ImageView] using a [DrawableRes].
@@ -87,7 +94,7 @@ fun ImageView.setDrawable(@DrawableRes drawableRes: Int) {
 /**
  * Set the image of an [ImageView] using a [DrawableRes] and start the animation.
  */
-fun ImageView.setAnimated(@DrawableRes drawableRes: Int) {
+fun ImageView.startAnimation(@DrawableRes drawableRes: Int) {
     val d = this.context.getDrawableByRes(drawableRes)
     setImageDrawable(d)
     if (d is Animatable) {
@@ -104,3 +111,30 @@ fun View.asRect() = Rect(left, top, right, bottom)
  * Convert an int in DP to pixels.
  */
 fun Context.dpToPixels(dp: Int) = (dp * resources.displayMetrics.density).roundToInt()
+
+/**
+ * This is copied from Resources.java for API 29 so that we can continue to support API 21.
+ */
+fun Context.getFloatResource(@DimenRes id: Int): Float {
+    val value = TypedValue()
+    resources.getValue(id, value, true)
+    if (value.type == TypedValue.TYPE_FLOAT) {
+        return value.float
+    }
+    throw NotFoundException(
+        "Resource ID #0x" + Integer.toHexString(id)
+                + " type #0x" + Integer.toHexString(value.type) + " is not valid"
+    )
+}
+
+/**
+ * Set the size of a text field using a dimension.
+ */
+fun TextView.setTextSize(@DimenRes id: Int) {
+    setTextSize(TypedValue.COMPLEX_UNIT_PX, this.resources.getDimension(id))
+}
+
+/**
+ * Determine the center point of a view.
+ */
+fun View.centerPoint() = PointF(left + width / 2F, top + height / 2F)

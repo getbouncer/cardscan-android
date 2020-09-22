@@ -8,6 +8,7 @@ import android.view.WindowManager;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.getbouncer.cardscan.ui.CardScan;
 import com.getbouncer.cardscan.ui.CardScanActivity;
 import com.getbouncer.cardscan.ui.CardScanActivityResult;
 import com.getbouncer.cardscan.ui.CardScanActivityResultHandler;
@@ -30,7 +31,7 @@ public class LaunchActivity extends AppCompatActivity implements CardScanActivit
         );
 
         findViewById(R.id.scanCardButton).setOnClickListener(v ->
-                CardScanActivity.start(
+                CardScan.start(
                         /* activity */ LaunchActivity.this,
                         /* apiKey */ API_KEY,
                         /* enableEnterCardManually */ true,
@@ -44,7 +45,7 @@ public class LaunchActivity extends AppCompatActivity implements CardScanActivit
         );
 
         findViewById(R.id.scanCardDebugButton).setOnClickListener(v ->
-                CardScanActivity.start(
+                CardScan.start(
                         /* activity */LaunchActivity.this,
                         /* apiKey */ API_KEY,
                         /* enableEnterCardManually */ false,
@@ -58,7 +59,7 @@ public class LaunchActivity extends AppCompatActivity implements CardScanActivit
         );
 
         findViewById(R.id.scanCardWithExpiryButton).setOnClickListener(v ->
-                CardScanActivity.start(
+                CardScan.start(
                         /* activity */ LaunchActivity.this,
                         /* apiKey */ API_KEY,
                         /* enableEnterCardManually */ true,

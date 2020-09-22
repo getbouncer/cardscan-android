@@ -14,7 +14,7 @@
            L 64,44 Z"
         android:fillColor="@color/bouncerFlashButtonLightColor"
         android:strokeColor="@color/bouncerFlashButtonLightColor"
-        android:strokeWidth="@dimen/bouncerIconStrokeWidth"
+        android:strokeWidth="@integer/bouncerIconStrokeWidth"
         android:strokeLineJoin="round" />
 
 </vector>

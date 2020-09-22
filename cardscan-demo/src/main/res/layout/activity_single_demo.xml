@@ -79,8 +79,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintVertical_bias="@dimen/bouncerViewFinderVerticalBias"
-            app:layout_constraintHorizontal_bias="@dimen/bouncerViewFinderHorizontalBias"
+            app:layout_constraintVertical_bias="@fraction/bouncerViewFinderVerticalBias"
+            app:layout_constraintHorizontal_bias="@fraction/bouncerViewFinderHorizontalBias"
             app:layout_constraintDimensionRatio="H,200:126">
 
             <ImageView

@@ -13,19 +13,19 @@
 
         <item name="bouncerNotFoundBackgroundColor">@color/bouncerNotFoundBackground</item>
         <item name="bouncerNotFoundOutlineColor">@color/bouncerNotFoundOutline</item>
-        <item name="bouncerNotFoundOutlineWidth">@dimen/bouncerNotFoundOutlineWidth</item>
+        <item name="bouncerNotFoundOutlineWidth">@integer/bouncerNotFoundOutlineWidth</item>
 
         <item name="bouncerFoundBackgroundColor">@color/bouncerFoundBackground</item>
         <item name="bouncerFoundOutlineColor">@color/bouncerFoundOutline</item>
-        <item name="bouncerFoundOutlineWidth">@dimen/bouncerFoundOutlineWidth</item>
+        <item name="bouncerFoundOutlineWidth">@integer/bouncerFoundOutlineWidth</item>
 
         <item name="bouncerWrongBackgroundColor">@color/bouncerWrongBackground</item>
         <item name="bouncerWrongOutlineColor">@color/bouncerWrongOutline</item>
-        <item name="bouncerWrongOutlineWidth">@dimen/bouncerWrongOutlineWidth</item>
+        <item name="bouncerWrongOutlineWidth">@integer/bouncerWrongOutlineWidth</item>
 
         <item name="bouncerCorrectBackgroundColor">@color/bouncerCorrectBackground</item>
         <item name="bouncerCorrectOutlineColor">@color/bouncerCorrectOutline</item>
-        <item name="bouncerCorrectOutlineWidth">@dimen/bouncerCorrectOutlineWidth</item>
+        <item name="bouncerCorrectOutlineWidth">@integer/bouncerCorrectOutlineWidth</item>
 
         <item name="android:windowTranslucentStatus">true</item>
     </style>
