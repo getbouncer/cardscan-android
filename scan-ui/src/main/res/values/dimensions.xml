@@ -19,6 +19,9 @@
     <dimen name="bouncerPanTextSize" description="The size of the card number text displayed in the middle of the view finder window">20sp</dimen>
     <dimen name="bouncerPanStrokeSize" description="The size of the outline of the card number text displayed in the middle of the view finder window">2.5</dimen>
 
+    <dimen name="bouncerNameTextSize" description="The size of the cardholder name text displayed in the middle of the view finder window">16sp</dimen>
+    <dimen name="bouncerNameStrokeSize" description="The size of the outline of the cardholder name text displayed in the middle of the view finder window">2.5</dimen>
+
     <dimen name="bouncerExpiryTextSize" description="The size of the expiry text displayed in the middle of the view finder window">16sp</dimen>
     <dimen name="bouncerExpiryStrokeSize" description="The size of the outline of the expiry text displayed in the middle of the view finder window">2.5</dimen>
 
@@ -28,4 +31,6 @@
 
     <dimen name="bouncerButtonMargin" description="The minimum amount of space surrounding the close and torch buttons">16dp</dimen>
     <dimen name="bouncerIconStrokeWidth" description="The width of the lines of the close and torch buttons">2</dimen>
+
+    <dimen name="bouncerDebugWindowWidth" description="The width of the debug window">192dp</dimen>
 </resources>

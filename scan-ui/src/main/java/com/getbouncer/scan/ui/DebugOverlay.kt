@@ -31,7 +31,7 @@ data class DebugDetectionBox(
     val label: String
 )
 
-class DebugOverlay(context: Context, attrs: AttributeSet?) : View(context, attrs) {
+class DebugOverlay(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE

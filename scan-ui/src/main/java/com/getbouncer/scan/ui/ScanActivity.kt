@@ -13,7 +13,6 @@ import android.util.Size
 import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
-import androidx.annotation.LayoutRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -101,13 +100,8 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
         CameraErrorListenerImpl(this) { t -> cameraErrorCancelScan(t) }
     }
 
-    @LayoutRes
-    abstract fun getLayoutRes(): Int
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        setContentView(getLayoutRes())
 
         runBlocking { Stats.startScan() }
 
@@ -423,5 +417,5 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      */
     protected abstract fun onInvalidApiKey()
 
-    private fun FrameLayout.centerPoint() = PointF(left + width / 2F, top + height / 2F)
+    private fun View.centerPoint() = PointF(left + width / 2F, top + height / 2F)
 }
