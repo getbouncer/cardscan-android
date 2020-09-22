@@ -96,7 +96,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     protected var isFlashlightOn: Boolean = false
         private set
 
-    private val cameraAdapter by lazy { buildCameraAdapter() }
+    protected val cameraAdapter by lazy { buildCameraAdapter() }
     private val cameraErrorListener by lazy {
         CameraErrorListenerImpl(this) { t -> cameraErrorCancelScan(t) }
     }

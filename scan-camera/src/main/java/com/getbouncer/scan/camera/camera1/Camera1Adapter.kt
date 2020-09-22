@@ -128,7 +128,8 @@ class Camera1Adapter(
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-    fun onPause() {
+    override fun onPause() {
+        super.onPause()
         focusJob?.cancel()
 
         mCamera?.stopPreview()

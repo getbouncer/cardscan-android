@@ -268,7 +268,8 @@ class Camera2Adapter(
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-    fun onPause() {
+    override fun onPause() {
+        super.onPause()
         focusJob?.cancel()
         closeCamera()
         stopCameraThread()
