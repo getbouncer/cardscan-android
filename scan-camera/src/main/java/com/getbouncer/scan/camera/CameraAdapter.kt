@@ -137,7 +137,7 @@ abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-    protected open fun onPause() {
+    open fun onPause() {
         // support OnPause events.
     }
 
