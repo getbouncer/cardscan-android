@@ -129,6 +129,19 @@ abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
     }
 
     /**
+     * Unbind this camera from a lifecycle. This will pause the camera.
+     */
+    open fun unbindFromLifecycle(lifecycleOwner: LifecycleOwner) {
+        lifecycleOwner.lifecycle.removeObserver(this)
+        this.onPause()
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+    protected open fun onPause() {
+        // support OnPause events.
+    }
+
+    /**
      * Execute a task with flash support.
      */
     abstract fun withFlashSupport(task: (Boolean) -> Unit)
