@@ -244,8 +244,7 @@ abstract class CardScanBaseActivity :
     /**
      * An interim result was received from the result aggregator.
      */
-    override suspend fun onInterimResult(result: MainLoopAggregator.InterimResult) = launch(
-        Dispatchers.Main) {
+    override suspend fun onInterimResult(result: MainLoopAggregator.InterimResult) = launch(Dispatchers.Main) {
         if (!mainLoopIsProducingResults.getAndSet(true)) {
             scanStat.trackResult("first_image_processed")
         }
@@ -256,7 +255,7 @@ abstract class CardScanBaseActivity :
         }
 
         val willRunNameAndExpiry = (result.analyzerResult.isExpiryExtractionAvailable && enableExpiryExtraction) ||
-                (result.analyzerResult.isNameExtractionAvailable && enableNameExtraction)
+            (result.analyzerResult.isNameExtractionAvailable && enableNameExtraction)
 
         when (result.state) {
             is MainLoopState.Initial -> changeScanState(ScanState.NotFound)

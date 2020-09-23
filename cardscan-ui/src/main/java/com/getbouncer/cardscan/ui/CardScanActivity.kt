@@ -171,7 +171,7 @@ open class CardScanActivity :
                 Log.e(
                     Config.logTag,
                     "Attempting to run name and expiry without initializing text detector. " +
-                            "Please invoke the warmup() function with initializeNameAndExpiryExtraction to true."
+                        "Please invoke the warmup() function with initializeNameAndExpiryExtraction to true."
                 )
                 showNameAndExpiryInitializationError(context)
                 return null
@@ -276,6 +276,5 @@ open class CardScanActivity :
                 .putExtra(RESULT_SCAN_ID, Stats.scanId)
             setResult(Activity.RESULT_CANCELED, intent)
         }
-
     }
 }

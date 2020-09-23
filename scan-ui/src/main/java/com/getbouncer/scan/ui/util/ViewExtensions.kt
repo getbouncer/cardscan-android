@@ -121,10 +121,7 @@ fun Context.getFloatResource(@DimenRes id: Int): Float {
     if (value.type == TypedValue.TYPE_FLOAT) {
         return value.float
     }
-    throw NotFoundException(
-        "Resource ID #0x" + Integer.toHexString(id)
-                + " type #0x" + Integer.toHexString(value.type) + " is not valid"
-    )
+    throw NotFoundException("Resource ID #0x ${Integer.toHexString(id)} type #0x${Integer.toHexString(value.type)} is not valid")
 }
 
 /**

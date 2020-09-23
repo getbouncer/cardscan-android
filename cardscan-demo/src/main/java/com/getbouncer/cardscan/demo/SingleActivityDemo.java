@@ -569,7 +569,8 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
             viewFinderBackground.setBackgroundColor(ViewExtensionsKt.getColorByRes(this,
                     R.color.bouncerCorrectBackground));
             viewFinderWindow.setBackgroundResource(R.drawable.bouncer_card_background_correct);
-            ViewExtensionsKt.startAnimation(viewFinderBorder, R.drawable.bouncer_card_border_correct);
+            ViewExtensionsKt.startAnimation(viewFinderBorder,
+                    R.drawable.bouncer_card_border_correct);
         }
         scanState = State.CORRECT;
     }

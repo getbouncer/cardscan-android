@@ -22,10 +22,10 @@ import com.getbouncer.scan.ui.util.fadeOut
 import com.getbouncer.scan.ui.util.getColorByRes
 import com.getbouncer.scan.ui.util.getFloatResource
 import com.getbouncer.scan.ui.util.hide
-import com.getbouncer.scan.ui.util.startAnimation
 import com.getbouncer.scan.ui.util.setDrawable
 import com.getbouncer.scan.ui.util.setTextSize
 import com.getbouncer.scan.ui.util.setVisible
+import com.getbouncer.scan.ui.util.startAnimation
 
 abstract class SimpleScanActivity : ScanActivity() {
 
@@ -502,7 +502,7 @@ abstract class SimpleScanActivity : ScanActivity() {
 
     private fun setupLogoConstraints() {
         logoView.layoutParams = ConstraintLayout.LayoutParams(
-            dpToPixels(LOGO_WIDTH_DP),           // width
+            dpToPixels(LOGO_WIDTH_DP), // width
             ViewGroup.LayoutParams.WRAP_CONTENT, // height
         ).apply {
             topMargin = resources.getDimensionPixelSize(R.dimen.bouncerButtonMargin)
