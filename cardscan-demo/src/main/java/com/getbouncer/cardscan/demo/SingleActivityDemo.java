@@ -455,7 +455,7 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
             new Handler(getMainLooper()).post(() -> {
                 if (interimResult.getState() instanceof MainLoopState.OcrRunning &&
                         !hasPreviousValidResult.getAndSet(true)) {
-                    ViewExtensionsKt.fadeOut(SingleActivityDemo.this, enterCardManuallyButtonView);
+                    ViewExtensionsKt.fadeOut(enterCardManuallyButtonView, null);
                 }
 
                 final MainLoopState mainLoopState = interimResult.getState();
@@ -466,7 +466,7 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
                         .getMostLikelyPan();
                     if (pan != null && PaymentCardUtils.isValidPan(pan)) {
                         cardPanTextView.setText(PanFormatterKt.formatPan(pan));
-                        ViewExtensionsKt.fadeIn(SingleActivityDemo.this, cardPanTextView, null);
+                        ViewExtensionsKt.fadeIn(cardPanTextView, null);
                     }
                     if (interimResult.getAnalyzerResult().isNameExtractionAvailable() ||
                             interimResult.getAnalyzerResult().isExpiryExtractionAvailable()) {
@@ -479,7 +479,7 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
                         .getMostLikelyName();
                     if (name != null) {
                         cardNameTextView.setText(name);
-                        ViewExtensionsKt.fadeIn(SingleActivityDemo.this, cardNameTextView, null);
+                        ViewExtensionsKt.fadeIn(cardNameTextView, null);
                     }
                     if (interimResult.getAnalyzerResult().isNameExtractionAvailable() ||
                             interimResult.getAnalyzerResult().isExpiryExtractionAvailable()) {
@@ -542,7 +542,7 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
             viewFinderBackground.setBackgroundColor(ViewExtensionsKt.getColorByRes(this,
                     R.color.bouncerFoundBackground));
             viewFinderWindow.setBackgroundResource(R.drawable.bouncer_card_background_found);
-            ViewExtensionsKt.setAnimated(this, viewFinderBorder, animation);
+            ViewExtensionsKt.startAnimation(viewFinderBorder, animation);
             instructionsTextView.setText(R.string.bouncer_card_scan_instructions);
         }
         scanState = State.FOUND;
@@ -553,10 +553,10 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
             viewFinderBackground.setBackgroundColor(ViewExtensionsKt.getColorByRes(this,
                     R.color.bouncerNotFoundBackground));
             viewFinderWindow.setBackgroundResource(R.drawable.bouncer_card_background_not_found);
-            ViewExtensionsKt.setAnimated(this, viewFinderBorder,
+            ViewExtensionsKt.startAnimation(viewFinderBorder,
                     R.drawable.bouncer_card_border_not_found);
-            ViewExtensionsKt.fadeOut(this, cardPanTextView);
-            ViewExtensionsKt.fadeOut(this, cardNameTextView);
+            ViewExtensionsKt.fadeOut(cardPanTextView, null);
+            ViewExtensionsKt.fadeOut(cardNameTextView, null);
             instructionsTextView.setText(R.string.bouncer_card_scan_instructions);
         }
         hasPreviousValidResult.set(false);
@@ -565,11 +565,11 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
 
     private void setStateCorrect() {
         if (scanState != State.CORRECT) {
-            ViewExtensionsKt.fadeOut(this, instructionsTextView);
+            ViewExtensionsKt.fadeOut(instructionsTextView, null);
             viewFinderBackground.setBackgroundColor(ViewExtensionsKt.getColorByRes(this,
                     R.color.bouncerCorrectBackground));
             viewFinderWindow.setBackgroundResource(R.drawable.bouncer_card_background_correct);
-            ViewExtensionsKt.setAnimated(this, viewFinderBorder,
+            ViewExtensionsKt.startAnimation(viewFinderBorder,
                     R.drawable.bouncer_card_border_correct);
         }
         scanState = State.CORRECT;

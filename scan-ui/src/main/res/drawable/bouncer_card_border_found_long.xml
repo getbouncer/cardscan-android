@@ -24,7 +24,7 @@
                 android:strokeColor="@color/bouncerFoundOutline"
                 android:trimPathEnd="0"
                 android:strokeLineCap="round"
-                android:strokeWidth="@dimen/bouncerFoundOutlineWidth"/>
+                android:strokeWidth="@integer/bouncerFoundOutlineWidth"/>
         </vector>
     </aapt:attr>
     <target android:name="card_border">

@@ -116,7 +116,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
                     input.cardFinder.right <= input.previewSize.width &&
                     input.cardFinder.top >= 0 &&
                     input.cardFinder.bottom <= input.previewSize.height
-            ) { "Card finder is outside preview image bounds" }
+            ) { "Card finder is outside preview image bounds ${input.cardFinder} ${input.previewSize}" }
 
             // Scale the previewImage to match the fullImage
             val scaledPreviewImage = input.previewSize.scaleAndCenterWithin(input.fullImage.size())

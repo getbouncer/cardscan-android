@@ -4,15 +4,17 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.WindowManager;
+import android.widget.CheckBox;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.getbouncer.cardscan.ui.CardScanActivity;
 import com.getbouncer.cardscan.ui.CardScanActivityResult;
 import com.getbouncer.cardscan.ui.CardScanActivityResultHandler;
+import com.getbouncer.scan.framework.Config;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class LaunchActivity extends AppCompatActivity implements CardScanActivityResultHandler {
 
@@ -25,93 +27,29 @@ public class LaunchActivity extends AppCompatActivity implements CardScanActivit
 
         // Because this activity displays card numbers, disallow screenshots.
         getWindow().setFlags(
-                WindowManager.LayoutParams.FLAG_SECURE,
-                WindowManager.LayoutParams.FLAG_SECURE
+            WindowManager.LayoutParams.FLAG_SECURE,
+            WindowManager.LayoutParams.FLAG_SECURE
         );
 
-        findViewById(R.id.scanCardButton).setOnClickListener(v ->
-                CardScanActivity.start(
-                        /* activity */ LaunchActivity.this,
-                        /* apiKey */ API_KEY,
-                        /* enableEnterCardManually */ true,
-                        /* enableExpiryExtraction */ false,
-                        /* enableNameExtraction */ false,
-                        /* displayCardPan */ true,
-                        /* displayCardholderName */ false,
-                        /* displayCardScanLogo */ true,
-                        /* enableDebug */ false
-                )
-        );
+        ((CheckBox) findViewById(R.id.enableDebugCheckbox))
+                .setOnCheckedChangeListener((buttonView, isChecked) -> Config.setDebug(isChecked));
 
-        findViewById(R.id.scanCardDebugButton).setOnClickListener(v ->
-                CardScanActivity.start(
-                        /* activity */LaunchActivity.this,
-                        /* apiKey */ API_KEY,
-                        /* enableEnterCardManually */ false,
-                        /* enableExpiryExtraction */ false,
-                        /* enableNameExtraction */ false,
-                        /* displayCardPan */ true,
-                        /* displayCardholderName */ true,
-                        /* displayCardScanLogo */ false,
-                        /* enableDebug */ true
-                )
-        );
+        findViewById(R.id.scanCardButton).setOnClickListener(v -> {
+            final boolean enableNameExtraction =
+                ((CheckBox) findViewById(R.id.enableNameExtractionCheckbox)).isChecked();
+            final boolean enableExpiryExtraction =
+                ((CheckBox) findViewById(R.id.enableExpiryExtractionCheckbox)).isChecked();
+            final boolean enableEnterCardManually =
+                ((CheckBox) findViewById(R.id.enableEnterCardManuallyCheckbox)).isChecked();
 
-        findViewById(R.id.scanCardWithExpiryButton).setOnClickListener(v ->
-                CardScanActivity.start(
-                        /* activity */ LaunchActivity.this,
-                        /* apiKey */ API_KEY,
-                        /* enableEnterCardManually */ true,
-                        /* enableExpiryExtraction */ true,
-                        /* enableNameExtraction */ false,
-                        /* displayCardPan */ true,
-                        /* displayCardholderName */ false,
-                        /* displayCardScanLogo */ true,
-                        /* enableDebug */ false
-                )
-        );
-
-        findViewById(R.id.scanCardWithExpiryDebugButton).setOnClickListener(v ->
-                CardScanActivity.start(
-                        /* activity */LaunchActivity.this,
-                        /* apiKey */ API_KEY,
-                        /* enableEnterCardManually */ false,
-                        /* enableExpiryExtraction */ true,
-                        /* enableNameExtraction */ false,
-                        /* displayCardPan */ true,
-                        /* displayCardholderName */ false,
-                        /* displayCardScanLogo */ true,
-                        /* enableDebug */ true
-                )
-        );
-
-        findViewById(R.id.scanCardWithNameExtractionButton).setOnClickListener(v ->
-                CardScanActivity.start(
-                        /* activity */ LaunchActivity.this,
-                        /* apiKey */ API_KEY,
-                        /* enableEnterCardManually */ true,
-                        /* enableExpiryExtraction */ true,
-                        /* enableNameExtraction */ true,
-                        /* displayCardPan */ true,
-                        /* displayCardholderName */ true,
-                        /* displayCardScanLogo */ true,
-                        /* enableDebug */ false
-                )
-        );
-
-        findViewById(R.id.scanCardWithNameExtractionDebugButton).setOnClickListener(v ->
-                CardScanActivity.start(
-                        /* activity */LaunchActivity.this,
-                        /* apiKey */ API_KEY,
-                        /* enableEnterCardManually */ false,
-                        /* enableExpiryExtraction */ true,
-                        /* enableNameExtraction */ true,
-                        /* displayCardPan */ true,
-                        /* displayCardholderName */ true,
-                        /* displayCardScanLogo */ true,
-                        /* enableDebug */ true
-                )
-        );
+            CardScanActivity.start(
+                /* activity */ LaunchActivity.this,
+                /* apiKey */ API_KEY,
+                /* enableEnterCardManually */ enableEnterCardManually,
+                /* enableExpiryExtraction */ enableExpiryExtraction,
+                /* enableNameExtraction */ enableNameExtraction
+            );
+        });
 
         findViewById(R.id.singleActivityDemo).setOnClickListener(v ->
                 startActivity(new Intent(this, SingleActivityDemo.class))

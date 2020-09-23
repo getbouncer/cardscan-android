@@ -29,6 +29,15 @@ import kotlin.math.min
 @Retention(AnnotationRetention.SOURCE)
 private annotation class RotationValue
 
+/**
+ * A list of supported camera adapter types. If you create a new adapter, create a new object that
+ * subclasses this class.
+ */
+open class CameraApi {
+    object Camera1 : CameraApi()
+    object Camera2 : CameraApi()
+}
+
 abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
 
     // TODO: change this to be a channelFlow once it's no longer experimental

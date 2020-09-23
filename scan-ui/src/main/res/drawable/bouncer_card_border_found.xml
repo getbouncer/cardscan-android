@@ -20,5 +20,5 @@
             a 5,5,0,0,1,-5,-5
             Z"
         android:strokeColor="@color/bouncerNotFoundOutline"
-        android:strokeWidth="@dimen/bouncerNotFoundOutlineWidth"/>
+        android:strokeWidth="@integer/bouncerNotFoundOutlineWidth"/>
 </vector>

@@ -1,27 +1,27 @@
 package com.getbouncer.scan.ui
 
 import android.Manifest
-import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.PointF
 import android.os.Bundle
 import android.util.Log
 import android.util.Size
+import android.view.TextureView
 import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
-import androidx.annotation.LayoutRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.getbouncer.scan.camera.CameraAdapter
+import com.getbouncer.scan.camera.CameraApi
 import com.getbouncer.scan.camera.CameraErrorListener
 import com.getbouncer.scan.camera.camera1.Camera1Adapter
+import com.getbouncer.scan.camera.camera2.Camera2Adapter
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.Stats
 import com.getbouncer.scan.framework.api.ERROR_CODE_NOT_AUTHENTICATED
@@ -31,6 +31,7 @@ import com.getbouncer.scan.framework.api.uploadScanStats
 import com.getbouncer.scan.framework.api.validateApiKey
 import com.getbouncer.scan.framework.util.AppDetails
 import com.getbouncer.scan.framework.util.Device
+import com.getbouncer.scan.ui.util.centerPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -39,9 +40,30 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.coroutines.CoroutineContext
 
-class CameraErrorListenerImpl(
-    private val context: Context,
-    private val callback: (Throwable?) -> Unit
+interface ScanResultListener {
+
+    /**
+     * The user canceled the scan.
+     */
+    fun userCanceled()
+
+    /**
+     * The scan failed because of a camera error.
+     */
+    fun cameraError(cause: Throwable?)
+
+    /**
+     * The scan failed to analyze images from the camera.
+     */
+    fun analyzerFailure(cause: Throwable?)
+}
+
+/**
+ * A basic implementation that displays error messages when there is a problem with the camera.
+ */
+open class CameraErrorListenerImpl(
+    protected val context: Context,
+    protected val callback: (Throwable?) -> Unit
 ) : CameraErrorListener {
     override fun onCameraOpenError(cause: Throwable?) {
         showCameraError(R.string.bouncer_error_camera_open, cause)
@@ -65,27 +87,8 @@ class CameraErrorListenerImpl(
 }
 
 abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
-
     companion object {
         const val PERMISSION_REQUEST_CODE = 1200
-
-        const val RESULT_INSTANCE_ID = "instanceId"
-        const val RESULT_SCAN_ID = "scanId"
-
-        const val RESULT_CANCELED_REASON = "canceledReason"
-        const val CANCELED_REASON_USER = -1
-        const val CANCELED_REASON_CAMERA_ERROR = -2
-        const val CANCELED_REASON_ANALYZER_FAILURE = -3
-
-        fun getCanceledReason(data: Intent?): Int =
-            data?.getIntExtra(RESULT_CANCELED_REASON, Int.MIN_VALUE) ?: Int.MIN_VALUE
-
-        fun Intent?.isUserCanceled(): Boolean = getCanceledReason(this) == CANCELED_REASON_USER
-        fun Intent?.isCameraError(): Boolean = getCanceledReason(this) == CANCELED_REASON_CAMERA_ERROR
-        fun Intent?.isAnalyzerFailure(): Boolean = getCanceledReason(this) == CANCELED_REASON_ANALYZER_FAILURE
-
-        fun Intent?.instanceId(): String? = this?.getStringExtra(RESULT_INSTANCE_ID)
-        fun Intent?.scanId(): String? = this?.getStringExtra(RESULT_SCAN_ID)
     }
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
@@ -101,13 +104,18 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
         CameraErrorListenerImpl(this) { t -> cameraErrorCancelScan(t) }
     }
 
-    @LayoutRes
-    abstract fun getLayoutRes(): Int
+    /**
+     * The listener which will handle the results from the scan.
+     */
+    protected abstract val resultListener: ScanResultListener
+
+    /**
+     * Override this value to use a different camera API.
+     */
+    protected open val cameraApi: CameraApi = CameraApi.Camera1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        setContentView(getLayoutRes())
 
         runBlocking { Stats.startScan() }
 
@@ -187,7 +195,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     /**
      * Show a dialog explaining that the camera is not available.
      */
-    private fun showCameraNotSupportedDialog() {
+    protected open fun showCameraNotSupportedDialog() {
         AlertDialog.Builder(this)
             .setTitle(R.string.bouncer_error_camera_title)
             .setMessage(R.string.bouncer_error_camera_unsupported)
@@ -198,7 +206,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     /**
      * Show an explanation dialog for why we are requesting camera permissions.
      */
-    private fun showPermissionDeniedDialog() {
+    protected open fun showPermissionDeniedDialog() {
         val builder = AlertDialog.Builder(this)
         builder.setMessage(R.string.bouncer_camera_permission_denied_message)
             .setPositiveButton(R.string.bouncer_camera_permission_denied_ok) { _, _ -> requestCameraPermission() }
@@ -242,7 +250,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
         }
     }
 
-    protected fun showApiKeyInvalidError() {
+    protected open fun showApiKeyInvalidError() {
         AlertDialog.Builder(this)
             .setTitle(R.string.bouncer_api_key_invalid_title)
             .setMessage(R.string.bouncer_api_key_invalid_message)
@@ -254,7 +262,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     /**
      * Turn the flashlight on or off.
      */
-    protected fun toggleFlashlight() {
+    protected open fun toggleFlashlight() {
         isFlashlightOn = !isFlashlightOn
         setFlashlightState(isFlashlightOn)
         runBlocking {
@@ -279,56 +287,36 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     /**
      * Cancel scanning due to a camera error.
      */
-    private fun cameraErrorCancelScan(cause: Throwable? = null) {
+    protected open fun cameraErrorCancelScan(cause: Throwable? = null) {
         Log.e(Config.logTag, "Canceling scan due to camera error", cause)
         runBlocking { scanStat.trackResult("camera_error") }
-        cancelScan(CANCELED_REASON_CAMERA_ERROR)
+        resultListener.cameraError(cause)
+        closeScanner()
     }
 
     /**
      * The scan has been cancelled by the user.
      */
-    protected fun userCancelScan() {
+    protected open fun userCancelScan() {
         runBlocking { scanStat.trackResult("user_canceled") }
-        cancelScan(CANCELED_REASON_USER)
+        resultListener.userCanceled()
+        closeScanner()
     }
 
     /**
      * Cancel scanning due to analyzer failure
      */
-    protected fun analyzerFailureCancelScan(cause: Throwable? = null) {
+    protected open fun analyzerFailureCancelScan(cause: Throwable? = null) {
         Log.e(Config.logTag, "Canceling scan due to analyzer error", cause)
         runBlocking { scanStat.trackResult("analyzer_failure") }
-        cancelScan(CANCELED_REASON_ANALYZER_FAILURE)
-    }
-
-    /**
-     * Cancel a scan
-     */
-    protected fun cancelScan(reasonCode: Int) {
-        val intent = Intent()
-            .putExtra(RESULT_CANCELED_REASON, reasonCode)
-            .putExtra(RESULT_INSTANCE_ID, Stats.instanceId)
-            .putExtra(RESULT_SCAN_ID, Stats.scanId)
-        setResult(Activity.RESULT_CANCELED, intent)
-        closeScanner()
-    }
-
-    /**
-     * Complete a scan
-     */
-    protected fun completeScan(result: Intent) {
-        result
-            .putExtra(RESULT_INSTANCE_ID, Stats.instanceId)
-            .putExtra(RESULT_SCAN_ID, Stats.scanId)
-        setResult(Activity.RESULT_OK, result)
+        resultListener.analyzerFailure(cause)
         closeScanner()
     }
 
     /**
      * Close the scanner.
      */
-    private fun closeScanner() {
+    protected open fun closeScanner() {
         setFlashlightState(false)
         if (Config.uploadStats) {
             uploadStats(
@@ -388,7 +376,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      */
     protected abstract fun onFlashSupported(supported: Boolean)
 
-    protected fun setFocus(point: PointF) {
+    protected open fun setFocus(point: PointF) {
         cameraAdapter.setFocus(point)
     }
 
@@ -402,12 +390,28 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     /**
      * Generate a camera adapter
      */
-    private fun buildCameraAdapter() = Camera1Adapter(
-        activity = this,
-        previewView = previewFrame,
-        minimumResolution = minimumAnalysisResolution,
-        cameraErrorListener = cameraErrorListener
-    )
+    protected open fun buildCameraAdapter(): CameraAdapter<Bitmap> = when (cameraApi) {
+        is CameraApi.Camera2 -> {
+            val textureView = TextureView(this)
+            previewFrame.removeAllViews()
+            previewFrame.addView(textureView)
+
+            Camera2Adapter(
+                activity = this,
+                previewView = textureView,
+                minimumResolution = minimumAnalysisResolution,
+                cameraErrorListener = cameraErrorListener,
+            )
+        }
+
+        else ->
+            Camera1Adapter(
+                activity = this,
+                previewView = previewFrame,
+                minimumResolution = minimumAnalysisResolution,
+                cameraErrorListener = cameraErrorListener,
+            )
+    }
 
     protected abstract val previewFrame: FrameLayout
 
@@ -422,6 +426,4 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      * The API key was invalid.
      */
     protected abstract fun onInvalidApiKey()
-
-    private fun FrameLayout.centerPoint() = PointF(left + width / 2F, top + height / 2F)
 }

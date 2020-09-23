@@ -3,6 +3,9 @@
     <color name="bouncerCardPanColor" description="The text color of the card number displayed over the scan window">@android:color/white</color>
     <color name="bouncerCardPanOutlineColor" description="The outline color of the card number displayed over the scan window">@android:color/black</color>
 
+    <color name="bouncerCardNameColor" description="The text color of the cardholder name displayed over the scan window">@android:color/white</color>
+    <color name="bouncerCardNameOutlineColor" description="The outline color of the cardholder name displayed over the scan window">@android:color/black</color>
+
     <color name="bouncerCardExpiryColor" description="The text color of the card expiry displayed over the scan window">@android:color/white</color>
     <color name="bouncerCardExpiryOutlineColor" description="The outline color of the card expiry displayed over the scan window">@android:color/black</color>
 

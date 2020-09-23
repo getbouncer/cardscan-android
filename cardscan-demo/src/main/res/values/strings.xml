@@ -14,4 +14,9 @@
     <string name="scan_card_w_name_and_expiry">Scan Card w/ Name and Expiry</string>
     <string name="scan_card_w_name_and_expiry_debug">Scan Card w/ Name and Expiry (Debug)</string>
     <string name="single_activity_demo">Single Activity Demo</string>
+
+    <string name="enableDebug">Enable Debug</string>
+    <string name="enableNameExtraction">Enable name extraction</string>
+    <string name="enableExpiryExtraction">Enable expiry extraction</string>
+    <string name="enableEnterCardManually">Enable manual entry</string>
 </resources>
