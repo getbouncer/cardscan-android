@@ -1,9 +1,7 @@
 package com.getbouncer.scan.ui
 
 import android.Manifest
-import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.PointF
@@ -42,6 +40,24 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.coroutines.CoroutineContext
 
+interface ScanResultListener {
+
+    /**
+     * The user canceled the scan.
+     */
+    fun userCanceled()
+
+    /**
+     * The scan failed because of a camera error.
+     */
+    fun cameraError(cause: Throwable?)
+
+    /**
+     * The scan failed to analyze images from the camera.
+     */
+    fun analyzerFailure(cause: Throwable?)
+}
+
 /**
  * A basic implementation that displays error messages when there is a problem with the camera.
  */
@@ -73,24 +89,6 @@ open class CameraErrorListenerImpl(
 abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     companion object {
         const val PERMISSION_REQUEST_CODE = 1200
-
-        const val RESULT_INSTANCE_ID = "instanceId"
-        const val RESULT_SCAN_ID = "scanId"
-
-        const val RESULT_CANCELED_REASON = "canceledReason"
-        const val CANCELED_REASON_USER = -1
-        const val CANCELED_REASON_CAMERA_ERROR = -2
-        const val CANCELED_REASON_ANALYZER_FAILURE = -3
-
-        fun getCanceledReason(data: Intent?): Int =
-            data?.getIntExtra(RESULT_CANCELED_REASON, Int.MIN_VALUE) ?: Int.MIN_VALUE
-
-        fun Intent?.isUserCanceled(): Boolean = getCanceledReason(this) == CANCELED_REASON_USER
-        fun Intent?.isCameraError(): Boolean = getCanceledReason(this) == CANCELED_REASON_CAMERA_ERROR
-        fun Intent?.isAnalyzerFailure(): Boolean = getCanceledReason(this) == CANCELED_REASON_ANALYZER_FAILURE
-
-        fun Intent?.instanceId(): String? = this?.getStringExtra(RESULT_INSTANCE_ID)
-        fun Intent?.scanId(): String? = this?.getStringExtra(RESULT_SCAN_ID)
     }
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
@@ -105,6 +103,11 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     private val cameraErrorListener by lazy {
         CameraErrorListenerImpl(this) { t -> cameraErrorCancelScan(t) }
     }
+
+    /**
+     * The listener which will handle the results from the scan.
+     */
+    protected abstract val resultListener: ScanResultListener
 
     /**
      * Override this value to use a different camera API.
@@ -287,7 +290,8 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     protected open fun cameraErrorCancelScan(cause: Throwable? = null) {
         Log.e(Config.logTag, "Canceling scan due to camera error", cause)
         runBlocking { scanStat.trackResult("camera_error") }
-        cancelScan(CANCELED_REASON_CAMERA_ERROR)
+        resultListener.cameraError(cause)
+        closeScanner()
     }
 
     /**
@@ -295,7 +299,8 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      */
     protected open fun userCancelScan() {
         runBlocking { scanStat.trackResult("user_canceled") }
-        cancelScan(CANCELED_REASON_USER)
+        resultListener.userCanceled()
+        closeScanner()
     }
 
     /**
@@ -304,29 +309,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     protected open fun analyzerFailureCancelScan(cause: Throwable? = null) {
         Log.e(Config.logTag, "Canceling scan due to analyzer error", cause)
         runBlocking { scanStat.trackResult("analyzer_failure") }
-        cancelScan(CANCELED_REASON_ANALYZER_FAILURE)
-    }
-
-    /**
-     * Cancel a scan
-     */
-    protected open fun cancelScan(reasonCode: Int) {
-        val intent = Intent()
-            .putExtra(RESULT_CANCELED_REASON, reasonCode)
-            .putExtra(RESULT_INSTANCE_ID, Stats.instanceId)
-            .putExtra(RESULT_SCAN_ID, Stats.scanId)
-        setResult(Activity.RESULT_CANCELED, intent)
-        closeScanner()
-    }
-
-    /**
-     * Complete a scan
-     */
-    protected open fun completeScan(result: Intent) {
-        result
-            .putExtra(RESULT_INSTANCE_ID, Stats.instanceId)
-            .putExtra(RESULT_SCAN_ID, Stats.scanId)
-        setResult(Activity.RESULT_OK, result)
+        resultListener.analyzerFailure(cause)
         closeScanner()
     }
 

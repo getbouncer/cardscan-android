@@ -50,6 +50,12 @@ object Config {
      */
     @JvmStatic
     var uploadStats: Boolean = true
+
+    /**
+     * Whether or not to display the Bouncer logo
+     */
+    @JvmStatic
+    var displayLogo: Boolean = true
 }
 
 object NetworkConfig {

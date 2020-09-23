@@ -18,4 +18,5 @@
     <string name="enableDebug">Enable Debug</string>
     <string name="enableNameExtraction">Enable name extraction</string>
     <string name="enableExpiryExtraction">Enable expiry extraction</string>
+    <string name="enableEnterCardManually">Enable manual entry</string>
 </resources>

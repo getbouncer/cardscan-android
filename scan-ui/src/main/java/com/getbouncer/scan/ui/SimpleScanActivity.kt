@@ -120,11 +120,6 @@ abstract class SimpleScanActivity : ScanActivity() {
     private val versionTextView: TextView by lazy { TextView(this) }
 
     /**
-     * Determine whether to show the logo at the top of the screen.
-     */
-    protected open val displayCardScanLogo: Boolean = true
-
-    /**
      * The aspect ratio of the view finder.
      */
     protected open val viewFinderAspectRatio = "200:126"
@@ -324,7 +319,7 @@ abstract class SimpleScanActivity : ScanActivity() {
         }
 
         logoView.contentDescription = resources.getString(R.string.bouncer_cardscan_logo)
-        logoView.setVisible(displayCardScanLogo)
+        logoView.setVisible(Config.displayLogo)
     }
 
     private fun setupVersionUi() {
