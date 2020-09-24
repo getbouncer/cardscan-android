@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.util.Size;
-import android.view.TextureView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -26,7 +25,7 @@ import com.getbouncer.cardscan.ui.result.MainLoopAggregator;
 import com.getbouncer.cardscan.ui.result.MainLoopState;
 import com.getbouncer.scan.camera.CameraAdapter;
 import com.getbouncer.scan.camera.CameraErrorListener;
-import com.getbouncer.scan.camera.camera2.Camera2Adapter;
+import com.getbouncer.scan.camera.camera1.Camera1Adapter;
 import com.getbouncer.scan.framework.AggregateResultListener;
 import com.getbouncer.scan.framework.AnalyzerLoopErrorListener;
 import com.getbouncer.scan.framework.Config;
@@ -68,7 +67,7 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
     private Button scanCardButton;
     private View scanView;
 
-    private TextureView cameraPreview;
+    private FrameLayout cameraPreview;
 
     private FrameLayout viewFinderWindow;
     private ViewFinderBackground viewFinderBackground;
@@ -227,7 +226,7 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
             viewFinderBackground.setViewFinderRect(ViewExtensionsKt.asRect(viewFinderWindow));
 
             // Create a camera adapter and bind it to this activity.
-            cameraAdapter = new Camera2Adapter(this, cameraPreview, MINIMUM_RESOLUTION, this);
+            cameraAdapter = new Camera1Adapter(this, cameraPreview, MINIMUM_RESOLUTION, this);
             cameraAdapter.bindToLifecycle(this);
             cameraAdapter.withFlashSupport(supported -> {
                 flashButtonView.setVisibility(supported ? View.VISIBLE : View.INVISIBLE);
