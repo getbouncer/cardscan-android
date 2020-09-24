@@ -16,6 +16,7 @@ import androidx.annotation.ColorRes
 import androidx.annotation.DimenRes
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
+import androidx.core.view.isInvisible
 import com.getbouncer.scan.framework.time.Duration
 import com.getbouncer.scan.ui.R
 import kotlin.math.roundToInt
@@ -48,6 +49,7 @@ fun View.hide() = setVisible(false)
 fun View.fadeIn(duration: Duration? = null) {
     val animation = AnimationUtils.loadAnimation(this.context, R.anim.bouncer_fade_in)
     if (!isVisible()) {
+        visibility = View.INVISIBLE
         if (duration != null) {
             animation.duration = duration.inMilliseconds.toLong()
         }
@@ -66,7 +68,7 @@ fun View.fadeOut(duration: Duration? = null) {
             animation.duration = duration.inMilliseconds.toLong()
         }
         startAnimation(animation)
-        Handler().postDelayed({ hide() }, 400)
+        Handler().postDelayed({ hide() }, duration?.inMilliseconds?.toLong() ?: 400)
     }
 }
 
@@ -127,7 +129,7 @@ fun Context.getFloatResource(@DimenRes id: Int): Float {
 /**
  * Set the size of a text field using a dimension.
  */
-fun TextView.setTextSize(@DimenRes id: Int) {
+fun TextView.setTextSizeByRes(@DimenRes id: Int) {
     setTextSize(TypedValue.COMPLEX_UNIT_PX, this.resources.getDimension(id))
 }
 

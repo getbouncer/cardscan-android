@@ -50,7 +50,7 @@ open class CardScanActivity :
     AnalyzerLoopErrorListener {
 
     companion object {
-        private const val REQUEST_CODE = 21521 // "bou"
+        const val REQUEST_CODE = 21521 // "bou"
 
         const val PARAM_ENABLE_ENTER_MANUALLY = "enableEnterManually"
         const val PARAM_ENABLE_EXPIRY_EXTRACTION = "enableExpiryExtraction"
@@ -73,6 +73,7 @@ open class CardScanActivity :
         private fun Intent?.isUserCanceled(): Boolean = getCanceledReason(this) == CANCELED_REASON_USER
         private fun Intent?.isCameraError(): Boolean = getCanceledReason(this) == CANCELED_REASON_CAMERA_ERROR
         private fun Intent?.isAnalyzerFailure(): Boolean = getCanceledReason(this) == CANCELED_REASON_ANALYZER_FAILURE
+        private fun Intent?.isEnterCardManually(): Boolean = getCanceledReason(this) == CANCELED_REASON_ENTER_MANUALLY
 
         private fun Intent?.instanceId(): String? = this?.getStringExtra(RESULT_INSTANCE_ID)
         private fun Intent?.scanId(): String? = this?.getStringExtra(RESULT_SCAN_ID)
@@ -201,9 +202,7 @@ open class CardScanActivity :
                     data.isUserCanceled() -> handler.userCanceled(data.scanId())
                     data.isCameraError() -> handler.cameraError(data.scanId())
                     data.isAnalyzerFailure() -> handler.analyzerFailure(data.scanId())
-                    getCanceledReason(data) == CANCELED_REASON_ENTER_MANUALLY -> {
-                        handler.enterManually(data.scanId())
-                    }
+                    data.isEnterCardManually() -> handler.enterManually(data.scanId())
                 }
             }
         }

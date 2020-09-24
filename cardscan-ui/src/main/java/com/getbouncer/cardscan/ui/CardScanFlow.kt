@@ -20,6 +20,7 @@ import com.getbouncer.scan.payment.ml.AlphabetDetect
 import com.getbouncer.scan.payment.ml.ExpiryDetect
 import com.getbouncer.scan.payment.ml.SSDOcr
 import com.getbouncer.scan.payment.ml.TextDetect
+import com.getbouncer.scan.ui.ScanFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -37,7 +38,7 @@ class CardScanFlow(
     private val enableExpiryExtraction: Boolean,
     private val resultListener: AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult>,
     private val errorListener: AnalyzerLoopErrorListener
-) {
+) : ScanFlow {
     companion object {
 
         /**
@@ -97,7 +98,7 @@ class CardScanFlow(
      * @param imageStream: The flow of images to process
      * @param previewSize: The size of the preview frame where the view finder is located
      */
-    fun startFlow(
+    override fun startFlow(
         context: Context,
         imageStream: Flow<Bitmap>,
         previewSize: Size,
@@ -156,7 +157,7 @@ class CardScanFlow(
     /**
      * In the event that the scan cannot complete, halt the flow to halt analyzers and free up CPU and memory.
      */
-    fun cancelFlow() {
+    override fun cancelFlow() {
         canceled = true
         if (::mainLoopResultAggregator.isInitialized) {
             mainLoopResultAggregator.cancel()

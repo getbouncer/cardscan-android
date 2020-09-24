@@ -1,9 +1,11 @@
 package com.getbouncer.scan.ui
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
 import android.graphics.PointF
 import android.graphics.Typeface
 import android.os.Bundle
+import android.util.Size
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -23,9 +25,10 @@ import com.getbouncer.scan.ui.util.getColorByRes
 import com.getbouncer.scan.ui.util.getFloatResource
 import com.getbouncer.scan.ui.util.hide
 import com.getbouncer.scan.ui.util.setDrawable
-import com.getbouncer.scan.ui.util.setTextSize
+import com.getbouncer.scan.ui.util.setTextSizeByRes
 import com.getbouncer.scan.ui.util.setVisible
 import com.getbouncer.scan.ui.util.startAnimation
+import kotlinx.coroutines.flow.Flow
 
 abstract class SimpleScanActivity : ScanActivity() {
 
@@ -130,6 +133,11 @@ abstract class SimpleScanActivity : ScanActivity() {
     protected var isFlashlightSupported: Boolean? = null
 
     /**
+     * The flow used to scan an item.
+     */
+    protected abstract val scanFlow: ScanFlow
+
+    /**
      * Determine if the background is dark. This is used to set light background vs dark background
      * text and images.
      */
@@ -173,13 +181,18 @@ abstract class SimpleScanActivity : ScanActivity() {
         viewFinderBackgroundView.setOnDrawListener { setupUiComponents() }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        scanFlow.cancelFlow()
+    }
+
     /**
      * Add the UI components to the root view.
      */
     protected open fun addUiComponents() {
         layout.id = View.generateViewId()
 
-        listOf(
+        appendUiComponents(
             previewFrame,
             viewFinderBackgroundView,
             viewFinderWindowView,
@@ -195,7 +208,14 @@ abstract class SimpleScanActivity : ScanActivity() {
             debugOverlayView,
             logoView,
             versionTextView,
-        ).forEach {
+        )
+    }
+
+    /**
+     * Append additional UI elements to the view.
+     */
+    protected fun appendUiComponents(vararg components: View) {
+        components.forEach {
             it.id = View.generateViewId()
             layout.addView(it)
         }
@@ -262,7 +282,7 @@ abstract class SimpleScanActivity : ScanActivity() {
     }
 
     protected open fun setupInstructionsViewUi() {
-        instructionsTextView.setTextSize(R.dimen.bouncerInstructionsTextSize)
+        instructionsTextView.setTextSizeByRes(R.dimen.bouncerInstructionsTextSize)
         instructionsTextView.typeface = Typeface.DEFAULT_BOLD
         instructionsTextView.gravity = Gravity.CENTER
 
@@ -275,7 +295,7 @@ abstract class SimpleScanActivity : ScanActivity() {
 
     protected open fun setupSecurityNoticeUi() {
         securityTextView.text = resources.getString(R.string.bouncer_card_scan_security)
-        securityTextView.setTextSize(R.dimen.bouncerSecurityTextSize)
+        securityTextView.setTextSizeByRes(R.dimen.bouncerSecurityTextSize)
         securityIconView.contentDescription = resources.getString(R.string.bouncer_security_description)
 
         if (isBackgroundDark()) {
@@ -289,13 +309,13 @@ abstract class SimpleScanActivity : ScanActivity() {
 
     protected open fun setupCardDetailsUi() {
         cardNumberTextView.setTextColor(getColorByRes(R.color.bouncerCardPanColor))
-        cardNumberTextView.setTextSize(R.dimen.bouncerPanTextSize)
+        cardNumberTextView.setTextSizeByRes(R.dimen.bouncerPanTextSize)
         cardNumberTextView.gravity = Gravity.CENTER
         cardNumberTextView.typeface = Typeface.DEFAULT_BOLD
         cardNumberTextView.setShadowLayer(getFloatResource(R.dimen.bouncerPanStrokeSize), 0F, 0F, getColorByRes(R.color.bouncerCardPanOutlineColor))
 
         cardNameTextView.setTextColor(getColorByRes(R.color.bouncerCardNameColor))
-        cardNameTextView.setTextSize(R.dimen.bouncerNameTextSize)
+        cardNameTextView.setTextSizeByRes(R.dimen.bouncerNameTextSize)
         cardNameTextView.gravity = Gravity.CENTER
         cardNameTextView.typeface = Typeface.DEFAULT_BOLD
         cardNameTextView.setShadowLayer(getFloatResource(R.dimen.bouncerNameStrokeSize), 0F, 0F, getColorByRes(R.color.bouncerCardNameOutlineColor))
@@ -324,7 +344,7 @@ abstract class SimpleScanActivity : ScanActivity() {
 
     private fun setupVersionUi() {
         versionTextView.text = getSdkVersion()
-        versionTextView.setTextSize(R.dimen.bouncerSecurityTextSize)
+        versionTextView.setTextSizeByRes(R.dimen.bouncerSecurityTextSize)
         versionTextView.setVisible(Config.isDebug)
 
         if (isBackgroundDark()) {
@@ -624,5 +644,23 @@ abstract class SimpleScanActivity : ScanActivity() {
             connect(it.id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
             connect(it.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
         }
+    }
+
+    /**
+     * Once the camera stream is available, start processing images.
+     */
+    override fun onCameraStreamAvailable(cameraStream: Flow<Bitmap>) {
+        scanFlow.startFlow(
+            context = this,
+            imageStream = cameraStream,
+            previewSize = Size(previewFrame.width, previewFrame.height),
+            viewFinder = viewFinderWindowView.asRect(),
+            lifecycleOwner = this,
+            coroutineScope = this,
+        )
+    }
+
+    override fun onInvalidApiKey() {
+        scanFlow.cancelFlow()
     }
 }
