@@ -1,14 +1,12 @@
 package com.getbouncer.cardscan.ui
 
 import android.annotation.SuppressLint
-import android.graphics.Bitmap
 import android.graphics.Rect
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.Log
 import android.util.Size
 import android.view.Gravity
-import android.view.View
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -26,18 +24,17 @@ import com.getbouncer.scan.payment.ml.SSDOcr
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
 import com.getbouncer.scan.payment.ml.ssd.calculateCardFinderCoordinatesFromObjectDetection
 import com.getbouncer.scan.ui.DebugDetectionBox
+import com.getbouncer.scan.ui.ScanFlow
 import com.getbouncer.scan.ui.ScanResultListener
 import com.getbouncer.scan.ui.SimpleScanActivity
-import com.getbouncer.scan.ui.util.asRect
 import com.getbouncer.scan.ui.util.fadeIn
 import com.getbouncer.scan.ui.util.fadeOut
 import com.getbouncer.scan.ui.util.getColorByRes
-import com.getbouncer.scan.ui.util.hide
-import com.getbouncer.scan.ui.util.setTextSize
+import com.getbouncer.scan.ui.util.setTextSizeByRes
+import com.getbouncer.scan.ui.util.setVisible
 import com.getbouncer.scan.ui.util.show
 import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -83,7 +80,7 @@ abstract class CardScanBaseActivity :
     AnalyzerLoopErrorListener {
 
     /**
-     * The text view that informs the user what to do.
+     * The text view that lets a user manually enter a card.
      */
     protected open val enterCardManuallyTextView: TextView by lazy { TextView(this) }
 
@@ -100,7 +97,7 @@ abstract class CardScanBaseActivity :
     private val hasPreviousValidResult = AtomicBoolean(false)
     private var lastDebugFrameUpdate = Clock.markNow()
 
-    private val cardScanFlow: CardScanFlow by lazy {
+    override val scanFlow: ScanFlow by lazy {
         CardScanFlow(enableNameExtraction, enableExpiryExtraction, this, this)
     }
 
@@ -118,27 +115,17 @@ abstract class CardScanBaseActivity :
 
     override fun addUiComponents() {
         super.addUiComponents()
-
-        listOf(
-            enterCardManuallyTextView,
-        ).forEach {
-            it.id = View.generateViewId()
-            layout.addView(it)
-        }
+        appendUiComponents(enterCardManuallyTextView)
     }
 
     override fun setupUiComponents() {
         super.setupUiComponents()
 
         enterCardManuallyTextView.text = resources.getString(R.string.bouncer_enter_card_manually)
-        enterCardManuallyTextView.setTextSize(R.dimen.bouncerEnterCardManuallyTextSize)
+        enterCardManuallyTextView.setTextSizeByRes(R.dimen.bouncerEnterCardManuallyTextSize)
         enterCardManuallyTextView.gravity = Gravity.CENTER
 
-        if (enableEnterCardManually) {
-            enterCardManuallyTextView.show()
-        } else {
-            enterCardManuallyTextView.hide()
-        }
+        enterCardManuallyTextView.setVisible(enableEnterCardManually)
 
         if (isBackgroundDark()) {
             enterCardManuallyTextView.setTextColor(getColorByRes(R.color.bouncerEnterCardManuallyColorDark))
@@ -165,11 +152,6 @@ abstract class CardScanBaseActivity :
             connect(it.id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
             connect(it.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        cardScanFlow.cancelFlow()
     }
 
     /**
@@ -311,23 +293,5 @@ abstract class CardScanBaseActivity :
     override fun onResultFailure(t: Throwable): Boolean {
         analyzerFailureCancelScan(t)
         return true
-    }
-
-    /**
-     * Once the camera stream is available, start processing images.
-     */
-    override fun onCameraStreamAvailable(cameraStream: Flow<Bitmap>) {
-        cardScanFlow.startFlow(
-            context = this,
-            imageStream = cameraStream,
-            previewSize = Size(previewFrame.width, previewFrame.height),
-            viewFinder = viewFinderWindowView.asRect(),
-            lifecycleOwner = this,
-            coroutineScope = this,
-        )
-    }
-
-    override fun onInvalidApiKey() {
-        cardScanFlow.cancelFlow()
     }
 }
