@@ -389,7 +389,7 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
         new AlertDialog.Builder(this)
             .setMessage(String.format(
                 Locale.getDefault(),
-                "%s\n%s\n%d/%d\n%s\n%s",
+                "%s\n%s\n%s/%s\n%s\n%s",
                 cardNumber,
                 issuer,
                 expiryMonth,
