@@ -11,6 +11,7 @@ import java.util.UUID
 
 object Stats {
     val instanceId = UUID.randomUUID().toString()
+
     var scanId: String? = null
         private set
 
@@ -143,9 +144,11 @@ object Stats {
         return result
     }
 
+    @JvmStatic
     @CheckResult
     fun getRepeatingTasks() = repeatingTasks.toMap()
 
+    @JvmStatic
     @CheckResult
     fun getTasks() = tasks.toMap()
 }

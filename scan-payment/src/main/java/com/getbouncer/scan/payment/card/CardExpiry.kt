@@ -30,7 +30,7 @@ fun isValidExpiry(day: String?, month: String, year: String): Boolean {
         return false
     }
 
-    if (cardYear > currentYear) {
+    if (cardYear > currentYear && cardYear < currentYear + 10) {
         return true
     } else if (cardYear < currentYear) {
         return false

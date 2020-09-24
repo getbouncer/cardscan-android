@@ -22,6 +22,7 @@ data class ScanStatistics(
     @SerialName("repeating_tasks") val repeatingTasks: Map<String, RepeatingTaskStatistics>
 ) {
     companion object {
+        @JvmStatic
         fun fromStats(): ScanStatistics {
             return ScanStatistics(
                 tasks = Stats.getTasks().mapValues { entry ->
@@ -42,6 +43,7 @@ data class TaskStatistics(
     @SerialName("result") val result: String?
 ) {
     companion object {
+        @JvmStatic
         fun fromTaskStats(taskStats: TaskStats) = TaskStatistics(
             startedAtMs = taskStats.started.toMillisecondsSinceEpoch(),
             durationMs = taskStats.duration.inMilliseconds.toLong(),
@@ -62,6 +64,7 @@ data class RepeatingTaskStatistics(
     @SerialName("results") val results: Map<String, Int>
 ) {
     companion object {
+        @JvmStatic
         fun fromRepeatingTaskStats(repeatingTaskStats: RepeatingTaskStats) = RepeatingTaskStatistics(
             executions = repeatingTaskStats.executions,
             startTimeMs = repeatingTaskStats.startedAt.toMillisecondsSinceEpoch(),

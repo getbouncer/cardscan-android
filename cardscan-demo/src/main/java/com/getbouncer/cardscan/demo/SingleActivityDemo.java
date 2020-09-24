@@ -2,11 +2,9 @@ package com.getbouncer.cardscan.demo;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.PointF;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -18,10 +16,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.annotation.DrawableRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -30,25 +24,29 @@ import androidx.core.content.ContextCompat;
 import com.getbouncer.cardscan.ui.CardScanFlow;
 import com.getbouncer.cardscan.ui.result.MainLoopAggregator;
 import com.getbouncer.cardscan.ui.result.MainLoopState;
+import com.getbouncer.scan.camera.CameraAdapter;
 import com.getbouncer.scan.camera.CameraErrorListener;
 import com.getbouncer.scan.camera.camera2.Camera2Adapter;
 import com.getbouncer.scan.framework.AggregateResultListener;
 import com.getbouncer.scan.framework.AnalyzerLoopErrorListener;
 import com.getbouncer.scan.framework.Config;
+import com.getbouncer.scan.framework.Stats;
+import com.getbouncer.scan.framework.api.BouncerApi;
+import com.getbouncer.scan.framework.api.dto.ScanStatistics;
 import com.getbouncer.scan.framework.interop.BlockingAggregateResultListener;
-import com.getbouncer.scan.framework.time.Clock;
-import com.getbouncer.scan.framework.time.ClockMark;
+import com.getbouncer.scan.framework.interop.EmptyJavaContinuation;
+import com.getbouncer.scan.framework.util.AppDetails;
+import com.getbouncer.scan.framework.util.Device;
 import com.getbouncer.scan.payment.card.PanFormatterKt;
 import com.getbouncer.scan.payment.card.PaymentCardUtils;
 import com.getbouncer.scan.payment.ml.ExpiryDetect;
-import com.getbouncer.scan.payment.ml.SSDOcr;
 import com.getbouncer.scan.ui.ViewFinderBackground;
 import com.getbouncer.scan.ui.util.ViewExtensionsKt;
 
 import java.util.Locale;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import kotlin.Unit;
 import kotlin.coroutines.CoroutineContext;
@@ -67,42 +65,40 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
     private static final int PERMISSION_REQUEST_CODE = 1200;
     private static final Size MINIMUM_RESOLUTION = new Size(1280, 720);
 
-    private static final int CANCELED_REASON_USER = -1;
-    private static final int CANCELED_REASON_CAMERA_ERROR = -2;
-    private static final int CANCELED_REASON_ANALYZER_FAILURE = -3;
-
     private Button scanCardButton;
     private View scanView;
 
     private TextureView cameraPreview;
 
-    private Rect viewFinderRect;
     private FrameLayout viewFinderWindow;
     private ViewFinderBackground viewFinderBackground;
     private ImageView viewFinderBorder;
 
     private ImageView flashButtonView;
-    private ImageView cardScanLogoView;
-    private ImageView closeButtonView;
-
-    private TextView instructionsTextView;
-    private TextView securityTextView;
-    private TextView enterCardManuallyButtonView;
 
     private TextView cardPanTextView;
     private TextView cardNameTextView;
 
-    private ImageView debugBitmapView;
-
-    private Camera2Adapter cameraAdapter;
+    private CameraAdapter<Bitmap> cameraAdapter;
 
     private CardScanFlow cardScanFlow;
 
-    private final AtomicBoolean hasPreviousValidResult = new AtomicBoolean(false);
-    private ClockMark lastDebugFrameUpdate = Clock.INSTANCE.markNow();
     private State scanState = State.NOT_FOUND;
 
-    private boolean isScanning = false;
+    /**
+     * CardScan uses kotlin coroutines to run multiple analyzers in parallel for maximum image
+     * throughput. This coroutine context binds the coroutines to this activity, so that if this
+     * activity is terminated, all coroutines are terminated and there is no work leak.
+     *
+     * Additionally, this specifies which threads the coroutines will run on. Normally, the default
+     * dispatchers should be used so that coroutines run on threads bound by the number of CPU
+     * cores.
+     */
+    @NotNull
+    @Override
+    public CoroutineContext getCoroutineContext() {
+        return Dispatchers.getDefault();
+    }
 
     @Override
     @SuppressLint("ClickableViewAccessibility")
@@ -116,13 +112,12 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
         scanCardButton.setOnClickListener(v -> {
             scanCardButton.setVisibility(View.GONE);
             scanView.setVisibility(View.VISIBLE);
-            isScanning = true;
 
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) !=
                     PackageManager.PERMISSION_GRANTED) {
                 requestCameraPermission();
             } else {
-                prepareCamera();
+                startScan();
             }
         });
 
@@ -132,23 +127,17 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
         viewFinderBorder = findViewById(R.id.viewFinderBorder);
 
         flashButtonView = findViewById(R.id.flashButtonView);
-        cardScanLogoView = findViewById(R.id.cardscanLogo);
-        closeButtonView = findViewById(R.id.closeButtonView);
-
-        instructionsTextView = findViewById(R.id.instructionsTextView);
-        securityTextView = findViewById(R.id.securityTextView);
-        enterCardManuallyButtonView = findViewById(R.id.enterCardManuallyButtonView);
+        ImageView closeButtonView = findViewById(R.id.closeButtonView);
 
         cardPanTextView = findViewById(R.id.cardPanTextView);
         cardNameTextView = findViewById(R.id.cardNameTextView);
 
-        debugBitmapView = findViewById(R.id.debugBitmapView);
-
         closeButtonView.setOnClickListener(v -> userCancelScan());
-        flashButtonView.setOnClickListener(v -> toggleFlashlight());
+        flashButtonView.setOnClickListener(v -> setFlashlightState(!cameraAdapter.isTorchOn()));
 
+        // Allow the user to set the focus of the camera by tapping on the view finder.
         viewFinderWindow.setOnTouchListener((v, event) -> {
-            setFocus(new PointF(
+            cameraAdapter.setFocus(new PointF(
                 event.getX() + viewFinderWindow.getLeft(), 
                 event.getY() + viewFinderWindow.getTop())
             );
@@ -168,23 +157,12 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
     protected void onPause() {
         super.onPause();
         setFlashlightState(false);
-        viewFinderBackground.clearOnDrawListener();
-        if (isScanning && cameraAdapter != null) {
-            cameraAdapter.onPause();
-        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         setStateNotFound();
-        viewFinderBackground.setOnDrawListener(() -> {
-            updateIcons(false);
-            return Unit.INSTANCE;
-        });
-        if (isScanning) {
-            prepareCamera();
-        }
     }
 
     /**
@@ -205,14 +183,14 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
     @Override
     public void onRequestPermissionsResult(
         int requestCode,
-        @NonNull String[] permissions,
-        @NonNull int[] grantResults
+        @NotNull String[] permissions,
+        @NotNull int[] grantResults
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (requestCode == PERMISSION_REQUEST_CODE && grantResults.length > 0) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                prepareCamera();
+                startScan();
             } else {
                 showPermissionDeniedDialog();
             }
@@ -231,43 +209,42 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
             )
             .setNegativeButton(
                 R.string.bouncer_camera_permission_denied_cancel,
-                (DialogInterface.OnClickListener) (dialog, which) -> prepareCamera()
+                (dialog, which) -> startScan()
             )
             .show();
     }
 
-    private void prepareCamera() {
+    /**
+     * Start the scanning flow.
+     */
+    private void startScan() {
+        // ensure the cameraPreview view has rendered.
         cameraPreview.post(() -> {
-            viewFinderRect = new Rect(
-                viewFinderWindow.getLeft(),
-                viewFinderWindow.getTop(),
-                viewFinderWindow.getRight(),
-                viewFinderWindow.getBottom()
-            );
-            viewFinderBackground.setViewFinderRect(viewFinderRect);
+            // Track scan statistics for health check
+            Stats.INSTANCE.startScan(new EmptyJavaContinuation<>());
 
+            // Tell the background where to draw a hole for the viewfinder window
+            viewFinderBackground.setViewFinderRect(ViewExtensionsKt.asRect(viewFinderWindow));
+
+            // Create a camera adapter and bind it to this activity.
             cameraAdapter = new Camera2Adapter(this, cameraPreview, MINIMUM_RESOLUTION, this);
             cameraAdapter.bindToLifecycle(this);
             cameraAdapter.withFlashSupport(supported -> {
-                setFlashlightState(cameraAdapter.isTorchOn());
-                onFlashSupported(supported);
+                flashButtonView.setVisibility(supported ? View.VISIBLE : View.INVISIBLE);
                 return Unit.INSTANCE;
             });
 
+            // Create and start a CardScanFlow which will handle the business logic of the scan
             cardScanFlow = new CardScanFlow(true, true, aggregateResultListener, this);
             cardScanFlow.startFlow(
                 this,
                 cameraAdapter.getImageStream(),
                 new Size(cameraPreview.getWidth(), cameraPreview.getHeight()),
-                viewFinderRect,
+                ViewExtensionsKt.asRect(viewFinderWindow),
                 this,
                 this
             );
         });
-    }
-
-    private void setFocus(PointF point) {
-        cameraAdapter.setFocus(point);
     }
 
     /**
@@ -276,70 +253,13 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
     private void setFlashlightState(boolean on) {
         if (cameraAdapter != null) {
             cameraAdapter.setTorchState(on);
-            onFlashlightStateChanged(cameraAdapter.isTorchOn());
+
+            if (cameraAdapter.isTorchOn()) {
+                flashButtonView.setImageResource(R.drawable.bouncer_flash_on_dark);
+            } else {
+                flashButtonView.setImageResource(R.drawable.bouncer_flash_off_dark);
+            }
         }
-    }
-
-    private void onFlashlightStateChanged(boolean flashlightOn) {
-        updateIcons(flashlightOn);
-    }
-
-    private void onFlashSupported(boolean supported) {
-        flashButtonView.setVisibility(supported ? View.VISIBLE : View.INVISIBLE);
-    }
-
-    /**
-     * Turn the flashlight on or off.
-     */
-    private void toggleFlashlight() {
-        setFlashlightState(!cameraAdapter.isTorchOn());
-    }
-
-    private void updateIcons(boolean isFlashlightOn) {
-        final int luminance = viewFinderBackground.getBackgroundLuminance();
-        if (luminance > 127) {
-            setIconsLight(isFlashlightOn);
-        } else {
-            setIconsDark(isFlashlightOn);
-        }
-    }
-
-    private void setIconsDark(boolean isFlashlightOn) {
-        if (isFlashlightOn) {
-            flashButtonView.setImageResource(R.drawable.bouncer_flash_on_dark);
-        } else {
-            flashButtonView.setImageResource(R.drawable.bouncer_flash_off_dark);
-        }
-        instructionsTextView.setTextColor(
-            ContextCompat.getColor(this, R.color.bouncerInstructionsColorDark)
-        );
-        securityTextView.setTextColor(
-            ContextCompat.getColor(this, R.color.bouncerSecurityColorDark)
-        );
-        enterCardManuallyButtonView.setTextColor(
-            ContextCompat.getColor(this, R.color.bouncerEnterCardManuallyColorDark)
-        );
-        closeButtonView.setImageResource(R.drawable.bouncer_close_button_dark);
-        cardScanLogoView.setImageResource(R.drawable.bouncer_logo_dark_background);
-    }
-
-    private void setIconsLight(boolean isFlashlightOn) {
-        if (isFlashlightOn) {
-            flashButtonView.setImageResource(R.drawable.bouncer_flash_on_light);
-        } else {
-            flashButtonView.setImageResource(R.drawable.bouncer_flash_off_light);
-        }
-        instructionsTextView.setTextColor(
-            ContextCompat.getColor(this, R.color.bouncerInstructionsColorLight)
-        );
-        securityTextView.setTextColor(
-            ContextCompat.getColor(this, R.color.bouncerSecurityColorLight)
-        );
-        enterCardManuallyButtonView.setTextColor(
-            ContextCompat.getColor(this, R.color.bouncerEnterCardManuallyColorLight)
-        );
-        closeButtonView.setImageResource(R.drawable.bouncer_close_button_light);
-        cardScanLogoView.setImageResource(R.drawable.bouncer_logo_light_background);
     }
 
     /**
@@ -347,7 +267,10 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
      */
     private void analyzerFailureCancelScan(@Nullable final Throwable cause) {
         Log.e(Config.getLogTag(), "Canceling scan due to analyzer error", cause);
-        cancelScan(CANCELED_REASON_ANALYZER_FAILURE);
+        new AlertDialog.Builder(this)
+            .setMessage("Analyzer failure")
+            .show();
+        closeScanner();
     }
 
     /**
@@ -355,28 +278,24 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
      */
     private void cameraErrorCancelScan(@Nullable final Throwable cause) {
         Log.e(Config.getLogTag(), "Canceling scan due to camera error", cause);
-        cancelScan(CANCELED_REASON_CAMERA_ERROR);
+        new AlertDialog.Builder(this)
+            .setMessage("Camera error")
+            .show();
+        closeScanner();
     }
 
     /**
      * The scan has been cancelled by the user.
      */
     private void userCancelScan() {
-        cancelScan(CANCELED_REASON_USER);
-    }
-
-    /**
-     * Cancel a scan
-     */
-    private void cancelScan(int reasonCode) {
         new AlertDialog.Builder(this)
-            .setMessage(String.format(Locale.getDefault(), "Scan Canceled: %d", reasonCode))
+            .setMessage("Scan Canceled by user")
             .show();
         closeScanner();
     }
 
     /**
-     * Complete a scan
+     * Show the completed scan results
      */
     private void completeScan(
         @Nullable String expiryMonth,
@@ -405,190 +324,38 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
      * Close the scanner.
      */
     private void closeScanner() {
+        Stats.INSTANCE.finishScan(new EmptyJavaContinuation<>());
         setFlashlightState(false);
         scanCardButton.setVisibility(View.VISIBLE);
         scanView.setVisibility(View.GONE);
         setStateNotFound();
-        isScanning = false;
+        cameraAdapter.unbindFromLifecycle(this);
         if (cardScanFlow != null) {
             cardScanFlow.cancelFlow();
         }
-        if (cameraAdapter != null) {
-            cameraAdapter.onPause();
-        }
+        BouncerApi.uploadScanStats(
+            this,
+            Stats.INSTANCE.getInstanceId(),
+            Stats.INSTANCE.getScanId(),
+            Device.fromContext(this),
+            AppDetails.fromContext(this),
+            ScanStatistics.fromStats()
+        );
     }
 
     @Override
     public void onCameraOpenError(@Nullable Throwable cause) {
-        showCameraError(R.string.bouncer_error_camera_open, cause);
+        cameraErrorCancelScan(cause);
     }
 
     @Override
     public void onCameraAccessError(@Nullable Throwable cause) {
-        showCameraError(R.string.bouncer_error_camera_access, cause);
+        cameraErrorCancelScan(cause);
     }
 
     @Override
     public void onCameraUnsupportedError(@Nullable Throwable cause) {
-        showCameraError(R.string.bouncer_error_camera_unsupported, cause);
-    }
-
-    private void showCameraError(@StringRes int message, @Nullable Throwable cause) {
-        new AlertDialog.Builder(this)
-            .setTitle(R.string.bouncer_error_camera_title)
-            .setMessage(message)
-            .setPositiveButton(
-                R.string.bouncer_error_camera_acknowledge_button,
-                (dialog, which) -> cameraErrorCancelScan(cause)
-            )
-            .show();
-    }
-
-    private AggregateResultListener<
-            MainLoopAggregator.InterimResult,
-            MainLoopAggregator.FinalResult> aggregateResultListener =
-            new BlockingAggregateResultListener<
-                    MainLoopAggregator.InterimResult,
-                    MainLoopAggregator.FinalResult>() {
-        @Override
-        public void onInterimResultBlocking(MainLoopAggregator.InterimResult interimResult) {
-            new Handler(getMainLooper()).post(() -> {
-                if (interimResult.getState() instanceof MainLoopState.OcrRunning &&
-                        !hasPreviousValidResult.getAndSet(true)) {
-                    ViewExtensionsKt.fadeOut(enterCardManuallyButtonView, null);
-                }
-
-                final MainLoopState mainLoopState = interimResult.getState();
-                if (mainLoopState instanceof MainLoopState.Initial) {
-                    setStateNotFound();
-                } else if (mainLoopState instanceof MainLoopState.OcrRunning) {
-                    final String pan = ((MainLoopState.OcrRunning) mainLoopState)
-                        .getMostLikelyPan();
-                    if (pan != null && PaymentCardUtils.isValidPan(pan)) {
-                        cardPanTextView.setText(PanFormatterKt.formatPan(pan));
-                        ViewExtensionsKt.fadeIn(cardPanTextView, null);
-                    }
-                    if (interimResult.getAnalyzerResult().isNameExtractionAvailable() ||
-                            interimResult.getAnalyzerResult().isExpiryExtractionAvailable()) {
-                        setStateFoundLong();
-                    } else {
-                        setStateFoundShort();
-                    }
-                } else if (mainLoopState instanceof MainLoopState.NameAndExpiryRunning) {
-                    final String name = ((MainLoopState.NameAndExpiryRunning) mainLoopState)
-                        .getMostLikelyName();
-                    if (name != null) {
-                        cardNameTextView.setText(name);
-                        ViewExtensionsKt.fadeIn(cardNameTextView, null);
-                    }
-                    if (interimResult.getAnalyzerResult().isNameExtractionAvailable() ||
-                            interimResult.getAnalyzerResult().isExpiryExtractionAvailable()) {
-                        setStateFoundLong();
-                    } else {
-                        setStateFoundShort();
-                    }
-                } else if (mainLoopState instanceof MainLoopState.Finished) {
-                    setStateCorrect();
-                }
-
-                showDebugFrame(interimResult.getFrame());
-            });
-        }
-
-        @Override
-        public void onResultBlocking(MainLoopAggregator.FinalResult result) {
-            // Only show the expiry dates that are not expired
-            final ExpiryDetect.Expiry expiry = result.getExpiry();
-
-            new Handler(getMainLooper()).post(() -> {
-                if (expiry != null && expiry.isValidExpiry()) {
-                    completeScan(
-                        expiry.getMonth(),
-                        expiry.getYear(),
-                        result.getPan(),
-                        PaymentCardUtils.getCardIssuer(result.getPan()).getDisplayName(),
-                        result.getName(),
-                        result.getErrorString()
-                    );
-                } else {
-                    completeScan(
-                        null,
-                        null,
-                        result.getPan(),
-                        PaymentCardUtils.getCardIssuer(result.getPan()).getDisplayName(),
-                        result.getName(),
-                        result.getErrorString()
-                    );
-                }
-            });
-        }
-
-        @Override
-        public void onResetBlocking() {
-            new Handler(getMainLooper()).post(() -> setStateNotFound());
-        }
-    };
-
-    private void setStateFoundShort() {
-        setStateFound(R.drawable.bouncer_card_border_found);
-    }
-
-    private void setStateFoundLong() {
-        setStateFound(R.drawable.bouncer_card_border_found_long);
-    }
-
-    private void setStateFound(@DrawableRes int animation) {
-        if (scanState != State.FOUND) {
-            viewFinderBackground.setBackgroundColor(ViewExtensionsKt.getColorByRes(this,
-                    R.color.bouncerFoundBackground));
-            viewFinderWindow.setBackgroundResource(R.drawable.bouncer_card_background_found);
-            ViewExtensionsKt.startAnimation(viewFinderBorder, animation);
-            instructionsTextView.setText(R.string.bouncer_card_scan_instructions);
-        }
-        scanState = State.FOUND;
-    }
-
-    private void setStateNotFound() {
-        if (scanState != State.NOT_FOUND) {
-            viewFinderBackground.setBackgroundColor(ViewExtensionsKt.getColorByRes(this,
-                    R.color.bouncerNotFoundBackground));
-            viewFinderWindow.setBackgroundResource(R.drawable.bouncer_card_background_not_found);
-            ViewExtensionsKt.startAnimation(viewFinderBorder,
-                    R.drawable.bouncer_card_border_not_found);
-            ViewExtensionsKt.fadeOut(cardPanTextView, null);
-            ViewExtensionsKt.fadeOut(cardNameTextView, null);
-            instructionsTextView.setText(R.string.bouncer_card_scan_instructions);
-        }
-        hasPreviousValidResult.set(false);
-        scanState = State.NOT_FOUND;
-    }
-
-    private void setStateCorrect() {
-        if (scanState != State.CORRECT) {
-            ViewExtensionsKt.fadeOut(instructionsTextView, null);
-            viewFinderBackground.setBackgroundColor(ViewExtensionsKt.getColorByRes(this,
-                    R.color.bouncerCorrectBackground));
-            viewFinderWindow.setBackgroundResource(R.drawable.bouncer_card_background_correct);
-            ViewExtensionsKt.startAnimation(viewFinderBorder,
-                    R.drawable.bouncer_card_border_correct);
-        }
-        scanState = State.CORRECT;
-    }
-
-    private void showDebugFrame(final SSDOcr.Input frame) {
-        if (Config.isDebug() && lastDebugFrameUpdate.elapsedSince().getInSeconds() > 1) {
-            lastDebugFrameUpdate = Clock.INSTANCE.markNow();
-            Bitmap bitmap = SSDOcr.Companion.cropImage(frame);
-            debugBitmapView.setImageBitmap(bitmap);
-
-            Log.d(
-                Config.getLogTag(),
-                String.format(
-                    "Delay between capture and result for this frame was %s",
-                    frame.getCapturedAt().elapsedSince()
-                )
-            );
-        }
+        cameraErrorCancelScan(cause);
     }
 
     @Override
@@ -603,9 +370,111 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
         return true;
     }
 
-    @NotNull
-    @Override
-    public CoroutineContext getCoroutineContext() {
-        return Dispatchers.getDefault();
+    private AggregateResultListener<
+            MainLoopAggregator.InterimResult,
+            MainLoopAggregator.FinalResult> aggregateResultListener =
+            new BlockingAggregateResultListener<
+                    MainLoopAggregator.InterimResult,
+                    MainLoopAggregator.FinalResult>() {
+
+        /**
+         * An interim result has been received from the scan, the scan is still running. Update your
+         * UI as necessary here to display the progress of the scan.
+         */
+        @Override
+        public void onInterimResultBlocking(MainLoopAggregator.InterimResult interimResult) {
+            new Handler(getMainLooper()).post(() -> {
+                final MainLoopState mainLoopState = interimResult.getState();
+                if (mainLoopState instanceof MainLoopState.Initial) {
+                    // In initial state, show no card found
+                    setStateNotFound();
+
+                } else if (mainLoopState instanceof MainLoopState.OcrRunning) {
+                    // If OCR is running and a valid card number is visible, display it
+                    final MainLoopState.OcrRunning state = (MainLoopState.OcrRunning) mainLoopState;
+                    final String pan = state.getMostLikelyPan();
+                    if (pan != null && PaymentCardUtils.isValidPan(pan)) {
+                        cardPanTextView.setText(PanFormatterKt.formatPan(pan));
+                        ViewExtensionsKt.fadeIn(cardPanTextView, null);
+                    }
+                    setStateFound();
+
+                } else if (mainLoopState instanceof MainLoopState.NameAndExpiryRunning) {
+                    // If name and expiry are running and a valid name is found, display it
+                    final MainLoopState.NameAndExpiryRunning state =
+                            (MainLoopState.NameAndExpiryRunning) mainLoopState;
+                    final String name = state.getMostLikelyName();
+                    if (name != null) {
+                        cardNameTextView.setText(name);
+                        ViewExtensionsKt.fadeIn(cardNameTextView, null);
+                    }
+                    setStateFound();
+
+                } else if (mainLoopState instanceof MainLoopState.Finished) {
+                    // If scanning has finished, display correct
+                    setStateCorrect();
+                }
+            });
+        }
+
+        /**
+         * The scan has completed and the final result is available. Close the scanner and make use
+         * of the final result.
+         */
+        @Override
+        public void onResultBlocking(MainLoopAggregator.FinalResult result) {
+            final ExpiryDetect.Expiry expiry = result.getExpiry();
+
+            new Handler(getMainLooper()).post(() -> {
+                // Only show the expiry dates that are not expired
+                completeScan(
+                    expiry != null && expiry.isValidExpiry() ? expiry.getMonth() : null,
+                    expiry != null && expiry.isValidExpiry() ? expiry.getYear() : null,
+                    result.getPan(),
+                    PaymentCardUtils.getCardIssuer(result.getPan()).getDisplayName(),
+                    result.getName(),
+                    result.getErrorString()
+                );
+            });
+        }
+
+        /**
+         * The scan was reset (usually because the activity was backgrounded). Reset the UI.
+         */
+        @Override
+        public void onResetBlocking() {
+            new Handler(getMainLooper()).post(() -> setStateNotFound());
+        }
+    };
+
+    /**
+     * Display a blue border tracing the outline of the card to indicate that the card is identified
+     * and scanning is running.
+     */
+    private void setStateFound() {
+        if (scanState == State.FOUND) return;
+        ViewExtensionsKt.startAnimation(viewFinderBorder,
+            R.drawable.bouncer_card_border_found_long);
+        scanState = State.FOUND;
+    }
+
+    /**
+     * Return the view to its initial state, where no card has been detected.
+     */
+    private void setStateNotFound() {
+        if (scanState == State.NOT_FOUND) return;
+        ViewExtensionsKt.startAnimation(viewFinderBorder, R.drawable.bouncer_card_border_not_found);
+        ViewExtensionsKt.hide(cardPanTextView);
+        ViewExtensionsKt.hide(cardNameTextView);
+        scanState = State.NOT_FOUND;
+    }
+
+    /**
+     * Flash the border around the card green to indicate that scanning was successful.
+     */
+    private void setStateCorrect() {
+        if (scanState == State.CORRECT) return;
+        ViewExtensionsKt.startAnimation(viewFinderBorder, R.drawable.bouncer_card_border_correct);
+        scanState = State.CORRECT;
     }
 }
