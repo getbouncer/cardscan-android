@@ -13,6 +13,7 @@ data class AppDetails(
     val isDebugBuild: Boolean
 ) {
     companion object {
+        @JvmStatic
         fun fromContext(context: Context) = AppDetails(
             appPackageName = getAppPackageName(context),
             applicationId = getApplicationId(),

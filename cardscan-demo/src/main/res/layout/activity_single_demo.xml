@@ -21,7 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
 
-        <TextureView
+        <FrameLayout
             android:id="@+id/cameraPreviewHolder"
             android:layout_width="0dp"
             android:layout_height="0dp"
@@ -39,32 +39,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:backgroundColor="@color/bouncerNotFoundBackground" />
-
-        <!-- debug window -->
-        <FrameLayout
-            android:id="@+id/debugWindowView"
-            android:layout_width="192dp"
-            android:layout_height="120dp"
-            android:visibility="invisible"
-            app:layout_constraintTop_toBottomOf="@id/viewFinderWindow"
-            app:layout_constraintBottom_toTopOf="@id/enterCardManuallyButtonView"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" >
-
-            <ImageView
-                android:id="@+id/debugBitmapView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:contentDescription="@string/bouncer_debug_description"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
-
-            <com.getbouncer.scan.ui.DebugOverlay
-                android:id="@+id/debugOverlayView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-        </FrameLayout>
 
         <FrameLayout
             android:id="@+id/viewFinderWindow"
@@ -125,17 +99,6 @@
             app:layout_constraintTop_toBottomOf="@id/viewFinderWindow"
             app:layout_constraintStart_toEndOf="@id/securityIconView"
             app:layout_constraintEnd_toEndOf="@id/viewFinderWindow" />
-
-        <TextView
-            android:id="@+id/enterCardManuallyButtonView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:visibility="invisible"
-            android:text="@string/bouncer_enter_card_manually"
-            style="@style/BouncerEnterCardManually.Default"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
 
         <LinearLayout
             android:id="@+id/cardDetailsView"

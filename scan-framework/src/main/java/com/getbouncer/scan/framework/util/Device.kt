@@ -35,6 +35,7 @@ data class Device(
             )
         }
 
+        @JvmStatic
         fun fromContext(context: Context) = getDeviceDetails(context.applicationContext)
     }
 }

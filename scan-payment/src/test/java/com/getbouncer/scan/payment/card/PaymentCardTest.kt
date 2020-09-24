@@ -132,7 +132,7 @@ class PaymentCardTest {
     fun isValidExpiry() {
         val expDay = "01"
         val expMonth = "02"
-        val expYear = "2222"
+        val expYear = "2022"
 
         assertTrue { isValidExpiry(expDay, expMonth, expYear) }
         assertTrue { isValidExpiry(null, expMonth, expYear) }
@@ -143,7 +143,7 @@ class PaymentCardTest {
     fun isValidExpiry_leapYear() {
         val expDay = "29"
         val expMonth = "2"
-        val expYear = "2224"
+        val expYear = "2024"
 
         assertTrue { isValidExpiry(expDay, expMonth, expYear) }
     }
@@ -153,7 +153,7 @@ class PaymentCardTest {
     fun isValidExpiry_nonLeapYear() {
         val expDay = "29"
         val expMonth = "2"
-        val expYear = "2223"
+        val expYear = "2023"
 
         assertFalse { isValidExpiry(expDay, expMonth, expYear) }
     }
