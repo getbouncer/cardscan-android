@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="bouncerViewFinderMargin" description="The minimum distance between the edge of the screen and the view finder window">16dp</dimen>
-    <item name="bouncerViewFinderVerticalBias" type="fraction" description="The vertical position of the view finder. Lower numbers shift the view finder towards the top of the screen">50%</item>
-    <item name="bouncerViewFinderHorizontalBias" type="fraction" description="The horizontal position of the view finder. Lower numbers shift the view finder towards the left of the screen">50%</item>
+    <item name="bouncerViewFinderVerticalBias" format="float" type="dimen" description="The vertical position of the view finder. Lower numbers shift the view finder towards the top of the screen">0.5</item>
+    <item name="bouncerViewFinderHorizontalBias" format="float" type="dimen" description="The horizontal position of the view finder. Lower numbers shift the view finder towards the left of the screen">0.5</item>
 
     <dimen name="bouncerCardDetailsMargin" description="The minimum vertical and horizontal distance between the card details (number, expiry, name) and the border of the view finder window">12dp</dimen>
 

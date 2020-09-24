@@ -407,8 +407,8 @@ abstract class SimpleScanActivity : ScanActivity() {
 
             view.constrainToParent()
             view.addConstraints {
-                setVerticalBias(it.id, resources.getFraction(R.fraction.bouncerViewFinderVerticalBias, 1, 0))
-                setHorizontalBias(it.id, resources.getFraction(R.fraction.bouncerViewFinderHorizontalBias, 1, 0))
+                setVerticalBias(it.id, resources.getFloat(R.dimen.bouncerViewFinderVerticalBias))
+                setHorizontalBias(it.id, resources.getFloat(R.dimen.bouncerViewFinderHorizontalBias))
 
                 setDimensionRatio(it.id, viewFinderAspectRatio)
             }
