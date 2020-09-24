@@ -16,7 +16,6 @@ import androidx.annotation.ColorRes
 import androidx.annotation.DimenRes
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
-import androidx.core.view.isInvisible
 import com.getbouncer.scan.framework.time.Duration
 import com.getbouncer.scan.ui.R
 import kotlin.math.roundToInt
