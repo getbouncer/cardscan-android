@@ -393,7 +393,7 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
                     // If OCR is running and a valid card number is visible, display it
                     final MainLoopState.OcrRunning state = (MainLoopState.OcrRunning) mainLoopState;
                     final String pan = state.getMostLikelyPan();
-                    if (pan != null && PaymentCardUtils.isValidPan(pan)) {
+                    if (pan != null) {
                         cardPanTextView.setText(PanFormatterKt.formatPan(pan));
                         ViewExtensionsKt.fadeIn(cardPanTextView, null);
                     }
