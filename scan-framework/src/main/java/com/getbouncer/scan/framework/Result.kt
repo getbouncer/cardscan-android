@@ -89,7 +89,7 @@ abstract class ResultAggregator<DataFrame, State, AnalyzerResult, InterimResult,
     private var isFinished = false
 
     private val aggregatorExecutionStats = runBlocking {
-        Stats.trackRepeatingTask("${this::class.java.simpleName}_aggregator_execution")
+        Stats.trackRepeatingTask("${this@ResultAggregator::class.java.simpleName}_aggregator_execution")
     }
 
     private val frameRateTracker by lazy { FrameRateTracker(this::class.java.simpleName) }
