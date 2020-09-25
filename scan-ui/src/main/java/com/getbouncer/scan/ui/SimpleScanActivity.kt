@@ -531,7 +531,7 @@ abstract class SimpleScanActivity : ScanActivity() {
             dpToPixels(LOGO_WIDTH_DP), // width
             ViewGroup.LayoutParams.WRAP_CONTENT, // height
         ).apply {
-            topMargin = resources.getDimensionPixelSize(R.dimen.bouncerButtonMargin)
+            topMargin = resources.getDimensionPixelSize(R.dimen.bouncerLogoMargin)
         }
 
         logoView.addConstraints {
@@ -546,7 +546,7 @@ abstract class SimpleScanActivity : ScanActivity() {
             ViewGroup.LayoutParams.WRAP_CONTENT, // width
             ViewGroup.LayoutParams.WRAP_CONTENT, // height
         ).apply {
-            bottomMargin = resources.getDimensionPixelSize(R.dimen.bouncerButtonMargin)
+            bottomMargin = resources.getDimensionPixelSize(R.dimen.bouncerLogoMargin)
         }
 
         versionTextView.addConstraints {
