@@ -237,6 +237,7 @@ open class CardScanActivity :
 
     override val resultListener = object : CardScanResultListener {
         override fun cardScanned(scanResult: CardScanActivityResult) {
+            Log.d(Config.logTag, "scan took ${scanStat.startedAt.elapsedSince()}")
             val intent = Intent()
                 .putExtra(RESULT_SCANNED_CARD, scanResult)
                 .putExtra(RESULT_INSTANCE_ID, Stats.instanceId)

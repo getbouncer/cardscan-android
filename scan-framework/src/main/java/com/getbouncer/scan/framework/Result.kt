@@ -158,7 +158,10 @@ abstract class ResultAggregator<DataFrame, State, AnalyzerResult, InterimResult,
 
             aggregatorExecutionStats.trackResult("frame_processed")
 
-            finalResult?.also { launch { listener.onResult(it) } } != null
+            finalResult?.also {
+                isFinished = true
+                launch { listener.onResult(it) }
+            } != null
         }
     }
 

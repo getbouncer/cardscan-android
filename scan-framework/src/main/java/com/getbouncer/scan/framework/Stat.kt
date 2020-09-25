@@ -159,17 +159,23 @@ object Stats {
 interface StatTracker {
 
     /**
+     * When this task was started.
+     */
+    val startedAt: ClockMark
+
+    /**
      * Track the result from a stat.
      */
     suspend fun trackResult(result: String? = null)
 }
 
 private object StatTrackerNoOpImpl : StatTracker {
+    override val startedAt = Clock.markNow()
     override suspend fun trackResult(result: String?) { /* do nothing */ }
 }
 
 private class StatTrackerImpl(private val onComplete: suspend (ClockMark, String?) -> Unit) : StatTracker {
-    private val startedAt = Clock.markNow()
+    override val startedAt = Clock.markNow()
     override suspend fun trackResult(result: String?) { onComplete(startedAt, result) }
 }
 
