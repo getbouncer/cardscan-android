@@ -72,7 +72,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/bouncer_card_scan_instructions"
-            style="@style/BouncerInstructions.Default"
+            android:textColor="@color/bouncerInstructionsColorDark"
+            android:textSize="@dimen/bouncerInstructionsTextSize"
+            android:gravity="center"
+            android:layout_margin="@dimen/bouncerInstructionsMargin"
             app:layout_constraintBottom_toTopOf="@id/viewFinderWindow"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
@@ -95,7 +98,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/bouncer_card_scan_security"
-            style="@style/BouncerSecurity.Default"
+            android:textSize="@dimen/bouncerSecurityTextSize"
+            android:textColor="@color/bouncerSecurityColorDark"
+            android:layout_margin="@dimen/bouncerSecurityMargin"
             app:layout_constraintTop_toBottomOf="@id/viewFinderWindow"
             app:layout_constraintStart_toEndOf="@id/securityIconView"
             app:layout_constraintEnd_toEndOf="@id/viewFinderWindow" />
@@ -115,14 +120,26 @@
 
             <TextView
                 android:id="@+id/cardPanTextView"
-                style="@style/BouncerCardPanLarge.Default"
+                android:textColor="@color/bouncerCardPanColor"
+                android:textSize="@dimen/bouncerPanTextSize"
+                android:shadowColor="@color/bouncerCardPanOutlineColor"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="2.5"
+                android:gravity="center"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="invisible" />
 
             <TextView
                 android:id="@+id/cardNameTextView"
-                style="@style/BouncerCardPanLarge.Default"
+                android:textColor="@color/bouncerCardPanColor"
+                android:textSize="@dimen/bouncerPanTextSize"
+                android:shadowColor="@color/bouncerCardPanOutlineColor"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="2.5"
+                android:gravity="center"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
