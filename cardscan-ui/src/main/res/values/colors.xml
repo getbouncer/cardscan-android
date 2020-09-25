@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bouncerEnterCardManuallyColorDark" description="The color of the Enter Card Manually text displayed at the bottom of the screen when the background is a dark color">@android:color/white</color>
+    <color name="bouncerEnterCardManuallyColorLight" description="The color of the Enter Card Manually text displayed at the bottom of the screen when the background is a light color">@android:color/black</color>
+</resources>
