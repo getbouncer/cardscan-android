@@ -22,6 +22,7 @@ import com.getbouncer.scan.ui.util.dpToPixels
 import com.getbouncer.scan.ui.util.fadeIn
 import com.getbouncer.scan.ui.util.fadeOut
 import com.getbouncer.scan.ui.util.getColorByRes
+import com.getbouncer.scan.ui.util.getDrawableByRes
 import com.getbouncer.scan.ui.util.getFloatResource
 import com.getbouncer.scan.ui.util.hide
 import com.getbouncer.scan.ui.util.setDrawable
@@ -161,8 +162,8 @@ abstract class SimpleScanActivity : ScanActivity() {
         closeButtonView.setOnClickListener { userCancelScan() }
         torchButtonView.setOnClickListener { toggleFlashlight() }
 
-        viewFinderBorderView.setOnTouchListener { _, e ->
-            setFocus(PointF(e.x + viewFinderBorderView.left, e.y + viewFinderBorderView.top))
+        viewFinderWindowView.setOnTouchListener { _, e ->
+            setFocus(PointF(e.x + viewFinderWindowView.left, e.y + viewFinderWindowView.top))
             true
         }
 
@@ -224,6 +225,7 @@ abstract class SimpleScanActivity : ScanActivity() {
     protected open fun setupUiComponents() {
         setupCloseButtonViewUi()
         setupTorchButtonViewUi()
+        setupViewFinderViewUI()
         setupInstructionsViewUi()
         setupSecurityNoticeUi()
         setupCardDetailsUi()
@@ -233,7 +235,7 @@ abstract class SimpleScanActivity : ScanActivity() {
     protected open fun setupCloseButtonViewUi() {
         when (val view = closeButtonView) {
             is ImageView -> {
-                view.contentDescription = resources.getString(R.string.bouncer_close_button_description)
+                view.contentDescription = getString(R.string.bouncer_close_button_description)
                 if (isBackgroundDark()) {
                     view.setDrawable(R.drawable.bouncer_close_button_dark)
                 } else {
@@ -241,7 +243,7 @@ abstract class SimpleScanActivity : ScanActivity() {
                 }
             }
             is TextView -> {
-                view.text = resources.getString(R.string.bouncer_close_button_description)
+                view.text = getString(R.string.bouncer_close_button_description)
                 if (isBackgroundDark()) {
                     view.setTextColor(getColorByRes(R.color.bouncerCloseButtonDarkColor))
                 } else {
@@ -255,7 +257,7 @@ abstract class SimpleScanActivity : ScanActivity() {
         torchButtonView.setVisible(isFlashlightSupported ?: false)
         when (val view = torchButtonView) {
             is ImageView -> {
-                view.contentDescription = resources.getString(R.string.bouncer_torch_button_description)
+                view.contentDescription = getString(R.string.bouncer_torch_button_description)
                 if (isBackgroundDark()) {
                     if (isFlashlightOn) {
                         view.setDrawable(R.drawable.bouncer_flash_on_dark)
@@ -271,7 +273,7 @@ abstract class SimpleScanActivity : ScanActivity() {
                 }
             }
             is TextView -> {
-                view.text = resources.getString(R.string.bouncer_torch_button_description)
+                view.text = getString(R.string.bouncer_torch_button_description)
                 if (isBackgroundDark()) {
                     view.setTextColor(getColorByRes(R.color.bouncerFlashButtonDarkColor))
                 } else {
@@ -279,6 +281,10 @@ abstract class SimpleScanActivity : ScanActivity() {
                 }
             }
         }
+    }
+
+    protected open fun setupViewFinderViewUI() {
+        viewFinderBorderView.background = getDrawableByRes(R.drawable.bouncer_card_border_not_found)
     }
 
     protected open fun setupInstructionsViewUi() {
@@ -294,9 +300,9 @@ abstract class SimpleScanActivity : ScanActivity() {
     }
 
     protected open fun setupSecurityNoticeUi() {
-        securityTextView.text = resources.getString(R.string.bouncer_card_scan_security)
+        securityTextView.text = getString(R.string.bouncer_card_scan_security)
         securityTextView.setTextSizeByRes(R.dimen.bouncerSecurityTextSize)
-        securityIconView.contentDescription = resources.getString(R.string.bouncer_security_description)
+        securityIconView.contentDescription = getString(R.string.bouncer_security_description)
 
         if (isBackgroundDark()) {
             securityTextView.setTextColor(getColorByRes(R.color.bouncerSecurityColorDark))
@@ -322,7 +328,7 @@ abstract class SimpleScanActivity : ScanActivity() {
     }
 
     protected open fun setupDebugUi() {
-        debugImageView.contentDescription = resources.getString(R.string.bouncer_debug_description)
+        debugImageView.contentDescription = getString(R.string.bouncer_debug_description)
         debugImageView.setVisible(Config.isDebug)
         debugOverlayView.setVisible(Config.isDebug)
     }
@@ -338,7 +344,7 @@ abstract class SimpleScanActivity : ScanActivity() {
             )
         }
 
-        logoView.contentDescription = resources.getString(R.string.bouncer_cardscan_logo)
+        logoView.contentDescription = getString(R.string.bouncer_cardscan_logo)
         logoView.setVisible(Config.displayLogo)
     }
 

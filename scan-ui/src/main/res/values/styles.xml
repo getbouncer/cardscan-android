@@ -30,68 +30,6 @@
         <item name="android:windowTranslucentStatus">true</item>
     </style>
 
-    <style name="BouncerCardPanLarge"/>
-
-    <style name="BouncerCardPanLarge.Default">
-        <item name="android:textColor">@color/bouncerCardPanColor</item>
-        <item name="android:shadowColor">@color/bouncerCardPanOutlineColor</item>
-        <item name="android:textSize">@dimen/bouncerPanTextSize</item>
-        <item name="android:shadowRadius">@dimen/bouncerPanStrokeSize</item>
-        <item name="android:gravity">center</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:shadowDx">0</item>
-        <item name="android:shadowDy">0</item>
-    </style>
-
-    <style name="BouncerCardExpiryLarge"/>
-
-    <style name="BouncerCardExpiryLarge.Default">
-        <item name="android:textColor">@color/bouncerCardExpiryColor</item>
-        <item name="android:shadowColor">@color/bouncerCardExpiryOutlineColor</item>
-        <item name="android:textSize">@dimen/bouncerExpiryTextSize</item>
-        <item name="android:shadowRadius">@dimen/bouncerExpiryStrokeSize</item>
-        <item name="android:gravity">center</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:shadowDx">0</item>
-        <item name="android:shadowDy">0</item>
-    </style>
-
-    <style name="BouncerEnterCardManually" />
-
-    <style name="BouncerEnterCardManually.Default">
-        <item name="android:textColor">@color/bouncerEnterCardManuallyColorDark</item>
-        <item name="android:textSize">@dimen/bouncerEnterCardManuallyTextSize</item>
-        <item name="android:layout_marginTop">@dimen/bouncerEnterCardManuallyMargin</item>
-        <item name="android:layout_marginBottom">@dimen/bouncerEnterCardManuallyMargin</item>
-        <item name="android:layout_marginStart">@dimen/bouncerEnterCardManuallyMargin</item>
-        <item name="android:layout_marginEnd">@dimen/bouncerEnterCardManuallyMargin</item>
-        <item name="android:gravity">center</item>
-    </style>
-
-    <style name="BouncerInstructions" />
-
-    <style name="BouncerInstructions.Default">
-        <item name="android:textColor">@color/bouncerInstructionsColorDark</item>
-        <item name="android:textSize">@dimen/bouncerInstructionsTextSize</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:layout_marginTop">@dimen/bouncerInstructionsMargin</item>
-        <item name="android:layout_marginBottom">@dimen/bouncerInstructionsMargin</item>
-        <item name="android:layout_marginStart">@dimen/bouncerInstructionsMargin</item>
-        <item name="android:layout_marginEnd">@dimen/bouncerInstructionsMargin</item>
-        <item name="android:gravity">center</item>
-    </style>
-
-    <style name="BouncerSecurity" />
-
-    <style name="BouncerSecurity.Default">
-        <item name="android:textColor">@color/bouncerSecurityColorDark</item>
-        <item name="android:textSize">@dimen/bouncerSecurityTextSize</item>
-        <item name="android:textStyle">normal</item>
-        <item name="android:layout_marginTop">@dimen/bouncerSecurityMargin</item>
-        <item name="android:layout_marginBottom">@dimen/bouncerSecurityMargin</item>
-        <item name="android:layout_marginEnd">@dimen/bouncerSecurityMargin</item>
-    </style>
-
     <attr name="bouncerCardPanColor" format="color" />
     <attr name="bouncerCardExpiryColor" format="color" />
 

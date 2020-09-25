@@ -121,7 +121,7 @@ abstract class CardScanBaseActivity :
     override fun setupUiComponents() {
         super.setupUiComponents()
 
-        enterCardManuallyTextView.text = resources.getString(R.string.bouncer_enter_card_manually)
+        enterCardManuallyTextView.text = getString(R.string.bouncer_enter_card_manually)
         enterCardManuallyTextView.setTextSizeByRes(R.dimen.bouncerEnterCardManuallyTextSize)
         enterCardManuallyTextView.gravity = Gravity.CENTER
 
