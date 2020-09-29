@@ -126,11 +126,12 @@ class Camera1Adapter(
                     .toBitmap()
                     .scale(scale)
                     .rotate(mRotation.toFloat())
-                camera.addCallbackBuffer(bytes)
                 sendImageToStream(bitmap)
             } catch (t: Throwable) {
-                Log.e(Config.logTag, "Exception caught during camera transform", t)
                 // ignore errors transforming the image (OOM, etc)
+                Log.e(Config.logTag, "Exception caught during camera transform", t)
+            } finally {
+                camera.addCallbackBuffer(bytes)
             }
         } else {
             camera.addCallbackBuffer(ByteArray((imageWidth * imageHeight * 1.5).roundToInt()))
