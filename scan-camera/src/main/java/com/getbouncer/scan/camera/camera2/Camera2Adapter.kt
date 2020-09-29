@@ -39,22 +39,23 @@ import android.media.ImageReader
 import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
+import android.os.Looper
 import android.util.Size
 import android.view.Surface
 import android.view.TextureView
+import android.view.ViewGroup
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import com.getbouncer.scan.camera.CameraAdapter
 import com.getbouncer.scan.camera.CameraErrorListener
 import com.getbouncer.scan.camera.isSupportedFormat
-import com.getbouncer.scan.camera.rotate
-import com.getbouncer.scan.camera.scale
-import com.getbouncer.scan.camera.toBitmap
+import com.getbouncer.scan.framework.time.delay
+import com.getbouncer.scan.framework.time.seconds
+import com.getbouncer.scan.framework.util.scaleAndCenterSurrounding
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -63,6 +64,7 @@ import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 /**
@@ -100,7 +102,7 @@ class CameraConfigurationFailedException(val cameraId: String) : Exception()
  */
 class Camera2Adapter(
     private val activity: Activity,
-    private val previewView: TextureView?,
+    private val previewView: ViewGroup?,
     private val minimumResolution: Size,
     private val cameraErrorListener: CameraErrorListener
 ) : CameraAdapter<Bitmap>(), LifecycleObserver {
@@ -135,6 +137,8 @@ class Camera2Adapter(
             return minAspectRatioOutSize(fit, previewAspectRatio)
         }
     }
+
+    private val textureView by lazy { TextureView(activity) }
 
     private val processingImage = AtomicBoolean(false)
 
@@ -173,6 +177,7 @@ class Camera2Adapter(
     private var focusPoint = previewView?.let { PointF(previewView.width / 2F, previewView.height / 2F) }
     private var focusJob: Job? = null
 
+    @ExperimentalCoroutinesApi
     private val surfaceTextureListener = object : TextureView.SurfaceTextureListener {
         override fun onSurfaceTextureAvailable(surface: SurfaceTexture?, width: Int, height: Int) {
             openCamera()
@@ -184,7 +189,17 @@ class Camera2Adapter(
 
         override fun onSurfaceTextureDestroyed(surface: SurfaceTexture?) = true
 
-        override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) { }
+        override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) {
+            configureTransform(Size(textureView.width, textureView.height), previewSize)
+            // There does not appear to be any performance improvement by using this method
+            if (processingImage.getAndSet(true)) {
+                return
+            }
+            cameraHandler?.post {
+                textureView?.bitmap?.let { sendImageToStream(it) }
+                processingImage.set(false)
+            }
+        }
     }
 
     private val stateCallback = object : CameraDevice.StateCallback() {
@@ -241,28 +256,60 @@ class Camera2Adapter(
             false
         }
 
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    fun onCreate() {
+        previewView?.removeAllViews()
+        previewView?.addView(textureView)
+    }
+
     @ExperimentalCoroutinesApi
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     fun onResume() {
         startCameraThread()
 
-        if (previewView?.isAvailable != false) {
+//        previewView?.let { parent ->
+//            val textureRect = if (parent.width > parent.height) {
+//                // device is horizontal. Match width and allow textureview height to be larger than
+//                // container view height
+//                val textureSize = Size(
+//                    max(minimumResolution.width, minimumResolution.height),
+//                    min(minimumResolution.width, minimumResolution.height),
+//                )
+//                textureSize.scaleAndCenterSurrounding(Size(parent.width, parent.height))
+//            } else {
+//                val textureSize = Size(
+//                    min(minimumResolution.width, minimumResolution.height),
+//                    max(minimumResolution.width, minimumResolution.height),
+//                )
+//                textureSize.scaleAndCenterSurrounding(Size(parent.width, parent.height))
+//            }
+//
+//            if (this::previewResolution.isInitialized) {
+//                textureView.layoutParams.apply {
+////                width = textureRect.width()
+////                height = textureRect.height()
+//                    width = previewResolution.width
+//                    height = previewResolution.height
+//                }
+//                textureView.requestLayout()
+//            }
+//        }
+
+        if (textureView.isAvailable) {
             openCamera()
         } else {
-            previewView.surfaceTextureListener = surfaceTextureListener
+            textureView.surfaceTextureListener = surfaceTextureListener
         }
 
         // For some devices (especially Samsung), we need to continuously refocus the camera.
         focusJob?.cancel()
         focusJob = GlobalScope.launch {
             while (isActive) {
-                delay(5000)
+                delay(5.seconds)
                 val variance = Random().nextFloat() - 0.5F
-                val originalFocusPoint = focusPoint
                 focusPoint?.let {
-                    setFocus(PointF(it.x + variance, it.y + variance))
-                } ?: break
-                focusPoint = originalFocusPoint
+                    updateFocus(PointF(it.x + variance, it.y + variance))
+                }
             }
         }
     }
@@ -278,6 +325,7 @@ class Camera2Adapter(
     /**
      * Sets up member variables related to camera.
      */
+    @ExperimentalCoroutinesApi
     private fun setUpCameraOutputs() {
         try {
             getAvailableCameras().firstOrNull()?.also { cameraDetails ->
@@ -299,47 +347,55 @@ class Camera2Adapter(
                     cameraDetails.sensorRotation
                 )
 
-                imageReader = ImageReader.newInstance(
-                    previewFormatAndResolution.second.width,
-                    previewFormatAndResolution.second.height,
-                    previewFormat,
-                    2
-                ).apply {
-                    setOnImageAvailableListener(
-                        object : ImageReader.OnImageAvailableListener {
-                            override fun onImageAvailable(reader: ImageReader?) {
-                                if (processingImage.getAndSet(true)) {
-                                    return
-                                }
-
-                                val bitmap = reader?.acquireLatestImage()?.use {
-                                    if (it.isSupportedFormat()) {
-                                        it
-                                            .toBitmap()
-                                            .scale(
-                                                max(
-                                                    minimumResolution.width.toFloat() / it.width,
-                                                    minimumResolution.height.toFloat() / it.height
-                                                )
-                                            )
-                                            .rotate(
-                                                calculateImageRotationDegrees(
-                                                    displayRotation,
-                                                    sensorRotation
-                                                ).toFloat()
-                                            )
-                                    } else {
-                                        null
-                                    }
-                                }
-
-                                bitmap?.let { sendImageToStream(it) }
-                                processingImage.set(false)
-                            }
-                        },
-                        cameraHandler
-                    )
+                // TODO: set up the preview view correctly. Until this is done, this will not work.
+                textureView.layoutParams.apply {
+//                width = textureRect.width()
+//                height = textureRect.height()
+                    width = previewResolution.width
+                    height = previewResolution.height
                 }
+                textureView.requestLayout()
+
+//                imageReader = ImageReader.newInstance(
+//                    previewFormatAndResolution.second.width,
+//                    previewFormatAndResolution.second.height,
+//                    previewFormat,
+//                    2
+//                ).apply {
+//                    setOnImageAvailableListener(
+//                        object : ImageReader.OnImageAvailableListener {
+//                            override fun onImageAvailable(reader: ImageReader?) {
+//                                cameraHandler?.post {
+//                                    if (processingImage.getAndSet(true)) {
+//                                        reader?.acquireLatestImage()?.close()
+//                                        return@post
+//                                    }
+//
+//                                    val bitmap = imageReader?.acquireLatestImage()?.use {
+//                                        if (it.isSupportedFormat()) it.toBitmap() else null
+//                                    }
+//
+//                                    bitmap
+////                                        ?.scale(
+////                                            max(
+////                                                minimumResolution.width.toFloat() / bitmap.width,
+////                                                minimumResolution.height.toFloat() / bitmap.height
+////                                            )
+////                                        )
+//                                        ?.rotate(
+//                                            calculateImageRotationDegrees(
+//                                                displayRotation,
+//                                                sensorRotation
+//                                            ).toFloat()
+//                                        )
+//                                        ?.run { sendImageToStream(this) }
+//                                    processingImage.set(false)
+//                                }
+//                            }
+//                        },
+//                        cameraHandler
+//                    )
+//                }
 
                 // Check if the flash is supported.
                 flashSupported = cameraDetails.flashAvailable
@@ -422,6 +478,7 @@ class Camera2Adapter(
     /**
      * Opens the camera specified by [cameraId].
      */
+    @ExperimentalCoroutinesApi
     @SuppressLint("MissingPermission")
     private fun openCamera() {
         setUpCameraOutputs()
@@ -490,7 +547,7 @@ class Camera2Adapter(
      */
     private fun createCameraPreviewSession(previewResolution: Size) {
         try {
-            val texture = previewView?.surfaceTexture
+            val texture = textureView.surfaceTexture
 
             // We configure the size of default buffer to be the size of camera preview we want.
             texture?.setDefaultBufferSize(previewResolution.width, previewResolution.height)
@@ -537,7 +594,13 @@ class Camera2Adapter(
                     }
 
                     override fun onConfigureFailed(session: CameraCaptureSession) {
-                        cameraErrorListener.onCameraOpenError(CameraConfigurationFailedException(session.device.id))
+                        Handler(Looper.getMainLooper()).post {
+                            cameraErrorListener.onCameraOpenError(
+                                CameraConfigurationFailedException(
+                                    session.device.id
+                                )
+                            )
+                        }
                     }
                 },
                 null
@@ -558,8 +621,6 @@ class Camera2Adapter(
         val matrix = Matrix()
         val viewRect = RectF(0F, 0F, viewSize.width.toFloat(), viewSize.height.toFloat())
         val bufferRect = RectF(0F, 0F, previewSize.width.toFloat(), previewSize.height.toFloat())
-        val centerX = viewRect.centerX()
-        val centerY = viewRect.centerY()
 
         val rotation = -(displayRotation * 90).toFloat()
         val scale = max(
@@ -568,20 +629,23 @@ class Camera2Adapter(
         )
 
         // TODO(awushensky): this breaks on rotation. See https://stackoverflow.com/questions/34536798/android-camera2-preview-is-rotated-90deg-while-in-landscape?rq=1
-        bufferRect.offset(centerX - bufferRect.centerX(), centerY - bufferRect.centerY())
-        matrix.setRectToRect(viewRect, bufferRect, Matrix.ScaleToFit.FILL)
+        bufferRect.offset(viewRect.centerX() - bufferRect.centerX(), viewRect.centerY() - bufferRect.centerY())
+        matrix.setRectToRect(viewRect, bufferRect, Matrix.ScaleToFit.CENTER)
         matrix.postScale(scale, scale, viewRect.centerX(), viewRect.centerY())
         matrix.postRotate(rotation, viewRect.centerX(), viewRect.centerY())
 
-        previewView?.setTransform(matrix)
+        textureView.setTransform(matrix)
     }
 
     override fun setFocus(point: PointF) {
+        focusPoint = point
+        updateFocus(point)
+    }
+
+    private fun updateFocus(point: PointF) {
         if (!::previewRequestBuilder.isInitialized) {
             return
         }
-
-        focusPoint = point
 
         previewCaptureSession?.stopRepeating()
 

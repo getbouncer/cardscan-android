@@ -75,6 +75,7 @@
 
             <CheckBox
                 android:id="@+id/enableEnterCardManuallyCheckbox"
+                android:checked="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
         </LinearLayout>

@@ -2,7 +2,10 @@ package com.getbouncer.cardscan.ui.result
 
 import androidx.annotation.VisibleForTesting
 import com.getbouncer.cardscan.ui.analyzer.PaymentCardOcrAnalyzer
+import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.MachineState
+import com.getbouncer.scan.framework.time.Duration
+import com.getbouncer.scan.framework.time.Rate
 import com.getbouncer.scan.framework.time.seconds
 import com.getbouncer.scan.framework.util.ItemTotalCounter
 import com.getbouncer.scan.payment.analyzer.NameAndExpiryAnalyzer
@@ -45,7 +48,7 @@ sealed class MainLoopState(
     override val runExpiryExtraction: Boolean,
 ) : MachineState(), NameAndExpiryAnalyzer.State {
 
-    internal abstract suspend fun consumeTransition(transition: PaymentCardOcrAnalyzer.Prediction): MainLoopState
+    internal abstract suspend fun consumeTransition(transition: PaymentCardOcrAnalyzer.Prediction, processingRate: Rate): MainLoopState
 
     /**
      * The initial state of the main loop.
@@ -54,7 +57,10 @@ sealed class MainLoopState(
         private val enableNameExtraction: Boolean,
         private val enableExpiryExtraction: Boolean,
     ) : MainLoopState(runOcr = true, runNameExtraction = false, runExpiryExtraction = false) {
-        override suspend fun consumeTransition(transition: PaymentCardOcrAnalyzer.Prediction): MainLoopState = when {
+        override suspend fun consumeTransition(
+            transition: PaymentCardOcrAnalyzer.Prediction,
+            processingRate: Rate,
+        ): MainLoopState = when {
             isValidPan(transition.pan) && transition.pan != null ->
                 OcrRunning(transition.pan, enableNameExtraction, enableExpiryExtraction)
             else -> this
@@ -73,7 +79,13 @@ sealed class MainLoopState(
 
         fun getMostLikelyPan() = panCounter.getHighestCountItem()?.second
 
-        override suspend fun consumeTransition(transition: PaymentCardOcrAnalyzer.Prediction): MainLoopState {
+        private fun deviceIsFastEnoughForNameExtraction(processingRate: Rate) =
+            processingRate.duration <= Duration.ZERO || processingRate > Config.slowDeviceFrameRate
+
+        override suspend fun consumeTransition(
+            transition: PaymentCardOcrAnalyzer.Prediction,
+            processingRate: Rate,
+        ): MainLoopState {
             if (isValidPan(transition.pan) && transition.pan != null) {
                 panCounter.countItem(transition.pan)
             }
@@ -87,7 +99,7 @@ sealed class MainLoopState(
                     if (enableNameExtraction || enableExpiryExtraction) {
                         NameAndExpiryRunning(
                             pan = mostLikelyPan,
-                            enableNameExtraction = enableNameExtraction,
+                            enableNameExtraction = enableNameExtraction && deviceIsFastEnoughForNameExtraction(processingRate),
                             enableExpiryExtraction = enableExpiryExtraction,
                         )
                     } else {
@@ -120,7 +132,10 @@ sealed class MainLoopState(
         fun getMostLikelyName() = nameCounter.getHighestCountItem(minCount = MINIMUM_NAME_AGREEMENT)?.second
         fun getMostLikelyExpiry() = expiryCounter.getHighestCountItem(minCount = MINIMUM_EXPIRY_AGREEMENT)?.second
 
-        override suspend fun consumeTransition(transition: PaymentCardOcrAnalyzer.Prediction): MainLoopState {
+        override suspend fun consumeTransition(
+            transition: PaymentCardOcrAnalyzer.Prediction,
+            processingRate: Rate,
+        ): MainLoopState {
             if (transition.name?.isNotEmpty() == true) {
                 nameCounter.countItem(transition.name)
             }
@@ -157,13 +172,16 @@ sealed class MainLoopState(
     }
 
     /**
-     * The final state of the aggregator.
+     * The final state of the state machine.
      */
     class Finished(
         val pan: String,
         val name: String?,
         val expiry: ExpiryDetect.Expiry?
     ) : MainLoopState(runOcr = false, runNameExtraction = false, runExpiryExtraction = false) {
-        override suspend fun consumeTransition(transition: PaymentCardOcrAnalyzer.Prediction): MainLoopState = this
+        override suspend fun consumeTransition(
+            transition: PaymentCardOcrAnalyzer.Prediction,
+            processingRate: Rate,
+        ): MainLoopState = this
     }
 }

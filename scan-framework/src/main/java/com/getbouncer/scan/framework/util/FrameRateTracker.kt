@@ -72,6 +72,11 @@ class FrameRateTracker(
     }
 
     /**
+     * Get the average frame rate for this device
+     */
+    fun getAverageFrameRate() = Rate(totalFramesProcessed.get(), firstFrameTime?.elapsedSince() ?: Duration.ZERO)
+
+    /**
      * The processing rate has been updated. This is useful for debugging and measuring performance.
      *
      * @param overallRate: The total frame rate at which the analyzer is running

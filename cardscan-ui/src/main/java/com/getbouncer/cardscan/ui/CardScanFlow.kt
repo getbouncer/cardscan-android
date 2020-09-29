@@ -88,7 +88,7 @@ class CardScanFlow(
      */
     private var canceled = false
 
-    private lateinit var mainLoopResultAggregator: MainLoopAggregator
+    private var mainLoopResultAggregator: MainLoopAggregator? = null
     private var mainLoopJob: Job? = null
 
     /**
@@ -114,44 +114,50 @@ class CardScanFlow(
             listener = resultListener,
             enableNameExtraction = enableNameExtraction,
             enableExpiryExtraction = enableExpiryExtraction
-        )
+        ).let { mainLoopResultAggregator ->
 
-        val analyzerPool = runBlocking {
-            val nameDetect = if (attemptedNameAndExpiryInitialization) {
-                NameAndExpiryAnalyzer.Factory<MainLoopState>(
-                    TextDetect.Factory(context, getTextDetectorModel(context, true)),
-                    AlphabetDetect.Factory(context, getAlphabetDetectorModel(context, true)),
-                    ExpiryDetect.Factory(context, getExpiryDetectorModel(context, true))
-                )
-            } else {
-                null
+            val analyzerPool = runBlocking {
+                val nameDetect = if (attemptedNameAndExpiryInitialization) {
+                    NameAndExpiryAnalyzer.Factory<MainLoopState>(
+                        TextDetect.Factory(context, getTextDetectorModel(context, true)),
+                        AlphabetDetect.Factory(context, getAlphabetDetectorModel(context, true)),
+                        ExpiryDetect.Factory(context, getExpiryDetectorModel(context, true))
+                    )
+                } else {
+                    null
+                }
+
+                AnalyzerPoolFactory(
+                    PaymentCardOcrAnalyzer.Factory(
+                        ssdOcrFactory = SSDOcr.Factory(context, getSsdOcrModel(context, true)),
+                        nameDetectFactory = nameDetect,
+                    )
+                ).buildAnalyzerPool()
             }
 
-            AnalyzerPoolFactory(
-                PaymentCardOcrAnalyzer.Factory(SSDOcr.Factory(context, getSsdOcrModel(context, true)), nameDetect)
-            ).buildAnalyzerPool()
+            // make this result aggregator pause and reset when the lifecycle pauses.
+            mainLoopResultAggregator.bindToLifecycle(lifecycleOwner)
+
+            val mainLoop = ProcessBoundAnalyzerLoop(
+                analyzerPool = analyzerPool,
+                resultHandler = mainLoopResultAggregator,
+                analyzerLoopErrorListener = errorListener
+            )
+
+            mainLoopJob = mainLoop.subscribeTo(
+                flow = imageStream.map {
+                    SSDOcr.Input(
+                        fullImage = it,
+                        previewSize = previewSize,
+                        cardFinder = viewFinder,
+                        capturedAt = Clock.markNow()
+                    )
+                },
+                processingCoroutineScope = coroutineScope
+            )
+
+            mainLoopResultAggregator
         }
-
-        // make this result aggregator pause and reset when the lifecycle pauses.
-        mainLoopResultAggregator.bindToLifecycle(lifecycleOwner)
-
-        val mainLoop = ProcessBoundAnalyzerLoop(
-            analyzerPool = analyzerPool,
-            resultHandler = mainLoopResultAggregator,
-            analyzerLoopErrorListener = errorListener
-        )
-
-        mainLoop.subscribeTo(
-            flow = imageStream.map {
-                SSDOcr.Input(
-                    fullImage = it,
-                    previewSize = previewSize,
-                    cardFinder = viewFinder,
-                    capturedAt = Clock.markNow()
-                )
-            },
-            processingCoroutineScope = coroutineScope
-        )
     }
 
     /**
@@ -159,10 +165,10 @@ class CardScanFlow(
      */
     override fun cancelFlow() {
         canceled = true
-        if (::mainLoopResultAggregator.isInitialized) {
-            mainLoopResultAggregator.cancel()
-        }
+        mainLoopResultAggregator?.run { cancel() }
+        mainLoopResultAggregator = null
 
         mainLoopJob?.apply { if (isActive) { cancel() } }
+        mainLoopJob = null
     }
 }

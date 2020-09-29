@@ -105,14 +105,41 @@ fun Size.scaleAndCenterWithin(containingSize: Size): Rect {
     val left = (containingSize.width - scaledSize.width) / 2
     val top = (containingSize.height - scaledSize.height) / 2
     return Rect(
-        /* left */
         left,
-        /* top */
         top,
-        /* right */
         left + scaledSize.width,
-        /* bottom */
-        top + scaledSize.height
+        top + scaledSize.height,
+    )
+}
+
+/**
+ * Calculate the position of the [Size] surrounding the [surroundedSize]. This makes a few
+ * assumptions:
+ * 1. the [Size] and the [surroundedSize] are centered relative to each other.
+ * 2. the [Size] and the [surroundedSize] have the same orientation
+ * 3. the [surroundedSize] and the [Size] share either a horizontal or vertical field of view
+ * 4. the non-shared field of view must be smaller on the [surroundedSize] than the [Size]
+ *
+ * If using this to project a full camera image onto a preview image, This makes a few assumptions:
+ * 1. the preview image [surroundedSize] and the full image [Size] are centered relative to each other
+ * 2. the preview image and the full image have the same orientation
+ * 3. the preview image and the full image share either a horizontal or vertical field of view
+ * 4. the non-shared field of view must be smaller on the preview image than the full image
+ *
+ * Note that the [Size] and the [surroundedSize] are allowed to have completely independent resolutions.
+ */
+@CheckResult
+fun Size.scaleAndCenterSurrounding(surroundedSize: Size): Rect {
+    val aspectRatio = width.toFloat() / height
+
+    val scaledSize = minAspectRatioSurroundingSize(surroundedSize, aspectRatio)
+    val left = (surroundedSize.width - scaledSize.width) / 2
+    val top = (surroundedSize.height - scaledSize.height) / 2
+    return Rect(
+        left,
+        top,
+        left + scaledSize.width,
+        top + scaledSize.height,
     )
 }
 

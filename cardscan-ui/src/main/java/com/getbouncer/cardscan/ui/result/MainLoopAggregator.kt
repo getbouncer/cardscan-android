@@ -44,7 +44,7 @@ class MainLoopAggregator(
         result: PaymentCardOcrAnalyzer.Prediction,
     ): Pair<InterimResult, FinalResult?> {
         val previousState = state
-        val currentState = previousState.consumeTransition(result)
+        val currentState = previousState.consumeTransition(result, frameRateTracker.getAverageFrameRate())
 
         state = currentState
 

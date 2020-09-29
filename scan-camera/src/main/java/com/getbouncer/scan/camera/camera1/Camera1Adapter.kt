@@ -12,11 +12,12 @@ import android.hardware.Camera
 import android.hardware.Camera.AutoFocusCallback
 import android.hardware.Camera.PreviewCallback
 import android.util.DisplayMetrics
+import android.util.Log
 import android.util.Size
 import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.SurfaceView
-import android.widget.FrameLayout
+import android.view.ViewGroup
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.OnLifecycleEvent
 import com.getbouncer.scan.camera.CameraAdapter
@@ -25,6 +26,7 @@ import com.getbouncer.scan.camera.nv21ToYuv
 import com.getbouncer.scan.camera.rotate
 import com.getbouncer.scan.camera.scale
 import com.getbouncer.scan.camera.toBitmap
+import com.getbouncer.scan.framework.Config
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -49,7 +51,7 @@ private val MAXIMUM_RESOLUTION = Size(1920, 1080)
  */
 class Camera1Adapter(
     private val activity: Activity,
-    private val previewView: FrameLayout,
+    private val previewView: ViewGroup,
     private val minimumResolution: Size,
     private val cameraErrorListener: CameraErrorListener
 ) : CameraAdapter<Bitmap>(), PreviewCallback {
@@ -96,10 +98,10 @@ class Camera1Adapter(
             val parameters = parameters
             if (parameters.maxNumFocusAreas > 0) {
                 val focusRect = Rect(
-                    point.x.toInt() - 150,
-                    point.y.toInt() - 150,
-                    point.x.toInt() + 150,
-                    point.y.toInt() + 150
+                    point.x.toInt() - 10,
+                    point.y.toInt() - 10,
+                    point.x.toInt() + 10,
+                    point.y.toInt() + 10
                 )
                 val cameraFocusAreas: MutableList<Camera.Area> = ArrayList()
                 cameraFocusAreas.add(Camera.Area(focusRect, 1000))
@@ -118,10 +120,18 @@ class Camera1Adapter(
         )
 
         if (bytes != null) {
-            val bitmap = bytes.nv21ToYuv(imageWidth, imageHeight).toBitmap().scale(scale).rotate(mRotation.toFloat())
-            camera.addCallbackBuffer(bytes)
-
-            sendImageToStream(bitmap)
+            try {
+                val bitmap = bytes
+                    .nv21ToYuv(imageWidth, imageHeight)
+                    .toBitmap()
+                    .scale(scale)
+                    .rotate(mRotation.toFloat())
+                camera.addCallbackBuffer(bytes)
+                sendImageToStream(bitmap)
+            } catch (t: Throwable) {
+                Log.e(Config.logTag, "Exception caught during camera transform", t)
+                // ignore errors transforming the image (OOM, etc)
+            }
         } else {
             camera.addCallbackBuffer(ByteArray((imageWidth * imageHeight * 1.5).roundToInt()))
         }
@@ -222,7 +232,9 @@ class Camera1Adapter(
             setCameraDisplayOrientation(activity, Camera.CameraInfo.CAMERA_FACING_BACK)
             setCameraPreviewFrame()
             // Create our Preview view and set it as the content of our activity.
-            cameraPreview = CameraPreview(activity, this)
+            cameraPreview = CameraPreview(activity, this).apply {
+                layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+            }
             withContext(Dispatchers.Main) {
                 onCameraAvailableListener.get()?.let {
                     it(camera)
