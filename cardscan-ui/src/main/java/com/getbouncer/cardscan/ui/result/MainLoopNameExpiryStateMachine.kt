@@ -1,6 +1,5 @@
 package com.getbouncer.cardscan.ui.result
 
-import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.getbouncer.cardscan.ui.analyzer.MainLoopNameExpiryAnalyzer
 import com.getbouncer.scan.framework.MachineState

@@ -8,17 +8,10 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class MainLoopOcrStateMachineTest {
-
-    @Test
-    fun initial_runsOcrOnly() {
-        val state = MainLoopOcrState.Initial(enableNameExpiryExtraction = true)
-        assertTrue { state.runOcr }
-    }
 
     @Test
     @ExperimentalCoroutinesApi
@@ -49,15 +42,6 @@ class MainLoopOcrStateMachineTest {
 
         assertTrue(newState is MainLoopOcrState.OcrRunning, "$newState is not NameAndExpiryRunning")
         assertEquals("4847186095118770", newState.getMostLikelyPan())
-    }
-
-    @Test
-    fun ocrRunning_runsOcrOnly() {
-        val state = MainLoopOcrState.OcrRunning(
-            firstPan = "4847186095118770",
-            enableNameExpiryExtraction = true,
-        )
-        assertTrue { state.runOcr }
     }
 
     @Test
@@ -205,12 +189,6 @@ class MainLoopOcrStateMachineTest {
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopOcrState.Finished, "$newState is not Finished")
         assertEquals("4847186095118770", newState.pan)
-    }
-
-    @Test
-    fun finished_runsNothing() {
-        val state = MainLoopOcrState.Finished("4847186095118770")
-        assertFalse(state.runOcr)
     }
 
     @Test
