@@ -6,7 +6,6 @@ import android.graphics.PointF
 import android.graphics.Rect
 import android.graphics.drawable.Animatable
 import android.os.Handler
-import android.util.Size
 import android.util.TypedValue
 import android.view.View
 import android.view.animation.AnimationUtils

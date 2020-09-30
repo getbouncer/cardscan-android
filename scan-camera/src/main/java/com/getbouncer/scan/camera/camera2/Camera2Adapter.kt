@@ -23,7 +23,6 @@ import android.graphics.Bitmap
 import android.graphics.ImageFormat
 import android.graphics.Matrix
 import android.graphics.PointF
-import android.graphics.RectF
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCaptureSession
@@ -52,7 +51,9 @@ import com.getbouncer.scan.camera.CameraErrorListener
 import com.getbouncer.scan.camera.isSupportedFormat
 import com.getbouncer.scan.framework.time.delay
 import com.getbouncer.scan.framework.time.seconds
-import com.getbouncer.scan.framework.util.scaleAndCenterSurrounding
+import com.getbouncer.scan.framework.util.aspectRatio
+import com.getbouncer.scan.framework.util.minAspectRatioSurroundingSize
+import com.getbouncer.scan.framework.util.toRectF
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -64,8 +65,6 @@ import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.roundToInt
 
 /**
  * The maximum resolution width for a preview.
@@ -132,10 +131,8 @@ class Camera2Adapter(
         /**
          * Scale a [previewResolution] to enclose [fit]
          */
-        private fun scalePreviewToFit(previewResolution: Size, fit: Size): Size {
-            val previewAspectRatio = previewResolution.width.toFloat() / previewResolution.height
-            return minAspectRatioOutSize(fit, previewAspectRatio)
-        }
+        private fun scalePreviewToFit(previewResolution: Size, fit: Size): Size =
+            minAspectRatioSurroundingSize(fit, previewResolution.aspectRatio())
     }
 
     private val textureView by lazy { TextureView(activity) }
@@ -267,34 +264,6 @@ class Camera2Adapter(
     fun onResume() {
         startCameraThread()
 
-//        previewView?.let { parent ->
-//            val textureRect = if (parent.width > parent.height) {
-//                // device is horizontal. Match width and allow textureview height to be larger than
-//                // container view height
-//                val textureSize = Size(
-//                    max(minimumResolution.width, minimumResolution.height),
-//                    min(minimumResolution.width, minimumResolution.height),
-//                )
-//                textureSize.scaleAndCenterSurrounding(Size(parent.width, parent.height))
-//            } else {
-//                val textureSize = Size(
-//                    min(minimumResolution.width, minimumResolution.height),
-//                    max(minimumResolution.width, minimumResolution.height),
-//                )
-//                textureSize.scaleAndCenterSurrounding(Size(parent.width, parent.height))
-//            }
-//
-//            if (this::previewResolution.isInitialized) {
-//                textureView.layoutParams.apply {
-////                width = textureRect.width()
-////                height = textureRect.height()
-//                    width = previewResolution.width
-//                    height = previewResolution.height
-//                }
-//                textureView.requestLayout()
-//            }
-//        }
-
         if (textureView.isAvailable) {
             openCamera()
         } else {
@@ -349,53 +318,10 @@ class Camera2Adapter(
 
                 // TODO: set up the preview view correctly. Until this is done, this will not work.
                 textureView.layoutParams.apply {
-//                width = textureRect.width()
-//                height = textureRect.height()
                     width = previewResolution.width
                     height = previewResolution.height
                 }
                 textureView.requestLayout()
-
-//                imageReader = ImageReader.newInstance(
-//                    previewFormatAndResolution.second.width,
-//                    previewFormatAndResolution.second.height,
-//                    previewFormat,
-//                    2
-//                ).apply {
-//                    setOnImageAvailableListener(
-//                        object : ImageReader.OnImageAvailableListener {
-//                            override fun onImageAvailable(reader: ImageReader?) {
-//                                cameraHandler?.post {
-//                                    if (processingImage.getAndSet(true)) {
-//                                        reader?.acquireLatestImage()?.close()
-//                                        return@post
-//                                    }
-//
-//                                    val bitmap = imageReader?.acquireLatestImage()?.use {
-//                                        if (it.isSupportedFormat()) it.toBitmap() else null
-//                                    }
-//
-//                                    bitmap
-////                                        ?.scale(
-////                                            max(
-////                                                minimumResolution.width.toFloat() / bitmap.width,
-////                                                minimumResolution.height.toFloat() / bitmap.height
-////                                            )
-////                                        )
-//                                        ?.rotate(
-//                                            calculateImageRotationDegrees(
-//                                                displayRotation,
-//                                                sensorRotation
-//                                            ).toFloat()
-//                                        )
-//                                        ?.run { sendImageToStream(this) }
-//                                    processingImage.set(false)
-//                                }
-//                            }
-//                        },
-//                        cameraHandler
-//                    )
-//                }
 
                 // Check if the flash is supported.
                 flashSupported = cameraDetails.flashAvailable
@@ -619,8 +545,8 @@ class Camera2Adapter(
      */
     private fun configureTransform(viewSize: Size, previewSize: Size) {
         val matrix = Matrix()
-        val viewRect = RectF(0F, 0F, viewSize.width.toFloat(), viewSize.height.toFloat())
-        val bufferRect = RectF(0F, 0F, previewSize.width.toFloat(), previewSize.height.toFloat())
+        val viewRect = viewSize.toRectF()
+        val bufferRect = previewSize.toRectF()
 
         val rotation = -(displayRotation * 90).toFloat()
         val scale = max(
@@ -712,30 +638,3 @@ private data class CameraDetails(
     val sensorRotation: Int,
     val supportedAutoFocusModes: List<Int>
 )
-
-/**
- * Determine the maximum size of rectangle with a given aspect ratio (X/Y) that can enclose the
- * specified area.
- *
- * For example, if the aspect ratio is 9/16 and the area is 2x2, the resulting rectangle would be
- * size 2x4 and look like this:
- * ```
- *  ____
- * |____|
- * |    |
- * |____|
- * |____|
- * ```
- */
-private fun minAspectRatioOutSize(area: Size, aspectRatio: Float): Size {
-    var height = area.height
-    var width = (height * aspectRatio).roundToInt()
-
-    return if (width >= area.width) {
-        Size(width, height)
-    } else {
-        width = area.width
-        height = (width / aspectRatio).roundToInt()
-        Size(width, max(height, area.height))
-    }
-}

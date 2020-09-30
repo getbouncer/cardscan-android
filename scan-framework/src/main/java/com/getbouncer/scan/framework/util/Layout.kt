@@ -37,10 +37,8 @@ fun maxAspectRatioInSize(area: Size, aspectRatio: Float): Size {
 }
 
 /**
- * Calculate the maximum [Size] that fits within the [containingSize] and maintains the same aspect ratio as the subject
- * of this method. This is often used to project a preview image onto a full camera image.
  * Determine the minimum size of rectangle with a given aspect ratio (X/Y) that a specified area
- * can fit inside it.
+ * can fit inside.
  *
  * For example, if the aspect ratio is 1/2 and the area is 1x1, the resulting rectangle would be
  * size 1x2 and look like this:
@@ -80,20 +78,20 @@ fun adjustSizeToAspectRatio(area: Size, aspectRatio: Float): Size = if (aspectRa
 }
 
 /**
- * Calculate the position of the [Size] within the [containingSize]. This makes a few
- * assumptions:
+ * Calculate the position of the [Size] within the [containingSize]. This makes a few assumptions:
  * 1. the [Size] and the [containingSize] are centered relative to each other.
  * 2. the [Size] and the [containingSize] have the same orientation
  * 3. the [containingSize] and the [Size] share either a horizontal or vertical field of view
  * 4. the non-shared field of view must be smaller on the [Size] than the [containingSize]
  *
  * If using this to project a preview image onto a full camera image, This makes a few assumptions:
- * 1. the preview image [Size] and the full image [containingSize] are centered relative to each other
+ * 1. the preview image [Size] and full image [containingSize] are centered relative to each other
  * 2. the preview image and the full image have the same orientation
  * 3. the preview image and the full image share either a horizontal or vertical field of view
  * 4. the non-shared field of view must be smaller on the preview image than the full image
  *
- * Note that the [Size] and the [containingSize] are allowed to have completely independent resolutions.
+ * Note that the [Size] and the [containingSize] are allowed to have completely independent
+ * resolutions.
  */
 @CheckResult
 fun Size.scaleAndCenterWithin(containingSize: Size): Rect {
@@ -121,12 +119,13 @@ fun Size.scaleAndCenterWithin(containingSize: Size): Rect {
  * 4. the non-shared field of view must be smaller on the [surroundedSize] than the [Size]
  *
  * If using this to project a full camera image onto a preview image, This makes a few assumptions:
- * 1. the preview image [surroundedSize] and the full image [Size] are centered relative to each other
+ * 1. the preview image [surroundedSize] and full image [Size] are centered relative to each other
  * 2. the preview image and the full image have the same orientation
  * 3. the preview image and the full image share either a horizontal or vertical field of view
  * 4. the non-shared field of view must be smaller on the preview image than the full image
  *
- * Note that the [Size] and the [surroundedSize] are allowed to have completely independent resolutions.
+ * Note that the [Size] and the [surroundedSize] are allowed to have completely independent
+ * resolutions.
  */
 @CheckResult
 fun Size.scaleAndCenterSurrounding(surroundedSize: Size): Rect {
@@ -159,7 +158,8 @@ fun Size.centerOn(rect: Rect) = Rect(
 )
 
 /**
- * Scale a [Rect] to have a size equivalent to the [scaledSize]. This will also scale the position of the [Rect].
+ * Scale a [Rect] to have a size equivalent to the [scaledSize]. This will also scale the position
+ * of the [Rect].
  *
  * For example, scaling a Rect(1, 2, 3, 4) by Size(5, 6) will result in a Rect(5, 12, 15, 24)
  */
@@ -172,7 +172,8 @@ fun RectF.scaled(scaledSize: Size) = RectF(
 )
 
 /**
- * Scale a [Rect] to have a size equivalent to the [scaledSize]. This will maintain the center position of the [Rect].
+ * Scale a [Rect] to have a size equivalent to the [scaledSize]. This will maintain the center
+ * position of the [Rect].
  *
  * For example, scaling a Rect(5, 6, 7, 8) by Size(2, 0.5) will result
  */
@@ -197,6 +198,9 @@ fun Rect.centerScaled(scaleX: Float, scaleY: Float) = Rect(
  */
 @CheckResult
 fun Size.toRect() = Rect(0, 0, this.width, this.height)
+
+@CheckResult
+fun Size.toRectF() = RectF(0F, 0F, this.width.toFloat(), this.height.toFloat())
 
 /**
  * Return a rect that is the intersection of two other rects
@@ -245,115 +249,153 @@ fun Size.projectRegionOfInterest(toSize: Size, regionOfInterest: Rect): Rect {
 }
 
 /**
- * Resizes a region of the image and places it somewhere else
+ * This method allows relocating and resizing a portion of a [Size]. It returns the required
+ * translations required to achieve this relocation. This is useful for zooming in on sections of
+ * an image.
+ *
+ * For example, given a size 5x5 and an original region (2, 2, 3, 3):
+ *
+ *  _______
+ * |       |
+ * |   _   |
+ * |  |_|  |
+ * |       |
+ * |_______|
+ *
+ * If the [newRegion] is (1, 1, 4, 4) and the [newSize] is 6x6, the result will look like this:
+ *
+ *  ________
+ * |  ___   |
+ * | |   |  |
+ * | |   |  |
+ * | |___|  |
+ * |        |
+ * |________|
+ *
+ * Nine individual translations will be returned for the affected regions. The returned [Rect]s
+ * will look like this:
+ *
+ *  ________
+ * |_|___|__|
+ * | |   |  |
+ * | |   |  |
+ * |_|___|__|
+ * | |   |  |
+ * |_|___|__|
  */
 @CheckResult
 fun Size.resizeRegion(
-    originalCenterRect: Rect,
-    toCenterRect: Rect,
-    toImageSize: Size
+    originalRegion: Rect,
+    newRegion: Rect,
+    newSize: Size
 ): Map<Rect, Rect> = mapOf(
     Rect(
         0,
         0,
-        originalCenterRect.left,
-        originalCenterRect.top
+        originalRegion.left,
+        originalRegion.top
     ) to Rect(
         0,
         0,
-        toCenterRect.left,
-        toCenterRect.top
+        newRegion.left,
+        newRegion.top
     ),
     Rect(
-        originalCenterRect.left,
+        originalRegion.left,
         0,
-        originalCenterRect.right,
-        originalCenterRect.top
+        originalRegion.right,
+        originalRegion.top
     ) to Rect(
-        toCenterRect.left,
+        newRegion.left,
         0,
-        toCenterRect.right,
-        toCenterRect.top
+        newRegion.right,
+        newRegion.top
     ),
     Rect(
-        originalCenterRect.right,
+        originalRegion.right,
         0,
         this.width,
-        originalCenterRect.top
+        originalRegion.top
     ) to Rect(
-        toCenterRect.right,
+        newRegion.right,
         0,
-        toImageSize.width,
-        toCenterRect.top
+        newSize.width,
+        newRegion.top
     ),
     Rect(
         0,
-        originalCenterRect.top,
-        originalCenterRect.left,
-        originalCenterRect.bottom
+        originalRegion.top,
+        originalRegion.left,
+        originalRegion.bottom
     ) to Rect(
         0,
-        toCenterRect.top,
-        toCenterRect.left,
-        toCenterRect.bottom
+        newRegion.top,
+        newRegion.left,
+        newRegion.bottom
     ),
     Rect(
-        originalCenterRect.left,
-        originalCenterRect.top,
-        originalCenterRect.right,
-        originalCenterRect.bottom
+        originalRegion.left,
+        originalRegion.top,
+        originalRegion.right,
+        originalRegion.bottom
     ) to Rect(
-        toCenterRect.left,
-        toCenterRect.top,
-        toCenterRect.right,
-        toCenterRect.bottom
+        newRegion.left,
+        newRegion.top,
+        newRegion.right,
+        newRegion.bottom
     ),
     Rect(
-        originalCenterRect.right,
-        originalCenterRect.top,
+        originalRegion.right,
+        originalRegion.top,
         this.width,
-        originalCenterRect.bottom
+        originalRegion.bottom
     ) to Rect(
-        toCenterRect.right,
-        toCenterRect.top,
-        toImageSize.width,
-        toCenterRect.bottom
+        newRegion.right,
+        newRegion.top,
+        newSize.width,
+        newRegion.bottom
     ),
     Rect(
         0,
-        originalCenterRect.bottom,
-        originalCenterRect.left,
+        originalRegion.bottom,
+        originalRegion.left,
         this.height
     ) to Rect(
         0,
-        toCenterRect.bottom,
-        toCenterRect.left,
-        toImageSize.height
+        newRegion.bottom,
+        newRegion.left,
+        newSize.height
     ),
     Rect(
-        originalCenterRect.left,
-        originalCenterRect.bottom,
-        originalCenterRect.right,
+        originalRegion.left,
+        originalRegion.bottom,
+        originalRegion.right,
         this.height
     ) to Rect(
-        toCenterRect.left,
-        toCenterRect.bottom,
-        toCenterRect.right,
-        toImageSize.height
+        newRegion.left,
+        newRegion.bottom,
+        newRegion.right,
+        newSize.height
     ),
     Rect(
-        originalCenterRect.right,
-        originalCenterRect.bottom,
+        originalRegion.right,
+        originalRegion.bottom,
         this.width,
         this.height
     ) to Rect(
-        toCenterRect.right,
-        toCenterRect.bottom,
-        toImageSize.width,
-        toImageSize.height
+        newRegion.right,
+        newRegion.bottom,
+        newSize.width,
+        newSize.height
     )
 )
 
+/**
+ * Determine the size of a [Rect].
+ */
 fun Rect.size() = Size(width(), height())
 
+/**
+ * Determine the aspect ratio of a size.
+ */
 fun Size.aspectRatio() = width.toFloat() / height.toFloat()

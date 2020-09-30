@@ -37,7 +37,9 @@ class ItemTotalCounter<T>(firstValue: T? = null) : ItemCounter<T> {
      */
     @CheckResult
     override fun getHighestCountItem(minCount: Int): Pair<Int, T>? =
-        items.maxByOrNull { it.value }?.let { if (items[it.key] ?: 0 >= minCount) it.value to it.key else null }
+        items
+            .maxByOrNull { it.value }
+            ?.let { if (items[it.key] ?: 0 >= minCount) it.value to it.key else null }
 
     /**
      * Reset all item counts.
@@ -50,7 +52,10 @@ class ItemTotalCounter<T>(firstValue: T? = null) : ItemCounter<T> {
 /**
  * A class that keeps track of [maxItemsToTrack] recent items.
  */
-class ItemRecencyCounter<T>(private val maxItemsToTrack: Int, firstValue: T? = null) : ItemCounter<T> {
+class ItemRecencyCounter<T>(
+    private val maxItemsToTrack: Int,
+    firstValue: T? = null
+) : ItemCounter<T> {
     private val storageMutex = Mutex()
     private val items = LinkedList<T>()
 
@@ -76,7 +81,12 @@ class ItemRecencyCounter<T>(private val maxItemsToTrack: Int, firstValue: T? = n
      */
     @CheckResult
     override fun getHighestCountItem(minCount: Int): Pair<Int, T>? =
-        items.groupingBy { it }.eachCount().filter { it.value >= minCount }.maxByOrNull { it.value }?.let { it.value to it.key }
+        items
+            .groupingBy { it }
+            .eachCount()
+            .filter { it.value >= minCount }
+            .maxByOrNull { it.value }
+            ?.let { it.value to it.key }
 
     /**
      * Reset all item counts.

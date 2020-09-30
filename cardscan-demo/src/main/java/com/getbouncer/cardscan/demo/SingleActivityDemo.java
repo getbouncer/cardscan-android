@@ -21,8 +21,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.getbouncer.cardscan.ui.CardScanFlow;
-import com.getbouncer.cardscan.ui.result.MainLoopAggregator;
-import com.getbouncer.cardscan.ui.result.MainLoopState;
+import com.getbouncer.cardscan.ui.result.MainLoopNameExpiryState;
+import com.getbouncer.cardscan.ui.result.MainLoopOcrState;
 import com.getbouncer.scan.camera.CameraAdapter;
 import com.getbouncer.scan.camera.CameraErrorListener;
 import com.getbouncer.scan.camera.camera1.Camera1Adapter;
@@ -370,27 +370,31 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
     }
 
     private AggregateResultListener<
-            MainLoopAggregator.InterimResult,
-            MainLoopAggregator.FinalResult> aggregateResultListener =
+            CardScanFlow.InterimResult,
+            CardScanFlow.FinalResult> aggregateResultListener =
             new BlockingAggregateResultListener<
-                    MainLoopAggregator.InterimResult,
-                    MainLoopAggregator.FinalResult>() {
+                    CardScanFlow.InterimResult,
+                    CardScanFlow.FinalResult>() {
 
         /**
          * An interim result has been received from the scan, the scan is still running. Update your
          * UI as necessary here to display the progress of the scan.
          */
         @Override
-        public void onInterimResultBlocking(MainLoopAggregator.InterimResult interimResult) {
+        public void onInterimResultBlocking(CardScanFlow.InterimResult interimResult) {
             new Handler(getMainLooper()).post(() -> {
-                final MainLoopState mainLoopState = interimResult.getState();
-                if (mainLoopState instanceof MainLoopState.Initial) {
+                final MainLoopOcrState mainLoopOcrState = interimResult.getOcrState();
+                final MainLoopNameExpiryState mainLoopNameExpiryState =
+                        interimResult.getNameExpiryState();
+
+                if (mainLoopOcrState instanceof MainLoopOcrState.Initial) {
                     // In initial state, show no card found
                     setStateNotFound();
 
-                } else if (mainLoopState instanceof MainLoopState.OcrRunning) {
+                } else if (mainLoopOcrState instanceof MainLoopOcrState.OcrRunning) {
                     // If OCR is running and a valid card number is visible, display it
-                    final MainLoopState.OcrRunning state = (MainLoopState.OcrRunning) mainLoopState;
+                    final MainLoopOcrState.OcrRunning state =
+                        (MainLoopOcrState.OcrRunning) mainLoopOcrState;
                     final String pan = state.getMostLikelyPan();
                     if (pan != null) {
                         cardPanTextView.setText(PanFormatterKt.formatPan(pan));
@@ -398,10 +402,11 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
                     }
                     setStateFound();
 
-                } else if (mainLoopState instanceof MainLoopState.NameAndExpiryRunning) {
+                } else if (mainLoopNameExpiryState instanceof
+                        MainLoopNameExpiryState.NameAndExpiryRunning) {
                     // If name and expiry are running and a valid name is found, display it
-                    final MainLoopState.NameAndExpiryRunning state =
-                            (MainLoopState.NameAndExpiryRunning) mainLoopState;
+                    final MainLoopNameExpiryState.NameAndExpiryRunning state =
+                            (MainLoopNameExpiryState.NameAndExpiryRunning) mainLoopNameExpiryState;
                     final String name = state.getMostLikelyName();
                     if (name != null) {
                         cardNameTextView.setText(name);
@@ -409,8 +414,12 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
                     }
                     setStateFound();
 
-                } else if (mainLoopState instanceof MainLoopState.Finished) {
-                    // If scanning has finished, display correct
+                } else if (mainLoopOcrState instanceof MainLoopOcrState.Finished) {
+                    // If ocr has finished, name and expiry extraction will start
+                    setStateFound();
+
+                } else if (mainLoopNameExpiryState instanceof MainLoopNameExpiryState.Finished) {
+                    // If name and expiry finished, display done
                     setStateCorrect();
                 }
             });
@@ -421,7 +430,7 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
          * of the final result.
          */
         @Override
-        public void onResultBlocking(MainLoopAggregator.FinalResult result) {
+        public void onResultBlocking(CardScanFlow.FinalResult result) {
             final ExpiryDetect.Expiry expiry = result.getExpiry();
 
             new Handler(getMainLooper()).post(() -> {

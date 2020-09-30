@@ -29,10 +29,7 @@ import com.getbouncer.scan.ui.util.setDrawable
 import com.getbouncer.scan.ui.util.setTextSizeByRes
 import com.getbouncer.scan.ui.util.setVisible
 import com.getbouncer.scan.ui.util.startAnimation
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 abstract class SimpleScanActivity : ScanActivity() {
 

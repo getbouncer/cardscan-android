@@ -380,7 +380,7 @@ class TextDetect private constructor(interpreter: Interpreter) :
     ) : TFLAnalyzerFactory<TextDetect>(context, fetchedModel) {
         companion object {
             private const val USE_GPU = false
-            private const val DEFAULT_THREADS = 2
+            private const val DEFAULT_THREADS = 3
         }
 
         override val tfOptions: Interpreter.Options = Interpreter
