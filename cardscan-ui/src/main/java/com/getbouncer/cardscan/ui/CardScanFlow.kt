@@ -178,15 +178,26 @@ class CardScanFlow(
 
                     pan = result
 
-                    coroutineScope.launch {
-                        runNameExpiryMainLoop(
-                            context,
-                            imageStream,
-                            previewSize,
-                            viewFinder,
-                            lifecycleOwner,
-                            coroutineScope,
-                            mainLoopNameExpiryListener,
+                    if (enableNameExtraction || enableExpiryExtraction) {
+                        coroutineScope.launch {
+                            runNameExpiryMainLoop(
+                                context,
+                                imageStream,
+                                previewSize,
+                                viewFinder,
+                                lifecycleOwner,
+                                coroutineScope,
+                                mainLoopNameExpiryListener,
+                            )
+                        }
+                    } else {
+                        resultListener.onResult(
+                            FinalResult(
+                                pan = result,
+                                name = null,
+                                expiry = null,
+                                errorString = null,
+                            )
                         )
                     }
                 }
