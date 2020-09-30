@@ -1,5 +1,7 @@
 package com.getbouncer.scan.framework.time
 
+import androidx.annotation.CheckResult
+
 object Clock {
     fun markNow(): ClockMark = PreciseClockMark(System.nanoTime())
 }
@@ -71,21 +73,10 @@ private class PreciseClockMark(private val originMark: Long) : ClockMark {
  *
  * TODO: use contracts when they are no longer experimental
  */
-inline fun <T> measureTimeWithResult(block: () -> T): Pair<Duration, T> {
+@CheckResult
+inline fun <T> measureTime(block: () -> T): Pair<Duration, T> {
     // contract { callsInPlace(block, EXACTLY_ONCE) }
     val mark = Clock.markNow()
     val result = block()
     return mark.elapsedSince() to result
-}
-
-/**
- * Measure the amount of time a process takes.
- *
- * TODO: use contracts when they are no longer experimental
- */
-inline fun measureTime(block: () -> Unit): Duration {
-    // contract { callsInPlace(block, EXACTLY_ONCE) }
-    val mark = Clock.markNow()
-    block()
-    return mark.elapsedSince()
 }

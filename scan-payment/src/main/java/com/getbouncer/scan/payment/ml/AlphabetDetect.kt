@@ -68,7 +68,7 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
     ) : TFLAnalyzerFactory<AlphabetDetect>(context, fetchedModel) {
         companion object {
             private const val USE_GPU = false
-            private const val DEFAULT_THREADS = 3
+            private const val DEFAULT_THREADS = 1
         }
 
         override val tfOptions: Interpreter.Options = Interpreter
