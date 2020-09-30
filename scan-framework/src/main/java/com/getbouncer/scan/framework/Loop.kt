@@ -3,7 +3,6 @@ package com.getbouncer.scan.framework
 import com.getbouncer.scan.framework.time.Clock
 import com.getbouncer.scan.framework.time.ClockMark
 import com.getbouncer.scan.framework.time.Duration
-import com.getbouncer.scan.framework.time.measureTime
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -113,20 +112,18 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
         flow.collect { frame ->
             yield() // allow for this to be canceled
             val stat = Stats.trackRepeatingTask("analyzer_execution:${analyzer::class.java.simpleName}")
-            measureTime {
-                try {
-                    val analyzerResult = analyzer.analyze(frame, getState())
+            try {
+                val analyzerResult = analyzer.analyze(frame, getState())
 
-                    try {
-                        finished = onResult(analyzerResult, frame)
-                    } catch (t: Throwable) {
-                        stat.trackResult("result_failure")
-                        handleResultFailure(t)
-                    }
+                try {
+                    finished = onResult(analyzerResult, frame)
                 } catch (t: Throwable) {
-                    stat.trackResult("analyzer_failure")
-                    handleAnalyzerFailure(t)
+                    stat.trackResult("result_failure")
+                    handleResultFailure(t)
                 }
+            } catch (t: Throwable) {
+                stat.trackResult("analyzer_failure")
+                handleAnalyzerFailure(t)
             }
 
             if (finished) {

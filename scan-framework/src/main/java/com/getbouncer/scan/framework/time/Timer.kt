@@ -57,7 +57,7 @@ private class LoggingTimer(
     // TODO: use contracts when they are no longer experimental
     override suspend fun <T> measureSuspend(taskName: String?, task: suspend () -> T): T {
         // contract { callsInPlace(task, EXACTLY_ONCE) }
-        val (duration, result) = measureTimeWithResult { task() }
+        val (duration, result) = measureTime { task() }
 
         executionCount++
         executionTotalDuration += duration
