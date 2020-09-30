@@ -23,13 +23,26 @@ sealed class Timer {
         }
     }
 
-    fun <T> measure(taskName: String? = null, task: () -> T): T = runBlocking { measureSuspend(taskName) { task() } }
+    /**
+     * Log the duration of a single task and return the result from that task.
+     *
+     * TODO: use contracts when they are no longer experimental
+     */
+    fun <T> measure(taskName: String? = null, task: () -> T): T {
+        // contract { callsInPlace(task, EXACTLY_ONCE) }
+        return runBlocking { measureSuspend(taskName) { task() } }
+    }
 
     abstract suspend fun <T> measureSuspend(taskName: String? = null, task: suspend () -> T): T
 }
 
 private object NoOpTimer : Timer() {
-    override suspend fun <T> measureSuspend(taskName: String?, task: suspend () -> T): T = task()
+
+    // TODO: use contracts when they are no longer experimental
+    override suspend fun <T> measureSuspend(taskName: String?, task: suspend () -> T): T {
+        // contract { callsInPlace(task, EXACTLY_ONCE) }
+        return task()
+    }
 }
 
 private class LoggingTimer(
@@ -41,7 +54,9 @@ private class LoggingTimer(
     private var executionTotalDuration = Duration.ZERO
     private var updateClock = Clock.markNow()
 
+    // TODO: use contracts when they are no longer experimental
     override suspend fun <T> measureSuspend(taskName: String?, task: suspend () -> T): T {
+        // contract { callsInPlace(task, EXACTLY_ONCE) }
         val (duration, result) = measureTimeWithResult { task() }
 
         executionCount++

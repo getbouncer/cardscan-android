@@ -5,15 +5,20 @@ import android.graphics.Bitmap
 import android.graphics.Rect
 import android.util.Size
 import androidx.lifecycle.LifecycleOwner
-import com.getbouncer.cardscan.ui.analyzer.PaymentCardOcrAnalyzer
-import com.getbouncer.cardscan.ui.result.MainLoopAggregator
-import com.getbouncer.cardscan.ui.result.MainLoopState
+import com.getbouncer.cardscan.ui.analyzer.MainLoopNameExpiryAnalyzer
+import com.getbouncer.cardscan.ui.analyzer.MainLoopOcrAnalyzer
+import com.getbouncer.cardscan.ui.result.MainLoopNameExpiryAggregator
+import com.getbouncer.cardscan.ui.result.MainLoopNameExpiryState
+import com.getbouncer.cardscan.ui.result.MainLoopOcrAggregator
+import com.getbouncer.cardscan.ui.result.MainLoopOcrState
 import com.getbouncer.scan.framework.AggregateResultListener
 import com.getbouncer.scan.framework.AnalyzerLoopErrorListener
 import com.getbouncer.scan.framework.AnalyzerPoolFactory
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.ProcessBoundAnalyzerLoop
 import com.getbouncer.scan.framework.time.Clock
+import com.getbouncer.scan.framework.time.Duration
+import com.getbouncer.scan.framework.time.Rate
 import com.getbouncer.scan.framework.util.cacheFirstResultSuspend
 import com.getbouncer.scan.payment.analyzer.NameAndExpiryAnalyzer
 import com.getbouncer.scan.payment.ml.AlphabetDetect
@@ -31,12 +36,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 /**
- * This class contains the scanning logic required for analyzing a credit card for scanning purposes.
+ * This class contains the logic required for analyzing a credit card for scanning.
  */
 class CardScanFlow(
     private val enableNameExtraction: Boolean,
     private val enableExpiryExtraction: Boolean,
-    private val resultListener: AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult>,
+    private val resultListener: AggregateResultListener<InterimResult, FinalResult>,
     private val errorListener: AnalyzerLoopErrorListener
 ) : ScanFlow {
     companion object {
@@ -83,13 +88,36 @@ class CardScanFlow(
         }
     }
 
+    data class InterimResult(
+        val ocrAnalyzerResult: SSDOcr.Prediction?,
+        val ocrState: MainLoopOcrState?,
+        val nameExpiryAnalyzerResult: MainLoopNameExpiryAnalyzer.Prediction?,
+        val nameExpiryState: MainLoopNameExpiryState?,
+        val frame: SSDOcr.Input,
+    )
+
+    data class FinalResult(
+        val pan: String?,
+        val name: String?,
+        val expiry: ExpiryDetect.Expiry?,
+        val errorString: String?,
+    )
+
     /**
      * If this is true, do not start the flow.
      */
     private var canceled = false
 
-    private lateinit var mainLoopResultAggregator: MainLoopAggregator
-    private var mainLoopJob: Job? = null
+    private var mainLoopOcrAggregator: MainLoopOcrAggregator? = null
+    private var mainLoopNameExpiryAggregator: MainLoopNameExpiryAggregator? = null
+
+    private var mainLoopOcr: ProcessBoundAnalyzerLoop<SSDOcr.Input, MainLoopOcrState, SSDOcr.Prediction>? = null
+    private var mainLoopNameExpiry: ProcessBoundAnalyzerLoop<SSDOcr.Input, MainLoopNameExpiryState, MainLoopNameExpiryAnalyzer.Prediction>? = null
+
+    private var mainLoopOcrJob: Job? = null
+    private var mainLoopNameExpiryJob: Job? = null
+
+    private var pan: String? = null
 
     /**
      * Start the image processing flow for scanning a card.
@@ -105,64 +133,226 @@ class CardScanFlow(
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,
         coroutineScope: CoroutineScope
-    ) {
-        if (canceled) {
-            return
-        }
+    ) = coroutineScope.launch {
 
-        mainLoopResultAggregator = MainLoopAggregator(
-            listener = resultListener,
-            enableNameExtraction = enableNameExtraction,
-            enableExpiryExtraction = enableExpiryExtraction
-        )
+        pan = null
 
-        val analyzerPool = runBlocking {
-            val nameDetect = if (attemptedNameAndExpiryInitialization) {
-                NameAndExpiryAnalyzer.Factory<MainLoopState>(
-                    TextDetect.Factory(context, getTextDetectorModel(context, true)),
-                    AlphabetDetect.Factory(context, getAlphabetDetectorModel(context, true)),
-                    ExpiryDetect.Factory(context, getExpiryDetectorModel(context, true))
-                )
-            } else {
-                null
+        val mainLoopNameExpiryListener =
+            object : AggregateResultListener<MainLoopNameExpiryAggregator.InterimResult, MainLoopNameExpiryAggregator.FinalResult> {
+                override suspend fun onResult(result: MainLoopNameExpiryAggregator.FinalResult) {
+                    mainLoopNameExpiry?.unsubscribe()
+                    mainLoopNameExpiry = null
+
+                    resultListener.onResult(
+                        FinalResult(
+                            pan = pan,
+                            name = result.name,
+                            expiry = result.expiry,
+                            errorString = result.errorString,
+                        )
+                    )
+                }
+
+                override suspend fun onInterimResult(result: MainLoopNameExpiryAggregator.InterimResult) {
+                    resultListener.onInterimResult(
+                        InterimResult(
+                            ocrAnalyzerResult = null,
+                            ocrState = null,
+                            nameExpiryAnalyzerResult = result.analyzerResult,
+                            nameExpiryState = result.state,
+                            frame = result.frame,
+                        )
+                    )
+                }
+
+                override suspend fun onReset() {
+                    resultListener.onReset()
+                }
             }
 
-            AnalyzerPoolFactory(
-                PaymentCardOcrAnalyzer.Factory(SSDOcr.Factory(context, getSsdOcrModel(context, true)), nameDetect)
-            ).buildAnalyzerPool()
-        }
+        val mainLoopOcrListener =
+            object : AggregateResultListener<MainLoopOcrAggregator.InterimResult, String> {
+                override suspend fun onResult(result: String) {
+                    mainLoopOcr?.unsubscribe()
+                    mainLoopOcr = null
 
-        // make this result aggregator pause and reset when the lifecycle pauses.
-        mainLoopResultAggregator.bindToLifecycle(lifecycleOwner)
+                    pan = result
 
-        val mainLoop = ProcessBoundAnalyzerLoop(
-            analyzerPool = analyzerPool,
-            resultHandler = mainLoopResultAggregator,
-            analyzerLoopErrorListener = errorListener
+                    if (enableNameExtraction || enableExpiryExtraction) {
+                        coroutineScope.launch {
+                            runNameExpiryMainLoop(
+                                context,
+                                imageStream,
+                                previewSize,
+                                viewFinder,
+                                lifecycleOwner,
+                                coroutineScope,
+                                mainLoopNameExpiryListener,
+                            )
+                        }
+                    } else {
+                        resultListener.onResult(
+                            FinalResult(
+                                pan = result,
+                                name = null,
+                                expiry = null,
+                                errorString = null,
+                            )
+                        )
+                    }
+                }
+
+                override suspend fun onInterimResult(result: MainLoopOcrAggregator.InterimResult) {
+                    resultListener.onInterimResult(
+                        InterimResult(
+                            ocrAnalyzerResult = result.analyzerResult,
+                            ocrState = result.state,
+                            nameExpiryAnalyzerResult = null,
+                            nameExpiryState = null,
+                            frame = result.frame,
+                        )
+                    )
+                }
+
+                override suspend fun onReset() {
+                    resultListener.onReset()
+                }
+            }
+
+        runOcrMainLoop(
+            context,
+            imageStream,
+            previewSize,
+            viewFinder,
+            lifecycleOwner,
+            coroutineScope,
+            mainLoopOcrListener,
         )
-
-        mainLoop.subscribeTo(
-            flow = imageStream.map {
-                SSDOcr.Input(
-                    fullImage = it,
-                    previewSize = previewSize,
-                    cardFinder = viewFinder,
-                    capturedAt = Clock.markNow()
-                )
-            },
-            processingCoroutineScope = coroutineScope
-        )
-    }
+    }.let { Unit }
 
     /**
      * In the event that the scan cannot complete, halt the flow to halt analyzers and free up CPU and memory.
      */
     override fun cancelFlow() {
         canceled = true
-        if (::mainLoopResultAggregator.isInitialized) {
-            mainLoopResultAggregator.cancel()
+        mainLoopOcrAggregator?.run { cancel() }
+        mainLoopOcrAggregator = null
+
+        mainLoopNameExpiryAggregator?.run { cancel() }
+        mainLoopNameExpiryAggregator = null
+
+        mainLoopNameExpiryJob?.apply { if (isActive) { cancel() } }
+        mainLoopNameExpiryJob = null
+
+        mainLoopOcrJob?.apply { if (isActive) { cancel() } }
+        mainLoopOcrJob = null
+    }
+
+    private fun isDeviceFastEnoughForNameExtraction(processingRate: Rate?) =
+        processingRate != null &&
+            (processingRate.duration <= Duration.ZERO || processingRate > Config.slowDeviceFrameRate)
+
+    private fun runOcrMainLoop(
+        context: Context,
+        imageStream: Flow<Bitmap>,
+        previewSize: Size,
+        viewFinder: Rect,
+        lifecycleOwner: LifecycleOwner,
+        coroutineScope: CoroutineScope,
+        listener: AggregateResultListener<MainLoopOcrAggregator.InterimResult, String>,
+    ) {
+        if (canceled) {
+            return
         }
 
-        mainLoopJob?.apply { if (isActive) { cancel() } }
+        mainLoopOcrAggregator = MainLoopOcrAggregator(
+            listener = listener,
+            enableNameExpiryExtraction = enableNameExtraction || enableExpiryExtraction,
+        ).also { mainLoopOcrAggregator ->
+            // make this result aggregator pause and reset when the lifecycle pauses.
+            mainLoopOcrAggregator.bindToLifecycle(lifecycleOwner)
+
+            val analyzerPool = runBlocking {
+                AnalyzerPoolFactory(
+                    MainLoopOcrAnalyzer.Factory(
+                        SSDOcr.Factory(context, getSsdOcrModel(context, true))
+                    )
+                ).buildAnalyzerPool()
+            }
+
+            mainLoopOcr = ProcessBoundAnalyzerLoop(
+                analyzerPool = analyzerPool,
+                resultHandler = mainLoopOcrAggregator,
+                analyzerLoopErrorListener = errorListener,
+            ).apply {
+                subscribeTo(
+                    imageStream.map {
+                        SSDOcr.Input(
+                            fullImage = it,
+                            previewSize = previewSize,
+                            cardFinder = viewFinder,
+                            capturedAt = Clock.markNow(),
+                        )
+                    },
+                    coroutineScope,
+                )
+            }
+        }
+    }
+
+    private fun runNameExpiryMainLoop(
+        context: Context,
+        imageStream: Flow<Bitmap>,
+        previewSize: Size,
+        viewFinder: Rect,
+        lifecycleOwner: LifecycleOwner,
+        coroutineScope: CoroutineScope,
+        listener: AggregateResultListener<MainLoopNameExpiryAggregator.InterimResult, MainLoopNameExpiryAggregator.FinalResult>,
+    ) {
+        if (canceled) {
+            return
+        }
+
+        val isDeviceFastEnough = isDeviceFastEnoughForNameExtraction(mainLoopOcrAggregator?.frameRateTracker?.getAverageFrameRate())
+
+        mainLoopNameExpiryAggregator = MainLoopNameExpiryAggregator(
+            listener = listener,
+            enableNameExtraction = enableNameExtraction && isDeviceFastEnough,
+            enableExpiryExtraction = enableExpiryExtraction,
+        ).also { mainLoopNameExpiryAggregator ->
+
+            // make this result aggregator pause and reset when the lifecycle pauses.
+            mainLoopNameExpiryAggregator.bindToLifecycle(lifecycleOwner)
+
+            val analyzerPool = runBlocking {
+                AnalyzerPoolFactory(
+                    MainLoopNameExpiryAnalyzer.Factory(
+                        NameAndExpiryAnalyzer.Factory(
+                            TextDetect.Factory(context, getTextDetectorModel(context, true)),
+                            AlphabetDetect.Factory(context, getAlphabetDetectorModel(context, true)),
+                            ExpiryDetect.Factory(context, getExpiryDetectorModel(context, true)),
+                        )
+                    )
+                ).buildAnalyzerPool()
+            }
+
+            mainLoopNameExpiry = ProcessBoundAnalyzerLoop(
+                analyzerPool = analyzerPool,
+                resultHandler = mainLoopNameExpiryAggregator,
+                analyzerLoopErrorListener = errorListener,
+            ).apply {
+                subscribeTo(
+                    imageStream.map {
+                        SSDOcr.Input(
+                            fullImage = it,
+                            previewSize = previewSize,
+                            cardFinder = viewFinder,
+                            capturedAt = Clock.markNow(),
+                        )
+                    },
+                    coroutineScope,
+                )
+            }
+        }
     }
 }

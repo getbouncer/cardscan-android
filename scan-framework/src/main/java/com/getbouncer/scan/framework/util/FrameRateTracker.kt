@@ -16,24 +16,26 @@ interface FrameRateListener {
 }
 
 /**
- * A class that tracks the rate at which frames are processed. This is useful for debugging to determine how quickly a
- * device is handling data.
+ * A class that tracks the rate at which frames are processed. This is useful for debugging to
+ * determine how quickly a device is handling data.
  */
 class FrameRateTracker(
     private val name: String,
     private val listener: FrameRateListener? = null,
-    private val notifyInterval: Duration = 1.seconds
+    private val notifyInterval: Duration = 1.seconds,
 ) {
     private var firstFrameTime: ClockMark? = null
     private var lastNotifyTime: ClockMark = Clock.markNow()
-    private val totalFramesProcessed: AtomicLong = AtomicLong(-1) // do not calculate a rate for the first frame
+
+    // This is -1 so that we do not calculate a rate for the first frame
+    private val totalFramesProcessed: AtomicLong = AtomicLong(-1)
     private val framesProcessedSinceLastUpdate: AtomicLong = AtomicLong(0)
 
     private val frameRateMutex = Mutex()
 
     /**
-     * Calculate the current rate at which frames are being processed. If the notify interval has elapsed, notify the
-     * listener of the current rate.
+     * Calculate the current rate at which frames are being processed. If the notify interval has
+     * elapsed, notify the listener of the current rate.
      */
     suspend fun trackFrameProcessed() {
         val totalFrames = totalFramesProcessed.incrementAndGet()
@@ -70,6 +72,14 @@ class FrameRateTracker(
         totalFramesProcessed.set(0)
         framesProcessedSinceLastUpdate.set(0)
     }
+
+    /**
+     * Get the average frame rate for this device
+     */
+    fun getAverageFrameRate() = Rate(
+        amount = totalFramesProcessed.get(),
+        duration = firstFrameTime?.elapsedSince() ?: Duration.ZERO
+    )
 
     /**
      * The processing rate has been updated. This is useful for debugging and measuring performance.

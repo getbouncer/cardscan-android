@@ -10,8 +10,8 @@ import android.view.Gravity
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import com.getbouncer.cardscan.ui.result.MainLoopAggregator
-import com.getbouncer.cardscan.ui.result.MainLoopState
+import com.getbouncer.cardscan.ui.result.MainLoopNameExpiryState
+import com.getbouncer.cardscan.ui.result.MainLoopOcrState
 import com.getbouncer.scan.framework.AggregateResultListener
 import com.getbouncer.scan.framework.AnalyzerLoopErrorListener
 import com.getbouncer.scan.framework.Config
@@ -76,7 +76,7 @@ private fun DetectionBox.forDebugObjDetect(cardFinder: Rect, previewImage: Size)
 
 abstract class CardScanBaseActivity :
     SimpleScanActivity(),
-    AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult>,
+    AggregateResultListener<CardScanFlow.InterimResult, CardScanFlow.FinalResult>,
     AnalyzerLoopErrorListener {
 
     /**
@@ -201,7 +201,7 @@ abstract class CardScanBaseActivity :
     /**
      * A final result was received from the aggregator. Set the result from this activity.
      */
-    override suspend fun onResult(result: MainLoopAggregator.FinalResult) = launch(Dispatchers.Main) {
+    override suspend fun onResult(result: CardScanFlow.FinalResult) = launch(Dispatchers.Main) {
         // Only show the expiry dates that are not expired
         val (expiryMonth, expiryYear) = if (result.expiry?.isValidExpiry() == true) {
             (result.expiry.month to result.expiry.year)
@@ -226,41 +226,37 @@ abstract class CardScanBaseActivity :
     /**
      * An interim result was received from the result aggregator.
      */
-    override suspend fun onInterimResult(result: MainLoopAggregator.InterimResult) = launch(Dispatchers.Main) {
+    override suspend fun onInterimResult(result: CardScanFlow.InterimResult) = launch(Dispatchers.Main) {
         if (!mainLoopIsProducingResults.getAndSet(true)) {
             scanStat.trackResult("first_image_processed")
         }
 
-        if (result.state is MainLoopState.OcrRunning && !hasPreviousValidResult.getAndSet(true)) {
+        if (result.ocrState is MainLoopOcrState.OcrRunning && !hasPreviousValidResult.getAndSet(true)) {
             scanStat.trackResult("ocr_pan_observed")
             enterCardManuallyTextView.fadeOut()
         }
 
-        val willRunNameAndExpiry = (result.analyzerResult.isExpiryExtractionAvailable && enableExpiryExtraction) ||
-            (result.analyzerResult.isNameExtractionAvailable && enableNameExtraction)
+        val willRunNameAndExpiry = enableExpiryExtraction || enableNameExtraction
 
-        when (result.state) {
-            is MainLoopState.Initial -> changeScanState(ScanState.NotFound)
-            is MainLoopState.OcrRunning -> {
-                displayPan(result.analyzerResult.pan, result.state.getMostLikelyPan())
-                if (willRunNameAndExpiry) {
-                    changeScanState(ScanState.FoundLong)
-                } else {
-                    changeScanState(ScanState.FoundShort)
-                }
+        when (val state = result.ocrState) {
+            is MainLoopOcrState.Initial -> changeScanState(ScanState.NotFound)
+            is MainLoopOcrState.OcrRunning -> {
+                displayPan(result.ocrAnalyzerResult?.pan, state.getMostLikelyPan())
+                changeScanState(if (willRunNameAndExpiry) ScanState.FoundLong else ScanState.FoundShort)
             }
-            is MainLoopState.NameAndExpiryRunning -> {
-                displayName(result.analyzerResult.pan, result.state.getMostLikelyName())
-                if (willRunNameAndExpiry) {
-                    changeScanState(ScanState.FoundLong)
-                } else {
-                    changeScanState(ScanState.FoundShort)
-                }
-            }
-            is MainLoopState.Finished -> changeScanState(ScanState.Correct)
+            is MainLoopOcrState.Finished ->
+                changeScanState(if (willRunNameAndExpiry) ScanState.FoundLong else ScanState.Correct)
         }
 
-        showDebugFrame(result.frame, result.analyzerResult.panDetectionBoxes, result.analyzerResult.objDetectionBoxes)
+        when (val state = result.nameExpiryState) {
+            is MainLoopNameExpiryState.NameAndExpiryRunning -> {
+                displayName(result.nameExpiryAnalyzerResult?.name, state.getMostLikelyName())
+                changeScanState(ScanState.FoundLong)
+            }
+            is MainLoopNameExpiryState.Finished -> changeScanState(ScanState.Correct)
+        }
+
+        showDebugFrame(result.frame, result.ocrAnalyzerResult?.detectedBoxes, result.nameExpiryAnalyzerResult?.detectionBoxes)
     }.let { Unit }
 
     override suspend fun onReset() = launch(Dispatchers.Main) { changeScanState(ScanState.NotFound) }.let { Unit }

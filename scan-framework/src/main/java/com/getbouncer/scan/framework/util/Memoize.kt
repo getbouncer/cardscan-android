@@ -51,7 +51,9 @@ private class MemoizeSuspend1<in Input, out Result>(private val f: suspend (Inpu
  * work in the suspend function, others will suspend until a result is available, and then return
  * that result.
  */
-private class MemoizeSuspend2<in Input1, in Input2, out Result>(private val f: suspend (Input1, Input2) -> Result) {
+private class MemoizeSuspend2<in Input1, in Input2, out Result>(
+    private val f: suspend (Input1, Input2) -> Result
+) {
     private val lookupMutex = Mutex()
 
     private val values = mutableMapOf<Pair<Input1, Input2>, Result>()
@@ -73,7 +75,9 @@ private class MemoizeSuspend2<in Input1, in Input2, out Result>(private val f: s
  * work in the suspend function, others will suspend until a result is available, and then return
  * that result.
  */
-private class MemoizeSuspend3<in Input1, in Input2, in Input3, out Result>(private val f: suspend (Input1, Input2, Input3) -> Result) {
+private class MemoizeSuspend3<in Input1, in Input2, in Input3, out Result>(
+    private val f: suspend (Input1, Input2, Input3) -> Result
+) {
     private val lookupMutex = Mutex()
 
     private val values = mutableMapOf<Triple<Input1, Input2, Input3>, Result>()
@@ -113,7 +117,9 @@ private class Memoize0<out Result>(private val function: () -> Result) : () -> R
  * ever invoke the backing function, other threads will block until a result is available, and then
  * return that result.
  */
-private class Memoize1<in Input, out Result>(private val function: (Input) -> Result) : (Input) -> Result {
+private class Memoize1<in Input, out Result>(
+    private val function: (Input) -> Result
+) : (Input) -> Result {
     private val values = mutableMapOf<Input, Result>()
     private val locks = mutableMapOf<Input, Any>()
 
@@ -133,12 +139,15 @@ private class Memoize1<in Input, out Result>(private val function: (Input) -> Re
  * ever invoke the backing function, other threads will block until a result is available, and then
  * return that result.
  */
-private class Memoize2<in Input1, in Input2, out Result>(private val function: (Input1, Input2) -> Result) : (Input1, Input2) -> Result {
+private class Memoize2<in Input1, in Input2, out Result>(
+    private val function: (Input1, Input2) -> Result
+) : (Input1, Input2) -> Result {
     private val values = mutableMapOf<Pair<Input1, Input2>, Result>()
     private val locks = mutableMapOf<Pair<Input1, Input2>, Any>()
 
     @Synchronized
-    private fun getLock(input1: Input1, input2: Input2): Any = locks.getOrPut(input1 to input2) { Object() }
+    private fun getLock(input1: Input1, input2: Input2): Any =
+        locks.getOrPut(input1 to input2) { Object() }
 
     override fun invoke(input1: Input1, input2: Input2): Result {
         val lock = getLock(input1, input2)
@@ -153,12 +162,15 @@ private class Memoize2<in Input1, in Input2, out Result>(private val function: (
  * ever invoke the backing function, other threads will block until a result is available, and then
  * return that result.
  */
-private class Memoize3<in Input1, in Input2, in Input3, out Result>(private val function: (Input1, Input2, Input3) -> Result) : (Input1, Input2, Input3) -> Result {
+private class Memoize3<in Input1, in Input2, in Input3, out Result>(
+    private val function: (Input1, Input2, Input3) -> Result
+) : (Input1, Input2, Input3) -> Result {
     private val values = mutableMapOf<Triple<Input1, Input2, Input3>, Result>()
     private val locks = mutableMapOf<Triple<Input1, Input2, Input3>, Any>()
 
     @Synchronized
-    private fun getLock(input1: Input1, input2: Input2, input3: Input3): Any = locks.getOrPut(Triple(input1, input2, input3)) { Object() }
+    private fun getLock(input1: Input1, input2: Input2, input3: Input3): Any =
+        locks.getOrPut(Triple(input1, input2, input3)) { Object() }
 
     override fun invoke(input1: Input1, input2: Input2, input3: Input3): Result {
         val lock = getLock(input1, input2, input3)
@@ -169,10 +181,15 @@ private class Memoize3<in Input1, in Input2, in Input3, out Result>(private val 
 }
 
 /**
- * Cache the result from calling this method. Subsequent calls, even with different parameters, will not change the
- * cached output.
+ * Cache the result from calling this method. Subsequent calls, even with different parameters, will
+ * not change the cached output.
+ *
+ * TODO: use contracts when they're no longer experimental
  */
-private class CachedFirstResultSuspend1<in Input, out Result>(private val f: suspend (Input) -> Result) {
+private class CachedFirstResultSuspend1<in Input, out Result>(
+    private val f: suspend (Input) -> Result
+) {
+    // contract { callsInPlace(f, EXACTLY_ONCE) }
     private val initializeMutex = Mutex()
 
     private object UNINITIALIZED_VALUE
@@ -189,10 +206,15 @@ private class CachedFirstResultSuspend1<in Input, out Result>(private val f: sus
 }
 
 /**
- * Cache the result from calling this method. Subsequent calls, even with different parameters, will not change the
- * cached output.
+ * Cache the result from calling this method. Subsequent calls, even with different parameters, will
+ * not change the cached output.
+ *
+ * TODO: use contracts when they're no longer experimental
  */
-private class CachedFirstResultSuspend2<in Input1, in Input2, out Result>(private val f: suspend (Input1, Input2) -> Result) {
+private class CachedFirstResultSuspend2<in Input1, in Input2, out Result>(
+    private val f: suspend (Input1, Input2) -> Result
+) {
+    // contract { callsInPlace(f, EXACTLY_ONCE) }
     private val initializeMutex = Mutex()
 
     private object UNINITIALIZED_VALUE
@@ -209,10 +231,15 @@ private class CachedFirstResultSuspend2<in Input1, in Input2, out Result>(privat
 }
 
 /**
- * Cache the result from calling this method. Subsequent calls, even with different parameters, will not change the
- * cached output.
+ * Cache the result from calling this method. Subsequent calls, even with different parameters, will
+ * not change the cached output.
+ *
+ * TODO: use contracts when they're no longer experimental
  */
-private class CachedFirstResultSuspend3<in Input1, in Input2, in Input3, out Result>(private val f: suspend (Input1, Input2, Input3) -> Result) {
+private class CachedFirstResultSuspend3<in Input1, in Input2, in Input3, out Result>(
+    private val f: suspend (Input1, Input2, Input3) -> Result
+) {
+    // contract { callsInPlace(f, EXACTLY_ONCE) }
     private val initializeMutex = Mutex()
 
     private object UNINITIALIZED_VALUE
@@ -229,10 +256,15 @@ private class CachedFirstResultSuspend3<in Input1, in Input2, in Input3, out Res
 }
 
 /**
- * Cache the result from calling this method. Subsequent calls, even with different parameters, will not change the
- * cached output.
+ * Cache the result from calling this method. Subsequent calls, even with different parameters, will
+ * not change the cached output.
+ *
+ * TODO: use contracts when they're no longer experimental
  */
-private class CachedFirstResult1<in Input, out Result>(private val function: (Input) -> Result) : (Input) -> Result {
+private class CachedFirstResult1<in Input, out Result>(
+    private val function: (Input) -> Result
+) : (Input) -> Result {
+    // contract { callsInPlace(f, EXACTLY_ONCE) }
     private object UNINITIALIZED_VALUE
     @Volatile private var value: Any? = UNINITIALIZED_VALUE
 
@@ -246,10 +278,15 @@ private class CachedFirstResult1<in Input, out Result>(private val function: (In
 }
 
 /**
- * Cache the result from calling this method. Subsequent calls, even with different parameters, will not change the
- * cached output.
+ * Cache the result from calling this method. Subsequent calls, even with different parameters, will
+ * not change the cached output.
+ *
+ * TODO: use contracts when they're no longer experimental
  */
-private class CachedFirstResult2<in Input1, in Input2, out Result>(private val function: (Input1, Input2) -> Result) : (Input1, Input2) -> Result {
+private class CachedFirstResult2<in Input1, in Input2, out Result>(
+    private val function: (Input1, Input2) -> Result
+) : (Input1, Input2) -> Result {
+    // contract { callsInPlace(f, EXACTLY_ONCE) }
     private object UNINITIALIZED_VALUE
     @Volatile private var value: Any? = UNINITIALIZED_VALUE
 
@@ -263,10 +300,15 @@ private class CachedFirstResult2<in Input1, in Input2, out Result>(private val f
 }
 
 /**
- * Cache the result from calling this method. Subsequent calls, even with different parameters, will not change the
- * cached output.
+ * Cache the result from calling this method. Subsequent calls, even with different parameters, will
+ * not change the cached output.
+ *
+ * TODO: use contracts when they're no longer experimental
  */
-private class CachedFirstResult3<in Input1, in Input2, in Input3, out Result>(private val function: (Input1, Input2, Input3) -> Result) : (Input1, Input2, Input3) -> Result {
+private class CachedFirstResult3<in Input1, in Input2, in Input3, out Result>(
+    private val function: (Input1, Input2, Input3) -> Result
+) : (Input1, Input2, Input3) -> Result {
+    // contract { callsInPlace(f, EXACTLY_ONCE) }
     private object UNINITIALIZED_VALUE
     @Volatile private var value: Any? = UNINITIALIZED_VALUE
 

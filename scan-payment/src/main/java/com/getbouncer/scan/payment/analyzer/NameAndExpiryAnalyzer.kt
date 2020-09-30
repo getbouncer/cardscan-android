@@ -35,7 +35,7 @@ private const val EXPIRY_BOX_Y_SCALE_RATIO = 1.2F
 class NameAndExpiryAnalyzer<State : NameAndExpiryAnalyzer.State> private constructor(
     private val textDetect: TextDetect?,
     private val alphabetDetect: AlphabetDetect?,
-    private val expiryDetect: ExpiryDetect? = null
+    private val expiryDetect: ExpiryDetect?,
 ) : Analyzer<SSDOcr.Input, State, NameAndExpiryAnalyzer.Prediction> {
 
     interface State {

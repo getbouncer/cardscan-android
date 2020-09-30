@@ -8,10 +8,9 @@ import android.graphics.PointF
 import android.os.Bundle
 import android.util.Log
 import android.util.Size
-import android.view.TextureView
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
-import android.widget.FrameLayout
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -392,13 +391,9 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      */
     protected open fun buildCameraAdapter(): CameraAdapter<Bitmap> = when (cameraApi) {
         is CameraApi.Camera2 -> {
-            val textureView = TextureView(this)
-            previewFrame.removeAllViews()
-            previewFrame.addView(textureView)
-
             Camera2Adapter(
                 activity = this,
-                previewView = textureView,
+                previewView = previewFrame,
                 minimumResolution = minimumAnalysisResolution,
                 cameraErrorListener = cameraErrorListener,
             )
@@ -413,7 +408,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
             )
     }
 
-    protected abstract val previewFrame: FrameLayout
+    protected abstract val previewFrame: ViewGroup
 
     protected abstract val minimumAnalysisResolution: Size
 

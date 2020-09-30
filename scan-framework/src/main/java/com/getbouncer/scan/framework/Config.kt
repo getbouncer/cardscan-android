@@ -2,6 +2,7 @@ package com.getbouncer.scan.framework
 
 import com.getbouncer.scan.framework.exception.InvalidBouncerApiKeyException
 import com.getbouncer.scan.framework.time.Duration
+import com.getbouncer.scan.framework.time.Rate
 import com.getbouncer.scan.framework.time.seconds
 import kotlinx.serialization.json.Json
 
@@ -56,6 +57,11 @@ object Config {
      */
     @JvmStatic
     var displayLogo: Boolean = true
+
+    /**
+     * The frame rate of a device that is considered slow will be below this rate.
+     */
+    var slowDeviceFrameRate = Rate(2, 1.seconds)
 }
 
 object NetworkConfig {

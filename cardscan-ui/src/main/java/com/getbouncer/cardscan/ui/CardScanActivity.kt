@@ -6,7 +6,6 @@ import android.content.Intent
 import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import com.getbouncer.cardscan.ui.result.MainLoopAggregator
 import com.getbouncer.scan.framework.AggregateResultListener
 import com.getbouncer.scan.framework.AnalyzerLoopErrorListener
 import com.getbouncer.scan.framework.Config
@@ -46,7 +45,7 @@ interface CardScanActivityResultHandler {
 
 open class CardScanActivity :
     CardScanBaseActivity(),
-    AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult>,
+    AggregateResultListener<CardScanFlow.InterimResult, CardScanFlow.FinalResult>,
     AnalyzerLoopErrorListener {
 
     companion object {

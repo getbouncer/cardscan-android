@@ -163,29 +163,38 @@ suspend fun getCardType(context: Context, pan: String?): CardType = withContext(
  * ```
  */
 @CheckResult
-fun isValidPan(pan: String?): Boolean = normalizeCardNumber(pan).let { normalizedPan ->
-    val iinData = getIssuerData(normalizedPan) ?: return false
-    return iinData.panValidator.isValidPan(normalizedPan)
+fun isValidPan(pan: String?): Boolean {
+    // contract { returns(true) implies (pan != null) }
+    return normalizeCardNumber(pan).let { normalizedPan ->
+        val iinData = getIssuerData(normalizedPan) ?: return false
+        iinData.panValidator.isValidPan(normalizedPan)
+    }
 }
 
 /**
  * Determine if an IIN is valid.
  */
 @CheckResult
-fun isValidIin(iin: String?): Boolean = normalizeCardNumber(iin).let { normalizedPan ->
-    getIssuerData(normalizedPan)?.issuer ?: CardIssuer.Unknown != CardIssuer.Unknown
+fun isValidIin(iin: String?): Boolean {
+    // contract { returns(true) implies (iin != null) }
+    return normalizeCardNumber(iin).let { normalizedPan ->
+        getIssuerData(normalizedPan)?.issuer ?: CardIssuer.Unknown != CardIssuer.Unknown
+    }
 }
 
 /**
  * Determine if a CVC is valid based on an issuer.
  */
 @CheckResult
-fun isValidCvc(cvc: String?, issuer: CardIssuer?) = normalizeCardNumber(cvc).let { cvcNumber ->
-    val issuerDataList = getIssuerData(issuer ?: CardIssuer.Unknown)
-    if (issuerDataList.isEmpty()) {
-        cvcNumber.length in VALID_CVC_LENGTHS
-    } else {
-        issuerDataList.any { cvcNumber.length in it.cvcLengths }
+fun isValidCvc(cvc: String?, issuer: CardIssuer?): Boolean {
+    // contract { returns(true) implies (cvc != null) }
+    return normalizeCardNumber(cvc).let { cvcNumber ->
+        val issuerDataList = getIssuerData(issuer ?: CardIssuer.Unknown)
+        if (issuerDataList.isEmpty()) {
+            cvcNumber.length in VALID_CVC_LENGTHS
+        } else {
+            issuerDataList.any { cvcNumber.length in it.cvcLengths }
+        }
     }
 }
 
@@ -193,8 +202,10 @@ fun isValidCvc(cvc: String?, issuer: CardIssuer?) = normalizeCardNumber(cvc).let
  * Determine if the provided last four digits are valid.
  */
 @CheckResult
-fun isValidPanLastFour(panLastFour: String?): Boolean =
-    normalizeCardNumber(panLastFour).length == LAST_FOUR_LENGTH
+fun isValidPanLastFour(panLastFour: String?): Boolean {
+    // contract { returns(true) implies (panLastFour != null) }
+    return normalizeCardNumber(panLastFour).length == LAST_FOUR_LENGTH
+}
 
 /**
  * Get an IIN for a given PAN.
@@ -266,13 +277,19 @@ internal fun normalizeCardNumber(cardNumber: String?) = cardNumber?.filter { it.
  * Determine if the pan is valid or close to valid.
  */
 @CheckResult
-fun isPossiblyValidPan(pan: String?) = pan != null && pan.isDigitsOnly() && pan.length >= 7
+fun isPossiblyValidPan(pan: String?): Boolean {
+    // contract { returns(true) implies (pan != null) }
+    return pan != null && pan.isDigitsOnly() && pan.length >= 7
+}
 
 /**
  * Determine if the pan is not close to being valid.
  */
 @CheckResult
-fun isNotPossiblyValidPan(pan: String?) = pan == null || !pan.isDigitsOnly() || pan.length < 10
+fun isNotPossiblyValidPan(pan: String?): Boolean {
+    // contract { returns(false) implies (pan != null) }
+    return pan == null || !pan.isDigitsOnly() || pan.length < 10
+}
 
 /**
  * Determine if a card number (PAN, IIN, last four) possibly matches a required number (PAN, IIN, last four). This

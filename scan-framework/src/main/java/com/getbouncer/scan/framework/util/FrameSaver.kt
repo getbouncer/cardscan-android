@@ -14,11 +14,11 @@ abstract class FrameSaver<Identifier, Frame> {
     private val savedFrames = mutableMapOf<Identifier, LinkedList<Frame>>()
 
     /**
-     * Determine how frames should be classified using [getSaveFrameIdentifier], and then store them in a map of frames
-     * based on that identifier.
+     * Determine how frames should be classified using [getSaveFrameIdentifier], and then store them
+     * in a map of frames based on that identifier.
      *
-     * This method keeps track of the total number of saved frames. If the total number or total size exceeds the
-     * maximum allowed, the oldest frames will be dropped.
+     * This method keeps track of the total number of saved frames. If the total number or total
+     * size exceeds the maximum allowed, the oldest frames will be dropped.
      */
     suspend fun saveFrame(frame: Frame) {
         val identifier = getSaveFrameIdentifier(frame) ?: return
@@ -58,8 +58,8 @@ abstract class FrameSaver<Identifier, Frame> {
     protected abstract fun getSaveFrameIdentifier(frame: Frame): Identifier?
 
     /**
-     * Remove a frame from this list. The most recently added frames will be at the beginning of this list, while the
-     * least recently added frames will be at the end.
+     * Remove a frame from this list. The most recently added frames will be at the beginning of
+     * this list, while the least recently added frames will be at the end.
      */
     protected open fun removeFrame(identifier: Identifier, frames: LinkedList<Frame>) {
         frames.removeLast()

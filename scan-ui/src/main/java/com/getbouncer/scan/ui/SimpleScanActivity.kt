@@ -57,7 +57,7 @@ abstract class SimpleScanActivity : ScanActivity() {
     /**
      * The frame where the camera preview will be displayed. This is usually the full screen.
      */
-    override val previewFrame: FrameLayout by lazy { FrameLayout(this) }
+    override val previewFrame: ViewGroup by lazy { FrameLayout(this) }
 
     /**
      * The text view that displays the cardholder name once a card has been scanned.
@@ -413,8 +413,8 @@ abstract class SimpleScanActivity : ScanActivity() {
 
             view.constrainToParent()
             view.addConstraints {
-                setVerticalBias(it.id, resources.getFloat(R.dimen.bouncerViewFinderVerticalBias))
-                setHorizontalBias(it.id, resources.getFloat(R.dimen.bouncerViewFinderHorizontalBias))
+                setVerticalBias(it.id, getFloatResource(R.dimen.bouncerViewFinderVerticalBias))
+                setHorizontalBias(it.id, getFloatResource(R.dimen.bouncerViewFinderHorizontalBias))
 
                 setDimensionRatio(it.id, viewFinderAspectRatio)
             }

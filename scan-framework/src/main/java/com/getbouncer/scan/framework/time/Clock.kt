@@ -68,8 +68,11 @@ private class PreciseClockMark(private val originMark: Long) : ClockMark {
 
 /**
  * Measure the amount of time a process takes.
+ *
+ * TODO: use contracts when they are no longer experimental
  */
 inline fun <T> measureTimeWithResult(block: () -> T): Pair<Duration, T> {
+    // contract { callsInPlace(block, EXACTLY_ONCE) }
     val mark = Clock.markNow()
     val result = block()
     return mark.elapsedSince() to result
@@ -77,8 +80,11 @@ inline fun <T> measureTimeWithResult(block: () -> T): Pair<Duration, T> {
 
 /**
  * Measure the amount of time a process takes.
+ *
+ * TODO: use contracts when they are no longer experimental
  */
 inline fun measureTime(block: () -> Unit): Duration {
+    // contract { callsInPlace(block, EXACTLY_ONCE) }
     val mark = Clock.markNow()
     block()
     return mark.elapsedSince()
