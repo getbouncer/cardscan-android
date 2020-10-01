@@ -38,10 +38,10 @@ class LoopTest {
             }
         }
 
-        val analyzerPool = AnalyzerPoolFactory(
+        val analyzerPool = AnalyzerPool.of(
             analyzerFactory = TestAnalyzerFactory(),
             desiredAnalyzerCount = 12
-        ).buildAnalyzerPool()
+        )
 
         val loop = ProcessBoundAnalyzerLoop(
             analyzerPool = analyzerPool,
@@ -91,10 +91,10 @@ class LoopTest {
             }
         }
 
-        val analyzerPool = AnalyzerPoolFactory(
+        val analyzerPool = AnalyzerPool.of(
             analyzerFactory = TestAnalyzerFactory(),
             desiredAnalyzerCount = 12
-        ).buildAnalyzerPool()
+        )
 
         val loop = ProcessBoundAnalyzerLoop(
             analyzerPool = analyzerPool,
@@ -137,10 +137,10 @@ class LoopTest {
             }
         }
 
-        val analyzerPool = AnalyzerPoolFactory(
+        val analyzerPool = AnalyzerPool.of(
             analyzerFactory = TestAnalyzerFactory(),
             desiredAnalyzerCount = 0
-        ).buildAnalyzerPool()
+        )
 
         val loop = ProcessBoundAnalyzerLoop(
             analyzerPool = analyzerPool,
@@ -182,10 +182,10 @@ class LoopTest {
             }
         }
 
-        val analyzerPool = AnalyzerPoolFactory(
+        val analyzerPool = AnalyzerPool.of(
             analyzerFactory = TestAnalyzerFactory(),
             desiredAnalyzerCount = 12
-        ).buildAnalyzerPool()
+        )
 
         val loop = FiniteAnalyzerLoop(
             analyzerPool = analyzerPool,
@@ -228,10 +228,10 @@ class LoopTest {
             }
         }
 
-        val analyzerPool = AnalyzerPoolFactory(
+        val analyzerPool = AnalyzerPool.of(
             analyzerFactory = TestAnalyzerFactory(),
             desiredAnalyzerCount = 12
-        ).buildAnalyzerPool()
+        )
 
         val loop = FiniteAnalyzerLoop(
             analyzerPool = analyzerPool,
@@ -264,10 +264,10 @@ class LoopTest {
             override suspend fun onTerminatedEarly() { fail() }
         }
 
-        val analyzerPool = AnalyzerPoolFactory(
+        val analyzerPool = AnalyzerPool.of(
             analyzerFactory = TestAnalyzerFactory(),
             desiredAnalyzerCount = 12
-        ).buildAnalyzerPool()
+        )
 
         val loop = FiniteAnalyzerLoop(
             analyzerPool = analyzerPool,
@@ -295,7 +295,7 @@ class LoopTest {
         override suspend fun analyze(data: Int, state: Int): String = "Analyzer=$analyzerNumber, data=$data, state=$state"
     }
 
-    private class TestAnalyzerFactory : AnalyzerFactory<TestAnalyzer> {
+    private class TestAnalyzerFactory : AnalyzerFactory<Int, Int, String, TestAnalyzer> {
         override suspend fun newInstance(): TestAnalyzer? = TestAnalyzer()
     }
 
