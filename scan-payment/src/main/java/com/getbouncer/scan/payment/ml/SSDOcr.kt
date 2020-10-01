@@ -213,7 +213,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
         context: Context,
         fetchedModel: FetchedData,
         threads: Int = DEFAULT_THREADS
-    ) : TFLAnalyzerFactory<SSDOcr>(context, fetchedModel) {
+    ) : TFLAnalyzerFactory<Input, Unit, Prediction, SSDOcr>(context, fetchedModel) {
         companion object {
             private const val USE_GPU = false
             private const val DEFAULT_THREADS = 3

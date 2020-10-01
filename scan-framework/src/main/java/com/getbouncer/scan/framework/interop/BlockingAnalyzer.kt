@@ -19,10 +19,10 @@ abstract class BlockingAnalyzer<Input, State, Output> : Analyzer<Input, State, O
  * An implementation of an analyzer factory that does not use suspending functions. This allows interoperability with
  * java.
  */
-abstract class BlockingAnalyzerFactory<Output : Analyzer<*, *, *>> : AnalyzerFactory<Output> {
-    override suspend fun newInstance(): Output? = newInstanceBlocking()
+abstract class BlockingAnalyzerFactory<DataFrame, State, Output, AnalyzerType : Analyzer<DataFrame, State, Output>> : AnalyzerFactory<DataFrame, State, Output, AnalyzerType> {
+    override suspend fun newInstance(): AnalyzerType? = newInstanceBlocking()
 
-    abstract fun newInstanceBlocking(): Output?
+    abstract fun newInstanceBlocking(): AnalyzerType?
 }
 
 /**
@@ -30,7 +30,7 @@ abstract class BlockingAnalyzerFactory<Output : Analyzer<*, *, *>> : AnalyzerFac
  * with java.
  */
 class BlockingAnalyzerPoolFactory<DataFrame, State, Output> @JvmOverloads constructor(
-    private val analyzerFactory: AnalyzerFactory<out Analyzer<DataFrame, State, Output>>,
+    private val analyzerFactory: AnalyzerFactory<DataFrame, State, Output, out Analyzer<DataFrame, State, Output>>,
     private val desiredAnalyzerCount: Int = DEFAULT_ANALYZER_PARALLEL_COUNT
 ) {
     fun buildAnalyzerPool() = AnalyzerPool(

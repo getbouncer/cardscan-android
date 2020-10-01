@@ -54,8 +54,8 @@ import com.getbouncer.scan.framework.time.seconds
 import com.getbouncer.scan.framework.util.aspectRatio
 import com.getbouncer.scan.framework.util.minAspectRatioSurroundingSize
 import com.getbouncer.scan.framework.util.toRectF
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -103,7 +103,8 @@ class Camera2Adapter(
     private val activity: Activity,
     private val previewView: ViewGroup?,
     private val minimumResolution: Size,
-    private val cameraErrorListener: CameraErrorListener
+    private val cameraErrorListener: CameraErrorListener,
+    private val coroutineScope: CoroutineScope,
 ) : CameraAdapter<Bitmap>(), LifecycleObserver {
 
     companion object {
@@ -272,7 +273,7 @@ class Camera2Adapter(
 
         // For some devices (especially Samsung), we need to continuously refocus the camera.
         focusJob?.cancel()
-        focusJob = GlobalScope.launch {
+        focusJob = coroutineScope.launch {
             while (isActive) {
                 delay(5.seconds)
                 val variance = Random().nextFloat() - 0.5F

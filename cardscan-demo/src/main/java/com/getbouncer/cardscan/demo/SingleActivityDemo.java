@@ -226,7 +226,7 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
             viewFinderBackground.setViewFinderRect(ViewExtensionsKt.asRect(viewFinderWindow));
 
             // Create a camera adapter and bind it to this activity.
-            cameraAdapter = new Camera1Adapter(this, cameraPreview, MINIMUM_RESOLUTION, this);
+            cameraAdapter = new Camera1Adapter(this, cameraPreview, MINIMUM_RESOLUTION, this, this);
             cameraAdapter.bindToLifecycle(this);
             cameraAdapter.withFlashSupport(supported -> {
                 flashButtonView.setVisibility(supported ? View.VISIBLE : View.INVISIBLE);

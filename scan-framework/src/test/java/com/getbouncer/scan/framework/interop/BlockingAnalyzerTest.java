@@ -53,8 +53,8 @@ public class BlockingAnalyzerTest {
     @Test(timeout = 1000)
     @MediumTest
     public void blockingAnalyzerFactory_works() throws InterruptedException {
-        final AnalyzerFactory<Analyzer<Integer, Boolean, Boolean>> factory =
-            new BlockingAnalyzerFactory<Analyzer<Integer, Boolean, Boolean>>() {
+        final AnalyzerFactory<Integer, Boolean, Boolean, Analyzer<Integer, Boolean, Boolean>> factory =
+            new BlockingAnalyzerFactory<Integer, Boolean, Boolean, Analyzer<Integer, Boolean, Boolean>>() {
                 @Override
                 public Analyzer<Integer, Boolean, Boolean> newInstanceBlocking() {
                     return new Analyzer<Integer, Boolean, Boolean>() {
@@ -96,8 +96,8 @@ public class BlockingAnalyzerTest {
     @Test
     @MediumTest
     public void blockingAnalyzerPoolFactory_works() {
-        final AnalyzerFactory<Analyzer<Integer, Boolean, Boolean>> factory =
-            new BlockingAnalyzerFactory<Analyzer<Integer, Boolean, Boolean>>() {
+        final AnalyzerFactory<Integer, Boolean, Boolean, Analyzer<Integer, Boolean, Boolean>> factory =
+            new BlockingAnalyzerFactory<Integer, Boolean, Boolean, Analyzer<Integer, Boolean, Boolean>>() {
                 @Override
                 public Analyzer<Integer, Boolean, Boolean> newInstanceBlocking() {
                     return new Analyzer<Integer, Boolean, Boolean>() {

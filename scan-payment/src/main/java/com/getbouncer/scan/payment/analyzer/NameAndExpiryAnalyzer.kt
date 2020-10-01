@@ -304,7 +304,7 @@ class NameAndExpiryAnalyzer<State : NameAndExpiryAnalyzer.State> private constru
         private val textDetectFactory: TextDetect.Factory,
         private val alphabetDetectFactory: AlphabetDetect.Factory? = null,
         private val expiryDetectFactory: ExpiryDetect.Factory? = null
-    ) : AnalyzerFactory<NameAndExpiryAnalyzer<State>> {
+    ) : AnalyzerFactory<SSDOcr.Input, State, Prediction, NameAndExpiryAnalyzer<State>> {
         override suspend fun newInstance() = NameAndExpiryAnalyzer<State>(
             textDetectFactory.newInstance(),
             alphabetDetectFactory?.newInstance(),
