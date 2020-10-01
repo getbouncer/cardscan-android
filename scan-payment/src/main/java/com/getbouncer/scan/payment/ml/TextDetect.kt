@@ -87,23 +87,6 @@ class TextDetect private constructor(interpreter: Interpreter) :
 
     private data class MergedBox(val box: DetectionBox, val subBoxes: List<DetectionBox>)
 
-    override suspend fun buildEmptyMLOutput() = mapOf(
-        0 to arrayOf(
-            Array(LAYER_1_SIZE.width) {
-                Array(LAYER_1_SIZE.height) {
-                    FloatArray(DIM_Z)
-                }
-            }
-        ),
-        1 to arrayOf(
-            Array(LAYER_2_SIZE.width) {
-                Array(LAYER_2_SIZE.height) {
-                    FloatArray(DIM_Z)
-                }
-            }
-        )
-    )
-
     private fun postProcessYolo(rawMlOutput: Map<Int, Array<Array<Array<FloatArray>>>>): List<DetectionBox> {
         val results = mutableListOf<DetectionBox>()
 
@@ -366,8 +349,27 @@ class TextDetect private constructor(interpreter: Interpreter) :
     override suspend fun executeInference(
         tfInterpreter: Interpreter,
         data: Array<ByteBuffer>,
-        mlOutput: Map<Int, Array<Array<Array<FloatArray>>>>
-    ) = tfInterpreter.runForMultipleInputsOutputs(data, mlOutput)
+    ): Map<Int, Array<Array<Array<FloatArray>>>> {
+        val mlOutput = mapOf(
+            0 to arrayOf(
+                Array(LAYER_1_SIZE.width) {
+                    Array(LAYER_1_SIZE.height) {
+                        FloatArray(DIM_Z)
+                    }
+                }
+            ),
+            1 to arrayOf(
+                Array(LAYER_2_SIZE.width) {
+                    Array(LAYER_2_SIZE.height) {
+                        FloatArray(DIM_Z)
+                    }
+                }
+            )
+        )
+
+        tfInterpreter.runForMultipleInputsOutputs(data, mlOutput)
+        return mlOutput
+    }
 
     /**
      * A factory for creating instances of this analyzer. This downloads the model from the web. If unable to download

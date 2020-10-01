@@ -30,8 +30,6 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
 
     data class Prediction(val character: Char, val confidence: Float)
 
-    override suspend fun buildEmptyMLOutput() = arrayOf(FloatArray(NUM_CLASS))
-
     override suspend fun interpretMLOutput(data: Input, mlOutput: Array<FloatArray>): Prediction {
         val prediction = mlOutput[0]
         val index = prediction.indexOfMax()
@@ -54,8 +52,11 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
     override suspend fun executeInference(
         tfInterpreter: Interpreter,
         data: ByteBuffer,
-        mlOutput: Array<FloatArray>
-    ) = tfInterpreter.run(data, mlOutput)
+    ): Array<FloatArray> {
+        val mlOutput = arrayOf(FloatArray(NUM_CLASS))
+        tfInterpreter.run(data, mlOutput)
+        return mlOutput
+    }
 
     /**
      * A factory for creating instances of this analyzer. This downloads the model from the web. If unable to download

@@ -235,11 +235,18 @@ class CardScanFlow(
      */
     override fun cancelFlow() {
         canceled = true
-        mainLoopOcrAggregator?.run { cancel() }
-        mainLoopOcrAggregator = null
 
         mainLoopNameExpiryAggregator?.run { cancel() }
         mainLoopNameExpiryAggregator = null
+
+        mainLoopOcrAggregator?.run { cancel() }
+        mainLoopOcrAggregator = null
+
+        mainLoopNameExpiry?.unsubscribe()
+        mainLoopNameExpiry = null
+
+        mainLoopOcr?.unsubscribe()
+        mainLoopOcr = null
 
         mainLoopNameExpiryJob?.apply { if (isActive) { cancel() } }
         mainLoopNameExpiryJob = null

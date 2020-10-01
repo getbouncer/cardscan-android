@@ -127,7 +127,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
                 (input.cardFinder.left * previewScale).roundToInt(),
                 (input.cardFinder.top * previewScale).roundToInt(),
                 (input.cardFinder.right * previewScale).roundToInt(),
-                (input.cardFinder.bottom * previewScale).roundToInt()
+                (input.cardFinder.bottom * previewScale).roundToInt(),
             )
 
             // Position the scaledCardFinder on the fullImage
@@ -135,20 +135,12 @@ class SSDOcr private constructor(interpreter: Interpreter) :
                 max(0, scaledCardFinder.left + scaledPreviewImage.left),
                 max(0, scaledCardFinder.top + scaledPreviewImage.top),
                 min(input.fullImage.width, scaledCardFinder.right + scaledPreviewImage.left),
-                min(input.fullImage.height, scaledCardFinder.bottom + scaledPreviewImage.top)
+                min(input.fullImage.height, scaledCardFinder.bottom + scaledPreviewImage.top),
             )
 
             return input.fullImage.crop(cropRect)
         }
     }
-
-    /**
-     * The model reshapes all the data to 1 x [All Data Points]
-     */
-    override suspend fun buildEmptyMLOutput(): Map<Int, Array<FloatArray>> = mapOf(
-        0 to arrayOf(FloatArray(NUM_CLASS)),
-        1 to arrayOf(FloatArray(NUM_LOC))
-    )
 
     override suspend fun transformData(data: Input): Array<ByteBuffer> = arrayOf(
         cropImage(data)
@@ -167,12 +159,12 @@ class SSDOcr private constructor(interpreter: Interpreter) :
             locations = outputLocations,
             featureMapSizes = FEATURE_MAP_SIZES,
             numberOfPriors = NUM_OF_PRIORS_PER_ACTIVATION,
-            locationsPerPrior = NUM_OF_COORDINATES
+            locationsPerPrior = NUM_OF_COORDINATES,
         ).reshape(NUM_OF_COORDINATES)
         boxes.adjustLocations(
             priors = PRIORS,
             centerVariance = CENTER_VARIANCE,
-            sizeVariance = SIZE_VARIANCE
+            sizeVariance = SIZE_VARIANCE,
         )
         boxes.forEach { it.toRectForm() }
 
@@ -180,7 +172,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
             locations = outputClasses,
             featureMapSizes = FEATURE_MAP_SIZES,
             numberOfPriors = NUM_OF_PRIORS_PER_ACTIVATION,
-            locationsPerPrior = NUM_OF_CLASSES
+            locationsPerPrior = NUM_OF_CLASSES,
         ).reshape(NUM_OF_CLASSES)
         scores.forEach { it.softMax() }
 
@@ -191,9 +183,9 @@ class SSDOcr private constructor(interpreter: Interpreter) :
                 probabilityThreshold = PROB_THRESHOLD,
                 intersectionOverUnionThreshold = IOU_THRESHOLD,
                 limit = LIMIT,
-                classifierToLabel = { if (it == 10) 0 else it }
+                classifierToLabel = { if (it == 10) 0 else it },
             ).sortedBy { it.rect.left },
-            VERTICAL_THRESHOLD
+            VERTICAL_THRESHOLD,
         )
 
         val predictedNumber = detectedBoxes.map { it.label }.joinToString("")
@@ -203,8 +195,15 @@ class SSDOcr private constructor(interpreter: Interpreter) :
     override suspend fun executeInference(
         tfInterpreter: Interpreter,
         data: Array<ByteBuffer>,
-        mlOutput: Map<Int, Array<FloatArray>>
-    ) = tfInterpreter.runForMultipleInputsOutputs(data, mlOutput)
+    ): Map<Int, Array<FloatArray>>{
+        val mlOutput = mapOf(
+            0 to arrayOf(FloatArray(NUM_CLASS)),
+            1 to arrayOf(FloatArray(NUM_LOC)),
+        )
+
+        tfInterpreter.runForMultipleInputsOutputs(data, mlOutput)
+        return mlOutput
+    }
 
     /**
      * A factory for creating instances of this analyzer.
