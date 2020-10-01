@@ -22,13 +22,11 @@ abstract class TensorFlowLiteAnalyzer<Input, MLInput, Output, MLOutput>(
     private val debug: Boolean = false
 ) : Analyzer<Input, Unit, Output>, Closeable {
 
-    protected abstract suspend fun buildEmptyMLOutput(): MLOutput
-
     protected abstract suspend fun interpretMLOutput(data: Input, mlOutput: MLOutput): Output
 
     protected abstract suspend fun transformData(data: Input): MLInput
 
-    protected abstract suspend fun executeInference(tfInterpreter: Interpreter, data: MLInput, mlOutput: MLOutput)
+    protected abstract suspend fun executeInference(tfInterpreter: Interpreter, data: MLInput): MLOutput
 
     private val loggingTimer by lazy {
         Timer.newInstance(Config.logTag, this::class.java.simpleName, enabled = debug)
@@ -39,12 +37,8 @@ abstract class TensorFlowLiteAnalyzer<Input, MLInput, Output, MLOutput>(
             transformData(data)
         }
 
-        val mlOutput = loggingTimer.measureSuspend("prepare") {
-            buildEmptyMLOutput()
-        }
-
-        loggingTimer.measureSuspend("infer") {
-            executeInference(tfInterpreter, mlInput, mlOutput)
+        val mlOutput = loggingTimer.measureSuspend("infer") {
+            executeInference(tfInterpreter, mlInput)
         }
 
         return loggingTimer.measureSuspend("interpret") {

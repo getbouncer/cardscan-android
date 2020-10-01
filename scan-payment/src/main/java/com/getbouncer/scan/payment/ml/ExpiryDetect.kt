@@ -58,8 +58,6 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
 
     private data class Digit(val digit: Int, val confidence: Float)
 
-    override suspend fun buildEmptyMLOutput() = arrayOf(arrayOf(Array(NUM_PREDICTIONS) { FloatArray(NUM_CLASS) }))
-
     override suspend fun interpretMLOutput(data: Input, mlOutput: Array<Array<Array<FloatArray>>>): Prediction {
         val output = mlOutput[0][0].mapNotNull {
             it.indexOfMax()?.let { maxIndex ->
@@ -113,8 +111,11 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
     override suspend fun executeInference(
         tfInterpreter: Interpreter,
         data: ByteBuffer,
-        mlOutput: Array<Array<Array<FloatArray>>>
-    ) = tfInterpreter.run(data, mlOutput)
+    ): Array<Array<Array<FloatArray>>> {
+        val mlOutput = arrayOf(arrayOf(Array(NUM_PREDICTIONS) { FloatArray(NUM_CLASS) }))
+        tfInterpreter.run(data, mlOutput)
+        return mlOutput
+    }
 
     /**
      * A factory for creating instances of this analyzer. This downloads the model from the web. If unable to download
