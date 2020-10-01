@@ -195,7 +195,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
     override suspend fun executeInference(
         tfInterpreter: Interpreter,
         data: Array<ByteBuffer>,
-    ): Map<Int, Array<FloatArray>>{
+    ): Map<Int, Array<FloatArray>> {
         val mlOutput = mapOf(
             0 to arrayOf(FloatArray(NUM_CLASS)),
             1 to arrayOf(FloatArray(NUM_LOC)),

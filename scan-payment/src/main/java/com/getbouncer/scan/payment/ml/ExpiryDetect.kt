@@ -111,7 +111,7 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
     override suspend fun executeInference(
         tfInterpreter: Interpreter,
         data: ByteBuffer,
-    ): Array<Array<Array<FloatArray>>>{
+    ): Array<Array<Array<FloatArray>>> {
         val mlOutput = arrayOf(arrayOf(Array(NUM_PREDICTIONS) { FloatArray(NUM_CLASS) }))
         tfInterpreter.run(data, mlOutput)
         return mlOutput
