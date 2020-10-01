@@ -396,6 +396,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
                 previewView = previewFrame,
                 minimumResolution = minimumAnalysisResolution,
                 cameraErrorListener = cameraErrorListener,
+                coroutineScope = this,
             )
         }
 
@@ -405,6 +406,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
                 previewView = previewFrame,
                 minimumResolution = minimumAnalysisResolution,
                 cameraErrorListener = cameraErrorListener,
+                coroutineScope = this,
             )
     }
 

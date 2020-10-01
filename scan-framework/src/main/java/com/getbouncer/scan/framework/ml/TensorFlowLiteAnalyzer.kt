@@ -6,12 +6,12 @@ import com.getbouncer.scan.framework.Analyzer
 import com.getbouncer.scan.framework.AnalyzerFactory
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.FetchedData
-import com.getbouncer.scan.framework.FetchedFile
 import com.getbouncer.scan.framework.Loader
 import com.getbouncer.scan.framework.time.Timer
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.tensorflow.lite.Interpreter
+import java.io.Closeable
 import java.nio.ByteBuffer
 
 /**
@@ -20,7 +20,7 @@ import java.nio.ByteBuffer
 abstract class TensorFlowLiteAnalyzer<Input, MLInput, Output, MLOutput>(
     private val tfInterpreter: Interpreter,
     private val debug: Boolean = false
-) : Analyzer<Input, Unit, Output> {
+) : Analyzer<Input, Unit, Output>, Closeable {
 
     protected abstract suspend fun buildEmptyMLOutput(): MLOutput
 
@@ -52,16 +52,16 @@ abstract class TensorFlowLiteAnalyzer<Input, MLInput, Output, MLOutput>(
         }
     }
 
-    fun close() = tfInterpreter.close()
+    override fun close() = tfInterpreter.close()
 }
 
 /**
  * A factory that creates tensorflow models as analyzers.
  */
-abstract class TFLAnalyzerFactory<Output : Analyzer<*, *, *>>(
+abstract class TFLAnalyzerFactory<Input, State, Output, AnalyzerType : Analyzer<Input, State, Output>>(
     private val context: Context,
     private val fetchedModel: FetchedData
-) : AnalyzerFactory<Output> {
+) : AnalyzerFactory<Input, State, Output, AnalyzerType> {
     protected abstract val tfOptions: Interpreter.Options
 
     private val loader by lazy { Loader(context) }
@@ -77,13 +77,6 @@ abstract class TFLAnalyzerFactory<Output : Analyzer<*, *, *>>(
         loadModel(fetchedModel)?.let { Interpreter(it, tfOptions) }
     } catch (t: Throwable) {
         Log.e(Config.logTag, "Error occurred while loading model ${fetchedModel.modelClass} version ${fetchedModel.modelVersion}", t)
-        if (fetchedModel is FetchedFile) {
-            try {
-                fetchedModel.file?.delete()
-            } catch (t: Throwable) {
-                Log.w(Config.logTag, "Unable to delete file ${fetchedModel.file}")
-            }
-        }
         null
     }.apply {
         if (this == null) {

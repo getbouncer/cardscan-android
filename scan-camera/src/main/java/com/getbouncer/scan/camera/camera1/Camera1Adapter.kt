@@ -27,8 +27,8 @@ import com.getbouncer.scan.camera.rotate
 import com.getbouncer.scan.camera.scale
 import com.getbouncer.scan.camera.toBitmap
 import com.getbouncer.scan.framework.Config
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -53,7 +53,8 @@ class Camera1Adapter(
     private val activity: Activity,
     private val previewView: ViewGroup,
     private val minimumResolution: Size,
-    private val cameraErrorListener: CameraErrorListener
+    private val cameraErrorListener: CameraErrorListener,
+    private val coroutineScope: CoroutineScope,
 ) : CameraAdapter<Bitmap>(), PreviewCallback {
 
     private var mCamera: Camera? = null
@@ -154,7 +155,7 @@ class Camera1Adapter(
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     fun onResume() {
-        GlobalScope.launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             try {
                 var camera: Camera? = null
                 try {
@@ -172,7 +173,7 @@ class Camera1Adapter(
 
         // For some devices (especially Samsung), we need to continuously refocus the camera.
         focusJob?.cancel()
-        focusJob = GlobalScope.launch {
+        focusJob = coroutineScope.launch {
             while (isActive) {
                 delay(5000)
                 val variance = Random().nextFloat() - 0.5F
@@ -200,7 +201,7 @@ class Camera1Adapter(
     }
 
     private fun startCameraPreview() {
-        GlobalScope.launch(Dispatchers.IO) {
+        coroutineScope.launch(Dispatchers.IO) {
             startCameraPreviewInternal(0, 5, null)
         }
     }

@@ -56,7 +56,7 @@ interface AnalyzerLoopErrorListener {
  */
 sealed class AnalyzerLoop<DataFrame, State, Output>(
     private val analyzerPool: AnalyzerPool<DataFrame, State, Output>,
-    private val analyzerLoopErrorListener: AnalyzerLoopErrorListener
+    private val analyzerLoopErrorListener: AnalyzerLoopErrorListener,
 ) : ResultHandler<DataFrame, Output, Boolean> {
     private val started = AtomicBoolean(false)
     protected var startedAt: ClockMark? = null
@@ -97,6 +97,7 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
 
     protected suspend fun unsubscribeFromFlow() = cancelMutex.withLock {
         workerJob?.apply { if (isActive) { cancel() } }
+        workerJob = null
         started.set(false)
         finished = false
     }
@@ -107,7 +108,7 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
     private suspend fun startWorker(
         flow: Flow<DataFrame>,
         workerId: Int,
-        analyzer: Analyzer<DataFrame, State, Output>
+        analyzer: Analyzer<DataFrame, State, Output>,
     ) {
         flow.collect { frame ->
             yield() // allow for this to be canceled
@@ -167,7 +168,7 @@ class ProcessBoundAnalyzerLoop<DataFrame, State, Output>(
     analyzerLoopErrorListener: AnalyzerLoopErrorListener
 ) : AnalyzerLoop<DataFrame, State, Output>(
     analyzerPool,
-    analyzerLoopErrorListener
+    analyzerLoopErrorListener,
 ) {
     /**
      * Subscribe to a flow. Loops can only subscribe to a single flow at a time.
@@ -197,13 +198,13 @@ class ProcessBoundAnalyzerLoop<DataFrame, State, Output>(
  *     exceeds this duration, the loop will terminate
  */
 class FiniteAnalyzerLoop<DataFrame, State, Output>(
-    analyzerPool: AnalyzerPool<DataFrame, State, Output>,
+    private val analyzerPool: AnalyzerPool<DataFrame, State, Output>,
     private val resultHandler: TerminatingResultHandler<DataFrame, State, Output>,
     analyzerLoopErrorListener: AnalyzerLoopErrorListener,
     private val timeLimit: Duration = Duration.INFINITE
 ) : AnalyzerLoop<DataFrame, State, Output>(
     analyzerPool,
-    analyzerLoopErrorListener
+    analyzerLoopErrorListener,
 ) {
     private val framesProcessed: AtomicInteger = AtomicInteger(0)
     private var framesToProcess = 0

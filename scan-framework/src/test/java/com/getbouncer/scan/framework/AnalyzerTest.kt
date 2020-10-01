@@ -12,14 +12,14 @@ class AnalyzerTest {
     @SmallTest
     @ExperimentalCoroutinesApi
     fun analyzerPoolCreateNormally() = runBlockingTest {
-        class TestAnalyzerFactory : AnalyzerFactory<TestAnalyzer> {
+        class TestAnalyzerFactory : AnalyzerFactory<Int, Int, Int, TestAnalyzer> {
             override suspend fun newInstance(): TestAnalyzer? = TestAnalyzer()
         }
 
-        val analyzerPool = AnalyzerPoolFactory(
+        val analyzerPool = AnalyzerPool.of(
             analyzerFactory = TestAnalyzerFactory(),
             desiredAnalyzerCount = 12
-        ).buildAnalyzerPool()
+        )
 
         assertEquals(12, analyzerPool.desiredAnalyzerCount)
         assertEquals(12, analyzerPool.analyzers.size)
@@ -30,14 +30,14 @@ class AnalyzerTest {
     @SmallTest
     @ExperimentalCoroutinesApi
     fun analyzerPoolCreateFailure() = runBlockingTest {
-        class TestAnalyzerFactory : AnalyzerFactory<TestAnalyzer> {
+        class TestAnalyzerFactory : AnalyzerFactory<Int, Int, Int, TestAnalyzer> {
             override suspend fun newInstance(): TestAnalyzer? = null
         }
 
-        val analyzerPool = AnalyzerPoolFactory(
+        val analyzerPool = AnalyzerPool.of(
             analyzerFactory = TestAnalyzerFactory(),
             desiredAnalyzerCount = 12
-        ).buildAnalyzerPool()
+        )
 
         assertEquals(12, analyzerPool.desiredAnalyzerCount)
         assertEquals(0, analyzerPool.analyzers.size)

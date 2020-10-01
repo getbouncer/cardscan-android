@@ -8,7 +8,7 @@ import java.util.LinkedList
 /**
  * Save data frames for later retrieval.
  */
-abstract class FrameSaver<Identifier, Frame> {
+abstract class FrameSaver<Identifier, Frame, MetaData> {
 
     private val saveFrameMutex = Mutex()
     private val savedFrames = mutableMapOf<Identifier, LinkedList<Frame>>()
@@ -20,8 +20,8 @@ abstract class FrameSaver<Identifier, Frame> {
      * This method keeps track of the total number of saved frames. If the total number or total
      * size exceeds the maximum allowed, the oldest frames will be dropped.
      */
-    suspend fun saveFrame(frame: Frame) {
-        val identifier = getSaveFrameIdentifier(frame) ?: return
+    suspend fun saveFrame(frame: Frame, metaData: MetaData) {
+        val identifier = getSaveFrameIdentifier(frame, metaData) ?: return
         return saveFrameMutex.withLock {
             val maxSavedFrames = getMaxSavedFrames(identifier)
 
@@ -36,10 +36,10 @@ abstract class FrameSaver<Identifier, Frame> {
     }
 
     /**
-     * Retrieve the list of saved frames.
+     * Retrieve a copy of the list of saved frames.
      */
     @CheckResult
-    fun getSavedFrames(): Map<Identifier, LinkedList<Frame>> = savedFrames
+    fun getSavedFrames(): Map<Identifier, LinkedList<Frame>> = savedFrames.toMap()
 
     /**
      * Clear all saved frames
@@ -55,7 +55,7 @@ abstract class FrameSaver<Identifier, Frame> {
      *
      * If this method returns a non-null string, the frame will be saved under that identifier.
      */
-    protected abstract fun getSaveFrameIdentifier(frame: Frame): Identifier?
+    protected abstract fun getSaveFrameIdentifier(frame: Frame, metaData: MetaData): Identifier?
 
     /**
      * Remove a frame from this list. The most recently added frames will be at the beginning of

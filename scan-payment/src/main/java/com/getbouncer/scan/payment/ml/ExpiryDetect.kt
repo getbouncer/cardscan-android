@@ -124,7 +124,7 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
         context: Context,
         fetchedModel: FetchedData,
         threads: Int = DEFAULT_THREADS
-    ) : TFLAnalyzerFactory<ExpiryDetect>(context, fetchedModel) {
+    ) : TFLAnalyzerFactory<Input, Unit, Prediction, ExpiryDetect>(context, fetchedModel) {
         companion object {
             private const val USE_GPU = false
             private const val DEFAULT_THREADS = 1

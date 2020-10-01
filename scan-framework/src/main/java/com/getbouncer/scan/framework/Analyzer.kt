@@ -17,8 +17,8 @@ interface Analyzer<Input, State, Output> {
 /**
  * A factory to create analyzers.
  */
-interface AnalyzerFactory<Output : Analyzer<*, *, *>> {
-    suspend fun newInstance(): Output?
+interface AnalyzerFactory<Input, State, Output, AnalyzerType : Analyzer<Input, State, Output>> {
+    suspend fun newInstance(): AnalyzerType?
 }
 
 /**
@@ -27,17 +27,14 @@ interface AnalyzerFactory<Output : Analyzer<*, *, *>> {
 data class AnalyzerPool<DataFrame, State, Output>(
     val desiredAnalyzerCount: Int,
     val analyzers: List<Analyzer<DataFrame, State, Output>>
-)
-
-/**
- * A pool of analyzers.
- */
-class AnalyzerPoolFactory<DataFrame, State, Output> @JvmOverloads constructor(
-    private val analyzerFactory: AnalyzerFactory<out Analyzer<DataFrame, State, Output>>,
-    private val desiredAnalyzerCount: Int = DEFAULT_ANALYZER_PARALLEL_COUNT
 ) {
-    suspend fun buildAnalyzerPool() = AnalyzerPool(
-        desiredAnalyzerCount = desiredAnalyzerCount,
-        analyzers = (0 until desiredAnalyzerCount).mapNotNull { analyzerFactory.newInstance() }
-    )
+    companion object {
+        suspend fun <DataFrame, State, Output> of(
+            analyzerFactory: AnalyzerFactory<DataFrame, State, Output, out Analyzer<DataFrame, State, Output>>,
+            desiredAnalyzerCount: Int = DEFAULT_ANALYZER_PARALLEL_COUNT,
+        ) = AnalyzerPool(
+            desiredAnalyzerCount = desiredAnalyzerCount,
+            analyzers = (0 until desiredAnalyzerCount).mapNotNull { analyzerFactory.newInstance() }
+        )
+    }
 }

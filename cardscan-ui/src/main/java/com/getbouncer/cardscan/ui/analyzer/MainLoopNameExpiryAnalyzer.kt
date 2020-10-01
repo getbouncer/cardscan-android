@@ -40,7 +40,7 @@ class MainLoopNameExpiryAnalyzer private constructor(
 
     class Factory(
         private val nameAndExpiryFactory: NameAndExpiryAnalyzer.Factory<MainLoopNameExpiryState>,
-    ) : AnalyzerFactory<MainLoopNameExpiryAnalyzer> {
+    ) : AnalyzerFactory<SSDOcr.Input, MainLoopNameExpiryState, Prediction, MainLoopNameExpiryAnalyzer> {
         override suspend fun newInstance(): MainLoopNameExpiryAnalyzer? =
             MainLoopNameExpiryAnalyzer(nameAndExpiryFactory.newInstance())
     }

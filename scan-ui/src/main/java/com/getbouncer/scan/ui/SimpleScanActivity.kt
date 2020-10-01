@@ -172,8 +172,8 @@ abstract class SimpleScanActivity : ScanActivity() {
     }
 
     override fun onPause() {
-        super.onPause()
         viewFinderBackgroundView.clearOnDrawListener()
+        super.onPause()
     }
 
     override fun onResume() {
@@ -183,8 +183,8 @@ abstract class SimpleScanActivity : ScanActivity() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         scanFlow.cancelFlow()
+        super.onDestroy()
     }
 
     /**

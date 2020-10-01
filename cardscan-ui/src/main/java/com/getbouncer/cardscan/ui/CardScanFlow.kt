@@ -13,7 +13,7 @@ import com.getbouncer.cardscan.ui.result.MainLoopOcrAggregator
 import com.getbouncer.cardscan.ui.result.MainLoopOcrState
 import com.getbouncer.scan.framework.AggregateResultListener
 import com.getbouncer.scan.framework.AnalyzerLoopErrorListener
-import com.getbouncer.scan.framework.AnalyzerPoolFactory
+import com.getbouncer.scan.framework.AnalyzerPool
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.ProcessBoundAnalyzerLoop
 import com.getbouncer.scan.framework.time.Clock
@@ -52,6 +52,9 @@ class CardScanFlow(
         var attemptedNameAndExpiryInitialization = false
             private set
 
+        private val getSsdOcrModel = cacheFirstResultSuspend { context: Context, forImmediateUse: Boolean ->
+            SSDOcr.ModelFetcher(context).fetchData(forImmediateUse)
+        }
         private val getTextDetectorModel = cacheFirstResultSuspend { context: Context, forImmediateUse: Boolean ->
             TextDetect.ModelFetcher(context).fetchData(forImmediateUse)
         }
@@ -60,9 +63,6 @@ class CardScanFlow(
         }
         private val getExpiryDetectorModel = cacheFirstResultSuspend { context: Context, forImmediateUse: Boolean ->
             ExpiryDetect.ModelFetcher(context).fetchData(forImmediateUse)
-        }
-        private val getSsdOcrModel = cacheFirstResultSuspend { context: Context, forImmediateUse: Boolean ->
-            SSDOcr.ModelFetcher(context).fetchData(forImmediateUse)
         }
 
         /**
@@ -273,11 +273,11 @@ class CardScanFlow(
             mainLoopOcrAggregator.bindToLifecycle(lifecycleOwner)
 
             val analyzerPool = runBlocking {
-                AnalyzerPoolFactory(
+                AnalyzerPool.of(
                     MainLoopOcrAnalyzer.Factory(
                         SSDOcr.Factory(context, getSsdOcrModel(context, true))
                     )
-                ).buildAnalyzerPool()
+                )
             }
 
             mainLoopOcr = ProcessBoundAnalyzerLoop(
@@ -325,7 +325,7 @@ class CardScanFlow(
             mainLoopNameExpiryAggregator.bindToLifecycle(lifecycleOwner)
 
             val analyzerPool = runBlocking {
-                AnalyzerPoolFactory(
+                AnalyzerPool.of(
                     MainLoopNameExpiryAnalyzer.Factory(
                         NameAndExpiryAnalyzer.Factory(
                             TextDetect.Factory(context, getTextDetectorModel(context, true)),
@@ -333,7 +333,7 @@ class CardScanFlow(
                             ExpiryDetect.Factory(context, getExpiryDetectorModel(context, true)),
                         )
                     )
-                ).buildAnalyzerPool()
+                )
             }
 
             mainLoopNameExpiry = ProcessBoundAnalyzerLoop(
