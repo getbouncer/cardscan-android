@@ -150,7 +150,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
 
     override suspend fun interpretMLOutput(
         data: Input,
-        mlOutput: Map<Int, Array<FloatArray>>
+        mlOutput: Map<Int, Array<FloatArray>>,
     ): Prediction {
         val outputClasses = mlOutput[0] ?: arrayOf(FloatArray(NUM_CLASS))
         val outputLocations = mlOutput[1] ?: arrayOf(FloatArray(NUM_LOC))
@@ -211,7 +211,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
     class Factory(
         context: Context,
         fetchedModel: FetchedData,
-        threads: Int = DEFAULT_THREADS
+        threads: Int = DEFAULT_THREADS,
     ) : TFLAnalyzerFactory<Input, Unit, Prediction, SSDOcr>(context, fetchedModel) {
         companion object {
             private const val USE_GPU = false

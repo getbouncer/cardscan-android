@@ -38,7 +38,10 @@ object Config {
      * The JSON configuration to use throughout this SDK.
      */
     @JvmStatic
-    var json: Json = Json { ignoreUnknownKeys = true }
+    var json: Json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+    }
 
     /**
      * Whether or not to track stats

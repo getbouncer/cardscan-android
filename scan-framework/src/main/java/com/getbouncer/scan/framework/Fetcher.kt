@@ -5,7 +5,8 @@ import android.util.Log
 import androidx.annotation.RawRes
 import com.getbouncer.scan.framework.api.NetworkResult
 import com.getbouncer.scan.framework.api.getModelSignedUrl
-import com.getbouncer.scan.framework.api.getModelUpgradePath
+import com.getbouncer.scan.framework.api.getModelUpgradeDetails
+import com.getbouncer.scan.framework.time.ClockMark
 import com.getbouncer.scan.framework.time.asEpochMillisecondsClockMark
 import com.getbouncer.scan.framework.time.weeks
 import com.getbouncer.scan.framework.util.memoizeSuspend
@@ -26,6 +27,8 @@ import java.security.NoSuchAlgorithmException
 
 private val CACHE_MODEL_TIME = 1.weeks
 private const val CACHE_MODEL_MAX_COUNT = 3
+
+private const val PURPOSE_MODEL_UPGRADE = "model_upgrade"
 
 /**
  * Fetched data metadata.
@@ -317,14 +320,25 @@ abstract class UpdatingModelWebFetcher(private val context: Context) : SignedUrl
     override suspend fun getDownloadDetails(): DownloadDetails? {
         cachedDownloadDetails?.let { return DownloadDetails(url, hash, hashAlgorithm, modelVersion) }
 
-        return when (val modelUpgradeResponse = getModelUpgradePath(context, modelClass, modelFrameworkVersion)) {
+        val nextUpgradeTime = getNextUpgradeTime()
+        if (!nextUpgradeTime.hasPassed()) {
+            Log.d(Config.logTag, "Not yet time to upgrade $modelClass (will upgrade at $nextUpgradeTime)")
+            return null
+        } else {
+            Log.d(Config.logTag, "Time to upgrade $modelClass, fetching upgrade details")
+        }
+
+        return when (val modelUpgradeResponse = getModelUpgradeDetails(context, modelClass, modelFrameworkVersion)) {
             is NetworkResult.Success ->
                 try {
+                    modelUpgradeResponse.body.queryAgainAfterMs?.asEpochMillisecondsClockMark()?.apply {
+                        setNextModelUpgradeAttemptTime(this)
+                    }
                     DownloadDetails(
                         url = URL(modelUpgradeResponse.body.url),
                         hash = modelUpgradeResponse.body.hash,
                         hashAlgorithm = modelUpgradeResponse.body.hashAlgorithm,
-                        modelVersion = modelUpgradeResponse.body.modelVersion
+                        modelVersion = modelUpgradeResponse.body.modelVersion,
                     ).apply { cachedDownloadDetails = this }
                 } catch (t: Throwable) {
                     Log.e(Config.logTag, "Invalid signed url for model $modelClass: ${modelUpgradeResponse.body.url}")
@@ -335,6 +349,21 @@ abstract class UpdatingModelWebFetcher(private val context: Context) : SignedUrl
                 fallbackDownloadDetails()
             }
         }
+    }
+
+    /**
+     * Determine if we should query for a model upgrade
+     */
+    protected open fun getNextUpgradeTime(): ClockMark =
+        StorageFactory
+            .getStorageInstance(context, PURPOSE_MODEL_UPGRADE)
+            .getLong(modelClass, 0)
+            .asEpochMillisecondsClockMark()
+
+    protected open fun setNextModelUpgradeAttemptTime(time: ClockMark) {
+        StorageFactory
+            .getStorageInstance(context, PURPOSE_MODEL_UPGRADE)
+            .storeValue(modelClass, time.toMillisecondsSinceEpoch())
     }
 
     /**

@@ -1,6 +1,7 @@
 package com.getbouncer.scan.framework.time
 
 import androidx.annotation.CheckResult
+import java.util.Date
 
 object Clock {
     fun markNow(): ClockMark = PreciseClockMark(System.nanoTime())
@@ -18,6 +19,10 @@ interface ClockMark {
     fun elapsedSince(): Duration
 
     fun toMillisecondsSinceEpoch(): Long
+
+    fun hasPassed(): Boolean
+
+    fun isInFuture(): Boolean
 }
 
 /**
@@ -27,6 +32,10 @@ private class AbsoluteClockMark(private val millisecondsSinceEpoch: Long) : Cloc
     override fun elapsedSince(): Duration = (System.currentTimeMillis() - millisecondsSinceEpoch).milliseconds
 
     override fun toMillisecondsSinceEpoch(): Long = millisecondsSinceEpoch
+
+    override fun hasPassed(): Boolean = elapsedSince() > Duration.ZERO
+
+    override fun isInFuture(): Boolean = elapsedSince() < Duration.ZERO
 
     override fun equals(other: Any?): Boolean =
         this === other || when (other) {
@@ -40,7 +49,7 @@ private class AbsoluteClockMark(private val millisecondsSinceEpoch: Long) : Cloc
     }
 
     override fun toString(): String {
-        return "AbsoluteClockMark(${elapsedSince()} ago)"
+        return "AbsoluteClockMark(at ${Date(millisecondsSinceEpoch)})"
     }
 }
 
@@ -51,6 +60,10 @@ private class PreciseClockMark(private val originMark: Long) : ClockMark {
     override fun elapsedSince(): Duration = (System.nanoTime() - originMark).nanoseconds
 
     override fun toMillisecondsSinceEpoch(): Long = System.currentTimeMillis() - elapsedSince().inMilliseconds.toLong()
+
+    override fun hasPassed(): Boolean = elapsedSince() > Duration.ZERO
+
+    override fun isInFuture(): Boolean = elapsedSince() < Duration.ZERO
 
     override fun equals(other: Any?): Boolean =
         this === other || when (other) {
@@ -63,8 +76,12 @@ private class PreciseClockMark(private val originMark: Long) : ClockMark {
         return originMark.hashCode()
     }
 
-    override fun toString(): String {
-        return "PreciseClockMark(${elapsedSince()} ago)"
+    override fun toString(): String = elapsedSince().let {
+        if (it >= Duration.ZERO) {
+            "PreciseClockMark($it ago)"
+        } else {
+            "PreciseClockMark(${-it} in the future)"
+        }
     }
 }
 
