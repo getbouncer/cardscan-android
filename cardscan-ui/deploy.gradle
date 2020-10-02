@@ -13,7 +13,7 @@ ext {
 
     libraryDescription = 'This library provides the framework for running CardScan ML models.'
 
-    siteUrl = 'https://github.com/getbouncer/cardscan-ui-android'
+    siteUrl = 'https://getbouncer.com'
     gitUrl = 'https://github.com/getbouncer/cardscan-ui-android.git'
 
     libraryVersion = version
