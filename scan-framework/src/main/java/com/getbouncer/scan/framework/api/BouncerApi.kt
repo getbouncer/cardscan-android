@@ -12,7 +12,6 @@ import com.getbouncer.scan.framework.api.dto.StatsPayload
 import com.getbouncer.scan.framework.api.dto.ValidateApiKeyResponse
 import com.getbouncer.scan.framework.util.AppDetails
 import com.getbouncer.scan.framework.util.Device
-import com.getbouncer.scan.framework.util.getAppPackageName
 import com.getbouncer.scan.framework.util.getPlatform
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope

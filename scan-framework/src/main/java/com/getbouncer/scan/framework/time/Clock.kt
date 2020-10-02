@@ -78,7 +78,7 @@ private class PreciseClockMark(private val originMark: Long) : ClockMark {
 
     override fun toString(): String = elapsedSince().let {
         if (it >= Duration.ZERO) {
-            "PreciseClockMark(${it} ago)"
+            "PreciseClockMark($it ago)"
         } else {
             "PreciseClockMark(${-it} in the future)"
         }

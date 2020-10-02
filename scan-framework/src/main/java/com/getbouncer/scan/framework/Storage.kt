@@ -73,7 +73,7 @@ class SharedPreferencesStorage(private val context: Context, private val purpose
     }
 
     override fun storeValue(key: String, value: String) = sharedPrefs?.run {
-        with (edit()) {
+        with(edit()) {
             putString("${purpose}_$key", value)
             commit()
         }
@@ -82,7 +82,7 @@ class SharedPreferencesStorage(private val context: Context, private val purpose
     }
 
     override fun storeValue(key: String, value: Long) = sharedPrefs?.run {
-        with (edit()) {
+        with(edit()) {
             putLong("${purpose}_$key", value)
             commit()
         }
@@ -91,7 +91,7 @@ class SharedPreferencesStorage(private val context: Context, private val purpose
     }
 
     override fun storeValue(key: String, value: Int) = sharedPrefs?.run {
-        with (edit()) {
+        with(edit()) {
             putInt("${purpose}_$key", value)
             commit()
         }
@@ -100,7 +100,7 @@ class SharedPreferencesStorage(private val context: Context, private val purpose
     }
 
     override fun storeValue(key: String, value: Float) = sharedPrefs?.run {
-        with (edit()) {
+        with(edit()) {
             putFloat("${purpose}_$key", value)
             commit()
         }
@@ -109,7 +109,7 @@ class SharedPreferencesStorage(private val context: Context, private val purpose
     }
 
     override fun storeValue(key: String, value: Boolean) = sharedPrefs?.run {
-        with (edit()) {
+        with(edit()) {
             putBoolean("${purpose}_$key", value)
             commit()
         }
