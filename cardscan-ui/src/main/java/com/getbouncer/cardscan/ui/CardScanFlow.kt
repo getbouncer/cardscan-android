@@ -143,6 +143,9 @@ class CardScanFlow(
                     mainLoopNameExpiry?.unsubscribe()
                     mainLoopNameExpiry = null
 
+                    mainLoopNameExpiryJob?.cancel()
+                    mainLoopNameExpiryAggregator = null
+
                     resultListener.onResult(
                         FinalResult(
                             pan = pan,
@@ -178,6 +181,11 @@ class CardScanFlow(
 
                     pan = result
 
+                    val isDeviceFastEnough = isDeviceFastEnoughForNameExtraction(mainLoopOcrAggregator?.frameRateTracker?.getAverageFrameRate())
+
+                    mainLoopOcrJob?.cancel()
+                    mainLoopOcrAggregator = null
+
                     if (enableNameExtraction || enableExpiryExtraction) {
                         coroutineScope.launch {
                             runNameExpiryMainLoop(
@@ -187,6 +195,7 @@ class CardScanFlow(
                                 viewFinder,
                                 lifecycleOwner,
                                 coroutineScope,
+                                isDeviceFastEnough,
                                 mainLoopNameExpiryListener,
                             )
                         }
@@ -314,13 +323,12 @@ class CardScanFlow(
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,
         coroutineScope: CoroutineScope,
+        isDeviceFastEnough: Boolean,
         listener: AggregateResultListener<MainLoopNameExpiryAggregator.InterimResult, MainLoopNameExpiryAggregator.FinalResult>,
     ) {
         if (canceled) {
             return
         }
-
-        val isDeviceFastEnough = isDeviceFastEnoughForNameExtraction(mainLoopOcrAggregator?.frameRateTracker?.getAverageFrameRate())
 
         mainLoopNameExpiryAggregator = MainLoopNameExpiryAggregator(
             listener = listener,
