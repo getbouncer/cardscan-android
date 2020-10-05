@@ -12,7 +12,7 @@ public class ResourceModelFactory extends ModelFactory {
     @NonNull
     @Override
     public MappedByteBuffer loadModelFile(@NonNull Context context) throws IOException{
-        return loadModelFromResource(context, R.raw.darknite);
+        return loadModelFromResource(context, R.raw.darknite_1_1_1_16);
     }
 
 }
