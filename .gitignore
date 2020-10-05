@@ -13,6 +13,8 @@
 /.idea/runConfigurations.xml
 /.idea/vcs.xml
 /.idea/dictionaries
+/.idea/codeStyles/Project.xml
+/.idea/jarRepositories.xml
 .DS_Store
 /build
 /captures
