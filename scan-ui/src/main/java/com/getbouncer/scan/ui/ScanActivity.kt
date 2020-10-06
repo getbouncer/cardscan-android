@@ -365,7 +365,6 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
             setFlashlightState(cameraAdapter.isTorchOn())
             onFlashSupported(it)
         }
-        cameraAdapter.setFocus(previewFrame.centerPoint())
 
         onCameraStreamAvailable(cameraAdapter.getImageStream())
     }
