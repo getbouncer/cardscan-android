@@ -31,7 +31,6 @@ import com.getbouncer.scan.framework.time.milliseconds
 import com.getbouncer.scan.framework.util.retry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
@@ -59,8 +58,6 @@ class Camera1Adapter(
     private var mCamera: Camera? = null
     private var cameraPreview: CameraPreview? = null
     private var mRotation = 0
-    private var focusJob: Job? = null
-    private var focusPoint = PointF(previewView.width / 2F, previewView.height / 2F)
     private var onCameraAvailableListener: WeakReference<((Camera) -> Unit)?> = WeakReference(null)
 
     override fun withFlashSupport(task: (Boolean) -> Unit) {
@@ -94,7 +91,6 @@ class Camera1Adapter(
 
     override fun setFocus(point: PointF) {
         mCamera?.apply {
-            focusPoint = point
             if (parameters.maxNumFocusAreas > 0) {
                 val focusRect = Rect(
                     point.x.toInt() - 10,
@@ -140,7 +136,6 @@ class Camera1Adapter(
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     override fun onPause() {
         super.onPause()
-        focusJob?.cancel()
 
         mCamera?.stopPreview()
         mCamera?.setPreviewCallbackWithBuffer(null)
@@ -201,7 +196,7 @@ class Camera1Adapter(
             }
         } else {
             mCamera = camera
-            setCameraDisplayOrientation(activity, Camera.CameraInfo.CAMERA_FACING_BACK)
+            setCameraDisplayOrientation(activity)
             setCameraPreviewFrame()
 
             // Create our Preview view and set it as the content of our activity.
@@ -292,10 +287,10 @@ class Camera1Adapter(
         return optimalSize
     }
 
-    private fun setCameraDisplayOrientation(activity: Activity, cameraId: Int) {
+    private fun setCameraDisplayOrientation(activity: Activity) {
         val camera = mCamera ?: return
         val info = Camera.CameraInfo()
-        Camera.getCameraInfo(cameraId, info)
+        Camera.getCameraInfo(Camera.CameraInfo.CAMERA_FACING_BACK, info)
 
         val rotation = activity.windowManager.defaultDisplay.rotation
         var degrees = 0
