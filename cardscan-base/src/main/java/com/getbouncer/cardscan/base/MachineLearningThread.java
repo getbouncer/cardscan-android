@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
@@ -589,22 +590,31 @@ public class MachineLearningThread implements Runnable {
             height = objectDetect.getHeight();
             width = height / 375F * 600F;
         }
-        float y = (objectDetect.getHeight() - height) / 2.0f;
+        float y = (objectDetect.getHeight() - height) / 2F;
         float x = (objectDetect.getWidth() - width) / 2F;
         return Bitmap.createBitmap(objectDetect, (int) x, (int) y, (int) width, (int) height);
     }
 
+    /**
+     * Calculate what portion of the full image should be cropped for screen detection.
+     */
     @NonNull
     protected Bitmap cropBitmapForScreenDetection(@NonNull Bitmap fullScreen) {
-        float width = fullScreen.getWidth();
-        float height = width * 16F / 9F;
-        if (height > fullScreen.getHeight()) {
-            height = fullScreen.getHeight();
-            width = height / 16F * 9F;
-        }
-        float y = (fullScreen.getHeight() - height) / 2F;
-        float x = (fullScreen.getWidth() - width) / 2F;
-        return Bitmap.createBitmap(fullScreen, (int) x, (int) y, (int) width, (int) height);
+        final Rect crop = ImageUtils.center(
+            ImageUtils.adjustSizeToAspectRatio(fullScreen.getWidth(), fullScreen.getHeight(), 16F / 9),
+            new Rect(0, 0, fullScreen.getWidth(), fullScreen.getHeight())
+        );
+
+        return ImageUtils.zoom(
+            ImageUtils.cropWithFill(fullScreen, crop),
+            ImageUtils.center(
+                new Rect(0, 0, 244, 244),
+                new Rect(0, 0, fullScreen.getWidth(), fullScreen.getHeight())
+            ),
+            new Rect(112, 112, 336, 336),
+            448,
+            488
+        );
     }
 
     @Override
