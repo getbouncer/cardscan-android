@@ -10,6 +10,8 @@ import android.util.Size
 import androidx.core.graphics.drawable.toBitmap
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
+import com.getbouncer.scan.framework.util.centerOn
+import com.getbouncer.scan.framework.util.toRect
 import com.getbouncer.scan.payment.test.R
 import org.junit.Test
 import java.nio.ByteBuffer
@@ -219,9 +221,9 @@ class ImageTest {
 
         // zoom the bitmap
         val zoomedBitmap = bitmap.zoom(
-            originalCenterSize = Size(224, 224),
-            futureCenterRect = Rect(112, 112, 336, 336),
-            futureImageSize = Size(448, 448)
+            originalRegion = Size(224, 224).centerOn(bitmap.size().toRect()),
+            newRegion = Rect(112, 112, 336, 336),
+            newImageSize = Size(448, 448)
         )
 
         // check the expected sizes of the images

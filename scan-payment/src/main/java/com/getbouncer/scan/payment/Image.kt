@@ -9,7 +9,6 @@ import android.graphics.Color
 import android.graphics.Rect
 import android.util.Size
 import androidx.annotation.CheckResult
-import com.getbouncer.scan.framework.util.centerOn
 import com.getbouncer.scan.framework.util.intersectionWith
 import com.getbouncer.scan.framework.util.move
 import com.getbouncer.scan.framework.util.resizeRegion
@@ -141,14 +140,12 @@ fun Bitmap.rearrangeBySegments(
  */
 @CheckResult
 fun Bitmap.zoom(
-    originalCenterSize: Size,
-    futureCenterRect: Rect,
-    futureImageSize: Size
+    originalRegion: Rect,
+    newRegion: Rect,
+    newImageSize: Size
 ): Bitmap {
-    // Finds the center rectangle of the newly cropped image
-    val originalCenterRect = originalCenterSize.centerOn(this.size().toRect())
     // Produces a map of rects to rects which are used to map segments of the old image onto the new one
-    val regionMap = this.size().resizeRegion(originalCenterRect, futureCenterRect, futureImageSize)
+    val regionMap = this.size().resizeRegion(originalRegion, newRegion, newImageSize)
     // construct the bitmap from the region map
     return this.rearrangeBySegments(regionMap)
 }
