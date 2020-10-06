@@ -91,17 +91,18 @@ class Camera1Adapter(
 
     override fun setFocus(point: PointF) {
         mCamera?.apply {
-            if (parameters.maxNumFocusAreas > 0) {
+            val params = parameters
+            if (params.maxNumFocusAreas > 0) {
                 val focusRect = Rect(
-                    point.x.toInt() - 10,
-                    point.y.toInt() - 10,
-                    point.x.toInt() + 10,
-                    point.y.toInt() + 10
+                    point.x.toInt() - 150,
+                    point.y.toInt() - 150,
+                    point.x.toInt() + 150,
+                    point.y.toInt() + 150
                 )
                 val cameraFocusAreas: MutableList<Camera.Area> = ArrayList()
                 cameraFocusAreas.add(Camera.Area(focusRect, 1000))
-                parameters.focusAreas = cameraFocusAreas
-                setCameraParameters(this, parameters)
+                params.focusAreas = cameraFocusAreas
+                setCameraParameters(this, params)
             }
         }
     }
@@ -172,6 +173,7 @@ class Camera1Adapter(
         try {
             camera.parameters = parameters
         } catch (t: Throwable) {
+            Log.w(Config.logTag, "Error setting camera parameters", t)
             // ignore failure to set camera parameters
         }
     }
@@ -332,20 +334,19 @@ class Camera1Adapter(
         private val mPreviewCallback: PreviewCallback
     ) : SurfaceView(context), AutoFocusCallback, SurfaceHolder.Callback {
 
-        private var mHolder: SurfaceHolder = holder
-
         init {
-            mHolder.addCallback(this)
+            holder.addCallback(this)
             mCamera?.apply {
-                val focusModes = parameters.supportedFocusModes
+                val params = parameters
+                val focusModes = params.supportedFocusModes
                 if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
-                    parameters.focusMode = Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE
+                    params.focusMode = Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE
                 } else if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
-                    parameters.focusMode = Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO
+                    params.focusMode = Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO
                 }
 
-                parameters.setRecordingHint(true)
-                setCameraParameters(this, parameters)
+                params.setRecordingHint(true)
+                setCameraParameters(this, params)
             }
         }
 
@@ -356,7 +357,7 @@ class Camera1Adapter(
          */
         override fun surfaceCreated(holder: SurfaceHolder) {
             try {
-                mCamera?.setPreviewDisplay(mHolder)
+                mCamera?.setPreviewDisplay(this.holder)
                 mCamera?.setPreviewCallbackWithBuffer(mPreviewCallback)
                 startCameraPreview()
             } catch (t: Throwable) {
@@ -376,7 +377,7 @@ class Camera1Adapter(
         ) {
             // If your preview can change or rotate, take care of those events here.
             // Make sure to stop the preview before resizing or reformatting it.
-            if (mHolder.surface == null) {
+            if (this.holder.surface == null) {
                 // preview surface does not exist
                 return
             }
@@ -393,7 +394,7 @@ class Camera1Adapter(
 
             // start preview with new settings
             try {
-                mCamera?.setPreviewDisplay(mHolder)
+                mCamera?.setPreviewDisplay(this.holder)
                 val bufSize = w * h * ImageFormat.getBitsPerPixel(format) / 8
                 for (i in 0..2) {
                     mCamera?.addCallbackBuffer(ByteArray(bufSize))
