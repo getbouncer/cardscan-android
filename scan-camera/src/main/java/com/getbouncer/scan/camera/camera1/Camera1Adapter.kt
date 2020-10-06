@@ -27,16 +27,15 @@ import com.getbouncer.scan.camera.rotate
 import com.getbouncer.scan.camera.scale
 import com.getbouncer.scan.camera.toBitmap
 import com.getbouncer.scan.framework.Config
+import com.getbouncer.scan.framework.time.milliseconds
+import com.getbouncer.scan.framework.util.retry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
 import java.util.ArrayList
-import java.util.Random
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -96,7 +95,6 @@ class Camera1Adapter(
     override fun setFocus(point: PointF) {
         mCamera?.apply {
             focusPoint = point
-            val parameters = parameters
             if (parameters.maxNumFocusAreas > 0) {
                 val focusRect = Rect(
                     point.x.toInt() - 10,
@@ -170,23 +168,6 @@ class Camera1Adapter(
                 cameraErrorListener.onCameraOpenError(t)
             }
         }
-
-        // For some devices (especially Samsung), we need to continuously refocus the camera.
-        focusJob?.cancel()
-        focusJob = coroutineScope.launch {
-            while (isActive) {
-                delay(5000)
-                val variance = Random().nextFloat() - 0.5F
-                val originalFocusPoint = focusPoint
-                setFocus(
-                    PointF(
-                        focusPoint.x + variance,
-                        focusPoint.y + variance
-                    )
-                )
-                focusPoint = originalFocusPoint
-            }
-        }
     }
 
     private fun setCameraParameters(
@@ -202,24 +183,13 @@ class Camera1Adapter(
 
     private fun startCameraPreview() {
         coroutineScope.launch(Dispatchers.IO) {
-            startCameraPreviewInternal(0, 5, null)
-        }
-    }
-
-    private suspend fun startCameraPreviewInternal(
-        attemptNumber: Int,
-        maxAttempts: Int,
-        previousThrowable: Throwable?
-    ) {
-        if (attemptNumber >= maxAttempts) {
-            cameraErrorListener.onCameraOpenError(previousThrowable)
-            return
-        }
-        try {
-            mCamera?.startPreview()
-        } catch (t: Throwable) {
-            delay(500)
-            startCameraPreviewInternal(attemptNumber + 1, maxAttempts, t)
+            try {
+                retry(retryDelay = 500.milliseconds, times = 5) {
+                    mCamera?.startPreview()
+                }
+            } catch (t: Throwable) {
+                cameraErrorListener.onCameraOpenError(t)
+            }
         }
     }
 
@@ -233,10 +203,12 @@ class Camera1Adapter(
             mCamera = camera
             setCameraDisplayOrientation(activity, Camera.CameraInfo.CAMERA_FACING_BACK)
             setCameraPreviewFrame()
+
             // Create our Preview view and set it as the content of our activity.
             cameraPreview = CameraPreview(activity, this).apply {
                 layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
             }
+
             withContext(Dispatchers.Main) {
                 onCameraAvailableListener.get()?.let {
                     it(camera)
@@ -254,12 +226,16 @@ class Camera1Adapter(
             val format = ImageFormat.NV21
             val parameters = parameters
             parameters.previewFormat = format
+
             val displayMetrics = DisplayMetrics()
             activity.windowManager.defaultDisplay.getRealMetrics(displayMetrics)
+
             val displayWidth = max(displayMetrics.heightPixels, displayMetrics.widthPixels)
             val displayHeight = min(displayMetrics.heightPixels, displayMetrics.widthPixels)
+
             val height: Int = minimumResolution.height
             val width = displayWidth * height / displayHeight
+
             getOptimalPreviewSize(parameters.supportedPreviewSizes, width, height)?.apply {
                 parameters.setPreviewSize(this.width, this.height)
             }
@@ -318,23 +294,23 @@ class Camera1Adapter(
 
     private fun setCameraDisplayOrientation(activity: Activity, cameraId: Int) {
         val camera = mCamera ?: return
-
         val info = Camera.CameraInfo()
         Camera.getCameraInfo(cameraId, info)
+
         val rotation = activity.windowManager.defaultDisplay.rotation
         var degrees = 0
+
         when (rotation) {
             Surface.ROTATION_0 -> degrees = 0
             Surface.ROTATION_90 -> degrees = 90
             Surface.ROTATION_180 -> degrees = 180
             Surface.ROTATION_270 -> degrees = 270
         }
-        var result: Int
-        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-            result = (info.orientation + degrees) % 360
-            result = (360 - result) % 360 // compensate for the mirror
+
+        val result = if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+            (360 - (info.orientation + degrees) % 360) % 360 // compensate for the mirror
         } else { // back-facing
-            result = (info.orientation - degrees + 360) % 360
+            (info.orientation - degrees + 360) % 360
         }
 
         try {
@@ -342,12 +318,15 @@ class Camera1Adapter(
         } catch (e: java.lang.Exception) {
             // preview was already stopped
         }
+
         try {
             camera.setDisplayOrientation(result)
         } catch (t: Throwable) {
             cameraErrorListener.onCameraUnsupportedError(t)
         }
+
         startCameraPreview()
+
         mRotation = result
     }
 
@@ -363,7 +342,6 @@ class Camera1Adapter(
         init {
             mHolder.addCallback(this)
             mCamera?.apply {
-                val parameters = parameters
                 val focusModes = parameters.supportedFocusModes
                 if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
                     parameters.focusMode = Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE
