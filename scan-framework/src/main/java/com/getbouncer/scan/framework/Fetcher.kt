@@ -172,8 +172,10 @@ sealed class WebFetcher : Fetcher {
         } catch (t: Throwable) {
             fetchException = t
             if (cachedData.successfullyFetched) {
+                Log.w(Config.logTag, "Failed to download model $modelClass, loaded from local cache", t)
                 stat.trackResult("success")
             } else {
+                Log.e(Config.logTag, "Failed to download model $modelClass, no local cache available", t)
                 stat.trackResult(t::class.java.simpleName)
             }
             return@withLock cachedData
