@@ -6,6 +6,7 @@ import android.graphics.PointF
 import android.graphics.Rect
 import android.graphics.drawable.Animatable
 import android.os.Handler
+import android.os.Looper
 import android.util.TypedValue
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -67,7 +68,7 @@ fun View.fadeOut(duration: Duration? = null) {
             animation.duration = duration.inMilliseconds.toLong()
         }
         startAnimation(animation)
-        Handler().postDelayed({ hide() }, duration?.inMilliseconds?.toLong() ?: 400)
+        Handler(Looper.getMainLooper()).postDelayed({ hide() }, duration?.inMilliseconds?.toLong() ?: 400)
     }
 }
 

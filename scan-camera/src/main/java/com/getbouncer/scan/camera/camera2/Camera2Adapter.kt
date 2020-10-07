@@ -177,17 +177,17 @@ class Camera2Adapter(
 
     @ExperimentalCoroutinesApi
     private val surfaceTextureListener = object : TextureView.SurfaceTextureListener {
-        override fun onSurfaceTextureAvailable(surface: SurfaceTexture?, width: Int, height: Int) {
+        override fun onSurfaceTextureAvailable(surface: SurfaceTexture, width: Int, height: Int) {
             openCamera()
         }
 
-        override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture?, width: Int, height: Int) {
+        override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture, width: Int, height: Int) {
             configureTransform(Size(width, height), previewSize)
         }
 
-        override fun onSurfaceTextureDestroyed(surface: SurfaceTexture?) = true
+        override fun onSurfaceTextureDestroyed(surface: SurfaceTexture) = true
 
-        override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) {
+        override fun onSurfaceTextureUpdated(surface: SurfaceTexture) {
             configureTransform(Size(textureView.width, textureView.height), previewSize)
             // There does not appear to be any performance improvement by using this method
             if (processingImage.getAndSet(true)) {

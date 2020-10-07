@@ -86,7 +86,12 @@ private fun getDevicePhoneType(context: Context) = try {
 private fun getDevicePhoneCount(context: Context) =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         try {
-            (context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?)?.phoneCount ?: -1
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                (context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?)?.activeModemCount ?: -1
+            } else {
+                @Suppress("deprecation")
+                (context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?)?.phoneCount ?: -1
+            }
         } catch (t: Throwable) {
             -1
         }
