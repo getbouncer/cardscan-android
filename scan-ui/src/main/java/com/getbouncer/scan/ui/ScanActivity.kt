@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.PointF
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.util.Size
@@ -141,7 +142,6 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
         }
     }
 
-    @Suppress("deprecation")
     private fun hideSystemUi() {
         // Prevent screenshots and keep the screen on while scanning.
         window.setFlags(
@@ -151,9 +151,10 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
 
         // Hide both the navigation bar and the status bar. Allow system gestures to show the navigation and status bar,
         // but prevent the UI from resizing when they are shown.
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             window.setDecorFitsSystemWindows(true)
         } else {
+            @Suppress("deprecation")
             window.decorView.apply {
                 systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
                         View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
