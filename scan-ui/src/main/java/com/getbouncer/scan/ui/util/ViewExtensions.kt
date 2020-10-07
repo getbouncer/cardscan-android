@@ -19,7 +19,6 @@ import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import com.getbouncer.scan.framework.time.Duration
 import com.getbouncer.scan.ui.R
-import java.util.concurrent.Executors
 import kotlin.math.roundToInt
 
 /**
