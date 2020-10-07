@@ -142,7 +142,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
         }
     }
 
-    @SuppressLint("deprecation")
+    @Suppress("deprecation")
     private fun hideSystemUi() {
         // Prevent screenshots and keep the screen on while scanning.
         window.setFlags(
