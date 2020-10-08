@@ -32,16 +32,13 @@ private const val NAME_BOX_Y_SCALE_RATIO = 1.4F
 private const val EXPIRY_BOX_X_SCALE_RATIO = 1.1F
 private const val EXPIRY_BOX_Y_SCALE_RATIO = 1.2F
 
-class NameAndExpiryAnalyzer<State : NameAndExpiryAnalyzer.State> private constructor(
+class NameAndExpiryAnalyzer<State> private constructor(
     private val textDetect: TextDetect?,
     private val alphabetDetect: AlphabetDetect?,
     private val expiryDetect: ExpiryDetect?,
+    private val runNameExtraction: Boolean,
+    private val runExpiryExtraction: Boolean,
 ) : Analyzer<SSDOcr.Input, State, NameAndExpiryAnalyzer.Prediction> {
-
-    interface State {
-        val runNameExtraction: Boolean
-        val runExpiryExtraction: Boolean
-    }
 
     data class Prediction(
         val name: String?,
@@ -56,7 +53,7 @@ class NameAndExpiryAnalyzer<State : NameAndExpiryAnalyzer.State> private constru
     override suspend fun analyze(
         data: SSDOcr.Input,
         state: State
-    ) = if ((!state.runNameExtraction && !state.runExpiryExtraction) || textDetect == null) {
+    ) = if ((!runNameExtraction && !runExpiryExtraction) || textDetect == null) {
         Prediction(null, null, null)
     } else {
         val objDetectBitmap = cropImageForObjectDetect(
@@ -74,7 +71,7 @@ class NameAndExpiryAnalyzer<State : NameAndExpiryAnalyzer.State> private constru
             Unit
         )
 
-        val expiry = if (state.runExpiryExtraction && textDetectorPrediction.expiryBoxes.isNotEmpty()) {
+        val expiry = if (runExpiryExtraction && textDetectorPrediction.expiryBoxes.isNotEmpty()) {
             // pick the expiry box by oldest date
             // the boxes produced by textDetector are sometimes too tight, especially in the Y
             // direction. Scale it out a bit
@@ -96,7 +93,7 @@ class NameAndExpiryAnalyzer<State : NameAndExpiryAnalyzer.State> private constru
             null
         }
 
-        val name = if (state.runNameExtraction) {
+        val name = if (runNameExtraction) {
             textDetectorPrediction.nameBoxes.mapNotNull { box ->
                 // the boxes produced by textDetector are sometimes too tight, especially in the Y
                 // direction. Scale it out a bit
@@ -300,15 +297,19 @@ class NameAndExpiryAnalyzer<State : NameAndExpiryAnalyzer.State> private constru
         return word.toString().trim { it <= ' ' }
     }
 
-    class Factory<State : NameAndExpiryAnalyzer.State>(
+    class Factory<State>(
         private val textDetectFactory: TextDetect.Factory,
         private val alphabetDetectFactory: AlphabetDetect.Factory? = null,
-        private val expiryDetectFactory: ExpiryDetect.Factory? = null
+        private val expiryDetectFactory: ExpiryDetect.Factory? = null,
+        private val runNameExtraction: Boolean,
+        private val runExpiryExtraction: Boolean,
     ) : AnalyzerFactory<SSDOcr.Input, State, Prediction, NameAndExpiryAnalyzer<State>> {
         override suspend fun newInstance() = NameAndExpiryAnalyzer<State>(
-            textDetectFactory.newInstance(),
-            alphabetDetectFactory?.newInstance(),
-            expiryDetectFactory?.newInstance()
+            textDetect = textDetectFactory.newInstance(),
+            alphabetDetect = alphabetDetectFactory?.newInstance(),
+            expiryDetect = expiryDetectFactory?.newInstance(),
+            runNameExtraction = runNameExtraction,
+            runExpiryExtraction = runExpiryExtraction,
         )
     }
 }

@@ -319,14 +319,12 @@ abstract class SimpleScanActivity : ScanActivity() {
         cardNumberTextView.gravity = Gravity.CENTER
         cardNumberTextView.typeface = Typeface.DEFAULT_BOLD
         cardNumberTextView.setShadowLayer(getFloatResource(R.dimen.bouncerPanStrokeSize), 0F, 0F, getColorByRes(R.color.bouncerCardPanOutlineColor))
-        cardNumberTextView.hide()
 
         cardNameTextView.setTextColor(getColorByRes(R.color.bouncerCardNameColor))
         cardNameTextView.setTextSizeByRes(R.dimen.bouncerNameTextSize)
         cardNameTextView.gravity = Gravity.CENTER
         cardNameTextView.typeface = Typeface.DEFAULT_BOLD
         cardNameTextView.setShadowLayer(getFloatResource(R.dimen.bouncerNameStrokeSize), 0F, 0F, getColorByRes(R.color.bouncerCardNameOutlineColor))
-        cardNameTextView.hide()
     }
 
     protected open fun setupDebugUi() {
