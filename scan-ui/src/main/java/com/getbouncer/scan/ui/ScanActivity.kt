@@ -144,10 +144,10 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
 
     private fun hideSystemUi() {
         // Prevent screenshots and keep the screen on while scanning.
-        window.setFlags(
-            WindowManager.LayoutParams.FLAG_SECURE + WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
-            WindowManager.LayoutParams.FLAG_SECURE + WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-        )
+//        window.setFlags(
+//            WindowManager.LayoutParams.FLAG_SECURE + WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+//            WindowManager.LayoutParams.FLAG_SECURE + WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+//        )
 
         // Hide both the navigation bar and the status bar. Allow system gestures to show the navigation and status bar,
         // but prevent the UI from resizing when they are shown.

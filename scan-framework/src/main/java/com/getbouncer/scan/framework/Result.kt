@@ -92,7 +92,7 @@ abstract class ResultAggregator<DataFrame, State, AnalyzerResult, InterimResult,
         Stats.trackRepeatingTask("${this@ResultAggregator::class.java.simpleName}_aggregator_execution")
     }
 
-    val frameRateTracker by lazy { FrameRateTracker(this::class.java.simpleName) }
+    protected open val frameRateTracker by lazy { FrameRateTracker(this::class.java.simpleName) }
 
     /**
      * Reset the state of the aggregator and pause aggregation. This is useful for aggregators that can be backgrounded.

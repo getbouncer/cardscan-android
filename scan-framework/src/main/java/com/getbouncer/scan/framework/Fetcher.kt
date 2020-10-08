@@ -279,11 +279,15 @@ abstract class SignedUrlModelWebFetcher(private val context: Context) : DirectDo
                 try {
                     URL(signedUrlResponse.body.modelUrl)
                 } catch (t: Throwable) {
-                    Log.e(Config.logTag, "Invalid signed url for model $modelClass: ${signedUrlResponse.body.modelUrl}")
+                    Log.e(Config.logTag, "Invalid signed url for model $modelClass: ${signedUrlResponse.body.modelUrl}", t)
                     null
                 }
-            else -> {
-                Log.e(Config.logTag, "Failed to get signed url for model $modelClass: ${signedUrlResponse.responseCode}")
+            is NetworkResult.Error -> {
+                Log.w(Config.logTag, "Failed to get signed url for model $modelClass: ${signedUrlResponse.error}")
+                null
+            }
+            is NetworkResult.Exception -> {
+                Log.e(Config.logTag, "Exception fetching signed url for model $modelClass: ${signedUrlResponse.responseCode}", signedUrlResponse.exception)
                 null
             }
         }?.let { DownloadDetails(it, hash, hashAlgorithm, modelVersion) }
@@ -343,11 +347,15 @@ abstract class UpdatingModelWebFetcher(private val context: Context) : SignedUrl
                         modelVersion = modelUpgradeResponse.body.modelVersion,
                     ).apply { cachedDownloadDetails = this }
                 } catch (t: Throwable) {
-                    Log.e(Config.logTag, "Invalid signed url for model $modelClass: ${modelUpgradeResponse.body.url}")
+                    Log.e(Config.logTag, "Invalid signed url for model $modelClass: ${modelUpgradeResponse.body.url}", t)
                     null
                 }
-            else -> {
-                Log.e(Config.logTag, "Failed to get latest details for model $modelClass: ${modelUpgradeResponse.responseCode}")
+            is NetworkResult.Error -> {
+                Log.w(Config.logTag, "Failed to get latest details for model $modelClass: ${modelUpgradeResponse.error}")
+                fallbackDownloadDetails()
+            }
+            is NetworkResult.Exception -> {
+                Log.e(Config.logTag, "Exception retrieving latest details for model $modelClass: ${modelUpgradeResponse.responseCode}", modelUpgradeResponse.exception)
                 fallbackDownloadDetails()
             }
         }
