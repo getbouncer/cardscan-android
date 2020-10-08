@@ -174,14 +174,14 @@ class CardScanFlow(
             }
 
         val mainLoopOcrListener =
-            object : AggregateResultListener<MainLoopOcrAggregator.InterimResult, String> {
-                override suspend fun onResult(result: String) {
+            object : AggregateResultListener<MainLoopOcrAggregator.InterimResult, MainLoopOcrAggregator.FinalResult> {
+                override suspend fun onResult(result: MainLoopOcrAggregator.FinalResult) {
                     mainLoopOcr?.unsubscribe()
                     mainLoopOcr = null
 
-                    pan = result
+                    pan = result.pan
 
-                    val isDeviceFastEnough = isDeviceFastEnoughForNameExtraction(mainLoopOcrAggregator?.frameRateTracker?.getAverageFrameRate())
+                    val isDeviceFastEnough = isDeviceFastEnoughForNameExtraction(result.averageFrameRate)
 
                     mainLoopOcrJob?.cancel()
                     mainLoopOcrAggregator = null
@@ -202,7 +202,7 @@ class CardScanFlow(
                     } else {
                         resultListener.onResult(
                             FinalResult(
-                                pan = result,
+                                pan = result.pan,
                                 name = null,
                                 expiry = null,
                                 errorString = null,
@@ -275,7 +275,7 @@ class CardScanFlow(
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,
         coroutineScope: CoroutineScope,
-        listener: AggregateResultListener<MainLoopOcrAggregator.InterimResult, String>,
+        listener: AggregateResultListener<MainLoopOcrAggregator.InterimResult, MainLoopOcrAggregator.FinalResult>,
     ) {
         if (canceled) {
             return
@@ -346,6 +346,8 @@ class CardScanFlow(
                             TextDetect.Factory(context, getTextDetectorModel(context, true)),
                             AlphabetDetect.Factory(context, getAlphabetDetectorModel(context, true)),
                             ExpiryDetect.Factory(context, getExpiryDetectorModel(context, true)),
+                            runNameExtraction = enableNameExtraction && isDeviceFastEnough,
+                            runExpiryExtraction = enableExpiryExtraction,
                         )
                     )
                 )

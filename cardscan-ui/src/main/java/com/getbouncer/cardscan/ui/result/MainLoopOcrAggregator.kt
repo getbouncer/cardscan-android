@@ -2,21 +2,22 @@ package com.getbouncer.cardscan.ui.result
 
 import com.getbouncer.scan.framework.AggregateResultListener
 import com.getbouncer.scan.framework.ResultAggregator
+import com.getbouncer.scan.framework.time.Rate
 import com.getbouncer.scan.payment.ml.SSDOcr
 
 /**
  * Aggregate results from the main loop. Each frame will trigger an [InterimResult] to the
- * [listener]. Once the [MainLoopOcrState.Finished] state is reached, a [String] will be sent to the
- * [listener].
+ * [listener]. Once the [MainLoopOcrState.Finished] state is reached, a [FinalResult] will be sent
+ * to the [listener].
  *
  * This aggregator is a state machine. The full list of possible states are subclasses of the
  * [MainLoopOcrState] class. This was written referencing this article:
  * https://thoughtbot.com/blog/finite-state-machines-android-kotlin-good-times
  */
 class MainLoopOcrAggregator(
-    listener: AggregateResultListener<InterimResult, String>,
+    listener: AggregateResultListener<InterimResult, FinalResult>,
     enableNameExpiryExtraction: Boolean = false,
-) : ResultAggregator<SSDOcr.Input, MainLoopOcrState, SSDOcr.Prediction, MainLoopOcrAggregator.InterimResult, String>(
+) : ResultAggregator<SSDOcr.Input, MainLoopOcrState, SSDOcr.Prediction, MainLoopOcrAggregator.InterimResult, MainLoopOcrAggregator.FinalResult>(
     listener = listener,
     initialState = MainLoopOcrState.Initial(enableNameExpiryExtraction = enableNameExpiryExtraction)
 ) {
@@ -26,10 +27,15 @@ class MainLoopOcrAggregator(
         val state: MainLoopOcrState,
     )
 
+    data class FinalResult(
+        val pan: String,
+        val averageFrameRate: Rate,
+    )
+
     override suspend fun aggregateResult(
         frame: SSDOcr.Input,
         result: SSDOcr.Prediction,
-    ): Pair<InterimResult, String?> {
+    ): Pair<InterimResult, FinalResult?> {
         val previousState = state
         val currentState = previousState.consumeTransition(result)
 
@@ -42,7 +48,10 @@ class MainLoopOcrAggregator(
         )
 
         return if (currentState is MainLoopOcrState.Finished) {
-            interimResult to currentState.pan
+            interimResult to FinalResult(
+                pan = currentState.pan,
+                averageFrameRate = frameRateTracker.getAverageFrameRate(),
+            )
         } else {
             interimResult to null
         }

@@ -5,7 +5,6 @@ import com.getbouncer.cardscan.ui.analyzer.MainLoopNameExpiryAnalyzer
 import com.getbouncer.scan.framework.MachineState
 import com.getbouncer.scan.framework.time.seconds
 import com.getbouncer.scan.framework.util.ItemTotalCounter
-import com.getbouncer.scan.payment.analyzer.NameAndExpiryAnalyzer
 import com.getbouncer.scan.payment.ml.ExpiryDetect
 
 @VisibleForTesting
@@ -27,9 +26,9 @@ internal const val DESIRED_NAME_AGREEMENT = 3
 internal const val DESIRED_EXPIRY_AGREEMENT = 4
 
 sealed class MainLoopNameExpiryState(
-    override val runNameExtraction: Boolean,
-    override val runExpiryExtraction: Boolean,
-) : MachineState(), NameAndExpiryAnalyzer.State {
+    val runNameExtraction: Boolean,
+    val runExpiryExtraction: Boolean,
+) : MachineState() {
 
     internal abstract suspend fun consumeTransition(
         transition: MainLoopNameExpiryAnalyzer.Prediction
