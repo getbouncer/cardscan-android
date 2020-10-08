@@ -3,7 +3,6 @@ package com.getbouncer.scan.payment.ml
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
-import android.util.Log
 import android.util.Size
 import com.getbouncer.scan.framework.FetchedData
 import com.getbouncer.scan.framework.UpdatingResourceFetcher

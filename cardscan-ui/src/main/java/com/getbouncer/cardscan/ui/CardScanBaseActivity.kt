@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.graphics.Rect
 import android.os.Bundle
 import android.os.Parcelable
-import android.util.Log
 import android.util.Size
 import android.view.Gravity
 import android.widget.TextView
