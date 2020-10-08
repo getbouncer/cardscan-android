@@ -15,14 +15,13 @@ import com.getbouncer.cardscan.ui.result.MainLoopOcrState
 import com.getbouncer.scan.framework.AggregateResultListener
 import com.getbouncer.scan.framework.AnalyzerLoopErrorListener
 import com.getbouncer.scan.framework.Config
-import com.getbouncer.scan.framework.time.Clock
-import com.getbouncer.scan.framework.time.seconds
 import com.getbouncer.scan.payment.card.formatPan
 import com.getbouncer.scan.payment.card.getCardIssuer
 import com.getbouncer.scan.payment.card.isValidPan
 import com.getbouncer.scan.payment.ml.SSDOcr
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
 import com.getbouncer.scan.payment.ml.ssd.calculateCardFinderCoordinatesFromObjectDetection
+import com.getbouncer.scan.payment.ml.ssd.cropImageForObjectDetect
 import com.getbouncer.scan.ui.DebugDetectionBox
 import com.getbouncer.scan.ui.ScanFlow
 import com.getbouncer.scan.ui.ScanResultListener
@@ -95,7 +94,6 @@ abstract class CardScanBaseActivity :
 
     private var mainLoopIsProducingResults = AtomicBoolean(false)
     private val hasPreviousValidResult = AtomicBoolean(false)
-    private var lastDebugFrameUpdate = Clock.markNow()
 
     override val scanFlow: ScanFlow by lazy {
         CardScanFlow(enableNameExtraction, enableExpiryExtraction, this, this)
@@ -256,30 +254,26 @@ abstract class CardScanBaseActivity :
             is MainLoopNameExpiryState.Finished -> changeScanState(ScanState.Correct)
         }
 
-        showDebugFrame(result.frame, result.ocrAnalyzerResult?.detectedBoxes, result.nameExpiryAnalyzerResult?.detectionBoxes)
+        // show OCR debug frame
+        result.ocrAnalyzerResult?.detectedBoxes?.let { detectionBoxes ->
+            if (Config.isDebug) {
+                val bitmap = withContext(Dispatchers.Default) { SSDOcr.cropImage(result.frame) }
+                debugImageView.setImageBitmap(bitmap)
+                debugOverlayView.setBoxes(detectionBoxes.map { it.forDebugPan() })
+            }
+        }
+
+        // show name & expiry debug frame
+        result.nameExpiryAnalyzerResult?.detectionBoxes?.let { detectionBoxes ->
+            if (Config.isDebug) {
+                val bitmap = withContext(Dispatchers.Default) { cropImageForObjectDetect(result.frame.fullImage, result.frame.previewSize, result.frame.cardFinder) }
+                debugImageView.setImageBitmap(bitmap)
+                debugOverlayView.setBoxes(detectionBoxes.map { it.forDebugObjDetect(result.frame.cardFinder, result.frame.previewSize) })
+            }
+        }
     }.let { Unit }
 
     override suspend fun onReset() = launch(Dispatchers.Main) { changeScanState(ScanState.NotFound) }.let { Unit }
-
-    private suspend fun showDebugFrame(
-        frame: SSDOcr.Input,
-        panBoxes: List<DetectionBox>?,
-        objectBoxes: List<DetectionBox>?,
-    ) {
-        if (Config.isDebug && lastDebugFrameUpdate.elapsedSince() > 1.seconds) {
-            lastDebugFrameUpdate = Clock.markNow()
-            val bitmap = withContext(Dispatchers.Default) { SSDOcr.cropImage(frame) }
-            debugImageView.setImageBitmap(bitmap)
-            if (panBoxes != null) {
-                debugOverlayView.setBoxes(panBoxes.map { it.forDebugPan() })
-            }
-            if (objectBoxes != null) {
-                debugOverlayView.setBoxes(objectBoxes.map { it.forDebugObjDetect(frame.cardFinder, frame.previewSize) })
-            }
-
-            Log.d(Config.logTag, "Delay between capture and result for this frame was ${frame.capturedAt.elapsedSince()}")
-        }
-    }
 
     override fun onAnalyzerFailure(t: Throwable): Boolean {
         analyzerFailureCancelScan(t)

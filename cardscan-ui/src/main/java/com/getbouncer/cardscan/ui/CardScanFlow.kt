@@ -77,13 +77,13 @@ class CardScanFlow(
 
             // pre-fetch all of the models used by this flow.
             GlobalScope.launch(Dispatchers.Default) {
+                getSsdOcrModel(context, false)
                 if (initializeNameAndExpiryExtraction) {
                     attemptedNameAndExpiryInitialization = true
                     getTextDetectorModel(context, false)
                     getAlphabetDetectorModel(context, false)
                     getExpiryDetectorModel(context, false)
                 }
-                getSsdOcrModel(context, false)
             }
         }
     }
