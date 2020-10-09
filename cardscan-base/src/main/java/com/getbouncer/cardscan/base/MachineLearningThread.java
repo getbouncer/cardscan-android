@@ -601,7 +601,7 @@ public class MachineLearningThread implements Runnable {
     @NonNull
     protected Bitmap cropBitmapForScreenDetection(@NonNull Bitmap fullScreen) {
         final Rect crop = ImageUtils.center(
-            ImageUtils.adjustSizeToAspectRatio(fullScreen.getWidth(), fullScreen.getHeight(), 16F / 9),
+            ImageUtils.adjustSizeToAspectRatio(fullScreen.getWidth(), fullScreen.getHeight(), 9F / 16),
             new Rect(0, 0, fullScreen.getWidth(), fullScreen.getHeight())
         );
 
