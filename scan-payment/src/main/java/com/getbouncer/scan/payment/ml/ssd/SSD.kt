@@ -148,10 +148,13 @@ fun determineLayoutAndFilter(detectedBoxes: List<DetectionBox>, verticalOffset: 
     val aggregateDeviation = centers.map { abs(it - medianCenter) }.sum()
 
     return if (aggregateDeviation > verticalOffset * medianHeight && detectedBoxes.size == QUICK_READ_LENGTH) {
-        detectedBoxes.sortedBy { it.rect.centerY() }
+        detectedBoxes
+            .sortedBy { it.rect.centerY() }
             .chunked(QUICK_READ_GROUP_LENGTH)
             .map { it.sortedBy { detectionBox -> detectionBox.rect.left } }.flatten()
     } else {
-        detectedBoxes.filter { abs(it.rect.centerY() - medianCenter) <= medianHeight }
+        detectedBoxes
+            .sortedBy { it.rect.left }
+            .filter { abs(it.rect.centerY() - medianCenter) <= medianHeight }
     }
 }

@@ -24,7 +24,6 @@ import com.getbouncer.scan.camera.CameraAdapter
 import com.getbouncer.scan.camera.CameraErrorListener
 import com.getbouncer.scan.camera.nv21ToYuv
 import com.getbouncer.scan.camera.rotate
-import com.getbouncer.scan.camera.scale
 import com.getbouncer.scan.camera.toBitmap
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.time.milliseconds
@@ -110,17 +109,12 @@ class Camera1Adapter(
     override fun onPreviewFrame(bytes: ByteArray?, camera: Camera) {
         val imageWidth = camera.parameters.previewSize.width
         val imageHeight = camera.parameters.previewSize.height
-        val scale = max(
-            minimumResolution.width.toFloat() / imageWidth,
-            minimumResolution.height.toFloat() / imageHeight
-        )
 
         if (bytes != null) {
             try {
                 val bitmap = bytes
                     .nv21ToYuv(imageWidth, imageHeight)
                     .toBitmap()
-                    .scale(scale)
                     .rotate(mRotation.toFloat())
                 sendImageToStream(bitmap)
             } catch (t: Throwable) {

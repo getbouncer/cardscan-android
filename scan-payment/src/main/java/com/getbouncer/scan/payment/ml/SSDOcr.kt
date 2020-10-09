@@ -12,8 +12,10 @@ import com.getbouncer.scan.framework.ml.ssd.adjustLocations
 import com.getbouncer.scan.framework.ml.ssd.softMax
 import com.getbouncer.scan.framework.ml.ssd.toRectForm
 import com.getbouncer.scan.framework.time.ClockMark
+import com.getbouncer.scan.framework.util.intersectionWith
+import com.getbouncer.scan.framework.util.projectRegionOfInterest
 import com.getbouncer.scan.framework.util.reshape
-import com.getbouncer.scan.framework.util.scaleAndCenterWithin
+import com.getbouncer.scan.framework.util.toRect
 import com.getbouncer.scan.payment.R
 import com.getbouncer.scan.payment.crop
 import com.getbouncer.scan.payment.hasOpenGl31
@@ -28,9 +30,6 @@ import com.getbouncer.scan.payment.size
 import com.getbouncer.scan.payment.toRGBByteBuffer
 import org.tensorflow.lite.Interpreter
 import java.nio.ByteBuffer
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.roundToInt
 
 /** Training images are normalized with mean 127.5 and std 128.5. */
 private const val IMAGE_MEAN = 127.5f
@@ -102,12 +101,14 @@ class SSDOcr private constructor(interpreter: Interpreter) :
 
     companion object {
         /**
-         * Calculate the crop from the [fullImage] for the credit card based on the [cardFinder] within the [previewImage].
+         * Calculate the crop from the full image for the credit card based on the view finder
+         * within the preview size.
          *
          * Note: This algorithm makes some assumptions:
          * 1. the previewImage and the fullImage are centered relative to each other.
-         * 2. the fullImage circumscribes the previewImage. I.E. they share at least one field of view, and the previewImage's
-         *    fields of view are smaller than or the same size as the fullImage's
+         * 2. the fullImage circumscribes the previewImage. I.E. they share at least one field of
+         *    view, and the previewImage's fields of view are smaller than or the same size as the
+         *    fullImage's
          * 3. the fullImage and the previewImage have the same orientation
          */
         fun cropImage(input: Input): Bitmap {
@@ -118,27 +119,16 @@ class SSDOcr private constructor(interpreter: Interpreter) :
                     input.cardFinder.bottom <= input.previewSize.height
             ) { "Card finder is outside preview image bounds ${input.cardFinder} ${input.previewSize}" }
 
-            // Scale the previewImage to match the fullImage
-            val scaledPreviewImage = input.previewSize.scaleAndCenterWithin(input.fullImage.size())
-            val previewScale = scaledPreviewImage.width().toFloat() / input.previewSize.width
+            // Scale the cardFinder to match the full image
+            val projectedViewFinder = input
+                .previewSize
+                .projectRegionOfInterest(
+                    toSize = input.fullImage.size(),
+                    regionOfInterest = input.cardFinder
+                )
+                .intersectionWith(input.fullImage.size().toRect())
 
-            // Scale the cardFinder to match the scaledPreviewImage
-            val scaledCardFinder = Rect(
-                (input.cardFinder.left * previewScale).roundToInt(),
-                (input.cardFinder.top * previewScale).roundToInt(),
-                (input.cardFinder.right * previewScale).roundToInt(),
-                (input.cardFinder.bottom * previewScale).roundToInt(),
-            )
-
-            // Position the scaledCardFinder on the fullImage
-            val cropRect = Rect(
-                max(0, scaledCardFinder.left + scaledPreviewImage.left),
-                max(0, scaledCardFinder.top + scaledPreviewImage.top),
-                min(input.fullImage.width, scaledCardFinder.right + scaledPreviewImage.left),
-                min(input.fullImage.height, scaledCardFinder.bottom + scaledPreviewImage.top),
-            )
-
-            return input.fullImage.crop(cropRect)
+            return input.fullImage.crop(projectedViewFinder)
         }
     }
 
@@ -184,7 +174,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
                 intersectionOverUnionThreshold = IOU_THRESHOLD,
                 limit = LIMIT,
                 classifierToLabel = { if (it == 10) 0 else it },
-            ).sortedBy { it.rect.left },
+            ),
             VERTICAL_THRESHOLD,
         )
 
@@ -233,7 +223,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
      */
     class ModelFetcher(context: Context) : UpdatingResourceFetcher(context) {
         override val resource: Int = R.raw.darknite_1_1_1_16
-        override val resourceModelVersion: String = "darknite_1_1_1_16"
+        override val resourceModelVersion: String = "1.1.1.16"
         override val resourceModelHash: String = "8d8e3f79aa0783ab0cfa5c8d65d663a9da6ba99401efb2298aaaee387c3b00d6"
         override val resourceModelHashAlgorithm: String = "SHA-256"
         override val modelClass: String = "ocr"
