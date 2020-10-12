@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.0.0045](https://github.com/getbouncer/cardscan-android/tree/2.0.0045) (2020-10-12)
+
+**Merged pull requests:**
+
+- Upgrade gradle [\#248](https://github.com/getbouncer/cardscan-android/pull/248) ([awushensky](https://github.com/awushensky))
+- Force model download if no cache [\#247](https://github.com/getbouncer/cardscan-android/pull/247) ([awushensky](https://github.com/awushensky))
+- Bump junit from 4.13 to 4.13.1 [\#246](https://github.com/getbouncer/cardscan-android/pull/246) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
+- Bump constraintlayout from 2.0.1 to 2.0.2 [\#241](https://github.com/getbouncer/cardscan-android/pull/241) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
+
 ## [2.0.0044](https://github.com/getbouncer/cardscan-android/tree/2.0.0044) (2020-10-09)
 
 **Merged pull requests:**
@@ -16,7 +25,6 @@
 - Fix autofocus more [\#239](https://github.com/getbouncer/cardscan-android/pull/239) ([awushensky](https://github.com/awushensky))
 - Remove camera1 autofocus repeater [\#238](https://github.com/getbouncer/cardscan-android/pull/238) ([awushensky](https://github.com/awushensky))
 - Clean up image utils [\#237](https://github.com/getbouncer/cardscan-android/pull/237) ([awushensky](https://github.com/awushensky))
-- Fix frame saver memory leak [\#231](https://github.com/getbouncer/cardscan-android/pull/231) ([awushensky](https://github.com/awushensky))
 
 ## [1.0.5152](https://github.com/getbouncer/cardscan-android/tree/1.0.5152) (2020-10-05)
 
@@ -38,6 +46,7 @@
 **Merged pull requests:**
 
 - Fix cancelation memory leak [\#232](https://github.com/getbouncer/cardscan-android/pull/232) ([awushensky](https://github.com/awushensky))
+- Fix frame saver memory leak [\#231](https://github.com/getbouncer/cardscan-android/pull/231) ([awushensky](https://github.com/awushensky))
 
 ## [2.0.0039](https://github.com/getbouncer/cardscan-android/tree/2.0.0039) (2020-09-30)
 
@@ -228,6 +237,7 @@
 
 **Merged pull requests:**
 
+- Bump version to 2.0.0016 [\#154](https://github.com/getbouncer/cardscan-android/pull/154) ([smkuhne](https://github.com/smkuhne))
 - Add readmes [\#153](https://github.com/getbouncer/cardscan-android/pull/153) ([awushensky](https://github.com/awushensky))
 - Rename demo module [\#152](https://github.com/getbouncer/cardscan-android/pull/152) ([awushensky](https://github.com/awushensky))
 
@@ -235,7 +245,6 @@
 
 **Merged pull requests:**
 
-- Bump version to 2.0.0016 [\#154](https://github.com/getbouncer/cardscan-android/pull/154) ([smkuhne](https://github.com/smkuhne))
 - Restructure 2.0 [\#151](https://github.com/getbouncer/cardscan-android/pull/151) ([awushensky](https://github.com/awushensky))
 
 ## [2.0.0014](https://github.com/getbouncer/cardscan-demo-android/tree/2.0.0014) (2020-07-14)
