@@ -146,7 +146,7 @@ sealed class WebFetcher : Fetcher {
         }
 
         // get details for downloading the data. If download details cannot be retrieved, use the latest cached version
-        val downloadDetails = getDownloadDetails() ?: run {
+        val downloadDetails = getDownloadDetails(!cachedData.successfullyFetched) ?: run {
             stat.trackResult("download_details_failure")
             return@withLock cachedData
         }
@@ -203,8 +203,10 @@ sealed class WebFetcher : Fetcher {
 
     /**
      * Get [DownloadDetails] for the data that will be downloaded.
+     *
+     * @param required: true if download details are required (no cache available)
      */
-    protected abstract suspend fun getDownloadDetails(): DownloadDetails?
+    protected abstract suspend fun getDownloadDetails(required: Boolean): DownloadDetails?
 
     /**
      * Get the file where the data should be downloaded.
@@ -248,7 +250,8 @@ abstract class DirectDownloadWebFetcher(private val context: Context) : WebFetch
     override suspend fun getDownloadOutputFile(modelVersion: String) =
         File(context.cacheDir, localFileName)
 
-    override suspend fun getDownloadDetails(): DownloadDetails? = DownloadDetails(url, hash, hashAlgorithm, modelVersion)
+    override suspend fun getDownloadDetails(required: Boolean): DownloadDetails? =
+        DownloadDetails(url, hash, hashAlgorithm, modelVersion)
 
     override suspend fun cleanUpPostDownload(downloadedFile: File) { /* nothing to do */ }
 
@@ -273,7 +276,7 @@ abstract class SignedUrlModelWebFetcher(private val context: Context) : DirectDo
 
     override suspend fun getDownloadOutputFile(modelVersion: String) = File(context.cacheDir, localFileName)
 
-    override suspend fun getDownloadDetails() =
+    override suspend fun getDownloadDetails(required: Boolean) =
         when (val signedUrlResponse = getModelSignedUrl(context, modelClass, modelVersion, modelFileName)) {
             is NetworkResult.Success ->
                 try {
@@ -323,15 +326,19 @@ abstract class UpdatingModelWebFetcher(private val context: Context) : SignedUrl
     override suspend fun getDownloadOutputFile(modelVersion: String) =
         File(getCacheFolder(), modelVersion)
 
-    override suspend fun getDownloadDetails(): DownloadDetails? {
+    override suspend fun getDownloadDetails(required: Boolean): DownloadDetails? {
         cachedDownloadDetails?.let { return DownloadDetails(url, hash, hashAlgorithm, modelVersion) }
 
         val nextUpgradeTime = getNextUpgradeTime()
-        if (!nextUpgradeTime.hasPassed()) {
-            Log.d(Config.logTag, "Not yet time to upgrade $modelClass (will upgrade at $nextUpgradeTime)")
-            return null
-        } else {
-            Log.d(Config.logTag, "Time to upgrade $modelClass, fetching upgrade details")
+        when {
+            nextUpgradeTime.hasPassed() ->
+                Log.d(Config.logTag, "Time to upgrade $modelClass, fetching upgrade details")
+            required ->
+                Log.d(Config.logTag, "Downloading initial version of $modelClass")
+            else -> {
+                Log.d(Config.logTag, "Not yet time to upgrade $modelClass (will upgrade at $nextUpgradeTime)")
+                return null
+            }
         }
 
         return when (val modelUpgradeResponse = getModelUpgradeDetails(context, modelClass, modelFrameworkVersion)) {
@@ -380,7 +387,7 @@ abstract class UpdatingModelWebFetcher(private val context: Context) : SignedUrl
      * Fall back to getting the download details.
      */
     protected open suspend fun fallbackDownloadDetails() =
-        super.getDownloadDetails()?.apply { cachedDownloadDetails = this }
+        super.getDownloadDetails(true)?.apply { cachedDownloadDetails = this }
 
     /**
      * Delete all files in cache that are not the recently downloaded file.
@@ -435,6 +442,10 @@ abstract class UpdatingModelWebFetcher(private val context: Context) : SignedUrl
     override suspend fun clearCache() = withContext(Dispatchers.IO) {
         getCacheFolder().deleteRecursively()
         getCacheFolder().mkdirs()
+
+        StorageFactory
+            .getStorageInstance(context, PURPOSE_MODEL_UPGRADE)
+            .clear()
     }.let { Unit }
 }
 
