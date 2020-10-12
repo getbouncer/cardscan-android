@@ -32,9 +32,9 @@ private fun getApplicationId(): String = "" // no longer available in later vers
 
 fun getLibraryPackageName(): String = BuildConfig.LIBRARY_PACKAGE_NAME
 
-fun getSdkVersion(): String = BuildConfig.VERSION_NAME
+fun getSdkVersion(): String = BuildConfig.SDK_VERSION_STRING
 
-private fun getSdkVersionCode(): Int = BuildConfig.VERSION_CODE
+private fun getSdkVersionCode(): Int = -1 // no longer available in later versions of gradle.
 
 fun getSdkFlavor(): String = BuildConfig.BUILD_TYPE
 
