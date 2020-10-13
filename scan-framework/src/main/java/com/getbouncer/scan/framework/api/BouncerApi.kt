@@ -5,8 +5,9 @@ import android.content.Context
 import com.getbouncer.scan.framework.api.dto.AppInfo
 import com.getbouncer.scan.framework.api.dto.BouncerErrorResponse
 import com.getbouncer.scan.framework.api.dto.ClientDevice
+import com.getbouncer.scan.framework.api.dto.ModelInfoRequest
 import com.getbouncer.scan.framework.api.dto.ModelSignedUrlResponse
-import com.getbouncer.scan.framework.api.dto.ModelUpgradeResponse
+import com.getbouncer.scan.framework.api.dto.ModelInfoResponse
 import com.getbouncer.scan.framework.api.dto.ScanStatistics
 import com.getbouncer.scan.framework.api.dto.StatsPayload
 import com.getbouncer.scan.framework.api.dto.ValidateApiKeyResponse
@@ -21,7 +22,7 @@ import kotlinx.coroutines.withContext
 private const val STATS_PATH = "/scan_stats"
 private const val API_KEY_VALIDATION_PATH = "/v1/api_key/validate"
 private const val MODEL_SIGNED_URL_PATH = "/v1/signed_url/model/%s/%s/android/%s"
-private const val MODEL_UPGRADE_PATH = "/v1/model/%s/%s/%s?supports_backoff=true"
+private const val MODEL_INFO_PATH = "/v1/model_info"
 
 const val ERROR_CODE_NOT_AUTHENTICATED = "not_authenticated"
 
@@ -34,7 +35,7 @@ fun uploadScanStats(
     scanId: String?,
     device: Device,
     appDetails: AppDetails,
-    scanStatistics: ScanStatistics
+    scanStatistics: ScanStatistics,
 ) = GlobalScope.launch(Dispatchers.IO) {
     postData(
         context = context,
@@ -46,7 +47,7 @@ fun uploadScanStats(
             app = AppInfo.fromAppDetails(appDetails),
             scanStats = scanStatistics
         ),
-        requestSerializer = StatsPayload.serializer()
+        requestSerializer = StatsPayload.serializer(),
     )
 }
 
@@ -59,7 +60,7 @@ suspend fun validateApiKey(context: Context): NetworkResult<out ValidateApiKeyRe
             context = context,
             path = API_KEY_VALIDATION_PATH,
             responseSerializer = ValidateApiKeyResponse.serializer(),
-            errorSerializer = BouncerErrorResponse.serializer()
+            errorSerializer = BouncerErrorResponse.serializer(),
         )
     }
 
@@ -70,30 +71,40 @@ suspend fun getModelSignedUrl(
     context: Context,
     modelClass: String,
     modelVersion: String,
-    modelFileName: String
+    modelFileName: String,
 ): NetworkResult<out ModelSignedUrlResponse, out BouncerErrorResponse> =
     withContext(Dispatchers.IO) {
         getForResult(
             context = context,
             path = MODEL_SIGNED_URL_PATH.format(modelClass, modelVersion, modelFileName),
             responseSerializer = ModelSignedUrlResponse.serializer(),
-            errorSerializer = BouncerErrorResponse.serializer()
+            errorSerializer = BouncerErrorResponse.serializer(),
         )
     }
 
 /**
- * Get an upgrade path for a model.
+ * Get details about a model.
  */
-suspend fun getModelUpgradeDetails(
+suspend fun getModelInfo(
     context: Context,
     modelClass: String,
-    modelFrameworkVersion: Int
-): NetworkResult<out ModelUpgradeResponse, out BouncerErrorResponse> =
+    modelFrameworkVersion: Int,
+    cachedModelHash: String?,
+    cachedModelHashAlgorithm: String?,
+): NetworkResult<out ModelInfoResponse, out BouncerErrorResponse> =
     withContext(Dispatchers.IO) {
-        getForResult(
+        postForResult(
             context = context,
-            path = MODEL_UPGRADE_PATH.format(getPlatform(), modelClass, modelFrameworkVersion),
-            responseSerializer = ModelUpgradeResponse.serializer(),
-            errorSerializer = BouncerErrorResponse.serializer()
+            path = MODEL_INFO_PATH,
+            requestSerializer = ModelInfoRequest.serializer(),
+            responseSerializer = ModelInfoResponse.serializer(),
+            errorSerializer = BouncerErrorResponse.serializer(),
+            data = ModelInfoRequest(
+                platform = getPlatform(),
+                modelClass = modelClass,
+                modelFrameworkVersion = modelFrameworkVersion,
+                cachedModelHash = cachedModelHash,
+                cachedModelHashAlgorithm = cachedModelHashAlgorithm,
+            ),
         )
     }

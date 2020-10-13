@@ -5,13 +5,14 @@ import android.util.Log
 import androidx.annotation.RawRes
 import com.getbouncer.scan.framework.api.NetworkResult
 import com.getbouncer.scan.framework.api.getModelSignedUrl
-import com.getbouncer.scan.framework.api.getModelUpgradeDetails
+import com.getbouncer.scan.framework.api.getModelInfo
 import com.getbouncer.scan.framework.time.ClockMark
 import com.getbouncer.scan.framework.time.asEpochMillisecondsClockMark
 import com.getbouncer.scan.framework.time.weeks
 import com.getbouncer.scan.framework.util.memoizeSuspend
 import com.getbouncer.scan.framework.util.retry
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -33,16 +34,19 @@ private const val PURPOSE_MODEL_UPGRADE = "model_upgrade"
 /**
  * Fetched data metadata.
  */
-sealed class FetchedModelMeta(open val modelVersion: String)
+sealed class FetchedModelMeta(open val modelVersion: String, open val hashAlgorithm: String)
 data class FetchedModelFileMeta(
     override val modelVersion: String,
-    val modelFile: File?
-) : FetchedModelMeta(modelVersion)
+    override val hashAlgorithm: String,
+    val modelFile: File?,
+) : FetchedModelMeta(modelVersion, hashAlgorithm)
 
 data class FetchedModelResourceMeta(
     override val modelVersion: String,
-    @RawRes val resourceId: Int?
-) : FetchedModelMeta(modelVersion)
+    override val hashAlgorithm: String,
+    val hash: String,
+    @RawRes val resourceId: Int?,
+) : FetchedModelMeta(modelVersion, hashAlgorithm)
 
 /**
  * Fetched data information.
@@ -51,29 +55,52 @@ sealed class FetchedData(
     open val modelClass: String,
     open val modelFrameworkVersion: Int,
     open val modelVersion: String,
-    val successfullyFetched: Boolean
+    open val modelHash: String?,
+    open val modelHashAlgorithm: String?,
 ) {
     companion object {
         fun fromFetchedModelMeta(modelClass: String, modelFrameworkVersion: Int, meta: FetchedModelMeta) = when (meta) {
-            is FetchedModelFileMeta -> FetchedFile(modelClass, modelFrameworkVersion, meta.modelVersion, meta.modelFile)
-            is FetchedModelResourceMeta -> FetchedResource(modelClass, modelFrameworkVersion, meta.modelVersion, meta.resourceId)
+            is FetchedModelFileMeta ->
+                FetchedFile(
+                    modelClass = modelClass,
+                    modelFrameworkVersion = modelFrameworkVersion,
+                    modelVersion = meta.modelVersion,
+                    modelHash = meta.modelFile?.let { runBlocking { calculateHash(it, meta.hashAlgorithm) } },
+                    modelHashAlgorithm = meta.hashAlgorithm,
+                    file = meta.modelFile
+                )
+            is FetchedModelResourceMeta ->
+                FetchedResource(
+                    modelClass = modelClass,
+                    modelFrameworkVersion = modelFrameworkVersion,
+                    modelVersion = meta.modelVersion,
+                    modelHash = meta.hash,
+                    modelHashAlgorithm = meta.hashAlgorithm,
+                    resourceId = meta.resourceId,
+                )
         }
     }
+
+    val successfullyFetched by lazy { modelHash != null }
 }
 
 data class FetchedResource(
     override val modelClass: String,
     override val modelFrameworkVersion: Int,
     override val modelVersion: String,
-    @RawRes val resourceId: Int?
-) : FetchedData(modelClass, modelFrameworkVersion, modelVersion, resourceId != null)
+    override val modelHash: String?,
+    override val modelHashAlgorithm: String?,
+    @RawRes val resourceId: Int?,
+) : FetchedData(modelClass, modelFrameworkVersion, modelVersion, modelHash, modelHashAlgorithm)
 
 data class FetchedFile(
     override val modelClass: String,
     override val modelFrameworkVersion: Int,
     override val modelVersion: String,
-    val file: File?
-) : FetchedData(modelClass, modelFrameworkVersion, modelVersion, file != null)
+    override val modelHash: String?,
+    override val modelHashAlgorithm: String?,
+    val file: File?,
+) : FetchedData(modelClass, modelFrameworkVersion, modelVersion, modelHash, modelHashAlgorithm)
 
 /**
  * An interface for getting data ready to be loaded into memory.
@@ -94,14 +121,18 @@ interface Fetcher {
  */
 abstract class ResourceFetcher : Fetcher {
     protected abstract val modelVersion: String
+    protected abstract val hash: String
+    protected abstract val hashAlgorithm: String
     protected abstract val resource: Int
 
     override suspend fun fetchData(forImmediateUse: Boolean): FetchedResource =
         FetchedResource(
-            modelClass,
-            modelFrameworkVersion,
-            modelVersion,
-            resource
+            modelClass = modelClass,
+            modelFrameworkVersion = modelFrameworkVersion,
+            modelVersion = modelVersion,
+            modelHash = hash,
+            modelHashAlgorithm = hashAlgorithm,
+            resourceId = resource,
         )
 }
 
@@ -146,7 +177,7 @@ sealed class WebFetcher : Fetcher {
         }
 
         // get details for downloading the data. If download details cannot be retrieved, use the latest cached version
-        val downloadDetails = getDownloadDetails(!cachedData.successfullyFetched) ?: run {
+        val downloadDetails = getDownloadDetails(cachedData.modelHash, cachedData.modelHashAlgorithm) ?: run {
             stat.trackResult("download_details_failure")
             return@withLock cachedData
         }
@@ -167,7 +198,7 @@ sealed class WebFetcher : Fetcher {
                 downloadDetails.url,
                 downloadOutputFile,
                 downloadDetails.hash,
-                downloadDetails.hashAlgorithm
+                downloadDetails.hashAlgorithm,
             )
         } catch (t: Throwable) {
             fetchException = t
@@ -184,10 +215,12 @@ sealed class WebFetcher : Fetcher {
         cleanUpPostDownload(downloadOutputFile)
 
         FetchedFile(
-            modelClass,
-            modelFrameworkVersion,
-            downloadDetails.modelVersion,
-            downloadOutputFile
+            modelClass = modelClass,
+            modelFrameworkVersion = modelFrameworkVersion,
+            modelVersion = downloadDetails.modelVersion,
+            modelHash = downloadDetails.hash,
+            modelHashAlgorithm = downloadDetails.hashAlgorithm,
+            file = downloadOutputFile,
         )
     }
 
@@ -204,9 +237,13 @@ sealed class WebFetcher : Fetcher {
     /**
      * Get [DownloadDetails] for the data that will be downloaded.
      *
-     * @param required: true if download details are required (no cache available)
+     * @param cachedModelHash: the hash of the cached model, or null if nothing is cached
+     * @param cachedModelHashAlgorithm: the hash algorithm used to calculate the hash
      */
-    protected abstract suspend fun getDownloadDetails(required: Boolean): DownloadDetails?
+    protected abstract suspend fun getDownloadDetails(
+        cachedModelHash: String?,
+        cachedModelHashAlgorithm: String?,
+    ): DownloadDetails?
 
     /**
      * Get the file where the data should be downloaded.
@@ -238,19 +275,22 @@ abstract class DirectDownloadWebFetcher(private val context: Context) : WebFetch
     override suspend fun tryFetchLatestCachedData(): FetchedModelMeta {
         val localFile = getDownloadOutputFile(modelVersion)
         return if (fileMatchesHash(localFile, hash, hashAlgorithm)) {
-            FetchedModelFileMeta(modelVersion, localFile)
+            FetchedModelFileMeta(modelVersion, hashAlgorithm, localFile)
         } else {
-            FetchedModelFileMeta(modelVersion, null)
+            FetchedModelFileMeta(modelVersion, hashAlgorithm, null)
         }
     }
 
     override suspend fun tryFetchMatchingCachedFile(hash: String, hashAlgorithm: String): FetchedModelMeta =
-        FetchedModelFileMeta(modelVersion, null)
+        FetchedModelFileMeta(modelVersion, hashAlgorithm, null)
 
     override suspend fun getDownloadOutputFile(modelVersion: String) =
         File(context.cacheDir, localFileName)
 
-    override suspend fun getDownloadDetails(required: Boolean): DownloadDetails? =
+    override suspend fun getDownloadDetails(
+        cachedModelHash: String?,
+        cachedModelHashAlgorithm: String?,
+    ): DownloadDetails? =
         DownloadDetails(url, hash, hashAlgorithm, modelVersion)
 
     override suspend fun cleanUpPostDownload(downloadedFile: File) { /* nothing to do */ }
@@ -276,24 +316,26 @@ abstract class SignedUrlModelWebFetcher(private val context: Context) : DirectDo
 
     override suspend fun getDownloadOutputFile(modelVersion: String) = File(context.cacheDir, localFileName)
 
-    override suspend fun getDownloadDetails(required: Boolean) =
-        when (val signedUrlResponse = getModelSignedUrl(context, modelClass, modelVersion, modelFileName)) {
-            is NetworkResult.Success ->
-                try {
-                    URL(signedUrlResponse.body.modelUrl)
-                } catch (t: Throwable) {
-                    Log.e(Config.logTag, "Invalid signed url for model $modelClass: ${signedUrlResponse.body.modelUrl}", t)
-                    null
-                }
-            is NetworkResult.Error -> {
-                Log.w(Config.logTag, "Failed to get signed url for model $modelClass: ${signedUrlResponse.error}")
+    override suspend fun getDownloadDetails(
+        cachedModelHash: String?,
+        cachedModelHashAlgorithm: String?,
+    ) = when (val signedUrlResponse = getModelSignedUrl(context, modelClass, modelVersion, modelFileName)) {
+        is NetworkResult.Success ->
+            try {
+                URL(signedUrlResponse.body.modelUrl)
+            } catch (t: Throwable) {
+                Log.e(Config.logTag, "Invalid signed url for model $modelClass: ${signedUrlResponse.body.modelUrl}", t)
                 null
             }
-            is NetworkResult.Exception -> {
-                Log.e(Config.logTag, "Exception fetching signed url for model $modelClass: ${signedUrlResponse.responseCode}", signedUrlResponse.exception)
-                null
-            }
-        }?.let { DownloadDetails(it, hash, hashAlgorithm, modelVersion) }
+        is NetworkResult.Error -> {
+            Log.w(Config.logTag, "Failed to get signed url for model $modelClass: ${signedUrlResponse.error}")
+            null
+        }
+        is NetworkResult.Exception -> {
+            Log.e(Config.logTag, "Exception fetching signed url for model $modelClass: ${signedUrlResponse.responseCode}", signedUrlResponse.exception)
+            null
+        }
+    }?.let { DownloadDetails(it, hash, hashAlgorithm, modelVersion) }
 }
 
 /**
@@ -318,22 +360,25 @@ abstract class UpdatingModelWebFetcher(private val context: Context) : SignedUrl
     override val hashAlgorithm: String by lazy { defaultModelHashAlgorithm }
 
     override suspend fun tryFetchLatestCachedData(): FetchedModelMeta =
-        getLatestFile()?.let { FetchedModelFileMeta(it.name, it) } ?: FetchedModelFileMeta(defaultModelVersion, null)
+        getLatestFile()?.let { FetchedModelFileMeta(it.name, defaultModelHashAlgorithm, it) } ?: FetchedModelFileMeta(defaultModelVersion, defaultModelHashAlgorithm,null)
 
     override suspend fun tryFetchMatchingCachedFile(hash: String, hashAlgorithm: String): FetchedModelMeta =
-        getMatchingFile(hash, hashAlgorithm)?.let { FetchedModelFileMeta(it.name, it) } ?: FetchedModelFileMeta(defaultModelVersion, null)
+        getMatchingFile(hash, hashAlgorithm)?.let { FetchedModelFileMeta(it.name, defaultModelHashAlgorithm, it) } ?: FetchedModelFileMeta(defaultModelVersion, defaultModelHashAlgorithm, null)
 
     override suspend fun getDownloadOutputFile(modelVersion: String) =
         File(getCacheFolder(), modelVersion)
 
-    override suspend fun getDownloadDetails(required: Boolean): DownloadDetails? {
+    override suspend fun getDownloadDetails(
+        cachedModelHash: String?,
+        cachedModelHashAlgorithm: String?,
+    ): DownloadDetails? {
         cachedDownloadDetails?.let { return DownloadDetails(url, hash, hashAlgorithm, modelVersion) }
 
         val nextUpgradeTime = getNextUpgradeTime()
         when {
             nextUpgradeTime.hasPassed() ->
                 Log.d(Config.logTag, "Time to upgrade $modelClass, fetching upgrade details")
-            required ->
+            cachedModelHash == null ->
                 Log.d(Config.logTag, "Downloading initial version of $modelClass")
             else -> {
                 Log.d(Config.logTag, "Not yet time to upgrade $modelClass (will upgrade at $nextUpgradeTime)")
@@ -341,28 +386,36 @@ abstract class UpdatingModelWebFetcher(private val context: Context) : SignedUrl
             }
         }
 
-        return when (val modelUpgradeResponse = getModelUpgradeDetails(context, modelClass, modelFrameworkVersion)) {
+        return when (val modelInfoResponse = getModelInfo(
+            context = context,
+            modelClass = modelClass,
+            modelFrameworkVersion = modelFrameworkVersion,
+            cachedModelHash = cachedModelHash,
+            cachedModelHashAlgorithm = cachedModelHashAlgorithm,
+        )) {
             is NetworkResult.Success ->
                 try {
-                    modelUpgradeResponse.body.queryAgainAfterMs?.asEpochMillisecondsClockMark()?.apply {
+                    modelInfoResponse.body.queryAgainAfterMs?.asEpochMillisecondsClockMark()?.apply {
                         setNextModelUpgradeAttemptTime(this)
                     }
-                    DownloadDetails(
-                        url = URL(modelUpgradeResponse.body.url),
-                        hash = modelUpgradeResponse.body.hash,
-                        hashAlgorithm = modelUpgradeResponse.body.hashAlgorithm,
-                        modelVersion = modelUpgradeResponse.body.modelVersion,
-                    ).apply { cachedDownloadDetails = this }
+                    modelInfoResponse.body.url?.let {
+                        DownloadDetails(
+                            url = URL(it),
+                            hash = modelInfoResponse.body.hash,
+                            hashAlgorithm = modelInfoResponse.body.hashAlgorithm,
+                            modelVersion = modelInfoResponse.body.modelVersion,
+                        ).apply { cachedDownloadDetails = this }
+                    }
                 } catch (t: Throwable) {
-                    Log.e(Config.logTag, "Invalid signed url for model $modelClass: ${modelUpgradeResponse.body.url}", t)
+                    Log.e(Config.logTag, "Invalid signed url for model $modelClass: ${modelInfoResponse.body.url}", t)
                     null
                 }
             is NetworkResult.Error -> {
-                Log.w(Config.logTag, "Failed to get latest details for model $modelClass: ${modelUpgradeResponse.error}")
+                Log.w(Config.logTag, "Failed to get latest details for model $modelClass: ${modelInfoResponse.error}")
                 fallbackDownloadDetails()
             }
             is NetworkResult.Exception -> {
-                Log.e(Config.logTag, "Exception retrieving latest details for model $modelClass: ${modelUpgradeResponse.responseCode}", modelUpgradeResponse.exception)
+                Log.e(Config.logTag, "Exception retrieving latest details for model $modelClass: ${modelInfoResponse.responseCode}", modelInfoResponse.exception)
                 fallbackDownloadDetails()
             }
         }
@@ -387,7 +440,7 @@ abstract class UpdatingModelWebFetcher(private val context: Context) : SignedUrl
      * Fall back to getting the download details.
      */
     protected open suspend fun fallbackDownloadDetails() =
-        super.getDownloadDetails(true)?.apply { cachedDownloadDetails = this }
+        super.getDownloadDetails(null, null)?.apply { cachedDownloadDetails = this }
 
     /**
      * Delete all files in cache that are not the recently downloaded file.
@@ -482,13 +535,15 @@ abstract class UpdatingResourceFetcher(context: Context) : UpdatingModelWebFetch
         url = URL("https://localhost"),
         hash = resourceModelHash,
         hashAlgorithm = resourceModelHashAlgorithm,
-        modelVersion = resourceModelVersion
+        modelVersion = resourceModelVersion,
     )
 
     private fun fetchModelFromResource(): FetchedModelMeta =
         FetchedModelResourceMeta(
             modelVersion = resourceModelVersion,
-            resourceId = resource
+            resourceId = resource,
+            hash = resourceModelHash,
+            hashAlgorithm = resourceModelHashAlgorithm,
         )
 }
 
