@@ -11,3 +11,12 @@ data class ModelDetailsRequest(
     @SerialName("cached_model_hash") val cachedModelHash: String?,
     @SerialName("cached_model_hash_algorithm") val cachedModelHashAlgorithm: String?,
 )
+
+@Serializable
+data class ModelDetailsResponse(
+    @SerialName("model_url") val url: String?,
+    @SerialName("model_version") val modelVersion: String,
+    @SerialName("model_hash") val hash: String,
+    @SerialName("model_hash_algorithm") val hashAlgorithm: String,
+    @SerialName("query_again_after_ms") val queryAgainAfterMs: Long? = 0,
+)
