@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ModelInfoRequest(
+data class ModelDetailsRequest(
     @SerialName("platform") val platform: String,
     @SerialName("model_class") val modelClass: String,
     @SerialName("model_framework_version") val modelFrameworkVersion: Int,

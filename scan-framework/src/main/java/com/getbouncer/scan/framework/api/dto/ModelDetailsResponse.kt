@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ModelInfoResponse(
+data class ModelDetailsResponse(
     @SerialName("model_url") val url: String?,
     @SerialName("model_version") val modelVersion: String,
     @SerialName("model_hash") val hash: String,

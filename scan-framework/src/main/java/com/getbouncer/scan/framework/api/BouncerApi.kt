@@ -5,9 +5,9 @@ import android.content.Context
 import com.getbouncer.scan.framework.api.dto.AppInfo
 import com.getbouncer.scan.framework.api.dto.BouncerErrorResponse
 import com.getbouncer.scan.framework.api.dto.ClientDevice
-import com.getbouncer.scan.framework.api.dto.ModelInfoRequest
+import com.getbouncer.scan.framework.api.dto.ModelDetailsRequest
 import com.getbouncer.scan.framework.api.dto.ModelSignedUrlResponse
-import com.getbouncer.scan.framework.api.dto.ModelInfoResponse
+import com.getbouncer.scan.framework.api.dto.ModelDetailsResponse
 import com.getbouncer.scan.framework.api.dto.ScanStatistics
 import com.getbouncer.scan.framework.api.dto.StatsPayload
 import com.getbouncer.scan.framework.api.dto.ValidateApiKeyResponse
@@ -22,7 +22,7 @@ import kotlinx.coroutines.withContext
 private const val STATS_PATH = "/scan_stats"
 private const val API_KEY_VALIDATION_PATH = "/v1/api_key/validate"
 private const val MODEL_SIGNED_URL_PATH = "/v1/signed_url/model/%s/%s/android/%s"
-private const val MODEL_INFO_PATH = "/v1/model_info"
+private const val MODEL_DETAILS_PATH = "/v2/model_details"
 
 const val ERROR_CODE_NOT_AUTHENTICATED = "not_authenticated"
 
@@ -85,21 +85,21 @@ suspend fun getModelSignedUrl(
 /**
  * Get details about a model.
  */
-suspend fun getModelInfo(
+suspend fun getModelDetails(
     context: Context,
     modelClass: String,
     modelFrameworkVersion: Int,
     cachedModelHash: String?,
     cachedModelHashAlgorithm: String?,
-): NetworkResult<out ModelInfoResponse, out BouncerErrorResponse> =
+): NetworkResult<out ModelDetailsResponse, out BouncerErrorResponse> =
     withContext(Dispatchers.IO) {
         postForResult(
             context = context,
-            path = MODEL_INFO_PATH,
-            requestSerializer = ModelInfoRequest.serializer(),
-            responseSerializer = ModelInfoResponse.serializer(),
+            path = MODEL_DETAILS_PATH,
+            requestSerializer = ModelDetailsRequest.serializer(),
+            responseSerializer = ModelDetailsResponse.serializer(),
             errorSerializer = BouncerErrorResponse.serializer(),
-            data = ModelInfoRequest(
+            data = ModelDetailsRequest(
                 platform = getPlatform(),
                 modelClass = modelClass,
                 modelFrameworkVersion = modelFrameworkVersion,

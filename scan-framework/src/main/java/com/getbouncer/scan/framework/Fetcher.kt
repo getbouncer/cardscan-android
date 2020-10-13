@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.annotation.RawRes
 import com.getbouncer.scan.framework.api.NetworkResult
 import com.getbouncer.scan.framework.api.getModelSignedUrl
-import com.getbouncer.scan.framework.api.getModelInfo
+import com.getbouncer.scan.framework.api.getModelDetails
 import com.getbouncer.scan.framework.time.ClockMark
 import com.getbouncer.scan.framework.time.asEpochMillisecondsClockMark
 import com.getbouncer.scan.framework.time.weeks
@@ -81,7 +81,7 @@ sealed class FetchedData(
         }
     }
 
-    val successfullyFetched by lazy { modelHash != null }
+    abstract val successfullyFetched: Boolean
 }
 
 data class FetchedResource(
@@ -91,7 +91,9 @@ data class FetchedResource(
     override val modelHash: String?,
     override val modelHashAlgorithm: String?,
     @RawRes val resourceId: Int?,
-) : FetchedData(modelClass, modelFrameworkVersion, modelVersion, modelHash, modelHashAlgorithm)
+) : FetchedData(modelClass, modelFrameworkVersion, modelVersion, modelHash, modelHashAlgorithm) {
+    override val successfullyFetched: Boolean = resourceId != null
+}
 
 data class FetchedFile(
     override val modelClass: String,
@@ -100,7 +102,9 @@ data class FetchedFile(
     override val modelHash: String?,
     override val modelHashAlgorithm: String?,
     val file: File?,
-) : FetchedData(modelClass, modelFrameworkVersion, modelVersion, modelHash, modelHashAlgorithm)
+) : FetchedData(modelClass, modelFrameworkVersion, modelVersion, modelHash, modelHashAlgorithm) {
+    override val successfullyFetched: Boolean = modelHash != null
+}
 
 /**
  * An interface for getting data ready to be loaded into memory.
@@ -386,7 +390,7 @@ abstract class UpdatingModelWebFetcher(private val context: Context) : SignedUrl
             }
         }
 
-        return when (val modelInfoResponse = getModelInfo(
+        return when (val detailsResponse = getModelDetails(
             context = context,
             modelClass = modelClass,
             modelFrameworkVersion = modelFrameworkVersion,
@@ -395,27 +399,27 @@ abstract class UpdatingModelWebFetcher(private val context: Context) : SignedUrl
         )) {
             is NetworkResult.Success ->
                 try {
-                    modelInfoResponse.body.queryAgainAfterMs?.asEpochMillisecondsClockMark()?.apply {
+                    detailsResponse.body.queryAgainAfterMs?.asEpochMillisecondsClockMark()?.apply {
                         setNextModelUpgradeAttemptTime(this)
                     }
-                    modelInfoResponse.body.url?.let {
+                    detailsResponse.body.url?.let {
                         DownloadDetails(
                             url = URL(it),
-                            hash = modelInfoResponse.body.hash,
-                            hashAlgorithm = modelInfoResponse.body.hashAlgorithm,
-                            modelVersion = modelInfoResponse.body.modelVersion,
+                            hash = detailsResponse.body.hash,
+                            hashAlgorithm = detailsResponse.body.hashAlgorithm,
+                            modelVersion = detailsResponse.body.modelVersion,
                         ).apply { cachedDownloadDetails = this }
                     }
                 } catch (t: Throwable) {
-                    Log.e(Config.logTag, "Invalid signed url for model $modelClass: ${modelInfoResponse.body.url}", t)
+                    Log.e(Config.logTag, "Invalid signed url for model $modelClass: ${detailsResponse.body.url}", t)
                     null
                 }
             is NetworkResult.Error -> {
-                Log.w(Config.logTag, "Failed to get latest details for model $modelClass: ${modelInfoResponse.error}")
+                Log.w(Config.logTag, "Failed to get latest details for model $modelClass: ${detailsResponse.error}")
                 fallbackDownloadDetails()
             }
             is NetworkResult.Exception -> {
-                Log.e(Config.logTag, "Exception retrieving latest details for model $modelClass: ${modelInfoResponse.responseCode}", modelInfoResponse.exception)
+                Log.e(Config.logTag, "Exception retrieving latest details for model $modelClass: ${detailsResponse.responseCode}", detailsResponse.exception)
                 fallbackDownloadDetails()
             }
         }
