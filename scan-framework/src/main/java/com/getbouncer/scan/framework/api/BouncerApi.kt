@@ -6,8 +6,8 @@ import com.getbouncer.scan.framework.api.dto.AppInfo
 import com.getbouncer.scan.framework.api.dto.BouncerErrorResponse
 import com.getbouncer.scan.framework.api.dto.ClientDevice
 import com.getbouncer.scan.framework.api.dto.ModelDetailsRequest
-import com.getbouncer.scan.framework.api.dto.ModelSignedUrlResponse
 import com.getbouncer.scan.framework.api.dto.ModelDetailsResponse
+import com.getbouncer.scan.framework.api.dto.ModelSignedUrlResponse
 import com.getbouncer.scan.framework.api.dto.ScanStatistics
 import com.getbouncer.scan.framework.api.dto.StatsPayload
 import com.getbouncer.scan.framework.api.dto.ValidateApiKeyResponse

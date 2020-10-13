@@ -4,8 +4,8 @@ import android.content.Context
 import android.util.Log
 import androidx.annotation.RawRes
 import com.getbouncer.scan.framework.api.NetworkResult
-import com.getbouncer.scan.framework.api.getModelSignedUrl
 import com.getbouncer.scan.framework.api.getModelDetails
+import com.getbouncer.scan.framework.api.getModelSignedUrl
 import com.getbouncer.scan.framework.time.ClockMark
 import com.getbouncer.scan.framework.time.asEpochMillisecondsClockMark
 import com.getbouncer.scan.framework.time.weeks
@@ -364,7 +364,7 @@ abstract class UpdatingModelWebFetcher(private val context: Context) : SignedUrl
     override val hashAlgorithm: String by lazy { defaultModelHashAlgorithm }
 
     override suspend fun tryFetchLatestCachedData(): FetchedModelMeta =
-        getLatestFile()?.let { FetchedModelFileMeta(it.name, defaultModelHashAlgorithm, it) } ?: FetchedModelFileMeta(defaultModelVersion, defaultModelHashAlgorithm,null)
+        getLatestFile()?.let { FetchedModelFileMeta(it.name, defaultModelHashAlgorithm, it) } ?: FetchedModelFileMeta(defaultModelVersion, defaultModelHashAlgorithm, null)
 
     override suspend fun tryFetchMatchingCachedFile(hash: String, hashAlgorithm: String): FetchedModelMeta =
         getMatchingFile(hash, hashAlgorithm)?.let { FetchedModelFileMeta(it.name, defaultModelHashAlgorithm, it) } ?: FetchedModelFileMeta(defaultModelVersion, defaultModelHashAlgorithm, null)
@@ -390,13 +390,15 @@ abstract class UpdatingModelWebFetcher(private val context: Context) : SignedUrl
             }
         }
 
-        return when (val detailsResponse = getModelDetails(
-            context = context,
-            modelClass = modelClass,
-            modelFrameworkVersion = modelFrameworkVersion,
-            cachedModelHash = cachedModelHash,
-            cachedModelHashAlgorithm = cachedModelHashAlgorithm,
-        )) {
+        return when (
+            val detailsResponse = getModelDetails(
+                context = context,
+                modelClass = modelClass,
+                modelFrameworkVersion = modelFrameworkVersion,
+                cachedModelHash = cachedModelHash,
+                cachedModelHashAlgorithm = cachedModelHashAlgorithm,
+            )
+        ) {
             is NetworkResult.Success ->
                 try {
                     detailsResponse.body.queryAgainAfterMs?.asEpochMillisecondsClockMark()?.apply {
