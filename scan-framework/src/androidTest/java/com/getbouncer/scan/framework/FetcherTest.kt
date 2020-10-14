@@ -36,6 +36,8 @@ class FetcherTest {
         class ResourceFetcherImpl : ResourceFetcher() {
             override val resource: Int = R.raw.sample_resource
             override val modelVersion: String = "sample_resource"
+            override val hash: String = "0dcf3e387c68dfea8dd72a183f1f765478ebaa4d8544cfc09a16e87a795d8ccf"
+            override val hashAlgorithm: String = "SHA-256"
             override val modelClass: String = "sample_class"
             override val modelFrameworkVersion: Int = 2049
         }
@@ -45,7 +47,9 @@ class FetcherTest {
                 modelClass = "sample_class",
                 modelFrameworkVersion = 2049,
                 modelVersion = "sample_resource",
-                resourceId = R.raw.sample_resource
+                modelHash = "0dcf3e387c68dfea8dd72a183f1f765478ebaa4d8544cfc09a16e87a795d8ccf",
+                modelHashAlgorithm = "SHA-256",
+                resourceId = R.raw.sample_resource,
             ),
             actual = ResourceFetcherImpl().fetchData(false)
         )
