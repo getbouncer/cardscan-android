@@ -20,7 +20,9 @@ class LoaderTest {
             modelClass = "sample_class",
             modelFrameworkVersion = 2049,
             modelVersion = "sample_resource",
-            resourceId = R.raw.sample_resource
+            modelHash = "0dcf3e387c68dfea8dd72a183f1f765478ebaa4d8544cfc09a16e87a795d8ccf",
+            modelHashAlgorithm = "SHA-256",
+            resourceId = R.raw.sample_resource,
         )
 
         val byteBuffer = Loader(testContext).loadData(fetchedData)
@@ -58,7 +60,9 @@ class LoaderTest {
             modelClass = "sample_class",
             modelFrameworkVersion = 2049,
             modelVersion = "sample_file",
-            file = sampleFile
+            modelHash = "133351546614bfadfa68bb66c22a06265972b02791e4ac545ad900f20fe1a796",
+            modelHashAlgorithm = "SHA-256",
+            file = sampleFile,
         )
 
         val byteBuffer = Loader(testContext).loadData(fetchedData)
