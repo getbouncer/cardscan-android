@@ -608,12 +608,12 @@ public class MachineLearningThread implements Runnable {
         return ImageUtils.zoom(
             ImageUtils.cropWithFill(fullScreen, crop),
             ImageUtils.center(
-                new Rect(0, 0, 244, 244),
+                new Rect(0, 0, 224, 224),
                 new Rect(0, 0, fullScreen.getWidth(), fullScreen.getHeight())
             ),
             new Rect(112, 112, 336, 336),
             448,
-            488
+            448
         );
     }
 
