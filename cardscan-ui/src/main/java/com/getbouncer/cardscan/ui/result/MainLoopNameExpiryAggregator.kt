@@ -1,7 +1,9 @@
 package com.getbouncer.cardscan.ui.result
 
+import android.util.Log
 import com.getbouncer.cardscan.ui.analyzer.MainLoopNameExpiryAnalyzer
 import com.getbouncer.scan.framework.AggregateResultListener
+import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.ResultAggregator
 import com.getbouncer.scan.payment.ml.ExpiryDetect
 import com.getbouncer.scan.payment.ml.SSDOcr
@@ -54,6 +56,10 @@ class MainLoopNameExpiryAggregator(
             frame = frame,
             state = currentState,
         )
+
+        if (Config.isDebug) {
+            Log.d(Config.logTag, "Delay between capture and process of image is ${frame.capturedAt.elapsedSince()}")
+        }
 
         return if (currentState is MainLoopNameExpiryState.Finished) {
             val errors = mutableListOf<String>()

@@ -4,6 +4,7 @@ import androidx.annotation.CheckResult
 import java.util.Date
 
 object Clock {
+    @JvmStatic
     fun markNow(): ClockMark = PreciseClockMark(System.nanoTime())
 }
 
