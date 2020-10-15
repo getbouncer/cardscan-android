@@ -313,7 +313,7 @@ class Camera1Adapter(
         try {
             camera.setDisplayOrientation(result)
         } catch (t: Throwable) {
-            cameraErrorListener.onCameraUnsupportedError(t)
+//            cameraErrorListener.onCameraUnsupportedError(t)
         }
 
         startCameraPreview()

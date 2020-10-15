@@ -73,6 +73,7 @@ open class CameraErrorListenerImpl(
     }
 
     override fun onCameraUnsupportedError(cause: Throwable?) {
+        Log.e(Config.logTag, "Camera not supported", cause)
         showCameraError(R.string.bouncer_error_camera_unsupported, cause)
     }
 

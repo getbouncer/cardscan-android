@@ -3,6 +3,7 @@ package com.getbouncer.scan.camera
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.PointF
+import android.util.Log
 import android.util.Size
 import android.view.Surface
 import androidx.annotation.IntDef
@@ -10,6 +11,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
+import com.getbouncer.scan.framework.Config
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -50,8 +52,9 @@ abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
          */
         @JvmStatic
         fun isCameraSupported(context: Context): Boolean =
-            context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA) &&
-                context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_AUTOFOCUS)
+            context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA).also {
+                if (!it) Log.e(Config.logTag, "System feature 'FEATURE_CAMERA' is unavailable")
+            }
 
         /**
          * Determine how much to rotate the image from the camera given the orientation of the
