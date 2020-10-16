@@ -1,6 +1,5 @@
 package com.getbouncer.scan.framework
 
-import android.util.Log
 import com.getbouncer.scan.framework.time.Clock
 import com.getbouncer.scan.framework.time.ClockMark
 import com.getbouncer.scan.framework.time.Duration
@@ -118,12 +117,10 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
                 try {
                     finished = onResult(analyzerResult, frame)
                 } catch (t: Throwable) {
-                    Log.w(Config.logTag, "Result failure", t)
                     stat.trackResult("result_failure")
                     handleResultFailure(t)
                 }
             } catch (t: Throwable) {
-                Log.w(Config.logTag, "Analyzer failure", t)
                 stat.trackResult("analyzer_failure")
                 handleAnalyzerFailure(t)
             }
