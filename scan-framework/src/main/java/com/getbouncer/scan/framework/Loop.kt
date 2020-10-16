@@ -19,7 +19,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.yield
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -112,7 +111,6 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
         analyzer: Analyzer<DataFrame, State, Output>,
     ) {
         flow.collect { frame ->
-//            yield() // allow for this to be canceled
             val stat = Stats.trackRepeatingTask("analyzer_execution:${analyzer::class.java.simpleName}")
             try {
                 val analyzerResult = analyzer.analyze(frame, getState())
