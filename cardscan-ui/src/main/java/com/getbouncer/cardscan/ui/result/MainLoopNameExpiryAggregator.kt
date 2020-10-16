@@ -58,7 +58,7 @@ class MainLoopNameExpiryAggregator(
         )
 
         if (Config.isDebug) {
-            Log.d(Config.logTag, "Delay between capture and process of image is ${frame.capturedAt.elapsedSince()}")
+            Log.d(Config.logTag, "Delay between capture and process of image is ${frame.fullImage.tracker.startedAt.elapsedSince()}")
         }
 
         return if (currentState is MainLoopNameExpiryState.Finished) {

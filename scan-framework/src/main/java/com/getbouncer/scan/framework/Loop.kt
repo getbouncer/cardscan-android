@@ -1,5 +1,6 @@
 package com.getbouncer.scan.framework
 
+import android.util.Log
 import com.getbouncer.scan.framework.time.Clock
 import com.getbouncer.scan.framework.time.ClockMark
 import com.getbouncer.scan.framework.time.Duration
@@ -18,7 +19,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.yield
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -79,7 +79,7 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
         loopExecutionStatTracker = Stats.trackTask("${this::class.java.simpleName}_execution")
 
         if (analyzerPool.analyzers.isEmpty()) {
-            runBlocking { loopExecutionStatTracker.trackResult("canceled") }
+            loopExecutionStatTracker.trackResult("canceled")
             analyzerLoopErrorListener.onAnalyzerFailure(NoAnalyzersAvailableException)
             return null
         }
@@ -111,7 +111,7 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
         analyzer: Analyzer<DataFrame, State, Output>,
     ) {
         flow.collect { frame ->
-            yield() // allow for this to be canceled
+//            yield() // allow for this to be canceled
             val stat = Stats.trackRepeatingTask("analyzer_execution:${analyzer::class.java.simpleName}")
             try {
                 val analyzerResult = analyzer.analyze(frame, getState())
@@ -119,10 +119,12 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
                 try {
                     finished = onResult(analyzerResult, frame)
                 } catch (t: Throwable) {
+                    Log.w(Config.logTag, "Result failure", t)
                     stat.trackResult("result_failure")
                     handleResultFailure(t)
                 }
             } catch (t: Throwable) {
+                Log.w(Config.logTag, "Analyzer failure", t)
                 stat.trackResult("analyzer_failure")
                 handleAnalyzerFailure(t)
             }

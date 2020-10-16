@@ -6,6 +6,7 @@ import android.util.Log
 import com.getbouncer.scan.framework.Analyzer
 import com.getbouncer.scan.framework.AnalyzerFactory
 import com.getbouncer.scan.framework.Config
+import com.getbouncer.scan.framework.TrackedCameraImage
 import com.getbouncer.scan.framework.ml.hardNonMaximumSuppression
 import com.getbouncer.scan.framework.ml.ssd.rectForm
 import com.getbouncer.scan.framework.util.centerScaled
@@ -56,10 +57,13 @@ class NameAndExpiryAnalyzer<State> private constructor(
     ) = if ((!runNameExtraction && !runExpiryExtraction) || textDetect == null) {
         Prediction(null, null, null)
     } else {
-        val objDetectBitmap = cropImageForObjectDetect(
-            data.fullImage,
-            data.previewSize,
-            data.cardFinder
+        val objDetectBitmap = TrackedCameraImage(
+            image = cropImageForObjectDetect(
+                data.fullImage.image,
+                data.previewSize,
+                data.cardFinder,
+            ),
+            tracker = data.fullImage.tracker,
         )
 
         val textDetectorPrediction = textDetect.analyze(
@@ -70,6 +74,8 @@ class NameAndExpiryAnalyzer<State> private constructor(
             ),
             Unit
         )
+
+        data.fullImage.tracker.trackResult("name_and_expiry_image_cropped")
 
         val expiry = if (runExpiryExtraction && textDetectorPrediction.expiryBoxes.isNotEmpty()) {
             // pick the expiry box by oldest date
@@ -100,9 +106,9 @@ class NameAndExpiryAnalyzer<State> private constructor(
                 processNamePredictions(
                     box.rect.centerScaled(
                         NAME_BOX_X_SCALE_RATIO,
-                        NAME_BOX_Y_SCALE_RATIO
+                        NAME_BOX_Y_SCALE_RATIO,
                     ),
-                    objDetectBitmap
+                    objDetectBitmap,
                 )?.filter { it != ' ' }
             }.joinToString(" ").trim().ifEmpty { null }
         } else {
@@ -123,13 +129,13 @@ class NameAndExpiryAnalyzer<State> private constructor(
 
     private suspend fun processNamePredictions(
         nameRect: RectF,
-        bitmapForObjectDetection: Bitmap
+        bitmapForObjectDetection: TrackedCameraImage
     ): String? {
         if (alphabetDetect == null) {
             return null
         }
 
-        val scaledNameRect = nameRect.scaled(bitmapForObjectDetection.size())
+        val scaledNameRect = nameRect.scaled(bitmapForObjectDetection.image.size())
         val x = scaledNameRect.left.toInt()
         val y = scaledNameRect.top.toInt()
         val width = scaledNameRect.width().toInt()
@@ -141,20 +147,23 @@ class NameAndExpiryAnalyzer<State> private constructor(
 
         // We adjust the start and end of the name bounding box to better capture the first char
         val xStart = max(0, x - charWidth / 4)
-        val nameWidth = min(bitmapForObjectDetection.width - xStart, width + charWidth / 2)
+        val nameWidth = min(bitmapForObjectDetection.image.width - xStart, width + charWidth / 2)
 
-        if (y < 0 || height < 0 || y + height > bitmapForObjectDetection.height || xStart + nameWidth > bitmapForObjectDetection.width) {
+        if (y < 0 || height < 0 || y + height > bitmapForObjectDetection.image.height || xStart + nameWidth > bitmapForObjectDetection.image.width) {
             Log.w(Config.logTag, "Invalid name dimensions. height=$height, y=$y")
             return null
         }
 
-        val nameBitmap = Bitmap.createBitmap(bitmapForObjectDetection, xStart, y, nameWidth, height)
+        val nameBitmap = Bitmap.createBitmap(bitmapForObjectDetection.image, xStart, y, nameWidth, height)
         val predictions: MutableList<CharPredictionWithBox> = ArrayList()
 
         // iterate through each stride, making a prediction per stride
         var nameX = 0
         while (nameX < nameWidth - charWidth) {
-            val firstLetterBitmap = Bitmap.createBitmap(nameBitmap, nameX, 0, height, height)
+            val firstLetterBitmap = TrackedCameraImage(
+                image = Bitmap.createBitmap(nameBitmap, nameX, 0, height, height),
+                tracker = bitmapForObjectDetection.tracker,
+            )
             predictions.add(
                 CharPredictionWithBox(
                     characterPrediction = alphabetDetect.analyze(AlphabetDetect.Input(firstLetterBitmap), Unit),
@@ -166,8 +175,8 @@ class NameAndExpiryAnalyzer<State> private constructor(
 
         val (boxes, probabilities) = predictions.map {
             it.getNormalizedRectForm(
-                width = bitmapForObjectDetection.width,
-                height = bitmapForObjectDetection.height
+                width = bitmapForObjectDetection.image.width,
+                height = bitmapForObjectDetection.image.height
             ) to it.characterPrediction.confidence
         }.unzip()
 

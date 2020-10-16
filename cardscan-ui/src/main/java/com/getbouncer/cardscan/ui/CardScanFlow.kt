@@ -1,7 +1,6 @@
 package com.getbouncer.cardscan.ui
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Rect
 import android.util.Size
 import androidx.lifecycle.LifecycleOwner
@@ -16,7 +15,7 @@ import com.getbouncer.scan.framework.AnalyzerLoopErrorListener
 import com.getbouncer.scan.framework.AnalyzerPool
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.ProcessBoundAnalyzerLoop
-import com.getbouncer.scan.framework.time.Clock
+import com.getbouncer.scan.framework.TrackedCameraImage
 import com.getbouncer.scan.framework.time.Duration
 import com.getbouncer.scan.framework.time.Rate
 import com.getbouncer.scan.framework.util.cacheFirstResultSuspend
@@ -127,7 +126,7 @@ class CardScanFlow(
      */
     override fun startFlow(
         context: Context,
-        imageStream: Flow<Bitmap>,
+        imageStream: Flow<TrackedCameraImage>,
         previewSize: Size,
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,
@@ -269,7 +268,7 @@ class CardScanFlow(
 
     private fun runOcrMainLoop(
         context: Context,
-        imageStream: Flow<Bitmap>,
+        imageStream: Flow<TrackedCameraImage>,
         previewSize: Size,
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,
@@ -306,7 +305,6 @@ class CardScanFlow(
                             fullImage = it,
                             previewSize = previewSize,
                             cardFinder = viewFinder,
-                            capturedAt = Clock.markNow(),
                         )
                     },
                     coroutineScope,
@@ -317,7 +315,7 @@ class CardScanFlow(
 
     private fun runNameExpiryMainLoop(
         context: Context,
-        imageStream: Flow<Bitmap>,
+        imageStream: Flow<TrackedCameraImage>,
         previewSize: Size,
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,
@@ -363,7 +361,6 @@ class CardScanFlow(
                             fullImage = it,
                             previewSize = previewSize,
                             cardFinder = viewFinder,
-                            capturedAt = Clock.markNow(),
                         )
                     },
                     coroutineScope,

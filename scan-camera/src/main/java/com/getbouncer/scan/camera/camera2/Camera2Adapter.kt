@@ -19,7 +19,6 @@ package com.getbouncer.scan.camera.camera2
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.ImageFormat
 import android.graphics.Matrix
 import android.graphics.PointF
@@ -49,6 +48,8 @@ import androidx.lifecycle.OnLifecycleEvent
 import com.getbouncer.scan.camera.CameraAdapter
 import com.getbouncer.scan.camera.CameraErrorListener
 import com.getbouncer.scan.camera.isSupportedFormat
+import com.getbouncer.scan.framework.Stats
+import com.getbouncer.scan.framework.TrackedCameraImage
 import com.getbouncer.scan.framework.time.delay
 import com.getbouncer.scan.framework.time.seconds
 import com.getbouncer.scan.framework.util.aspectRatio
@@ -105,7 +106,7 @@ class Camera2Adapter(
     private val minimumResolution: Size,
     private val cameraErrorListener: CameraErrorListener,
     private val coroutineScope: CoroutineScope,
-) : CameraAdapter<Bitmap>(), LifecycleObserver {
+) : CameraAdapter<TrackedCameraImage>(), LifecycleObserver {
 
     companion object {
         /**
@@ -194,7 +195,9 @@ class Camera2Adapter(
                 return
             }
             cameraHandler?.post {
-                textureView?.bitmap?.let { sendImageToStream(it) }
+                textureView?.bitmap?.let {
+                    sendImageToStream(TrackedCameraImage(it, Stats.trackRepeatingTask("image_analysis")))
+                }
                 processingImage.set(false)
             }
         }

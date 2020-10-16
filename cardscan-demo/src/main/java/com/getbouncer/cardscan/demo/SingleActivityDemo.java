@@ -30,6 +30,7 @@ import com.getbouncer.scan.framework.AggregateResultListener;
 import com.getbouncer.scan.framework.AnalyzerLoopErrorListener;
 import com.getbouncer.scan.framework.Config;
 import com.getbouncer.scan.framework.Stats;
+import com.getbouncer.scan.framework.TrackedCameraImage;
 import com.getbouncer.scan.framework.api.BouncerApi;
 import com.getbouncer.scan.framework.api.dto.ScanStatistics;
 import com.getbouncer.scan.framework.interop.BlockingAggregateResultListener;
@@ -78,7 +79,7 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
     private TextView cardPanTextView;
     private TextView cardNameTextView;
 
-    private CameraAdapter<Bitmap> cameraAdapter;
+    private CameraAdapter<TrackedCameraImage> cameraAdapter;
 
     private CardScanFlow cardScanFlow;
 

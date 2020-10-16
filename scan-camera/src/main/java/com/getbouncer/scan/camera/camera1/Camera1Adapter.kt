@@ -4,7 +4,6 @@ package com.getbouncer.scan.camera.camera1
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.ImageFormat
 import android.graphics.PointF
 import android.graphics.Rect
@@ -26,6 +25,8 @@ import com.getbouncer.scan.camera.nv21ToYuv
 import com.getbouncer.scan.camera.rotate
 import com.getbouncer.scan.camera.toBitmap
 import com.getbouncer.scan.framework.Config
+import com.getbouncer.scan.framework.Stats
+import com.getbouncer.scan.framework.TrackedCameraImage
 import com.getbouncer.scan.framework.time.milliseconds
 import com.getbouncer.scan.framework.util.retry
 import kotlinx.coroutines.CoroutineScope
@@ -52,7 +53,7 @@ class Camera1Adapter(
     private val minimumResolution: Size,
     private val cameraErrorListener: CameraErrorListener,
     private val coroutineScope: CoroutineScope,
-) : CameraAdapter<Bitmap>(), PreviewCallback {
+) : CameraAdapter<TrackedCameraImage>(), PreviewCallback {
 
     private var mCamera: Camera? = null
     private var cameraPreview: CameraPreview? = null
@@ -116,7 +117,11 @@ class Camera1Adapter(
                     .nv21ToYuv(imageWidth, imageHeight)
                     .toBitmap()
                     .rotate(mRotation.toFloat())
-                sendImageToStream(bitmap)
+                val TrackedCameraImage = TrackedCameraImage(
+                    image = bitmap,
+                    tracker = Stats.trackRepeatingTask("image_processing")
+                )
+                sendImageToStream(TrackedCameraImage)
             } catch (t: Throwable) {
                 // ignore errors transforming the image (OOM, etc)
                 Log.e(Config.logTag, "Exception caught during camera transform", t)
