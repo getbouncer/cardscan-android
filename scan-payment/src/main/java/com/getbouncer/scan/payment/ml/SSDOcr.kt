@@ -212,7 +212,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
     ) : TFLAnalyzerFactory<Input, Unit, Prediction, SSDOcr>(context, fetchedModel) {
         companion object {
             private const val USE_GPU = false
-            private const val DEFAULT_THREADS = 3
+            private const val DEFAULT_THREADS = 2
 
             val TRAINED_IMAGE_SIZE = Size(600, 375)
         }

@@ -113,15 +113,15 @@ class Camera1Adapter(
 
         if (bytes != null) {
             try {
-                val bitmap = bytes
-                    .nv21ToYuv(imageWidth, imageHeight)
-                    .toBitmap()
-                    .rotate(mRotation.toFloat())
-                val TrackedCameraImage = TrackedCameraImage(
-                    image = bitmap,
-                    tracker = Stats.trackRepeatingTask("image_processing")
+                sendImageToStream(
+                    TrackedCameraImage(
+                        image = bytes
+                            .nv21ToYuv(imageWidth, imageHeight)
+                            .toBitmap()
+                            .rotate(mRotation.toFloat()),
+                        tracker = Stats.trackRepeatingTask("image_processing")
+                    )
                 )
-                sendImageToStream(TrackedCameraImage)
             } catch (t: Throwable) {
                 // ignore errors transforming the image (OOM, etc)
                 Log.e(Config.logTag, "Exception caught during camera transform", t)

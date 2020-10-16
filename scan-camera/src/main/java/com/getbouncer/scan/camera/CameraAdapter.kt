@@ -42,8 +42,8 @@ open class CameraApi {
 
 abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
 
-    // TODO: change this to be a channelFlow once it's no longer experimental
-    private val imageChannel = Channel<CameraOutput>(capacity = 2)
+    // TODO: change this to be a channelFlow once it's no longer experimental, add some capacity and use a backpressure drop strategy
+    private val imageChannel = Channel<CameraOutput>(capacity = Channel.RENDEZVOUS)
 
     companion object {
 
