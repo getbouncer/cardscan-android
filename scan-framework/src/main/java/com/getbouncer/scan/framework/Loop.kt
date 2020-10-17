@@ -126,7 +126,7 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
             }
 
             if (finished) {
-                loopExecutionStatTracker.trackResult("success:$workerId")
+                loopExecutionStatTracker.trackResult("success")
                 unsubscribeFromFlow()
             }
 

@@ -182,7 +182,7 @@ sealed class WebFetcher : Fetcher {
 
         // get details for downloading the data. If download details cannot be retrieved, use the latest cached version
         val downloadDetails = getDownloadDetails(cachedData.modelHash, cachedData.modelHashAlgorithm) ?: run {
-            stat.trackResult("download_details_failure")
+            stat.trackResult("no_download_details")
             return@withLock cachedData
         }
 
