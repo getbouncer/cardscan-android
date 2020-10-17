@@ -1,10 +1,10 @@
 package com.getbouncer.scan.ui
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Rect
 import android.util.Size
 import androidx.lifecycle.LifecycleOwner
+import com.getbouncer.scan.framework.TrackedCameraImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
@@ -26,7 +26,7 @@ interface ScanFlow {
      */
     fun startFlow(
         context: Context,
-        imageStream: Flow<Bitmap>,
+        imageStream: Flow<TrackedCameraImage>,
         previewSize: Size,
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,

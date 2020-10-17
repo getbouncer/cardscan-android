@@ -23,7 +23,7 @@ import kotlin.test.fail
 
 class LoopTest {
 
-    @Test(timeout = 200)
+    @Test(timeout = 1000)
     @SmallTest
     @ExperimentalCoroutinesApi
     fun processBoundAnalyzerLoop_analyzeData() = runBlockingTest {

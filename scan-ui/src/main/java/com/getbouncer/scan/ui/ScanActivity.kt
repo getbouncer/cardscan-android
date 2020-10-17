@@ -3,7 +3,6 @@ package com.getbouncer.scan.ui
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
 import android.graphics.PointF
 import android.os.Build
 import android.os.Bundle
@@ -24,6 +23,7 @@ import com.getbouncer.scan.camera.camera1.Camera1Adapter
 import com.getbouncer.scan.camera.camera2.Camera2Adapter
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.Stats
+import com.getbouncer.scan.framework.TrackedCameraImage
 import com.getbouncer.scan.framework.api.ERROR_CODE_NOT_AUTHENTICATED
 import com.getbouncer.scan.framework.api.NetworkResult
 import com.getbouncer.scan.framework.api.dto.ScanStatistics
@@ -128,7 +128,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             requestCameraPermission()
         } else {
-            runBlocking { permissionStat.trackResult("already_granted") }
+            permissionStat.trackResult("already_granted")
             prepareCamera { onCameraReady() }
         }
     }
@@ -186,11 +186,11 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
         if (requestCode == PERMISSION_REQUEST_CODE && grantResults.isNotEmpty()) {
             when (grantResults[0]) {
                 PackageManager.PERMISSION_GRANTED -> {
-                    runBlocking { permissionStat.trackResult("granted") }
+                    permissionStat.trackResult("granted")
                     prepareCamera { onCameraReady() }
                 }
                 else -> {
-                    runBlocking { permissionStat.trackResult("denied") }
+                    permissionStat.trackResult("denied")
                     showPermissionDeniedDialog()
                 }
             }
@@ -270,9 +270,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     protected open fun toggleFlashlight() {
         isFlashlightOn = !isFlashlightOn
         setFlashlightState(isFlashlightOn)
-        runBlocking {
-            Stats.trackRepeatingTask("torch_state").trackResult(if (isFlashlightOn) "on" else "off")
-        }
+        Stats.trackRepeatingTask("torch_state").trackResult(if (isFlashlightOn) "on" else "off")
     }
 
     /**
@@ -294,7 +292,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      */
     protected open fun cameraErrorCancelScan(cause: Throwable? = null) {
         Log.e(Config.logTag, "Canceling scan due to camera error", cause)
-        runBlocking { scanStat.trackResult("camera_error") }
+        scanStat.trackResult("camera_error")
         resultListener.cameraError(cause)
         closeScanner()
     }
@@ -303,7 +301,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      * The scan has been cancelled by the user.
      */
     protected open fun userCancelScan() {
-        runBlocking { scanStat.trackResult("user_canceled") }
+        scanStat.trackResult("user_canceled")
         resultListener.userCanceled()
         closeScanner()
     }
@@ -313,7 +311,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      */
     protected open fun analyzerFailureCancelScan(cause: Throwable? = null) {
         Log.e(Config.logTag, "Canceling scan due to analyzer error", cause)
-        runBlocking { scanStat.trackResult("analyzer_failure") }
+        scanStat.trackResult("analyzer_failure")
         resultListener.analyzerFailure(cause)
         closeScanner()
     }
@@ -329,9 +327,11 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
                 scanId = Stats.scanId,
                 device = Device.fromContext(this),
                 appDetails = AppDetails.fromContext(this),
-                scanStatistics = runBlocking { ScanStatistics.fromStats() }
+                scanStatistics = ScanStatistics.fromStats(),
             )
         }
+        runBlocking { Stats.finishScan() }
+        runBlocking { Stats.resetStats() }
         finish()
     }
 
@@ -353,8 +353,6 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
             appDetails = appDetails,
             scanStatistics = scanStatistics
         )
-        runBlocking { Stats.finishScan() }
-        runBlocking { Stats.resetStats() }
     }
 
     /**
@@ -367,7 +365,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
 
         val stat = Stats.trackTask("torch_supported")
         cameraAdapter.withFlashSupport {
-            runBlocking { stat.trackResult(if (it) "supported" else "unsupported") }
+            stat.trackResult(if (it) "supported" else "unsupported")
             setFlashlightState(cameraAdapter.isTorchOn())
             onFlashSupported(it)
         }
@@ -394,7 +392,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     /**
      * Generate a camera adapter
      */
-    protected open fun buildCameraAdapter(): CameraAdapter<Bitmap> = when (cameraApi) {
+    protected open fun buildCameraAdapter(): CameraAdapter<TrackedCameraImage> = when (cameraApi) {
         is CameraApi.Camera2 -> {
             Camera2Adapter(
                 activity = this,
@@ -422,7 +420,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     /**
      * A stream of images from the camera is available to be processed.
      */
-    protected abstract fun onCameraStreamAvailable(cameraStream: Flow<Bitmap>)
+    protected abstract fun onCameraStreamAvailable(cameraStream: Flow<TrackedCameraImage>)
 
     /**
      * The API key was invalid.

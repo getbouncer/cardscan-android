@@ -18,7 +18,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.yield
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -79,15 +78,15 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
         loopExecutionStatTracker = Stats.trackTask("${this::class.java.simpleName}_execution")
 
         if (analyzerPool.analyzers.isEmpty()) {
-            runBlocking { loopExecutionStatTracker.trackResult("canceled") }
+            loopExecutionStatTracker.trackResult("canceled")
             analyzerLoopErrorListener.onAnalyzerFailure(NoAnalyzersAvailableException)
             return null
         }
 
         workerJob = processingCoroutineScope.launch {
-            analyzerPool.analyzers.forEachIndexed { index, analyzer ->
+            analyzerPool.analyzers.forEach { analyzer ->
                 launch(Dispatchers.Default) {
-                    startWorker(flow, index, analyzer)
+                    startWorker(flow, analyzer)
                 }
             }
         }
@@ -107,11 +106,9 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
      */
     private suspend fun startWorker(
         flow: Flow<DataFrame>,
-        workerId: Int,
         analyzer: Analyzer<DataFrame, State, Output>,
     ) {
         flow.collect { frame ->
-            yield() // allow for this to be canceled
             val stat = Stats.trackRepeatingTask("analyzer_execution:${analyzer::class.java.simpleName}")
             try {
                 val analyzerResult = analyzer.analyze(frame, getState())
@@ -128,7 +125,7 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
             }
 
             if (finished) {
-                loopExecutionStatTracker.trackResult("success:$workerId")
+                loopExecutionStatTracker.trackResult("success")
                 unsubscribeFromFlow()
             }
 

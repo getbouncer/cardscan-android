@@ -1,17 +1,16 @@
 package com.getbouncer.scan.payment.ml
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Rect
 import android.util.Size
 import com.getbouncer.scan.framework.FetchedData
+import com.getbouncer.scan.framework.TrackedCameraImage
 import com.getbouncer.scan.framework.UpdatingResourceFetcher
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.ml.ssd.adjustLocations
 import com.getbouncer.scan.framework.ml.ssd.softMax
 import com.getbouncer.scan.framework.ml.ssd.toRectForm
-import com.getbouncer.scan.framework.time.ClockMark
 import com.getbouncer.scan.framework.util.intersectionWith
 import com.getbouncer.scan.framework.util.projectRegionOfInterest
 import com.getbouncer.scan.framework.util.reshape
@@ -95,7 +94,7 @@ private val PRIORS = combinePriors()
 class SSDOcr private constructor(interpreter: Interpreter) :
     TensorFlowLiteAnalyzer<SSDOcr.Input, Array<ByteBuffer>, SSDOcr.Prediction, Map<Int, Array<FloatArray>>>(interpreter) {
 
-    data class Input(val fullImage: Bitmap, val previewSize: Size, val cardFinder: Rect, val capturedAt: ClockMark)
+    data class Input(val fullImage: TrackedCameraImage, val previewSize: Size, val cardFinder: Rect)
 
     data class Prediction(val pan: String, val detectedBoxes: List<DetectionBox>)
 
@@ -111,7 +110,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
          *    fullImage's
          * 3. the fullImage and the previewImage have the same orientation
          */
-        fun cropImage(input: Input): Bitmap {
+        fun cropImage(input: Input): TrackedCameraImage {
             require(
                 input.cardFinder.left >= 0 &&
                     input.cardFinder.right <= input.previewSize.width &&
@@ -123,19 +122,25 @@ class SSDOcr private constructor(interpreter: Interpreter) :
             val projectedViewFinder = input
                 .previewSize
                 .projectRegionOfInterest(
-                    toSize = input.fullImage.size(),
+                    toSize = input.fullImage.image.size(),
                     regionOfInterest = input.cardFinder
                 )
-                .intersectionWith(input.fullImage.size().toRect())
+                .intersectionWith(input.fullImage.image.size().toRect())
 
-            return input.fullImage.crop(projectedViewFinder)
+            return TrackedCameraImage(
+                image = input.fullImage.image.crop(projectedViewFinder),
+                tracker = input.fullImage.tracker,
+            )
         }
     }
 
     override suspend fun transformData(data: Input): Array<ByteBuffer> = arrayOf(
         cropImage(data)
+            .image
             .scale(Factory.TRAINED_IMAGE_SIZE)
-            .toRGBByteBuffer(mean = IMAGE_MEAN, std = IMAGE_STD)
+            .toRGBByteBuffer(mean = IMAGE_MEAN, std = IMAGE_STD).also {
+                data.fullImage.tracker.trackResult("ocr_image_transform")
+            }
     )
 
     override suspend fun interpretMLOutput(
@@ -179,6 +184,8 @@ class SSDOcr private constructor(interpreter: Interpreter) :
         )
 
         val predictedNumber = detectedBoxes.map { it.label }.joinToString("")
+
+        data.fullImage.tracker.trackResult("ocr_prediction_complete")
         return Prediction(predictedNumber, detectedBoxes)
     }
 
@@ -205,7 +212,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
     ) : TFLAnalyzerFactory<Input, Unit, Prediction, SSDOcr>(context, fetchedModel) {
         companion object {
             private const val USE_GPU = false
-            private const val DEFAULT_THREADS = 3
+            private const val DEFAULT_THREADS = 2
 
             val TRAINED_IMAGE_SIZE = Size(600, 375)
         }

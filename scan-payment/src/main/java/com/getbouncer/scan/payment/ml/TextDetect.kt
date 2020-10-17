@@ -1,13 +1,13 @@
 package com.getbouncer.scan.payment.ml
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Rect
 import android.graphics.RectF
 import android.util.Log
 import android.util.Size
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.FetchedData
+import com.getbouncer.scan.framework.TrackedCameraImage
 import com.getbouncer.scan.framework.UpdatingModelWebFetcher
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
@@ -74,7 +74,7 @@ class TextDetect private constructor(interpreter: Interpreter) :
         Map<Int, Array<Array<Array<FloatArray>>>>>(interpreter) {
 
     data class Input(
-        val fullImage: Bitmap,
+        val fullImage: TrackedCameraImage,
         val previewSize: Size,
         val cardFinder: Rect
     )
@@ -150,11 +150,14 @@ class TextDetect private constructor(interpreter: Interpreter) :
                 )
             )
         }
+
         return Prediction(
             allObjects,
             nameBoxes?.subBoxes ?: emptyList(),
             outputBoxes.filter { it.label == LABELS.EXPIRATION_DATE.ordinal }.sortedByDescending { it.confidence }.take(2)
-        )
+        ).also {
+            data.fullImage.tracker.trackResult("text_detect_prediction_complete")
+        }
     }
 
     /**
@@ -338,12 +341,15 @@ class TextDetect private constructor(interpreter: Interpreter) :
 
     override suspend fun transformData(data: Input): Array<ByteBuffer> = arrayOf(
         cropImageForObjectDetect(
-            data.fullImage,
+            data.fullImage.image,
             data.previewSize,
             data.cardFinder
         )
             .scale(TRAINED_IMAGE_SIZE)
             .toRGBByteBuffer()
+            .also {
+                data.fullImage.tracker.trackResult("text_detect_image_cropped")
+            }
     )
 
     override suspend fun executeInference(

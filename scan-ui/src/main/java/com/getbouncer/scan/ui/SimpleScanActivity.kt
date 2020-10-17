@@ -1,7 +1,6 @@
 package com.getbouncer.scan.ui
 
 import android.annotation.SuppressLint
-import android.graphics.Bitmap
 import android.graphics.PointF
 import android.graphics.Typeface
 import android.os.Bundle
@@ -16,6 +15,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import com.getbouncer.scan.framework.Config
+import com.getbouncer.scan.framework.TrackedCameraImage
 import com.getbouncer.scan.framework.util.getSdkVersion
 import com.getbouncer.scan.ui.util.asRect
 import com.getbouncer.scan.ui.util.dpToPixels
@@ -655,7 +655,7 @@ abstract class SimpleScanActivity : ScanActivity() {
     /**
      * Once the camera stream is available, start processing images.
      */
-    override fun onCameraStreamAvailable(cameraStream: Flow<Bitmap>) {
+    override fun onCameraStreamAvailable(cameraStream: Flow<TrackedCameraImage>) {
         scanFlow.startFlow(
             context = this,
             imageStream = cameraStream,

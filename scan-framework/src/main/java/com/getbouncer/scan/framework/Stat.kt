@@ -5,6 +5,8 @@ import androidx.annotation.CheckResult
 import com.getbouncer.scan.framework.time.Clock
 import com.getbouncer.scan.framework.time.ClockMark
 import com.getbouncer.scan.framework.time.Duration
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.UUID
@@ -16,7 +18,7 @@ object Stats {
         private set
 
     private var tasks: MutableMap<String, List<TaskStats>> = mutableMapOf()
-    private var repeatingTasks: MutableMap<String, RepeatingTaskStats> = mutableMapOf()
+    private var repeatingTasks: MutableMap<String, MutableMap<String, RepeatingTaskStats>> = mutableMapOf()
 
     private val scanIdMutex = Mutex()
     private val taskMutex = Mutex()
@@ -92,33 +94,32 @@ object Stats {
     fun trackRepeatingTask(name: String): StatTracker =
         if (!Config.trackStats) StatTrackerNoOpImpl else StatTrackerImpl { startedAt, result ->
             repeatingTaskMutex.withLock {
-                val taskStats = repeatingTasks[name]
+                val resultName = result ?: "null"
+                val resultStats = repeatingTasks[name] ?: run {
+                    val taskStats = mutableMapOf<String, RepeatingTaskStats>()
+                    repeatingTasks[name] = taskStats
+                    taskStats
+                }
+
+                val taskStats = resultStats[resultName]
                 val duration = startedAt.elapsedSince()
                 if (taskStats == null) {
-                    repeatingTasks[name] = RepeatingTaskStats(
+                    resultStats[resultName] = RepeatingTaskStats(
                         executions = 1,
                         startedAt = startedAt,
                         totalDuration = duration,
                         totalCpuDuration = duration,
                         minimumDuration = duration,
                         maximumDuration = duration,
-                        results = if (result == null) emptyMap() else mapOf(result to 1)
                     )
                 } else {
-                    val results = if (result == null) {
-                        taskStats.results
-                    } else {
-                        taskStats.results + (result to (taskStats.results[result] ?: 0) + 1)
-                    }
-
-                    repeatingTasks[name] = RepeatingTaskStats(
+                    resultStats[resultName] = RepeatingTaskStats(
                         executions = taskStats.executions + 1,
                         startedAt = taskStats.startedAt,
                         totalDuration = taskStats.startedAt.elapsedSince(),
                         totalCpuDuration = taskStats.totalCpuDuration + duration,
                         minimumDuration = minOf(taskStats.minimumDuration, duration),
                         maximumDuration = maxOf(taskStats.maximumDuration, duration),
-                        results = results
                     )
                 }
             }
@@ -130,7 +131,7 @@ object Stats {
     /**
      * Track the result of a task.
      */
-    suspend fun <T> trackRepeatingTask(name: String, task: () -> T): T {
+    fun <T> trackRepeatingTask(name: String, task: () -> T): T {
         val tracker = trackRepeatingTask(name)
         val result: T
         try {
@@ -146,7 +147,7 @@ object Stats {
 
     @JvmStatic
     @CheckResult
-    fun getRepeatingTasks() = repeatingTasks.toMap()
+    fun getRepeatingTasks() = repeatingTasks.toMap().mapValues { entry -> entry.value.toMap() }
 
     @JvmStatic
     @CheckResult
@@ -166,23 +167,23 @@ interface StatTracker {
     /**
      * Track the result from a stat.
      */
-    suspend fun trackResult(result: String? = null)
+    fun trackResult(result: String? = null)
 }
 
 private object StatTrackerNoOpImpl : StatTracker {
     override val startedAt = Clock.markNow()
-    override suspend fun trackResult(result: String?) { /* do nothing */ }
+    override fun trackResult(result: String?) { /* do nothing */ }
 }
 
 private class StatTrackerImpl(private val onComplete: suspend (ClockMark, String?) -> Unit) : StatTracker {
     override val startedAt = Clock.markNow()
-    override suspend fun trackResult(result: String?) { onComplete(startedAt, result) }
+    override fun trackResult(result: String?) { GlobalScope.launch { onComplete(startedAt, result) } }
 }
 
 data class TaskStats(
     val started: ClockMark,
     val duration: Duration,
-    val result: String?
+    val result: String?,
 )
 
 data class RepeatingTaskStats(
@@ -192,7 +193,6 @@ data class RepeatingTaskStats(
     val totalCpuDuration: Duration,
     val minimumDuration: Duration,
     val maximumDuration: Duration,
-    val results: Map<String, Int>
 ) {
     fun averageDuration() = totalCpuDuration / executions
 }

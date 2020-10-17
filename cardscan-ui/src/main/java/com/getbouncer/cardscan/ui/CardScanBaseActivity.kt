@@ -34,7 +34,6 @@ import com.getbouncer.scan.ui.util.show
 import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -155,7 +154,7 @@ abstract class CardScanBaseActivity :
      * Cancel scanning to enter a card manually
      */
     protected open fun enterCardManually() {
-        runBlocking { scanStat.trackResult("enter_card_manually") }
+        scanStat.trackResult("enter_card_manually")
         resultListener.enterManually()
         closeScanner()
     }
@@ -164,7 +163,7 @@ abstract class CardScanBaseActivity :
      * Card was successfully scanned, return an activity result.
      */
     protected open fun cardScanned(result: CardScanActivityResult) {
-        runBlocking { scanStat.trackResult("card_scanned") }
+        scanStat.trackResult("card_scanned")
         resultListener.cardScanned(result)
         closeScanner()
     }
@@ -256,7 +255,7 @@ abstract class CardScanBaseActivity :
         // show OCR debug frame
         result.ocrAnalyzerResult?.detectedBoxes?.let { detectionBoxes ->
             if (Config.isDebug) {
-                val bitmap = withContext(Dispatchers.Default) { SSDOcr.cropImage(result.frame) }
+                val bitmap = withContext(Dispatchers.Default) { SSDOcr.cropImage(result.frame).image }
                 debugImageView.setImageBitmap(bitmap)
                 debugOverlayView.setBoxes(detectionBoxes.map { it.forDebugPan() })
             }
@@ -265,7 +264,7 @@ abstract class CardScanBaseActivity :
         // show name & expiry debug frame
         result.nameExpiryAnalyzerResult?.detectionBoxes?.let { detectionBoxes ->
             if (Config.isDebug) {
-                val bitmap = withContext(Dispatchers.Default) { cropImageForObjectDetect(result.frame.fullImage, result.frame.previewSize, result.frame.cardFinder) }
+                val bitmap = withContext(Dispatchers.Default) { cropImageForObjectDetect(result.frame.fullImage.image, result.frame.previewSize, result.frame.cardFinder) }
                 debugImageView.setImageBitmap(bitmap)
                 debugOverlayView.setBoxes(detectionBoxes.map { it.forDebugObjDetect(result.frame.cardFinder, result.frame.previewSize) })
             }

@@ -3,7 +3,7 @@ package com.getbouncer.scan.framework
 /**
  * The default number of analyzers to run in parallel.
  */
-internal const val DEFAULT_ANALYZER_PARALLEL_COUNT = 3
+internal const val DEFAULT_ANALYZER_PARALLEL_COUNT = 2
 
 /**
  * An analyzer takes some data as an input, and returns an analyzed output. Analyzers should not
