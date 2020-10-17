@@ -84,9 +84,9 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
         }
 
         workerJob = processingCoroutineScope.launch {
-            analyzerPool.analyzers.forEachIndexed { index, analyzer ->
+            analyzerPool.analyzers.forEach { analyzer ->
                 launch(Dispatchers.Default) {
-                    startWorker(flow, index, analyzer)
+                    startWorker(flow, analyzer)
                 }
             }
         }
@@ -106,7 +106,6 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
      */
     private suspend fun startWorker(
         flow: Flow<DataFrame>,
-        workerId: Int,
         analyzer: Analyzer<DataFrame, State, Output>,
     ) {
         flow.collect { frame ->
