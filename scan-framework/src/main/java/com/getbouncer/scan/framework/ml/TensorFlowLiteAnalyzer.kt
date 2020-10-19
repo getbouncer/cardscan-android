@@ -28,7 +28,7 @@ abstract class TensorFlowLiteAnalyzer<Input, MLInput, Output, MLOutput>(
     protected abstract suspend fun executeInference(tfInterpreter: Interpreter, data: MLInput): MLOutput
 
     private val loggingTimer by lazy {
-        Timer.newInstance(Config.logTag, this::class.java.simpleName, enabled = Config.isDebug)
+        Timer.newInstance(Config.logTag, this::class.java.simpleName)
     }
 
     override suspend fun analyze(data: Input, state: Unit): Output {
