@@ -6,7 +6,7 @@ import android.util.Log
 import com.getbouncer.scan.framework.Analyzer
 import com.getbouncer.scan.framework.AnalyzerFactory
 import com.getbouncer.scan.framework.Config
-import com.getbouncer.scan.framework.TrackedCameraImage
+import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.framework.ml.hardNonMaximumSuppression
 import com.getbouncer.scan.framework.ml.ssd.rectForm
 import com.getbouncer.scan.framework.util.centerScaled
@@ -57,7 +57,7 @@ class NameAndExpiryAnalyzer<State> private constructor(
     ) = if ((!runNameExtraction && !runExpiryExtraction) || textDetect == null) {
         Prediction(null, null, null)
     } else {
-        val objDetectBitmap = TrackedCameraImage(
+        val objDetectBitmap = TrackedImage(
             image = cropImageForObjectDetect(
                 data.fullImage.image,
                 data.previewSize,
@@ -129,7 +129,7 @@ class NameAndExpiryAnalyzer<State> private constructor(
 
     private suspend fun processNamePredictions(
         nameRect: RectF,
-        bitmapForObjectDetection: TrackedCameraImage
+        bitmapForObjectDetection: TrackedImage
     ): String? {
         if (alphabetDetect == null) {
             return null
@@ -160,7 +160,7 @@ class NameAndExpiryAnalyzer<State> private constructor(
         // iterate through each stride, making a prediction per stride
         var nameX = 0
         while (nameX < nameWidth - charWidth) {
-            val firstLetterBitmap = TrackedCameraImage(
+            val firstLetterBitmap = TrackedImage(
                 image = Bitmap.createBitmap(nameBitmap, nameX, 0, height, height),
                 tracker = bitmapForObjectDetection.tracker,
             )

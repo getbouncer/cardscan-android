@@ -3,9 +3,9 @@ package com.getbouncer.scan.framework
 import android.graphics.Bitmap
 
 /**
- * An image from a camera with a stat tracker.
+ * An image with a stat tracker.
  */
-data class TrackedCameraImage(
+data class TrackedImage(
     val image: Bitmap,
     val tracker: StatTracker,
 )

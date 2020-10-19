@@ -49,7 +49,7 @@ import com.getbouncer.scan.camera.CameraAdapter
 import com.getbouncer.scan.camera.CameraErrorListener
 import com.getbouncer.scan.camera.isSupportedFormat
 import com.getbouncer.scan.framework.Stats
-import com.getbouncer.scan.framework.TrackedCameraImage
+import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.framework.time.delay
 import com.getbouncer.scan.framework.time.seconds
 import com.getbouncer.scan.framework.util.aspectRatio
@@ -106,7 +106,7 @@ class Camera2Adapter(
     private val minimumResolution: Size,
     private val cameraErrorListener: CameraErrorListener,
     private val coroutineScope: CoroutineScope,
-) : CameraAdapter<TrackedCameraImage>(), LifecycleObserver {
+) : CameraAdapter<TrackedImage>(), LifecycleObserver {
 
     companion object {
         /**
@@ -196,7 +196,7 @@ class Camera2Adapter(
             }
             cameraHandler?.post {
                 textureView?.bitmap?.let {
-                    sendImageToStream(TrackedCameraImage(it, Stats.trackRepeatingTask("image_analysis")))
+                    sendImageToStream(TrackedImage(it, Stats.trackRepeatingTask("image_analysis")))
                 }
                 processingImage.set(false)
             }

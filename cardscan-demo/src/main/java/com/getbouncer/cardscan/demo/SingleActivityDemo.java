@@ -3,7 +3,6 @@ package com.getbouncer.cardscan.demo;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.graphics.PointF;
 import android.os.Bundle;
 import android.os.Handler;
@@ -30,7 +29,7 @@ import com.getbouncer.scan.framework.AggregateResultListener;
 import com.getbouncer.scan.framework.AnalyzerLoopErrorListener;
 import com.getbouncer.scan.framework.Config;
 import com.getbouncer.scan.framework.Stats;
-import com.getbouncer.scan.framework.TrackedCameraImage;
+import com.getbouncer.scan.framework.TrackedImage;
 import com.getbouncer.scan.framework.api.BouncerApi;
 import com.getbouncer.scan.framework.api.dto.ScanStatistics;
 import com.getbouncer.scan.framework.interop.BlockingAggregateResultListener;
@@ -79,7 +78,7 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
     private TextView cardPanTextView;
     private TextView cardNameTextView;
 
-    private CameraAdapter<TrackedCameraImage> cameraAdapter;
+    private CameraAdapter<TrackedImage> cameraAdapter;
 
     private CardScanFlow cardScanFlow;
 

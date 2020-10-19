@@ -467,18 +467,67 @@ abstract class UpdatingModelWebFetcher(private val context: Context) : SignedUrl
     /**
      * If a file in the cache directory matches the provided [hash], return it.
      */
-    private suspend fun getMatchingFile(hash: String, hashAlgorithm: String): File? = withContext(Dispatchers.IO) {
-        getCacheFolder()
-            .listFiles()
-            ?.sortedByDescending { it.lastModified() }
-            ?.firstOrNull { calculateHash(it, hashAlgorithm) == hash }
-    }
+    private suspend fun getMatchingFile(hash: String, hashAlgorithm: String): File? =
+        withContext(Dispatchers.IO) {
+            getCacheFolder()
+                .listFiles()
+                ?.sortedByDescending { it.lastModified() }
+                ?.firstOrNull { calculateHash(it, hashAlgorithm) == hash }
+        }
 
     /**
-     * Get the most recently created file in the cache folder. Return null if no files in this
+     * Get the highest model version, or most recently created file in the cache folder. Return null
+     * if no files in cache
      */
-    private suspend fun getLatestFile() = withContext(Dispatchers.IO) {
-        getCacheFolder().listFiles()?.maxByOrNull { it.lastModified() }
+    private suspend fun getLatestFile(): File? = withContext(Dispatchers.IO) {
+        val files = getCacheFolder()
+            .listFiles()
+            ?.filter { it.exists() && it.length() > 0 }
+
+        files
+            ?.filter { it.name.startsWith("1.") }
+            ?.mapNotNull { file -> ModelVersion.fromString(file.name)?.let { it to file } }
+            ?.maxByOrNull { it.first }
+            ?.second ?: files?.maxByOrNull { it.lastModified() }
+    }
+
+    data class ModelVersion(
+        val versioningVersion: Int,
+        val frameworkVersion: Int,
+        val modelNumber: Int,
+        val quantization: Int,
+    ) : Comparable<ModelVersion> {
+        override fun compareTo(other: ModelVersion): Int {
+            val versioningDiff = versioningVersion.compareTo(other.versioningVersion)
+            val frameworkDiff = frameworkVersion.compareTo(other.frameworkVersion)
+            val modelDiff = modelNumber.compareTo(other.modelNumber)
+
+            return when {
+                versioningDiff != 0 -> versioningDiff
+                frameworkDiff != 0 -> frameworkDiff
+                modelDiff != 0 -> modelDiff
+                else -> 0
+            }
+        }
+
+        companion object {
+            fun fromString(modelVersion: String): ModelVersion? {
+                val components = modelVersion.split("\\.").mapNotNull {
+                    try { it.toInt() } catch (t: Throwable) { null }
+                }
+
+                if (components.size != 4) {
+                    return null
+                }
+
+                return ModelVersion(
+                    components[0],
+                    components[1],
+                    components[2],
+                    components[3],
+                )
+            }
+        }
     }
 
     /**

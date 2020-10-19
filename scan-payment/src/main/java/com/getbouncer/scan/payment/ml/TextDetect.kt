@@ -7,7 +7,7 @@ import android.util.Log
 import android.util.Size
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.FetchedData
-import com.getbouncer.scan.framework.TrackedCameraImage
+import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.framework.UpdatingModelWebFetcher
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
@@ -74,7 +74,7 @@ class TextDetect private constructor(interpreter: Interpreter) :
         Map<Int, Array<Array<Array<FloatArray>>>>>(interpreter) {
 
     data class Input(
-        val fullImage: TrackedCameraImage,
+        val fullImage: TrackedImage,
         val previewSize: Size,
         val cardFinder: Rect
     )

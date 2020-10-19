@@ -4,7 +4,7 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.test.filters.MediumTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.getbouncer.scan.framework.Stats
-import com.getbouncer.scan.framework.TrackedCameraImage
+import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.framework.util.toRect
 import com.getbouncer.scan.payment.size
 import com.getbouncer.scan.payment.test.R
@@ -31,7 +31,7 @@ class SSDOcrTest {
         val model = SSDOcr.Factory(appContext, SSDOcr.ModelFetcher(appContext).fetchData(false)).newInstance()
         assertNotNull(model)
 
-        val prediction = model.analyze(SSDOcr.Input(TrackedCameraImage(bitmap, Stats.trackTask("no_op")), bitmap.size(), bitmap.size().toRect()), Unit)
+        val prediction = model.analyze(SSDOcr.Input(TrackedImage(bitmap, Stats.trackTask("no_op")), bitmap.size(), bitmap.size().toRect()), Unit)
         assertNotNull(prediction)
         assertEquals("4557095462268383", prediction.pan)
     }
@@ -50,8 +50,8 @@ class SSDOcrTest {
         val model = SSDOcr.Factory(appContext, SSDOcr.ModelFetcher(appContext).fetchData(false)).newInstance()
         assertNotNull(model)
 
-        val prediction1 = model.analyze(SSDOcr.Input(TrackedCameraImage(bitmap, Stats.trackTask("no_op")), bitmap.size(), bitmap.size().toRect()), Unit)
-        val prediction2 = model.analyze(SSDOcr.Input(TrackedCameraImage(bitmap, Stats.trackTask("no_op")), bitmap.size(), bitmap.size().toRect()), Unit)
+        val prediction1 = model.analyze(SSDOcr.Input(TrackedImage(bitmap, Stats.trackTask("no_op")), bitmap.size(), bitmap.size().toRect()), Unit)
+        val prediction2 = model.analyze(SSDOcr.Input(TrackedImage(bitmap, Stats.trackTask("no_op")), bitmap.size(), bitmap.size().toRect()), Unit)
         assertNotNull(prediction1)
         assertEquals("4557095462268383", prediction1.pan)
 

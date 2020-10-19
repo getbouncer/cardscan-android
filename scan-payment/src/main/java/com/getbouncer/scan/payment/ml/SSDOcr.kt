@@ -4,7 +4,7 @@ import android.content.Context
 import android.graphics.Rect
 import android.util.Size
 import com.getbouncer.scan.framework.FetchedData
-import com.getbouncer.scan.framework.TrackedCameraImage
+import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.framework.UpdatingResourceFetcher
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
@@ -94,7 +94,7 @@ private val PRIORS = combinePriors()
 class SSDOcr private constructor(interpreter: Interpreter) :
     TensorFlowLiteAnalyzer<SSDOcr.Input, Array<ByteBuffer>, SSDOcr.Prediction, Map<Int, Array<FloatArray>>>(interpreter) {
 
-    data class Input(val fullImage: TrackedCameraImage, val previewSize: Size, val cardFinder: Rect)
+    data class Input(val fullImage: TrackedImage, val previewSize: Size, val cardFinder: Rect)
 
     data class Prediction(val pan: String, val detectedBoxes: List<DetectionBox>)
 
@@ -110,7 +110,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
          *    fullImage's
          * 3. the fullImage and the previewImage have the same orientation
          */
-        fun cropImage(input: Input): TrackedCameraImage {
+        fun cropImage(input: Input): TrackedImage {
             require(
                 input.cardFinder.left >= 0 &&
                     input.cardFinder.right <= input.previewSize.width &&
@@ -127,7 +127,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
                 )
                 .intersectionWith(input.fullImage.image.size().toRect())
 
-            return TrackedCameraImage(
+            return TrackedImage(
                 image = input.fullImage.image.crop(projectedViewFinder),
                 tracker = input.fullImage.tracker,
             )

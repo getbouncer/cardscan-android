@@ -5,7 +5,7 @@ import android.graphics.Rect
 import android.graphics.RectF
 import android.util.Size
 import com.getbouncer.scan.framework.FetchedData
-import com.getbouncer.scan.framework.TrackedCameraImage
+import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.framework.UpdatingModelWebFetcher
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
@@ -38,7 +38,7 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
         ExpiryDetect.Prediction,
         Array<Array<Array<FloatArray>>>>(interpreter) {
 
-    data class Input(val image: TrackedCameraImage, val expiryBox: RectF)
+    data class Input(val image: TrackedImage, val expiryBox: RectF)
 
     data class Prediction(val expiry: Expiry?)
 

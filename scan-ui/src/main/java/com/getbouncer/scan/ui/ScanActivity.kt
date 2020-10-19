@@ -23,7 +23,7 @@ import com.getbouncer.scan.camera.camera1.Camera1Adapter
 import com.getbouncer.scan.camera.camera2.Camera2Adapter
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.Stats
-import com.getbouncer.scan.framework.TrackedCameraImage
+import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.framework.api.ERROR_CODE_NOT_AUTHENTICATED
 import com.getbouncer.scan.framework.api.NetworkResult
 import com.getbouncer.scan.framework.api.dto.ScanStatistics
@@ -392,7 +392,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     /**
      * Generate a camera adapter
      */
-    protected open fun buildCameraAdapter(): CameraAdapter<TrackedCameraImage> = when (cameraApi) {
+    protected open fun buildCameraAdapter(): CameraAdapter<TrackedImage> = when (cameraApi) {
         is CameraApi.Camera2 -> {
             Camera2Adapter(
                 activity = this,
@@ -420,7 +420,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     /**
      * A stream of images from the camera is available to be processed.
      */
-    protected abstract fun onCameraStreamAvailable(cameraStream: Flow<TrackedCameraImage>)
+    protected abstract fun onCameraStreamAvailable(cameraStream: Flow<TrackedImage>)
 
     /**
      * The API key was invalid.
