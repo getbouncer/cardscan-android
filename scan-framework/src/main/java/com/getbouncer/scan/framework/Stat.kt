@@ -7,6 +7,7 @@ import com.getbouncer.scan.framework.time.ClockMark
 import com.getbouncer.scan.framework.time.Duration
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.UUID
@@ -147,7 +148,11 @@ object Stats {
 
     @JvmStatic
     @CheckResult
-    fun getRepeatingTasks() = repeatingTasks.toMap().mapValues { entry -> entry.value.toMap() }
+    fun getRepeatingTasks() = runBlocking {
+        repeatingTaskMutex.withLock {
+            repeatingTasks.toMap().mapValues { entry -> entry.value.toMap() }
+        }
+    }
 
     @JvmStatic
     @CheckResult
