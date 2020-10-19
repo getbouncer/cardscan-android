@@ -77,8 +77,9 @@ class Loader(private val context: Context) {
 /**
  * Read a [File] into a [ByteBuffer].
  */
-private suspend fun readFileToByteBuffer(file: File) =
-    withContext(Dispatchers.IO) { FileInputStream(file).use { readFileToByteBuffer(it, 0, file.length()) } }
+private suspend fun readFileToByteBuffer(file: File) = withContext(Dispatchers.IO) {
+    FileInputStream(file).use { readFileToByteBuffer(it, 0, file.length()) }
+}
 
 /**
  * Read a raw resource into a [ByteBuffer].

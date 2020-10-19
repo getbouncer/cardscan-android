@@ -26,7 +26,7 @@ import com.getbouncer.scan.camera.rotate
 import com.getbouncer.scan.camera.toBitmap
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.Stats
-import com.getbouncer.scan.framework.TrackedCameraImage
+import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.framework.time.milliseconds
 import com.getbouncer.scan.framework.util.retry
 import kotlinx.coroutines.CoroutineScope
@@ -53,7 +53,7 @@ class Camera1Adapter(
     private val minimumResolution: Size,
     private val cameraErrorListener: CameraErrorListener,
     private val coroutineScope: CoroutineScope,
-) : CameraAdapter<TrackedCameraImage>(), PreviewCallback {
+) : CameraAdapter<TrackedImage>(), PreviewCallback {
 
     private var mCamera: Camera? = null
     private var cameraPreview: CameraPreview? = null
@@ -114,7 +114,7 @@ class Camera1Adapter(
         if (bytes != null) {
             try {
                 sendImageToStream(
-                    TrackedCameraImage(
+                    TrackedImage(
                         image = bytes
                             .nv21ToYuv(imageWidth, imageHeight)
                             .toBitmap()

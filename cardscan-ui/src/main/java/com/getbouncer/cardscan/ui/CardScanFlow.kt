@@ -15,7 +15,7 @@ import com.getbouncer.scan.framework.AnalyzerLoopErrorListener
 import com.getbouncer.scan.framework.AnalyzerPool
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.ProcessBoundAnalyzerLoop
-import com.getbouncer.scan.framework.TrackedCameraImage
+import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.framework.time.Duration
 import com.getbouncer.scan.framework.time.Rate
 import com.getbouncer.scan.framework.util.cacheFirstResultSuspend
@@ -126,7 +126,7 @@ class CardScanFlow(
      */
     override fun startFlow(
         context: Context,
-        imageStream: Flow<TrackedCameraImage>,
+        imageStream: Flow<TrackedImage>,
         previewSize: Size,
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,
@@ -268,7 +268,7 @@ class CardScanFlow(
 
     private fun runOcrMainLoop(
         context: Context,
-        imageStream: Flow<TrackedCameraImage>,
+        imageStream: Flow<TrackedImage>,
         previewSize: Size,
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,
@@ -315,7 +315,7 @@ class CardScanFlow(
 
     private fun runNameExpiryMainLoop(
         context: Context,
-        imageStream: Flow<TrackedCameraImage>,
+        imageStream: Flow<TrackedImage>,
         previewSize: Size,
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,

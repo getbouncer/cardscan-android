@@ -4,7 +4,7 @@ import android.content.Context
 import android.graphics.Rect
 import android.util.Size
 import androidx.lifecycle.LifecycleOwner
-import com.getbouncer.scan.framework.TrackedCameraImage
+import com.getbouncer.scan.framework.TrackedImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
@@ -26,7 +26,7 @@ interface ScanFlow {
      */
     fun startFlow(
         context: Context,
-        imageStream: Flow<TrackedCameraImage>,
+        imageStream: Flow<TrackedImage>,
         previewSize: Size,
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,
