@@ -37,8 +37,8 @@ class NameAndExpiryAnalyzer<State> private constructor(
     private val textDetect: TextDetect?,
     private val alphabetDetect: AlphabetDetect?,
     private val expiryDetect: ExpiryDetect?,
-    private val runNameExtraction: Boolean,
-    private val runExpiryExtraction: Boolean,
+    val runNameExtraction: Boolean,
+    val runExpiryExtraction: Boolean,
 ) : Analyzer<SSDOcr.Input, State, NameAndExpiryAnalyzer.Prediction> {
 
     data class Prediction(

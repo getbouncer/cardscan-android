@@ -1,10 +1,10 @@
 package com.getbouncer.cardscan.ui.analyzer
 
-import com.getbouncer.cardverify.ui.base.result.MainLoopState
+import com.getbouncer.cardscan.ui.result.MainLoopState
 import com.getbouncer.scan.framework.Analyzer
 import com.getbouncer.scan.framework.AnalyzerFactory
+import com.getbouncer.scan.payment.ml.CardDetect
 import com.getbouncer.scan.payment.ml.SSDOcr
-import com.getbouncer.scan.payment.verify.ml.CardDetect
 import kotlinx.coroutines.async
 import kotlinx.coroutines.supervisorScope
 

@@ -3,16 +3,40 @@ package com.getbouncer.cardscan.ui
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.os.Parcelable
 import android.util.Log
+import android.view.Gravity
 import android.view.View
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.view.size
 import androidx.fragment.app.Fragment
+import com.getbouncer.cardscan.ui.analyzer.CompletionLoopAnalyzer
+import com.getbouncer.cardscan.ui.result.CompletionLoopListener
+import com.getbouncer.cardscan.ui.result.CompletionLoopResult
+import com.getbouncer.cardscan.ui.result.MainLoopAggregator
 import com.getbouncer.scan.framework.AggregateResultListener
 import com.getbouncer.scan.framework.AnalyzerLoopErrorListener
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.Stats
+import com.getbouncer.scan.framework.util.size
+import com.getbouncer.scan.payment.card.getCardIssuer
+import com.getbouncer.scan.payment.card.isValidExpiry
+import com.getbouncer.scan.payment.ml.ssd.cropImageForObjectDetect
+import com.getbouncer.scan.ui.util.asRect
+import com.getbouncer.scan.ui.util.fadeIn
+import com.getbouncer.scan.ui.util.getColorByRes
+import com.getbouncer.scan.ui.util.hide
+import com.getbouncer.scan.ui.util.setTextSizeByRes
+import com.getbouncer.scan.ui.util.setVisible
+import kotlinx.android.parcel.Parcelize
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 interface CardScanActivityResultHandler {
     /**
@@ -46,9 +70,30 @@ interface CardScanActivityResultHandler {
     fun canceledUnknown(scanId: String?)
 }
 
+@Parcelize
+data class CardScanActivityResult(
+    val pan: String?,
+    val expiryDay: String?,
+    val expiryMonth: String?,
+    val expiryYear: String?,
+    val networkName: String?,
+    val cvc: String?,
+    val cardholderName: String?,
+    val errorString: String?,
+) : Parcelable
+
+interface CardProcessedResultListener : CardScanResultListener {
+
+    /**
+     * A payment card was successfully scanned.
+     */
+    fun cardProcessed(scanResult: CardScanActivityResult)
+}
+
 open class CardScanActivity :
     CardScanBaseActivity(),
-    AggregateResultListener<CardScanFlow.InterimResult, CardScanFlow.FinalResult>,
+    AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult>,
+    CompletionLoopListener,
     AnalyzerLoopErrorListener {
 
     companion object {
@@ -240,6 +285,113 @@ open class CardScanActivity :
      */
     protected open val processingTextView by lazy { TextView(this) }
 
+    /**
+     * The image view for debugging the completion loop
+     */
+    protected open val debugCompletionImageView by lazy { ImageView(this) }
+
+    override fun addUiComponents() {
+        super.addUiComponents()
+        appendUiComponents(processingOverlayView, processingSpinnerView, processingTextView, debugCompletionImageView)
+    }
+
+    override fun setupUiComponents() {
+        super.setupUiComponents()
+
+        setupProcessingOverlayViewUi()
+        setupProcessingTextViewUi()
+        setupDebugCompletionViewUi()
+    }
+
+    protected open fun setupProcessingOverlayViewUi() {
+        processingOverlayView.setBackgroundColor(getColorByRes(R.color.bouncerProcessingBackground))
+    }
+
+    protected open fun setupProcessingTextViewUi() {
+        processingTextView.text = getString(R.string.bouncer_processing_card)
+        processingTextView.setTextSizeByRes(R.dimen.bouncerProcessingTextSize)
+        processingTextView.setTextColor(getColorByRes(R.color.bouncerProcessingText))
+        processingTextView.gravity = Gravity.CENTER
+    }
+
+    protected open fun setupDebugCompletionViewUi() {
+        debugCompletionImageView.contentDescription = getString(R.string.bouncer_debug_description)
+        debugCompletionImageView.setVisible(Config.isDebug)
+    }
+
+    override fun setupUiConstraints() {
+        super.setupUiConstraints()
+
+        setupProcessingOverlayViewConstraints()
+        setupProcessingSpinnerViewConstraints()
+        setupProcessingTextViewConstraints()
+        setupDebugCompletionViewConstraints()
+    }
+
+    protected open fun setupProcessingOverlayViewConstraints() {
+        processingOverlayView.layoutParams = ConstraintLayout.LayoutParams(
+            ConstraintLayout.LayoutParams.MATCH_PARENT, // width
+            ConstraintLayout.LayoutParams.MATCH_PARENT, // height
+        )
+
+        processingOverlayView.constrainToParent()
+    }
+
+    protected open fun setupProcessingSpinnerViewConstraints() {
+        processingSpinnerView.layoutParams = ConstraintLayout.LayoutParams(
+            ConstraintLayout.LayoutParams.WRAP_CONTENT, // width
+            ConstraintLayout.LayoutParams.WRAP_CONTENT, // height
+        )
+
+        processingSpinnerView.constrainToParent()
+    }
+
+    protected open fun setupProcessingTextViewConstraints() {
+        processingTextView.layoutParams = ConstraintLayout.LayoutParams(
+            0, // width
+            ConstraintLayout.LayoutParams.WRAP_CONTENT, // height
+        )
+
+        processingTextView.addConstraints {
+            connect(it.id, ConstraintSet.TOP, processingSpinnerView.id, ConstraintSet.BOTTOM)
+            connect(it.id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
+            connect(it.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
+        }
+    }
+
+    protected open fun setupDebugCompletionViewConstraints() {
+        debugCompletionImageView.layoutParams = ConstraintLayout.LayoutParams(
+            resources.getDimensionPixelSize(R.dimen.bouncerDebugWindowWidth), // width,
+            resources.getDimensionPixelSize(R.dimen.bouncerDebugWindowWidth), // height
+        )
+
+        debugCompletionImageView.addConstraints {
+            connect(it.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
+            connect(it.id, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
+        }
+    }
+
+    override fun displayState(newState: ScanState, previousState: ScanState?) {
+        super.displayState(newState, previousState)
+
+        when (newState) {
+            is ScanState.NotFound, ScanState.FoundShort, ScanState.FoundLong, ScanState.Wrong -> {
+                processingOverlayView.hide()
+                processingSpinnerView.hide()
+                processingTextView.hide()
+            }
+            is ScanState.Correct -> {
+                processingOverlayView.fadeIn()
+                processingSpinnerView.fadeIn()
+                processingTextView.fadeIn()
+            }
+        }
+    }
+
+    override val scanFlow: CardScanFlow by lazy {
+        CardScanFlow(enableNameExtraction, enableExpiryExtraction, this, this, this)
+    }
+
     override val enableEnterCardManually: Boolean by lazy {
         intent.getBooleanExtra(PARAM_ENABLE_ENTER_MANUALLY, false)
     }
@@ -252,13 +404,33 @@ open class CardScanActivity :
         intent.getBooleanExtra(PARAM_ENABLE_EXPIRY_EXTRACTION, false)
     }
 
-    override val resultListener = object : CardScanResultListener {
-        override fun cardScanned(scanResult: CardScanActivityResult) {
+    private var pan: String? = null
+
+    override val resultListener = object : CardProcessedResultListener {
+        override fun cardProcessed(scanResult: CardScanActivityResult) {
             val intent = Intent()
                 .putExtra(RESULT_SCANNED_CARD, scanResult)
                 .putExtra(RESULT_INSTANCE_ID, Stats.instanceId)
                 .putExtra(RESULT_SCAN_ID, Stats.scanId)
             setResult(Activity.RESULT_OK, intent)
+        }
+
+        override fun cardScanned(
+            pan: String?,
+            frames: Collection<SavedFrame>,
+            isFastDevice: Boolean
+        ) {
+            cameraAdapter.unbindFromLifecycle(this@CardScanActivity)
+            this@CardScanActivity.pan = pan
+
+            launch(Dispatchers.Default) {
+                scanFlow.launchCompletionLoop(
+                    context = this@CardScanActivity,
+                    savedFrames = frames,
+                    isFastDevice = isFastDevice,
+                    coroutineScope = this@CardScanActivity,
+                )
+            }
         }
 
         override fun enterManually() {
@@ -293,4 +465,42 @@ open class CardScanActivity :
             setResult(Activity.RESULT_CANCELED, intent)
         }
     }
+
+    override fun onCompletionLoopDone(result: CompletionLoopResult) = launch(Dispatchers.Main) {
+        scanStat.trackResult("card_scanned")
+
+        // Only show the expiry dates that are not expired
+        val (expiryMonth, expiryYear) = if (isValidExpiry(null, result.expiryMonth ?: "", result.expiryYear ?: "")) {
+            (result.expiryMonth to result.expiryYear)
+        } else {
+            (null to null)
+        }
+
+        resultListener.cardProcessed(
+            scanResult = CardScanActivityResult(
+                pan = pan,
+                expiryDay = null,
+                expiryMonth = expiryMonth,
+                expiryYear = expiryYear,
+                networkName = getCardIssuer(pan).displayName,
+                cvc = null,
+                cardholderName = result.name,
+                errorString = result.errorString,
+            )
+        )
+
+        closeScanner()
+    }.let { Unit }
+
+    override fun onCompletionLoopFrameProcessed(
+        result: CompletionLoopAnalyzer.Prediction,
+        frame: SavedFrame,
+    ) = launch(Dispatchers.Main) {
+        if (Config.isDebug) {
+            val bitmap = withContext(Dispatchers.Default) {
+                cropImageForObjectDetect(frame.frame.fullImage.image, previewFrame.asRect().size(), viewFinderWindowView.asRect())
+            }
+            debugCompletionImageView.setImageBitmap(bitmap)
+        }
+    }.let { Unit }
 }

@@ -1,7 +1,6 @@
 package com.getbouncer.cardscan.ui.result
 
 import androidx.test.filters.LargeTest
-import com.getbouncer.cardscan.ui.analyzer.MainLoopNameExpiryAnalyzer
 import com.getbouncer.scan.framework.time.max
 import com.getbouncer.scan.payment.ml.ExpiryDetect
 import kotlinx.coroutines.ExperimentalCoroutinesApi

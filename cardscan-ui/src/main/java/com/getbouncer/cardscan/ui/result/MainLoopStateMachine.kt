@@ -1,11 +1,10 @@
 package com.getbouncer.cardscan.ui.result
 
 import androidx.annotation.VisibleForTesting
-import com.getbouncer.cardverify.ui.base.analyzer.MainLoopAnalyzer
+import com.getbouncer.cardscan.ui.analyzer.MainLoopAnalyzer
 import com.getbouncer.scan.framework.MachineState
 import com.getbouncer.scan.framework.time.seconds
 import com.getbouncer.scan.framework.util.ItemTotalCounter
-import com.getbouncer.scan.payment.card.RequiresMatchingCard
 import com.getbouncer.scan.payment.card.isValidPan
 
 @VisibleForTesting
@@ -23,9 +22,6 @@ internal val MINIMUM_PAN_AGREEMENT = 2
 @VisibleForTesting
 internal val DESIRED_SIDE_COUNT = 8
 
-@VisibleForTesting
-internal val WRONG_CARD_DURATION = 2.seconds
-
 sealed class MainLoopState(
     val runOcr: Boolean,
     val runCardDetect: Boolean,
@@ -35,24 +31,12 @@ sealed class MainLoopState(
         transition: MainLoopAnalyzer.Prediction,
     ): MainLoopState
 
-    class Initial(
-        override val requiredIin: String?,
-        override val requiredLastFour: String?,
-    ) : MainLoopState(runOcr = true, runCardDetect = false),
-        RequiresMatchingCard {
+    class Initial : MainLoopState(runOcr = true, runCardDetect = false) {
         override suspend fun consumeTransition(
             transition: MainLoopAnalyzer.Prediction,
         ): MainLoopState = when {
-            doesNotMatchRequiredCard(transition.ocr?.pan) ->
-                WrongPanFound(
-                    pan = transition.ocr?.pan ?: "",
-                    requiredIin = requiredIin,
-                    requiredLastFour = requiredLastFour,
-                )
             isValidPan(transition.ocr?.pan) ->
-                PanFound(
-                    panCounter = ItemTotalCounter(transition.ocr?.pan ?: ""),
-                )
+                PanFound(ItemTotalCounter(transition.ocr?.pan ?: ""))
             else -> this
         }
     }
@@ -134,31 +118,6 @@ sealed class MainLoopState(
                     Finished(getMostLikelyPan() ?: "")
                 else -> this
             }
-        }
-    }
-
-    class WrongPanFound(
-        val pan: String,
-        override val requiredIin: String?,
-        override val requiredLastFour: String?,
-    ) : MainLoopState(runOcr = true, runCardDetect = false), RequiresMatchingCard {
-        override suspend fun consumeTransition(
-            transition: MainLoopAnalyzer.Prediction,
-        ): MainLoopState = when {
-            doesNotMatchRequiredCard(transition.ocr?.pan) ->
-                WrongPanFound(
-                    pan = transition.ocr?.pan ?: "",
-                    requiredIin = requiredIin,
-                    requiredLastFour = requiredLastFour,
-                )
-            isValidPan(transition.ocr?.pan) ->
-                PanFound(ItemTotalCounter(transition.ocr?.pan ?: ""))
-            reachedStateAt.elapsedSince() >= WRONG_CARD_DURATION ->
-                Initial(
-                    requiredIin = requiredIin,
-                    requiredLastFour = requiredLastFour,
-                )
-            else -> this
         }
     }
 

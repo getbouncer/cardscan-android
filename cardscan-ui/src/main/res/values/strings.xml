@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="bouncer_processing_card">Processing, please wait</string>
+
     <string name="bouncer_enter_card_manually" description="Text shown at the bottom of the screen offering for the user to type in card details manually">Enter card manually</string>
 
     <string name="bouncer_name_and_expiry_initialization_error" description="Title of the dialog shown to the user when attempting to extract name and expiry from a card when models have not been warmed up">Config Problem</string>

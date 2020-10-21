@@ -2,20 +2,17 @@ package com.getbouncer.cardscan.ui.result
 
 import android.util.Log
 import androidx.annotation.Keep
-import com.getbouncer.cardverify.ui.base.SavedFrame
-import com.getbouncer.cardverify.ui.base.SavedFrameType
-import com.getbouncer.cardverify.ui.base.analyzer.MainLoopAnalyzer
+import com.getbouncer.cardscan.ui.SavedFrame
+import com.getbouncer.cardscan.ui.SavedFrameType
+import com.getbouncer.cardscan.ui.analyzer.MainLoopAnalyzer
 import com.getbouncer.scan.framework.AggregateResultListener
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.ResultAggregator
 import com.getbouncer.scan.framework.time.Rate
 import com.getbouncer.scan.framework.util.FrameSaver
-import com.getbouncer.scan.payment.card.RequiresMatchingCard
-import com.getbouncer.scan.payment.card.isValidIin
+import com.getbouncer.scan.payment.FrameDetails
 import com.getbouncer.scan.payment.card.isValidPan
-import com.getbouncer.scan.payment.card.isValidPanLastFour
 import com.getbouncer.scan.payment.ml.SSDOcr
-import com.getbouncer.scan.payment.verify.FrameDetails
 import kotlinx.coroutines.runBlocking
 
 private const val MAX_SAVED_FRAMES_PER_TYPE = 6
@@ -29,20 +26,14 @@ private const val MAX_SAVED_FRAMES_PER_TYPE = 6
  */
 class MainLoopAggregator(
     listener: AggregateResultListener<InterimResult, FinalResult>,
-    override val requiredIin: String?,
-    override val requiredLastFour: String?,
-) : RequiresMatchingCard,
-    ResultAggregator<SSDOcr.Input, MainLoopState, MainLoopAnalyzer.Prediction, MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult>(
+) : ResultAggregator<SSDOcr.Input, MainLoopState, MainLoopAnalyzer.Prediction, MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult>(
         listener = listener,
-        initialState = MainLoopState.Initial(
-            requiredIin = requiredIin,
-            requiredLastFour = requiredLastFour,
-        )
+        initialState = MainLoopState.Initial()
     ) {
 
     @Keep
     data class FinalResult(
-        val pan: String?,
+        val pan: String,
         val savedFrames: Map<SavedFrameType, List<SavedFrame>>,
         val averageFrameRate: Rate,
     )
@@ -54,17 +45,12 @@ class MainLoopAggregator(
         val state: MainLoopState,
     )
 
-    init {
-        require(requiredIin == null || isValidIin(requiredIin)) { "Invalid required iin" }
-        require(requiredLastFour == null || isValidPanLastFour(requiredLastFour)) { "Invalid last four" }
-    }
-
     private val frameSaver = object : FrameSaver<SavedFrameType, SavedFrame, InterimResult>() {
         override fun getMaxSavedFrames(savedFrameIdentifier: SavedFrameType): Int =
             MAX_SAVED_FRAMES_PER_TYPE
         override fun getSaveFrameIdentifier(frame: SavedFrame, metaData: InterimResult): SavedFrameType? {
             val hasCard = metaData.analyzerResult.isCardVisible == true
-            val hasPan = matchesRequiredCard(metaData.analyzerResult.ocr?.pan)
+            val hasPan = isValidPan(metaData.analyzerResult.ocr?.pan)
             return if (hasCard || hasPan) SavedFrameType(hasCard = hasCard, hasPan = hasPan) else null
         }
     }
@@ -89,7 +75,6 @@ class MainLoopAggregator(
             is MainLoopState.PanFound -> currentState.getMostLikelyPan()
             is MainLoopState.PanSatisfied -> currentState.pan
             is MainLoopState.CardSatisfied -> currentState.getMostLikelyPan()
-            is MainLoopState.WrongPanFound -> currentState.pan
             is MainLoopState.Finished -> currentState.pan
         }
 
