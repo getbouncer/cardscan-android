@@ -4,6 +4,9 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import android.view.View
+import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import com.getbouncer.scan.framework.AggregateResultListener
@@ -221,6 +224,21 @@ open class CardScanActivity :
                 .show()
         }
     }
+
+    /**
+     * And overlay to darken the screen during result processing.
+     */
+    protected open val processingOverlayView by lazy { View(this) }
+
+    /**
+     * The spinner indicating that results are processing.
+     */
+    protected open val processingSpinnerView by lazy { ProgressBar(this) }
+
+    /**
+     * The text indicating that results are processing
+     */
+    protected open val processingTextView by lazy { TextView(this) }
 
     override val enableEnterCardManually: Boolean by lazy {
         intent.getBooleanExtra(PARAM_ENABLE_ENTER_MANUALLY, false)
