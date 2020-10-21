@@ -76,11 +76,11 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
     private FrameLayout viewFinderWindow;
     private ViewFinderBackground viewFinderBackground;
     private ImageView viewFinderBorder;
+    private View processingOverlay;
 
     private ImageView flashButtonView;
 
     private TextView cardPanTextView;
-    private TextView cardNameTextView;
 
     private CameraAdapter<TrackedImage> cameraAdapter;
 
@@ -130,12 +130,12 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
         viewFinderWindow = findViewById(R.id.viewFinderWindow);
         viewFinderBackground = findViewById(R.id.viewFinderBackground);
         viewFinderBorder = findViewById(R.id.viewFinderBorder);
+        processingOverlay = findViewById(R.id.processing_overlay);
 
         flashButtonView = findViewById(R.id.flashButtonView);
         ImageView closeButtonView = findViewById(R.id.closeButtonView);
 
         cardPanTextView = findViewById(R.id.cardPanTextView);
-        cardNameTextView = findViewById(R.id.cardNameTextView);
 
         closeButtonView.setOnClickListener(v -> userCancelScan());
         flashButtonView.setOnClickListener(v -> setFlashlightState(!cameraAdapter.isTorchOn()));
@@ -512,6 +512,7 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
         if (scanState == State.FOUND) return;
         ViewExtensionsKt.startAnimation(viewFinderBorder,
             R.drawable.bouncer_card_border_found_long);
+        ViewExtensionsKt.hide(processingOverlay);
         scanState = State.FOUND;
     }
 
@@ -522,7 +523,7 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
         if (scanState == State.NOT_FOUND) return;
         ViewExtensionsKt.startAnimation(viewFinderBorder, R.drawable.bouncer_card_border_not_found);
         ViewExtensionsKt.hide(cardPanTextView);
-        ViewExtensionsKt.hide(cardNameTextView);
+        ViewExtensionsKt.hide(processingOverlay);
         scanState = State.NOT_FOUND;
     }
 
@@ -532,6 +533,7 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
     private void setStateCorrect() {
         if (scanState == State.CORRECT) return;
         ViewExtensionsKt.startAnimation(viewFinderBorder, R.drawable.bouncer_card_border_correct);
+        ViewExtensionsKt.fadeIn(processingOverlay, null);
         scanState = State.CORRECT;
     }
 }
