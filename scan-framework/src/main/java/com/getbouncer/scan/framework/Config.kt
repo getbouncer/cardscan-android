@@ -64,6 +64,7 @@ object Config {
     /**
      * The frame rate of a device that is considered slow will be below this rate.
      */
+    @JvmStatic
     var slowDeviceFrameRate = Rate(2, 1.seconds)
 }
 

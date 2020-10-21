@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="bouncerProcessingTextSize">24sp</dimen>
+
     <dimen name="bouncerButtonMargin">24dp</dimen>
 
     <dimen name="bouncerEnterCardManuallyMargin" description="The minimum amount of space surrounding the Enter Card Mandually text at the bottom of the screen">16dp</dimen>
