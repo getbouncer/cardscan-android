@@ -240,7 +240,13 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
             });
 
             // Create and start a CardScanFlow which will handle the business logic of the scan
-            cardScanFlow = new CardScanFlow(true, true, aggregateResultListener, this, completionLoopListener);
+            cardScanFlow = new CardScanFlow(
+                true,
+                true,
+                aggregateResultListener,
+                this,
+                completionLoopListener
+            );
             cardScanFlow.startFlow(
                 this,
                 cameraAdapter.getImageStream(),
@@ -489,9 +495,12 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
             SingleActivityDemo.this.pan = result.getPan();
             cardScanFlow.launchCompletionLoop(
                 SingleActivityDemo.this,
-                cardScanFlow.selectCompletionLoopFrames(result.getAverageFrameRate(), result.getSavedFrames()),
+                cardScanFlow.selectCompletionLoopFrames(
+                    result.getAverageFrameRate(),
+                    result.getSavedFrames()
+                ),
                 result.getAverageFrameRate().compareTo(Config.getSlowDeviceFrameRate()) > 0,
-                    SingleActivityDemo.this
+                SingleActivityDemo.this
             );
         }
 

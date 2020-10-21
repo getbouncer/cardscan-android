@@ -27,9 +27,9 @@ private const val MAX_SAVED_FRAMES_PER_TYPE = 6
 class MainLoopAggregator(
     listener: AggregateResultListener<InterimResult, FinalResult>,
 ) : ResultAggregator<SSDOcr.Input, MainLoopState, MainLoopAnalyzer.Prediction, MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult>(
-        listener = listener,
-        initialState = MainLoopState.Initial()
-    ) {
+    listener = listener,
+    initialState = MainLoopState.Initial()
+) {
 
     @Keep
     data class FinalResult(

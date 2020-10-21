@@ -11,12 +11,12 @@ import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.util.indexOfMax
 import com.getbouncer.scan.framework.util.maxAspectRatioInSize
 import com.getbouncer.scan.framework.util.scaleAndCenterWithin
+import com.getbouncer.scan.payment.R
 import com.getbouncer.scan.payment.crop
 import com.getbouncer.scan.payment.hasOpenGl31
 import com.getbouncer.scan.payment.scale
 import com.getbouncer.scan.payment.size
 import com.getbouncer.scan.payment.toRGBByteBuffer
-import com.getbouncer.scan.payment.R
 import org.tensorflow.lite.Interpreter
 import java.nio.ByteBuffer
 import kotlin.math.max
