@@ -9,7 +9,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.0.2'
+        classpath 'com.android.tools.build:gradle:4.1.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.10"
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -45,7 +45,7 @@ allprojects {
         maven { url "https://plugins.gradle.org/m2/" }
     }
 
-    task checkstyle(type: Checkstyle) {
+    task checkJavaStyle(type: Checkstyle) {
         showViolations = true
         configFile file("../settings/checkstyle.xml")
         source 'src/main/java'
@@ -76,6 +76,6 @@ allprojects {
     }
 
     assemble.dependsOn('lint')
-    check.dependsOn checkstyle
+    check.dependsOn checkJavaStyle
     check.dependsOn ktlint
 }

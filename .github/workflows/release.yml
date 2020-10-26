@@ -90,7 +90,7 @@ jobs:
         run: ./gradlew ktlint
 
       - name: CheckStyle
-        run: ./gradlew checkstyle
+        run: ./gradlew checkJavaStyle
 
       - name: test
         run: ./gradlew test
