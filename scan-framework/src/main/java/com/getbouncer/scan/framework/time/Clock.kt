@@ -1,7 +1,6 @@
 package com.getbouncer.scan.framework.time
 
 import androidx.annotation.CheckResult
-import java.util.Date
 
 object Clock {
     @JvmStatic
