@@ -97,8 +97,8 @@ jobs:
 
       - name: upload to bintray
         run: |
-          ./gradlew scan-framework:bintrayUpload
-          ./gradlew scan-camera:bintrayUpload
-          ./gradlew scan-payment:bintrayUpload
-          ./gradlew scan-ui:bintrayUpload
-          ./gradlew cardscan-ui:bintrayUpload
+          ./gradlew scan-framework:bintrayUpload || ./gradlew scan-framework:bintrayUpload || ./gradlew scan-framework:bintrayUpload
+          ./gradlew scan-camera:bintrayUpload || ./gradlew scan-camera:bintrayUpload || ./gradlew scan-camera:bintrayUpload
+          ./gradlew scan-payment:bintrayUpload || ./gradlew scan-payment:bintrayUpload || ./gradlew scan-payment:bintrayUpload
+          ./gradlew scan-ui:bintrayUpload || ./gradlew scan-ui:bintrayUpload || ./gradlew scan-ui:bintrayUpload
+          ./gradlew cardscan-ui:bintrayUpload || ./gradlew cardscan-ui:bintrayUpload || ./gradlew cardscan-ui:bintrayUpload
