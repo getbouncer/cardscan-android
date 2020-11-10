@@ -1,7 +1,6 @@
 package com.getbouncer.scan.framework.time
 
 import androidx.annotation.CheckResult
-import java.util.Date
 
 object Clock {
     @JvmStatic
@@ -50,7 +49,7 @@ private class AbsoluteClockMark(private val millisecondsSinceEpoch: Long) : Cloc
     }
 
     override fun toString(): String {
-        return "AbsoluteClockMark(at ${Date(millisecondsSinceEpoch)})"
+        return "AbsoluteClockMark(at $millisecondsSinceEpoch ms since epoch})"
     }
 }
 
