@@ -6,8 +6,10 @@ import com.getbouncer.scan.framework.time.Clock
 import com.getbouncer.scan.framework.time.ClockMark
 import com.getbouncer.scan.framework.time.Duration
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.UUID
@@ -25,30 +27,14 @@ object Stats {
     private val taskMutex = Mutex()
     private val repeatingTaskMutex = Mutex()
 
-    suspend fun startScan() {
-        scanIdMutex.withLock {
-            if (scanId == null) {
+    fun startScan() {
+        runBlocking {
+            scanIdMutex.withLock {
+                if (scanId != null) {
+                    clearAllTasks()
+                }
                 scanId = UUID.randomUUID().toString()
             }
-        }
-    }
-
-    suspend fun finishScan() {
-        scanIdMutex.withLock {
-            scanId = null
-        }
-    }
-
-    /**
-     * Reset all tracked stats.
-     */
-    suspend fun resetStats() {
-        taskMutex.withLock {
-            tasks = mutableMapOf()
-        }
-
-        repeatingTaskMutex.withLock {
-            repeatingTasks = mutableMapOf()
         }
     }
 
@@ -148,15 +134,31 @@ object Stats {
 
     @JvmStatic
     @CheckResult
-    fun getRepeatingTasks() = runBlocking {
+    fun getAndClearRepeatingTasks() = runBlocking {
         repeatingTaskMutex.withLock {
-            repeatingTasks.toMap().mapValues { entry -> entry.value.toMap() }
+            val capturedTasks = repeatingTasks.toMap().mapValues { entry -> entry.value.toMap() }
+            repeatingTasks.clear()
+            capturedTasks
         }
     }
 
     @JvmStatic
     @CheckResult
-    fun getTasks() = tasks.toMap()
+    fun getAndClearTasks() = runBlocking {
+        taskMutex.withLock {
+            val capturedTasks = tasks.toMap()
+            tasks.clear()
+            capturedTasks
+        }
+    }
+
+    private suspend fun clearAllTasks() = supervisorScope {
+        val tasksAsync = async { taskMutex.withLock { tasks.clear() } }
+        val repeatingTasksAsync = async { repeatingTaskMutex.withLock { repeatingTasks.clear() } }
+
+        tasksAsync.await()
+        repeatingTasksAsync.await()
+    }
 }
 
 /**
