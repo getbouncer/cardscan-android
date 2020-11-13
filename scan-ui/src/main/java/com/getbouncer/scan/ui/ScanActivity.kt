@@ -36,7 +36,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlin.coroutines.CoroutineContext
 
 interface ScanResultListener {
@@ -117,7 +116,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        runBlocking { Stats.startScan() }
+        Stats.startScan()
 
         ensureValidApiKey()
 
@@ -330,8 +329,6 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
                 scanStatistics = ScanStatistics.fromStats(),
             )
         }
-        runBlocking { Stats.finishScan() }
-        runBlocking { Stats.resetStats() }
         finish()
     }
 

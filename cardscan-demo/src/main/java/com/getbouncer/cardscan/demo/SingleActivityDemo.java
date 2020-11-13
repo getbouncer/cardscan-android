@@ -226,7 +226,7 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
         // ensure the cameraPreview view has rendered.
         cameraPreview.post(() -> {
             // Track scan statistics for health check
-            Stats.INSTANCE.startScan(new EmptyJavaContinuation<>());
+            Stats.INSTANCE.startScan();
 
             // Tell the background where to draw a hole for the viewfinder window
             viewFinderBackground.setViewFinderRect(ViewExtensionsKt.asRect(viewFinderWindow));
@@ -335,7 +335,6 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
      * Close the scanner.
      */
     private void closeScanner() {
-        Stats.INSTANCE.finishScan(new EmptyJavaContinuation<>());
         setFlashlightState(false);
         scanCardButton.setVisibility(View.VISIBLE);
         scanView.setVisibility(View.GONE);
