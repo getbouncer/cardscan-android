@@ -2,10 +2,13 @@ package com.getbouncer.scan.ui
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.PointF
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.util.Size
 import android.view.View
@@ -23,6 +26,7 @@ import com.getbouncer.scan.camera.camera1.Camera1Adapter
 import com.getbouncer.scan.camera.camera2.Camera2Adapter
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.Stats
+import com.getbouncer.scan.framework.StorageFactory
 import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.framework.api.ERROR_CODE_NOT_AUTHENTICATED
 import com.getbouncer.scan.framework.api.NetworkResult
@@ -31,12 +35,15 @@ import com.getbouncer.scan.framework.api.uploadScanStats
 import com.getbouncer.scan.framework.api.validateApiKey
 import com.getbouncer.scan.framework.util.AppDetails
 import com.getbouncer.scan.framework.util.Device
+import com.getbouncer.scan.framework.util.getAppPackageName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
+
+const val PERMISSION_RATIONALE_SHOWN = "permission_rationale_shown"
 
 interface ScanResultListener {
 
@@ -113,6 +120,10 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      */
     protected open val cameraApi: CameraApi = CameraApi.Camera1
 
+    protected val storage by lazy {
+        StorageFactory.getStorageInstance(this, "scan_camera_permissions")
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -122,13 +133,6 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
 
         if (!CameraAdapter.isCameraSupported(this)) {
             showCameraNotSupportedDialog()
-        }
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            requestCameraPermission()
-        } else {
-            permissionStat.trackResult("already_granted")
-            prepareCamera { onCameraReady() }
         }
     }
 
@@ -140,9 +144,13 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
             delay(1500)
             hideSystemUi()
         }
+
+        if (!cameraAdapter.isBoundToLifecycle()) {
+            ensurePermissionAndStartCamera()
+        }
     }
 
-    private fun hideSystemUi() {
+    protected open fun hideSystemUi() {
         // Prevent screenshots and keep the screen on while scanning.
         window.setFlags(
             WindowManager.LayoutParams.FLAG_SECURE + WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
@@ -172,6 +180,19 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     }
 
     /**
+     * Ensure that the camera permission is available. If so, start the camera. If not, request it.
+     */
+    protected open fun ensurePermissionAndStartCamera() = when {
+        ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED -> {
+            permissionStat.trackResult("already_granted")
+            prepareCamera { onCameraReady() }
+        }
+        ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA) -> showPermissionRationaleDialog()
+        storage.getBoolean(PERMISSION_RATIONALE_SHOWN, false) -> showPermissionDeniedDialog()
+        else -> requestCameraPermission()
+    }
+
+    /**
      * Handle permission status changes. If the camera permission has been granted, start it. If
      * not, show a dialog.
      */
@@ -190,7 +211,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
                 }
                 else -> {
                     permissionStat.trackResult("denied")
-                    showPermissionDeniedDialog()
+                    userCancelScan()
                 }
             }
         }
@@ -210,45 +231,87 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     /**
      * Show an explanation dialog for why we are requesting camera permissions.
      */
-    protected open fun showPermissionDeniedDialog() {
+    protected open fun showPermissionRationaleDialog() {
         val builder = AlertDialog.Builder(this)
         builder.setMessage(R.string.bouncer_camera_permission_denied_message)
             .setPositiveButton(R.string.bouncer_camera_permission_denied_ok) { _, _ -> requestCameraPermission() }
-            .setNegativeButton(R.string.bouncer_camera_permission_denied_cancel) { _, _ -> prepareCamera { onCameraReady() } }
+        builder.show()
+        storage.storeValue(PERMISSION_RATIONALE_SHOWN, true)
+    }
+
+    /**
+     * Show an explanation dialog for why we are requesting camera permissions when the permission
+     * has been permanently denied.
+     */
+    protected open fun showPermissionDeniedDialog() {
+        val builder = AlertDialog.Builder(this)
+        builder.setMessage(R.string.bouncer_camera_permission_denied_message)
+            .setPositiveButton(R.string.bouncer_camera_permission_denied_ok) { _, _ ->
+                storage.storeValue(PERMISSION_RATIONALE_SHOWN, false)
+                openAppSettings()
+            }
+            .setNegativeButton(R.string.bouncer_camera_permission_denied_cancel) { _, _ -> userCancelScan() }
         builder.show()
     }
 
     /**
      * Request permission to use the camera.
      */
-    private fun requestCameraPermission() {
-        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), PERMISSION_REQUEST_CODE)
+    protected open fun requestCameraPermission() {
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.CAMERA),
+            PERMISSION_REQUEST_CODE,
+        )
+    }
+
+    /**
+     * Open the settings for this app
+     */
+    protected open fun openAppSettings() {
+        val intent = Intent()
+            .setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+            .setData(Uri.fromParts("package", getAppPackageName(this), null))
+        startActivity(intent)
     }
 
     /**
      * Validate the API key against the server. If it's invalid, close the scanner.
      */
-    private fun ensureValidApiKey() {
+    protected fun ensureValidApiKey() {
         if (Config.apiKey != null) {
             launch {
                 when (val apiKeyValidateResult = validateApiKey(this@ScanActivity)) {
                     is NetworkResult.Success -> {
                         if (!apiKeyValidateResult.body.isApiKeyValid) {
-                            Log.e(Config.logTag, "API key is invalid: ${apiKeyValidateResult.body.keyInvalidReason}")
+                            Log.e(
+                                Config.logTag,
+                                "API key is invalid: ${apiKeyValidateResult.body.keyInvalidReason}"
+                            )
                             onInvalidApiKey()
                             showApiKeyInvalidError()
                         }
                     }
                     is NetworkResult.Error -> {
                         if (apiKeyValidateResult.error.errorCode == ERROR_CODE_NOT_AUTHENTICATED) {
-                            Log.e(Config.logTag, "API key is invalid: ${apiKeyValidateResult.error.errorMessage}")
+                            Log.e(
+                                Config.logTag,
+                                "API key is invalid: ${apiKeyValidateResult.error.errorMessage}"
+                            )
                             onInvalidApiKey()
                             showApiKeyInvalidError()
                         } else {
-                            Log.w(Config.logTag, "Unable to validate API key: ${apiKeyValidateResult.error.errorMessage}")
+                            Log.w(
+                                Config.logTag,
+                                "Unable to validate API key: ${apiKeyValidateResult.error.errorMessage}"
+                            )
                         }
                     }
-                    is NetworkResult.Exception -> Log.w(Config.logTag, "Unable to validate API key", apiKeyValidateResult.exception)
+                    is NetworkResult.Exception -> Log.w(
+                        Config.logTag,
+                        "Unable to validate API key",
+                        apiKeyValidateResult.exception
+                    )
                 }
             }
         }
@@ -357,7 +420,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      */
     protected abstract fun prepareCamera(onCameraReady: () -> Unit)
 
-    private fun onCameraReady() {
+    protected open fun onCameraReady() {
         cameraAdapter.bindToLifecycle(this)
 
         val stat = Stats.trackTask("torch_supported")
