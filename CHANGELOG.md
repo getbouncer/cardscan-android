@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.0052](https://github.com/getbouncer/cardscan-android/tree/2.0.0052) (2020-11-13)
+
+**Merged pull requests:**
+
+- Reset stats at scan start [\#268](https://github.com/getbouncer/cardscan-android/pull/268) ([awushensky](https://github.com/awushensky))
+
 ## [2.0.0051](https://github.com/getbouncer/cardscan-android/tree/2.0.0051) (2020-11-10)
 
 **Merged pull requests:**
@@ -36,6 +42,10 @@
 
 ## [2.0.0046](https://github.com/getbouncer/cardscan-android/tree/2.0.0046) (2020-10-14)
 
+**Merged pull requests:**
+
+- Send model hash with info request [\#250](https://github.com/getbouncer/cardscan-android/pull/250) ([awushensky](https://github.com/awushensky))
+
 ## [2.0.0045](https://github.com/getbouncer/cardscan-android/tree/2.0.0045) (2020-10-12)
 
 **Merged pull requests:**
@@ -58,7 +68,6 @@
 
 **Merged pull requests:**
 
-- Send model hash with info request [\#250](https://github.com/getbouncer/cardscan-android/pull/250) ([awushensky](https://github.com/awushensky))
 - Parallelize model downloads [\#244](https://github.com/getbouncer/cardscan-android/pull/244) ([awushensky](https://github.com/awushensky))
 - Clean up some OCR [\#243](https://github.com/getbouncer/cardscan-android/pull/243) ([awushensky](https://github.com/awushensky))
 - Improve fetcher logging [\#242](https://github.com/getbouncer/cardscan-android/pull/242) ([awushensky](https://github.com/awushensky))
@@ -102,7 +111,6 @@
 - Split main loop [\#229](https://github.com/getbouncer/cardscan-android/pull/229) ([awushensky](https://github.com/awushensky))
 - Calculate and adapt to device speed [\#228](https://github.com/getbouncer/cardscan-android/pull/228) ([awushensky](https://github.com/awushensky))
 - Prevent duplicate final results [\#227](https://github.com/getbouncer/cardscan-android/pull/227) ([awushensky](https://github.com/awushensky))
-- Clean up single activity demo [\#225](https://github.com/getbouncer/cardscan-android/pull/225) ([awushensky](https://github.com/awushensky))
 
 ## [2.0.0038](https://github.com/getbouncer/cardscan-android/tree/2.0.0038) (2020-09-25)
 
@@ -117,6 +125,10 @@
 - Demo app crashed [\#223](https://github.com/getbouncer/cardscan-android/issues/223)
 
 ## [2.0.0036](https://github.com/getbouncer/cardscan-android/tree/2.0.0036) (2020-09-24)
+
+**Merged pull requests:**
+
+- Clean up single activity demo [\#225](https://github.com/getbouncer/cardscan-android/pull/225) ([awushensky](https://github.com/awushensky))
 
 ## [2.0.0035](https://github.com/getbouncer/cardscan-android/tree/2.0.0035) (2020-09-24)
 
