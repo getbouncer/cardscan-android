@@ -44,6 +44,7 @@ abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
 
     // TODO: change this to be a channelFlow once it's no longer experimental, add some capacity and use a backpressure drop strategy
     private val imageChannel = Channel<CameraOutput>(capacity = Channel.RENDEZVOUS)
+    private var lifecyclesBound = 0
 
     companion object {
 
@@ -138,6 +139,7 @@ abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
      */
     open fun bindToLifecycle(lifecycleOwner: LifecycleOwner) {
         lifecycleOwner.lifecycle.addObserver(this)
+        lifecyclesBound++
     }
 
     /**
@@ -145,8 +147,20 @@ abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
      */
     open fun unbindFromLifecycle(lifecycleOwner: LifecycleOwner) {
         lifecycleOwner.lifecycle.removeObserver(this)
+
+        lifecyclesBound--
+        if (lifecyclesBound < 0) {
+            Log.e(Config.logTag, "Bound lifecycle count $lifecyclesBound is below 0")
+            lifecyclesBound = 0
+        }
+
         this.onPause()
     }
+
+    /**
+     * Determine if the adapter is currently bound.
+     */
+    open fun isBoundToLifecycle() = lifecyclesBound > 0
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     open fun onPause() {
