@@ -87,9 +87,7 @@ open class CameraErrorListenerImpl(
         AlertDialog.Builder(context)
             .setTitle(R.string.bouncer_error_camera_title)
             .setMessage(message)
-            .setPositiveButton(R.string.bouncer_error_camera_acknowledge_button) { _, _ -> callback(
-                cause
-            ) }
+            .setPositiveButton(R.string.bouncer_error_camera_acknowledge_button) { _, _ -> callback(cause) }
             .show()
     }
 }
@@ -122,7 +120,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      */
     protected open val cameraApi: CameraApi = CameraApi.Camera1
 
-    private val storage by lazy {
+    protected val storage by lazy {
         StorageFactory.getStorageInstance(this, "scan_camera_permissions")
     }
 
@@ -147,19 +145,12 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
             hideSystemUi()
         }
 
-        when {
-            cameraAdapter.isBoundToLifecycle() -> { /* nothing to do */ }
-            ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED -> {
-                permissionStat.trackResult("already_granted")
-                prepareCamera { onCameraReady() }
-            }
-            ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA) -> showPermissionRationaleDialog()
-            storage.getBoolean(PERMISSION_RATIONALE_SHOWN, false) -> showPermissionDeniedDialog()
-            else -> requestCameraPermission()
+        if (!cameraAdapter.isBoundToLifecycle()) {
+            ensurePermissionAndStartCamera()
         }
     }
 
-    private fun hideSystemUi() {
+    protected open fun hideSystemUi() {
         // Prevent screenshots and keep the screen on while scanning.
         window.setFlags(
             WindowManager.LayoutParams.FLAG_SECURE + WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
@@ -186,6 +177,19 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     override fun onPause() {
         super.onPause()
         setFlashlightState(false)
+    }
+
+    /**
+     * Ensure that the camera permission is available. If so, start the camera. If not, request it.
+     */
+    protected open fun ensurePermissionAndStartCamera() = when {
+        ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED -> {
+            permissionStat.trackResult("already_granted")
+            prepareCamera { onCameraReady() }
+        }
+        ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA) -> showPermissionRationaleDialog()
+        storage.getBoolean(PERMISSION_RATIONALE_SHOWN, false) -> showPermissionDeniedDialog()
+        else -> requestCameraPermission()
     }
 
     /**
@@ -253,7 +257,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     /**
      * Request permission to use the camera.
      */
-    private fun requestCameraPermission() {
+    protected open fun requestCameraPermission() {
         ActivityCompat.requestPermissions(
             this,
             arrayOf(Manifest.permission.CAMERA),
@@ -264,7 +268,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     /**
      * Open the settings for this app
      */
-    private fun openAppSettings() {
+    protected open fun openAppSettings() {
         val intent = Intent()
             .setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
             .setData(Uri.fromParts("package", getAppPackageName(this), null))
@@ -274,7 +278,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     /**
      * Validate the API key against the server. If it's invalid, close the scanner.
      */
-    private fun ensureValidApiKey() {
+    protected fun ensureValidApiKey() {
         if (Config.apiKey != null) {
             launch {
                 when (val apiKeyValidateResult = validateApiKey(this@ScanActivity)) {
@@ -416,7 +420,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      */
     protected abstract fun prepareCamera(onCameraReady: () -> Unit)
 
-    private fun onCameraReady() {
+    protected open fun onCameraReady() {
         cameraAdapter.bindToLifecycle(this)
 
         val stat = Stats.trackTask("torch_supported")
