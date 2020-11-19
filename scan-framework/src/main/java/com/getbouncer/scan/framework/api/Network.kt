@@ -19,6 +19,9 @@ import com.getbouncer.scan.framework.util.memoize
 import com.getbouncer.scan.framework.util.retry
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
 import java.io.InputStreamReader
 import java.io.OutputStream
 import java.io.OutputStreamWriter
@@ -248,7 +251,7 @@ private fun get(context: Context, path: String): NetworkResult<out String, out S
         with(url.openConnection() as HttpURLConnection) {
             requestMethod = REQUEST_METHOD_GET
 
-            // Set the connection to both send and receive data
+            // Set the connection to only receive data
             doOutput = false
             doInput = true
 
@@ -273,6 +276,47 @@ private fun get(context: Context, path: String): NetworkResult<out String, out S
     } catch (t: Throwable) {
         Log.w(Config.logTag, "Failed network request to endpoint $url", t)
         NetworkResult.Exception(responseCode, t)
+    }
+}
+
+suspend fun downloadFileWithRetries(context: Context, url: URL, outputFile: File) = retry(
+    NetworkConfig.retryDelay,
+    excluding = listOf(FileNotFoundException::class.java)
+) {
+    downloadFile(context, url, outputFile)
+}
+
+/**
+ * Download a file.
+ */
+private fun downloadFile(context: Context, url: URL, outputFile: File) = networkTimer.measure(url.toString()) {
+    try {
+        with(url.openConnection() as HttpURLConnection) {
+            requestMethod = REQUEST_METHOD_GET
+
+            // Set the connection to only receive data
+            doOutput = false
+            doInput = true
+
+            // set headers
+            setRequestHeaders(context)
+
+            // Read the response code. This will block until the response has been received.
+            val responseCode = this.responseCode
+
+            if (!outputFile.createNewFile()) {
+                throw FileCreationException(outputFile.name)
+            }
+
+            inputStream.use { stream ->
+                FileOutputStream(outputFile).use { it.write(stream.readBytes()) }
+            }
+
+            responseCode
+        }
+    } catch (t: Throwable) {
+        Log.w(Config.logTag, "Failed network request to endpoint $url", t)
+        throw t
     }
 }
 
@@ -351,4 +395,14 @@ private fun getBaseUrl() = if (NetworkConfig.baseUrl.endsWith("/")) {
     NetworkConfig.baseUrl
 }
 
+/**
+ * An exception that should never be thrown, but is required for typing.
+ */
 private class RetryNetworkRequestException(val result: NetworkResult<out String, out String>) : Exception()
+
+/**
+ * Unable to create a file.
+ */
+class FileCreationException(val fileName: String) : java.lang.Exception("Unable to create local file '$fileName'") {
+    override fun toString() = "FileCreationException(fileName='$fileName')"
+}

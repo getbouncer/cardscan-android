@@ -2,17 +2,12 @@
     <string name="app_name">CardScan Demo</string>
 
     <string name="scan_card">Scan Card</string>
-    <string name="scan_card_debug">Scan Card (Debug)</string>
 
     <string name="scan_canceled">Scan canceled</string>
     <string name="enter_manually">Enter card manually</string>
     <string name="camera_error">Camera error</string>
     <string name="analyzer_error">Analyzer error</string>
     <string name="unknown_reason">Unknown reason</string>
-    <string name="scan_card_w_expiry">Scan Card w/ Expiry</string>
-    <string name="scan_card_w_expiry_debug">Scan Card w/ Expiry (Debug)</string>
-    <string name="scan_card_w_name_and_expiry">Scan Card w/ Name and Expiry</string>
-    <string name="scan_card_w_name_and_expiry_debug">Scan Card w/ Name and Expiry (Debug)</string>
     <string name="single_activity_demo">Single Activity Demo</string>
 
     <string name="enableDebug">Enable Debug</string>

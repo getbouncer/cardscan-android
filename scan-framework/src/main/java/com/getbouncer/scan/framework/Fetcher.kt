@@ -3,14 +3,15 @@ package com.getbouncer.scan.framework
 import android.content.Context
 import android.util.Log
 import androidx.annotation.RawRes
+import com.getbouncer.scan.framework.api.FileCreationException
 import com.getbouncer.scan.framework.api.NetworkResult
+import com.getbouncer.scan.framework.api.downloadFileWithRetries
 import com.getbouncer.scan.framework.api.getModelDetails
 import com.getbouncer.scan.framework.api.getModelSignedUrl
 import com.getbouncer.scan.framework.time.ClockMark
 import com.getbouncer.scan.framework.time.asEpochMillisecondsClockMark
 import com.getbouncer.scan.framework.time.weeks
 import com.getbouncer.scan.framework.util.memoizeSuspend
-import com.getbouncer.scan.framework.util.retry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
@@ -18,8 +19,6 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
-import java.io.FileNotFoundException
-import java.io.FileOutputStream
 import java.io.IOException
 import java.lang.Exception
 import java.net.URL
@@ -143,7 +142,7 @@ abstract class ResourceFetcher : Fetcher {
 /**
  * A [Fetcher] that downloads data from the web.
  */
-sealed class WebFetcher : Fetcher {
+sealed class WebFetcher(protected val context: Context) : Fetcher {
     protected data class DownloadDetails(val url: URL, val hash: String, val hashAlgorithm: String, val modelVersion: String)
 
     private val fetchDataMutex = Mutex()
@@ -199,6 +198,7 @@ sealed class WebFetcher : Fetcher {
         val downloadOutputFile = getDownloadOutputFile(downloadDetails.modelVersion)
         try {
             downloadAndVerify(
+                context,
                 downloadDetails.url,
                 downloadOutputFile,
                 downloadDetails.hash,
@@ -268,7 +268,7 @@ sealed class WebFetcher : Fetcher {
 /**
  * A [WebFetcher] that directly downloads a model.
  */
-abstract class DirectDownloadWebFetcher(private val context: Context) : WebFetcher() {
+abstract class DirectDownloadWebFetcher(context: Context) : WebFetcher(context) {
     abstract val url: URL
     abstract val hash: String
     abstract val hashAlgorithm: String
@@ -310,7 +310,7 @@ abstract class DirectDownloadWebFetcher(private val context: Context) : WebFetch
 /**
  * A [WebFetcher] that uses the signed URL server endpoints to download data.
  */
-abstract class SignedUrlModelWebFetcher(private val context: Context) : DirectDownloadWebFetcher(context) {
+abstract class SignedUrlModelWebFetcher(context: Context) : DirectDownloadWebFetcher(context) {
     abstract val modelFileName: String
 
     private val localFileName by lazy { "${modelClass}_${modelFileName}_$modelVersion" }
@@ -346,7 +346,7 @@ abstract class SignedUrlModelWebFetcher(private val context: Context) : DirectDo
  * A [WebFetcher] that queries Bouncer servers for updated data. If a new version is found, download it. If the data
  * details match what is cached, return the cached version instead.
  */
-abstract class UpdatingModelWebFetcher(private val context: Context) : SignedUrlModelWebFetcher(context) {
+abstract class UpdatingModelWebFetcher(context: Context) : SignedUrlModelWebFetcher(context) {
     abstract val defaultModelVersion: String
     abstract val defaultModelFileName: String
     abstract val defaultModelHash: String
@@ -616,12 +616,13 @@ private suspend fun fileMatchesHash(localFile: File, hash: String, hashAlgorithm
  */
 @Throws(IOException::class, FileCreationException::class, NoSuchAlgorithmException::class, HashMismatchException::class)
 private suspend fun downloadAndVerify(
+    context: Context,
     url: URL,
     outputFile: File,
     hash: String,
     hashAlgorithm: String
 ) {
-    downloadFile(url, outputFile)
+    downloadFile(context, url, outputFile)
     val calculatedHash = calculateHash(outputFile, hashAlgorithm)
 
     if (hash != calculatedHash) {
@@ -648,25 +649,12 @@ private suspend fun calculateHash(file: File, hashAlgorithm: String): String? = 
  * Download a file from the provided [url] into the provided [outputFile].
  */
 @Throws(IOException::class, FileCreationException::class)
-private suspend fun downloadFile(url: URL, outputFile: File) = withContext(Dispatchers.IO) {
-    retry(
-        NetworkConfig.retryDelay,
-        excluding = listOf(FileNotFoundException::class.java)
-    ) {
-        val urlConnection = url.openConnection()
-
-        if (outputFile.exists()) {
-            outputFile.delete()
-        }
-
-        if (!outputFile.createNewFile()) {
-            throw FileCreationException(outputFile.name)
-        }
-
-        urlConnection.getInputStream().use { stream ->
-            FileOutputStream(outputFile).use { it.write(stream.readBytes()) }
-        }
+private suspend fun downloadFile(context: Context, url: URL, outputFile: File) = withContext(Dispatchers.IO) {
+    if (outputFile.exists()) {
+        outputFile.delete()
     }
+
+    downloadFileWithRetries(context, url, outputFile)
 }
 
 /**
@@ -675,11 +663,4 @@ private suspend fun downloadFile(url: URL, outputFile: File) = withContext(Dispa
 class HashMismatchException(val algorithm: String, val expected: String, val actual: String?) :
     Exception("Invalid hash result for algorithm '$algorithm'. Expected '$expected' but got '$actual'") {
     override fun toString() = "HashMismatchException(algorithm='$algorithm', expected='$expected', actual='$actual')"
-}
-
-/**
- * Unable to create a file.
- */
-class FileCreationException(val fileName: String) : Exception("Unable to create local file '$fileName'") {
-    override fun toString() = "FileCreationException(fileName='$fileName')"
 }
