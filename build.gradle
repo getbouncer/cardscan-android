@@ -19,7 +19,7 @@ buildscript {
 plugins {
     id "com.jfrog.bintray" version "1.8.5"
     id "com.github.dcendents.android-maven" version "2.1"
-    id 'org.jetbrains.kotlin.plugin.serialization' version "1.4.10"
+    id 'org.jetbrains.kotlin.plugin.serialization' version "1.4.20"
 }
 
 allprojects {
