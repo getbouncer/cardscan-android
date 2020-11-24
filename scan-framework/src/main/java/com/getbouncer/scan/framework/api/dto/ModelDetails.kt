@@ -10,6 +10,7 @@ data class ModelDetailsRequest(
     @SerialName("model_framework_version") val modelFrameworkVersion: Int,
     @SerialName("cached_model_hash") val cachedModelHash: String?,
     @SerialName("cached_model_hash_algorithm") val cachedModelHashAlgorithm: String?,
+    @SerialName("beta_opt_in") val betaOptIn: Boolean?,
 )
 
 @Serializable
