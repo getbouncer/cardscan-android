@@ -38,7 +38,7 @@ class ExpiryDetectTest {
         val factory = ExpiryDetect.Factory(testContext, fetcher.fetchData(false))
 
         assertNotNull(factory.newInstance())
-    }.let { Unit }
+    }.let { }
 
     @Test
     @SmallTest

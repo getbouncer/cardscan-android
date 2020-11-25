@@ -13,7 +13,6 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.core.view.size
 import androidx.fragment.app.Fragment
 import com.getbouncer.cardscan.ui.analyzer.CompletionLoopAnalyzer
 import com.getbouncer.cardscan.ui.result.CompletionLoopListener
@@ -33,10 +32,10 @@ import com.getbouncer.scan.ui.util.getColorByRes
 import com.getbouncer.scan.ui.util.hide
 import com.getbouncer.scan.ui.util.setTextSizeByRes
 import com.getbouncer.scan.ui.util.setVisible
-import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.parcelize.Parcelize
 
 interface CardScanActivityResultHandler {
     /**
@@ -490,7 +489,7 @@ open class CardScanActivity :
         )
 
         closeScanner()
-    }.let { Unit }
+    }.let { }
 
     override fun onCompletionLoopFrameProcessed(
         result: CompletionLoopAnalyzer.Prediction,
@@ -502,5 +501,5 @@ open class CardScanActivity :
             }
             debugCompletionImageView.setImageBitmap(bitmap)
         }
-    }.let { Unit }
+    }.let { }
 }

@@ -186,7 +186,7 @@ open class CardScanFlow(
                 )
             }
         }
-    }.let { Unit }
+    }.let { }
 
     /**
      * In the event that the scan cannot complete, halt the flow to halt analyzers and free up CPU and memory.
@@ -248,7 +248,7 @@ open class CardScanFlow(
                 }
             }
         ).process(savedFrames, coroutineScope)
-    }.let { Unit }
+    }.let { }
 
     /**
      * Select which frames to use in the completion loop.
