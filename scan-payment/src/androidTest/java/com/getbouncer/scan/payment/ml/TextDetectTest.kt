@@ -38,7 +38,7 @@ class TextDetectTest {
         val factory = TextDetect.Factory(testContext, fetcher.fetchData(false))
 
         assertNotNull(factory.newInstance())
-    }.let { Unit }
+    }.let { }
 
     @Test
     @SmallTest

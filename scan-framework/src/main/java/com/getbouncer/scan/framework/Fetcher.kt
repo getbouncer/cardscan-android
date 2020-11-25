@@ -461,7 +461,7 @@ abstract class UpdatingModelWebFetcher(context: Context) : SignedUrlModelWebFetc
                     .elapsedSince() > CACHE_MODEL_TIME || index > CACHE_MODEL_MAX_COUNT
             }
             ?.forEach { it.delete() }
-            .let { Unit }
+            .let { }
     }
 
     /**
@@ -554,7 +554,7 @@ abstract class UpdatingModelWebFetcher(context: Context) : SignedUrlModelWebFetc
         StorageFactory
             .getStorageInstance(context, PURPOSE_MODEL_UPGRADE)
             .clear()
-    }.let { Unit }
+    }.let { }
 }
 
 /**

@@ -144,7 +144,7 @@ abstract class CardScanBaseActivity :
             frames = scanFlow.selectCompletionLoopFrames(result.averageFrameRate, result.savedFrames),
             isFastDevice = result.averageFrameRate > Config.slowDeviceFrameRate,
         )
-    }.let { Unit }
+    }.let { }
 
     /**
      * An interim result was received from the result aggregator.
@@ -189,9 +189,9 @@ abstract class CardScanBaseActivity :
                 debugOverlayView.setBoxes(detectionBoxes.map { it.forDebug() })
             }
         }
-    }.let { Unit }
+    }.let { }
 
-    override suspend fun onReset() = launch(Dispatchers.Main) { changeScanState(ScanState.NotFound) }.let { Unit }
+    override suspend fun onReset() = launch(Dispatchers.Main) { changeScanState(ScanState.NotFound) }.let { }
 
     override fun onAnalyzerFailure(t: Throwable): Boolean {
         analyzerFailureCancelScan(t)
