@@ -62,6 +62,12 @@ object Config {
     var displayLogo: Boolean = true
 
     /**
+     * If set to true, opt-in to beta versions of the ML models.
+     */
+    @JvmStatic
+    var betaModelOptIn: Boolean = false
+
+    /**
      * The frame rate of a device that is considered slow will be below this rate.
      */
     @JvmStatic

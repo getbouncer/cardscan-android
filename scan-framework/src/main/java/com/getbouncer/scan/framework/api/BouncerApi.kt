@@ -2,6 +2,7 @@
 package com.getbouncer.scan.framework.api
 
 import android.content.Context
+import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.api.dto.AppInfo
 import com.getbouncer.scan.framework.api.dto.BouncerErrorResponse
 import com.getbouncer.scan.framework.api.dto.ClientDevice
@@ -105,6 +106,7 @@ suspend fun getModelDetails(
                 modelFrameworkVersion = modelFrameworkVersion,
                 cachedModelHash = cachedModelHash,
                 cachedModelHashAlgorithm = cachedModelHashAlgorithm,
+                betaOptIn = Config.betaModelOptIn,
             ),
         )
     }
