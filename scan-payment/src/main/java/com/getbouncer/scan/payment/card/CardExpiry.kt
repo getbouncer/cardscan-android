@@ -30,7 +30,9 @@ fun isValidExpiry(day: String?, month: String, year: String): Boolean {
         return false
     }
 
-    if (cardYear > currentYear && cardYear < currentYear + 10) {
+    // according to https://stackoverflow.com/questions/2500588/maximum-year-in-expiry-date-of-credit-card,
+    // it's possible to have expires up to 50 years from now.
+    if (cardYear > currentYear && cardYear < currentYear + 100) {
         return true
     } else if (cardYear < currentYear) {
         return false
