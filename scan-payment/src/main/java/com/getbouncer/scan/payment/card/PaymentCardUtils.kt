@@ -57,8 +57,8 @@ import kotlinx.coroutines.withContext
  * | --------------- | ------------------------- | ------- | ------- | --------------------------- |
  * | IIN             | Issuer                    | PAN Len | CVC Len | Validation                  |
  * | --------------- | ------------------------- | ------- | ------- | --------------------------- |
- * | 34****          | American Express          | 15      | 4       | Luhn                        |
- * | 37****          | American Express          | 15      | 4       | Luhn                        |
+ * | 34****          | American Express          | 15      | 3-4     | Luhn                        |
+ * | 37****          | American Express          | 15      | 3-4     | Luhn                        |
  * | 300*** - 305*** | Diners Club International | 16 - 19 | 3       | Luhn                        |
  * | 3095**          | Diners Club International | 16 - 19 | 3       | Luhn                        |
  * | 36****          | Diners Club International | 14 - 19 | 3       | Luhn                        |
@@ -106,8 +106,8 @@ internal data class IssuerData(
  * the list get priority over items lower in the list when selecting by IIN.
  */
 private val ISSUER_TABLE: List<IssuerData> = listOf(
-    IssuerData(340000..349999, CardIssuer.AmericanExpress, listOf(15), listOf(4), LengthPanValidator + LuhnPanValidator),
-    IssuerData(370000..379999, CardIssuer.AmericanExpress, listOf(15), listOf(4), LengthPanValidator + LuhnPanValidator),
+    IssuerData(340000..349999, CardIssuer.AmericanExpress, listOf(15), (3..4).toList(), LengthPanValidator + LuhnPanValidator),
+    IssuerData(370000..379999, CardIssuer.AmericanExpress, listOf(15), (3..4).toList(), LengthPanValidator + LuhnPanValidator),
     IssuerData(300000..305999, CardIssuer.DinersClub, (16..19).toList(), listOf(3), LengthPanValidator + LuhnPanValidator),
     IssuerData(309500..309599, CardIssuer.DinersClub, (16..19).toList(), listOf(3), LengthPanValidator + LuhnPanValidator),
     IssuerData(360000..369999, CardIssuer.DinersClub, (14..19).toList(), listOf(3), LengthPanValidator + LuhnPanValidator),
