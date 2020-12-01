@@ -30,6 +30,7 @@ private const val SAMPLE_VISA_IIN = "411111"
 
 private const val SAMPLE_AMEX_CVC = "1234"
 private const val SAMPLE_NORMAL_CVC = "123"
+private const val SAMPLE_INVALID_CVC = "12"
 
 private const val SAMPLE_CUSTOM_16_PAN = "9900000000000101"
 private const val SAMPLE_CUSTOM_17_PAN = "99000000000000002"
@@ -123,7 +124,10 @@ class PaymentCardTest {
         assertTrue { isValidCvc(SAMPLE_CUSTOM_CVC, SAMPLE_CUSTOM_CARD_ISSUER) }
         assertTrue { isValidCvc(SAMPLE_ADVANCED_CUSTOM_CVC, SAMPLE_ADVANCED_CUSTOM_CARD_ISSUER) }
         assertFalse { isValidCvc(SAMPLE_AMEX_CVC, CardIssuer.MasterCard) }
-        assertFalse { isValidCvc(SAMPLE_NORMAL_CVC, CardIssuer.AmericanExpress) }
+        assertTrue { isValidCvc(SAMPLE_NORMAL_CVC, CardIssuer.AmericanExpress) }
+        assertFalse { isValidCvc(SAMPLE_INVALID_CVC, null) }
+        assertTrue { isValidCvc(SAMPLE_NORMAL_CVC, null) }
+        assertTrue { isValidCvc(SAMPLE_AMEX_CVC, null) }
         assertFalse { isValidCvc("a12", CardIssuer.Visa) }
     }
 
