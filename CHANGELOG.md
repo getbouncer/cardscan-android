@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.0.0056](https://github.com/getbouncer/cardscan-android/tree/2.0.0056) (2020-12-03)
+
+**Closed issues:**
+
+- Integration of the library shows this. [\#256](https://github.com/getbouncer/cardscan-android/issues/256)
+
+**Merged pull requests:**
+
+- Support expirys up to 100 years in the future [\#286](https://github.com/getbouncer/cardscan-android/pull/286) ([awushensky](https://github.com/awushensky))
+- Support 3-digit CVC for amex [\#285](https://github.com/getbouncer/cardscan-android/pull/285) ([awushensky](https://github.com/awushensky))
+- Upgrade dependencies [\#278](https://github.com/getbouncer/cardscan-android/pull/278) ([awushensky](https://github.com/awushensky))
+
 ## [2.0.0055](https://github.com/getbouncer/cardscan-android/tree/2.0.0055) (2020-11-25)
 
 **Merged pull requests:**
@@ -54,13 +66,16 @@
 
 ## [2.0.0047](https://github.com/getbouncer/cardscan-android/tree/2.0.0047) (2020-10-15)
 
+**Merged pull requests:**
+
+- Remove autofocus feature requirement [\#251](https://github.com/getbouncer/cardscan-android/pull/251) ([awushensky](https://github.com/awushensky))
+
 ## [1.0.5155](https://github.com/getbouncer/cardscan-android/tree/1.0.5155) (2020-10-15)
 
 ## [2.0.0046](https://github.com/getbouncer/cardscan-android/tree/2.0.0046) (2020-10-14)
 
 **Merged pull requests:**
 
-- Remove autofocus feature requirement [\#251](https://github.com/getbouncer/cardscan-android/pull/251) ([awushensky](https://github.com/awushensky))
 - Send model hash with info request [\#250](https://github.com/getbouncer/cardscan-android/pull/250) ([awushensky](https://github.com/awushensky))
 
 ## [2.0.0045](https://github.com/getbouncer/cardscan-android/tree/2.0.0045) (2020-10-12)
@@ -72,9 +87,9 @@
 - Bump junit from 4.13 to 4.13.1 [\#246](https://github.com/getbouncer/cardscan-android/pull/246) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Bump constraintlayout from 2.0.1 to 2.0.2 [\#241](https://github.com/getbouncer/cardscan-android/pull/241) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 
-## [1.0.5153](https://github.com/getbouncer/cardscan-android/tree/1.0.5153) (2020-10-09)
-
 ## [1.0.5154](https://github.com/getbouncer/cardscan-android/tree/1.0.5154) (2020-10-09)
+
+## [1.0.5153](https://github.com/getbouncer/cardscan-android/tree/1.0.5153) (2020-10-09)
 
 **Merged pull requests:**
 
@@ -89,7 +104,6 @@
 - Clean up some OCR [\#243](https://github.com/getbouncer/cardscan-android/pull/243) ([awushensky](https://github.com/awushensky))
 - Improve fetcher logging [\#242](https://github.com/getbouncer/cardscan-android/pull/242) ([awushensky](https://github.com/awushensky))
 - Target android 30 [\#240](https://github.com/getbouncer/cardscan-android/pull/240) ([awushensky](https://github.com/awushensky))
-- Clean up image utils [\#237](https://github.com/getbouncer/cardscan-android/pull/237) ([awushensky](https://github.com/awushensky))
 
 ## [2.0.0043](https://github.com/getbouncer/cardscan-android/tree/2.0.0043) (2020-10-06)
 
@@ -97,6 +111,7 @@
 
 - Fix autofocus more [\#239](https://github.com/getbouncer/cardscan-android/pull/239) ([awushensky](https://github.com/awushensky))
 - Remove camera1 autofocus repeater [\#238](https://github.com/getbouncer/cardscan-android/pull/238) ([awushensky](https://github.com/awushensky))
+- Clean up image utils [\#237](https://github.com/getbouncer/cardscan-android/pull/237) ([awushensky](https://github.com/awushensky))
 
 ## [1.0.5152](https://github.com/getbouncer/cardscan-android/tree/1.0.5152) (2020-10-05)
 
@@ -155,7 +170,6 @@
 - Clean up UI changes [\#222](https://github.com/getbouncer/cardscan-android/pull/222) ([awushensky](https://github.com/awushensky))
 - Add java continuation support [\#221](https://github.com/getbouncer/cardscan-android/pull/221) ([awushensky](https://github.com/awushensky))
 - Create programmatic UI [\#217](https://github.com/getbouncer/cardscan-android/pull/217) ([awushensky](https://github.com/awushensky))
-- Bump kotlin-test from 1.4.0 to 1.4.10 [\#214](https://github.com/getbouncer/cardscan-android/pull/214) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 
 ## [2.0.0034](https://github.com/getbouncer/cardscan-android/tree/2.0.0034) (2020-09-22)
 
@@ -163,6 +177,7 @@
 
 - Allow manual camera pause [\#216](https://github.com/getbouncer/cardscan-android/pull/216) ([awushensky](https://github.com/awushensky))
 - Bump kotlin-stdlib-jdk7 from 1.4.0 to 1.4.10 [\#215](https://github.com/getbouncer/cardscan-android/pull/215) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
+- Bump kotlin-test from 1.4.0 to 1.4.10 [\#214](https://github.com/getbouncer/cardscan-android/pull/214) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Bump ktlint from 0.38.1 to 0.39.0 [\#213](https://github.com/getbouncer/cardscan-android/pull/213) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 
 ## [2.0.0033](https://github.com/getbouncer/cardscan-android/tree/2.0.0033) (2020-09-17)
