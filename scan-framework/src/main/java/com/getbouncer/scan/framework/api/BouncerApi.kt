@@ -39,7 +39,7 @@ fun uploadScanStats(
     scanStatistics: ScanStatistics,
 ) = GlobalScope.launch(Dispatchers.IO) {
     postData(
-        context = context,
+        context = context.applicationContext,
         path = STATS_PATH,
         data = StatsPayload(
             instanceId = instanceId,
