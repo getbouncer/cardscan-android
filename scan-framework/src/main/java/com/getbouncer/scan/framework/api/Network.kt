@@ -19,7 +19,6 @@ import com.getbouncer.scan.framework.util.memoize
 import com.getbouncer.scan.framework.util.retry
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
@@ -352,6 +351,7 @@ private val buildDeviceId = memoize { context: Context ->
     DeviceIds.fromContext(context).run {
         Base64.encodeToString(
             Config.json.encodeToString(
+                DeviceIdStructure.serializer(),
                 DeviceIdStructure(a = androidId ?: "", v = "", d = "")
             ).toByteArray(Charsets.UTF_8),
             Base64.URL_SAFE
