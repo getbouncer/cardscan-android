@@ -29,7 +29,7 @@ class Loader(private val context: Context) {
      * Create a [ByteBuffer] object from an android resource.
      */
     private suspend fun loadResourceData(fetchedData: FetchedResource): ByteBuffer? {
-        val stat = Stats.trackRepeatingTask("resource_loader:${fetchedData.modelClass}")
+        val stat = Stats.trackPersistentRepeatingTask("resource_loader:${fetchedData.modelClass}")
 
         if (fetchedData.resourceId == null) {
             trackModelLoaded(fetchedData.modelClass, fetchedData.modelVersion, fetchedData.modelFrameworkVersion, false)
@@ -53,7 +53,7 @@ class Loader(private val context: Context) {
      * Create a [ByteBuffer] object from a [File].
      */
     private suspend fun loadFileData(fetchedData: FetchedFile): ByteBuffer? {
-        val stat = Stats.trackRepeatingTask("web_loader:${fetchedData.modelClass}")
+        val stat = Stats.trackPersistentRepeatingTask("web_loader:${fetchedData.modelClass}")
 
         if (fetchedData.file == null) {
             trackModelLoaded(fetchedData.modelClass, fetchedData.modelVersion, fetchedData.modelFrameworkVersion, false)

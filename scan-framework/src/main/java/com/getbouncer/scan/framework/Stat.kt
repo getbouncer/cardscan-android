@@ -20,19 +20,19 @@ object Stats {
     var scanId: String? = null
         private set
 
+    private var persistentRepeatingTasks: MutableMap<String, MutableMap<String, RepeatingTaskStats>> = mutableMapOf()
     private var tasks: MutableMap<String, List<TaskStats>> = mutableMapOf()
     private var repeatingTasks: MutableMap<String, MutableMap<String, RepeatingTaskStats>> = mutableMapOf()
 
     private val scanIdMutex = Mutex()
     private val taskMutex = Mutex()
     private val repeatingTaskMutex = Mutex()
+    private val persistentRepeatingTasksMutex = Mutex()
 
     fun startScan() {
         runBlocking {
             scanIdMutex.withLock {
-                if (scanId != null) {
-                    clearAllTasks()
-                }
+                clearAllTasks()
                 scanId = UUID.randomUUID().toString()
             }
         }
@@ -116,6 +116,47 @@ object Stats {
         }
 
     /**
+     * Track a single execution of a repeating task that should not be cleared on scan start.
+     */
+    @CheckResult
+    fun trackPersistentRepeatingTask(name: String): StatTracker =
+        if (!Config.trackStats) StatTrackerNoOpImpl else StatTrackerImpl { startedAt, result ->
+            persistentRepeatingTasksMutex.withLock {
+                val resultName = result ?: "null"
+                val resultStats = persistentRepeatingTasks[name] ?: run {
+                    val taskStats = mutableMapOf<String, RepeatingTaskStats>()
+                    persistentRepeatingTasks[name] = taskStats
+                    taskStats
+                }
+
+                val taskStats = resultStats[resultName]
+                val duration = startedAt.elapsedSince()
+                if (taskStats == null) {
+                    resultStats[resultName] = RepeatingTaskStats(
+                        executions = 1,
+                        startedAt = startedAt,
+                        totalDuration = duration,
+                        totalCpuDuration = duration,
+                        minimumDuration = duration,
+                        maximumDuration = duration,
+                    )
+                } else {
+                    resultStats[resultName] = RepeatingTaskStats(
+                        executions = taskStats.executions + 1,
+                        startedAt = taskStats.startedAt,
+                        totalDuration = taskStats.startedAt.elapsedSince(),
+                        totalCpuDuration = taskStats.totalCpuDuration + duration,
+                        minimumDuration = minOf(taskStats.minimumDuration, duration),
+                        maximumDuration = maxOf(taskStats.maximumDuration, duration),
+                    )
+                }
+            }
+            if (Config.isDebug) {
+                Log.v(Config.logTag, "Persistent repeating task $name got result $result after ${startedAt.elapsedSince()}")
+            }
+        }
+
+    /**
      * Track the result of a task.
      */
     fun <T> trackRepeatingTask(name: String, task: () -> T): T {
@@ -134,22 +175,19 @@ object Stats {
 
     @JvmStatic
     @CheckResult
-    fun getAndClearRepeatingTasks() = runBlocking {
+    fun getRepeatingTasks() = runBlocking {
         repeatingTaskMutex.withLock {
-            val capturedTasks = repeatingTasks.toMap().mapValues { entry -> entry.value.toMap() }
-            repeatingTasks.clear()
-            capturedTasks
+            persistentRepeatingTasksMutex.withLock {
+                repeatingTasks.toMap().mapValues { entry -> entry.value.toMap() } +
+                    persistentRepeatingTasks.toMap().mapValues { entry -> entry.value.toMap() }
+            }
         }
     }
 
     @JvmStatic
     @CheckResult
-    fun getAndClearTasks() = runBlocking {
-        taskMutex.withLock {
-            val capturedTasks = tasks.toMap()
-            tasks.clear()
-            capturedTasks
-        }
+    fun getTasks() = runBlocking {
+        taskMutex.withLock { tasks.toMap() }
     }
 
     private suspend fun clearAllTasks() = supervisorScope {

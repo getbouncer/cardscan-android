@@ -24,10 +24,10 @@ data class ScanStatistics(
     companion object {
         @JvmStatic
         fun fromStats() = ScanStatistics(
-            tasks = Stats.getAndClearTasks().mapValues { entry ->
+            tasks = Stats.getTasks().mapValues { entry ->
                 entry.value.map { TaskStatistics.fromTaskStats(it) }
             },
-            repeatingTasks = Stats.getAndClearRepeatingTasks().mapValues { repeatingTasks ->
+            repeatingTasks = Stats.getRepeatingTasks().mapValues { repeatingTasks ->
                 repeatingTasks.value.map { resultMap ->
                     RepeatingTaskStatistics.fromRepeatingTaskStats(
                         result = resultMap.key,

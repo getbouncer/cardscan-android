@@ -155,7 +155,7 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
     private var fetchException: Throwable? = null
 
     override suspend fun fetchData(forImmediateUse: Boolean): FetchedData = fetchDataMutex.withLock {
-        val stat = Stats.trackRepeatingTask("web_fetcher_$modelClass")
+        val stat = Stats.trackPersistentRepeatingTask("web_fetcher_$modelClass")
         val cachedData = FetchedData.fromFetchedModelMeta(modelClass, modelFrameworkVersion, tryFetchLatestCachedData())
 
         // if a previous exception was encountered, attempt to fetch cached data
