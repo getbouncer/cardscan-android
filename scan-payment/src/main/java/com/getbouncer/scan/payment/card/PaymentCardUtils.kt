@@ -271,7 +271,7 @@ fun supportCardIssuer(
  * Normalize a PAN by removing all non-numeric characters.
  */
 @CheckResult
-internal fun normalizeCardNumber(cardNumber: String?) = cardNumber?.filter { it.isDigit() } ?: ""
+fun normalizeCardNumber(cardNumber: String?) = cardNumber?.filter { it.isDigit() } ?: ""
 
 /**
  * Determine if the pan is valid or close to valid.
