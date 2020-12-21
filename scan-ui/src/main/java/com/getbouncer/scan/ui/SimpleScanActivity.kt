@@ -564,7 +564,7 @@ abstract class SimpleScanActivity : ScanActivity() {
      * Change the state of the scanner.
      */
     protected fun changeScanState(newState: ScanState): Boolean {
-        if (newState == scanStatePrevious) {
+        if (newState == scanStatePrevious || scanStatePrevious == ScanState.Correct) {
             return false
         }
 
