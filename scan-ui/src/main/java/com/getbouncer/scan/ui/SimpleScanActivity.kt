@@ -37,12 +37,12 @@ abstract class SimpleScanActivity : ScanActivity() {
      * The state of the scan flow. This can be expanded if [displayState] is overridden to handle
      * the added states.
      */
-    abstract class ScanState {
-        object NotFound : ScanState()
-        object FoundShort : ScanState()
-        object FoundLong : ScanState()
-        object Correct : ScanState()
-        object Wrong : ScanState()
+    abstract class ScanState(val isFinal: Boolean) {
+        object NotFound : ScanState(isFinal = false)
+        object FoundShort : ScanState(isFinal = false)
+        object FoundLong : ScanState(isFinal = false)
+        object Correct : ScanState(isFinal = true)
+        object Wrong : ScanState(isFinal = false)
     }
 
     companion object {
@@ -564,7 +564,7 @@ abstract class SimpleScanActivity : ScanActivity() {
      * Change the state of the scanner.
      */
     protected fun changeScanState(newState: ScanState): Boolean {
-        if (newState == scanStatePrevious || scanStatePrevious == ScanState.Correct) {
+        if (newState == scanStatePrevious || scanStatePrevious?.isFinal == true) {
             return false
         }
 
