@@ -41,6 +41,7 @@ object Config {
     var json: Json = Json {
         ignoreUnknownKeys = true
         isLenient = true
+        encodeDefaults = true
     }
 
     /**
