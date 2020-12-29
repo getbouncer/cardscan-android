@@ -203,6 +203,12 @@ fun Size.toRect() = Rect(0, 0, this.width, this.height)
 fun Size.toRectF() = RectF(0F, 0F, this.width.toFloat(), this.height.toFloat())
 
 /**
+ * Transpose a size's width and height.
+ */
+@CheckResult
+fun Size.transpose() = Size(this.height, this.width)
+
+/**
  * Return a rect that is the intersection of two other rects
  */
 @CheckResult
