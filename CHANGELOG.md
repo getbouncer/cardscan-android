@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.0061](https://github.com/getbouncer/cardscan-android/tree/2.0.0061) (2020-12-31)
+
+**Merged pull requests:**
+
+- Improve analyzer performance [\#301](https://github.com/getbouncer/cardscan-android/pull/301) ([awushensky](https://github.com/awushensky))
+
 ## [2.0.0060](https://github.com/getbouncer/cardscan-android/tree/2.0.0060) (2020-12-22)
 
 ## [2.0.0059](https://github.com/getbouncer/cardscan-android/tree/2.0.0059) (2020-12-21)
@@ -32,6 +38,7 @@
 - Bump org.jetbrains.kotlin.plugin.serialization from 1.4.20 to 1.4.21 [\#289](https://github.com/getbouncer/cardscan-android/pull/289) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Bump kotlin-gradle-plugin from 1.4.20 to 1.4.21 [\#288](https://github.com/getbouncer/cardscan-android/pull/288) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Bump ktlint from 0.39.0 to 0.40.0 [\#287](https://github.com/getbouncer/cardscan-android/pull/287) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
+- Support 3-digit CVC for amex [\#285](https://github.com/getbouncer/cardscan-android/pull/285) ([awushensky](https://github.com/awushensky))
 
 ## [2.0.0056](https://github.com/getbouncer/cardscan-android/tree/2.0.0056) (2020-12-03)
 
@@ -42,7 +49,6 @@
 **Merged pull requests:**
 
 - Support expirys up to 100 years in the future [\#286](https://github.com/getbouncer/cardscan-android/pull/286) ([awushensky](https://github.com/awushensky))
-- Support 3-digit CVC for amex [\#285](https://github.com/getbouncer/cardscan-android/pull/285) ([awushensky](https://github.com/awushensky))
 - Upgrade dependencies [\#278](https://github.com/getbouncer/cardscan-android/pull/278) ([awushensky](https://github.com/awushensky))
 
 ## [2.0.0055](https://github.com/getbouncer/cardscan-android/tree/2.0.0055) (2020-11-25)
@@ -56,7 +62,6 @@
 **Merged pull requests:**
 
 - Use network stack for model downloads [\#270](https://github.com/getbouncer/cardscan-android/pull/270) ([awushensky](https://github.com/awushensky))
-- Reset stats at scan start [\#268](https://github.com/getbouncer/cardscan-android/pull/268) ([awushensky](https://github.com/awushensky))
 - Bump gradle from 4.1.0 to 4.1.1 [\#267](https://github.com/getbouncer/cardscan-android/pull/267) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Bump constraintlayout from 2.0.2 to 2.0.4 [\#262](https://github.com/getbouncer/cardscan-android/pull/262) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 
@@ -67,6 +72,10 @@
 - Make permissions requests make more sense [\#269](https://github.com/getbouncer/cardscan-android/pull/269) ([awushensky](https://github.com/awushensky))
 
 ## [2.0.0052](https://github.com/getbouncer/cardscan-android/tree/2.0.0052) (2020-11-13)
+
+**Merged pull requests:**
+
+- Reset stats at scan start [\#268](https://github.com/getbouncer/cardscan-android/pull/268) ([awushensky](https://github.com/awushensky))
 
 ## [2.0.0051](https://github.com/getbouncer/cardscan-android/tree/2.0.0051) (2020-11-10)
 
@@ -170,6 +179,7 @@
 **Merged pull requests:**
 
 - Tune the name & expiry extraction analyzers [\#230](https://github.com/getbouncer/cardscan-android/pull/230) ([awushensky](https://github.com/awushensky))
+- Split main loop [\#229](https://github.com/getbouncer/cardscan-android/pull/229) ([awushensky](https://github.com/awushensky))
 - Calculate and adapt to device speed [\#228](https://github.com/getbouncer/cardscan-android/pull/228) ([awushensky](https://github.com/awushensky))
 - Prevent duplicate final results [\#227](https://github.com/getbouncer/cardscan-android/pull/227) ([awushensky](https://github.com/awushensky))
 
@@ -177,7 +187,6 @@
 
 **Merged pull requests:**
 
-- Split main loop [\#229](https://github.com/getbouncer/cardscan-android/pull/229) ([awushensky](https://github.com/awushensky))
 - Clean up resources [\#226](https://github.com/getbouncer/cardscan-android/pull/226) ([awushensky](https://github.com/awushensky))
 
 ## [2.0.0037](https://github.com/getbouncer/cardscan-android/tree/2.0.0037) (2020-09-25)
@@ -354,9 +363,7 @@
 
 **Merged pull requests:**
 
-- Bump version to 2.0.0016 [\#154](https://github.com/getbouncer/cardscan-android/pull/154) ([smkuhne](https://github.com/smkuhne))
 - Add readmes [\#153](https://github.com/getbouncer/cardscan-android/pull/153) ([awushensky](https://github.com/awushensky))
-- Rename demo module [\#152](https://github.com/getbouncer/cardscan-android/pull/152) ([awushensky](https://github.com/awushensky))
 
 ## [2.0.0015](https://github.com/getbouncer/cardscan-android/tree/2.0.0015) (2020-07-18)
 
