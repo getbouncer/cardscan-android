@@ -10,7 +10,6 @@ import com.getbouncer.scan.framework.Loader
 import com.getbouncer.scan.framework.time.Timer
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import org.tensorflow.lite.Delegate
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.nnapi.NnApiDelegate
 import java.io.Closeable

@@ -28,9 +28,7 @@ import com.getbouncer.scan.payment.scale
 import com.getbouncer.scan.payment.size
 import com.getbouncer.scan.payment.toRGBByteBuffer
 import org.tensorflow.lite.Interpreter
-import org.tensorflow.lite.nnapi.NnApiDelegate
 import java.nio.ByteBuffer
-
 
 /** Training images are normalized with mean 127.5 and std 128.5. */
 private const val IMAGE_MEAN = 127.5f
