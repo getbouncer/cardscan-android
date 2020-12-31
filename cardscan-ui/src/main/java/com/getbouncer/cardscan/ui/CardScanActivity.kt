@@ -388,7 +388,7 @@ open class CardScanActivity :
     }
 
     override val scanFlow: CardScanFlow by lazy {
-        CardScanFlow(enableNameExtraction, enableExpiryExtraction, this, this, this)
+        CardScanFlow(enableNameExtraction, enableExpiryExtraction, this, this)
     }
 
     override val enableEnterCardManually: Boolean by lazy {
@@ -425,6 +425,7 @@ open class CardScanActivity :
             launch(Dispatchers.Default) {
                 scanFlow.launchCompletionLoop(
                     context = this@CardScanActivity,
+                    completionResultListener = this@CardScanActivity,
                     savedFrames = frames,
                     isFastDevice = isFastDevice,
                     coroutineScope = this@CardScanActivity,

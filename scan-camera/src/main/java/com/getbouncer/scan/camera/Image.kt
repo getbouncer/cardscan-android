@@ -7,6 +7,7 @@ import android.graphics.Matrix
 import android.graphics.Rect
 import android.graphics.YuvImage
 import android.media.Image
+import android.util.Log
 import android.util.Size
 import androidx.annotation.CheckResult
 import com.getbouncer.scan.camera.exception.ImageTypeNotSupportedException

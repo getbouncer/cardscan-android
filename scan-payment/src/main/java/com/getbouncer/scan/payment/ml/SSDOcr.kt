@@ -28,7 +28,9 @@ import com.getbouncer.scan.payment.scale
 import com.getbouncer.scan.payment.size
 import com.getbouncer.scan.payment.toRGBByteBuffer
 import org.tensorflow.lite.Interpreter
+import org.tensorflow.lite.nnapi.NnApiDelegate
 import java.nio.ByteBuffer
+
 
 /** Training images are normalized with mean 127.5 and std 128.5. */
 private const val IMAGE_MEAN = 127.5f
@@ -92,7 +94,9 @@ private val PRIORS = combinePriors()
  * This model performs SSD OCR recognition on a card.
  */
 class SSDOcr private constructor(interpreter: Interpreter) :
-    TensorFlowLiteAnalyzer<SSDOcr.Input, Array<ByteBuffer>, SSDOcr.Prediction, Map<Int, Array<FloatArray>>>(interpreter) {
+    TensorFlowLiteAnalyzer<SSDOcr.Input, Array<ByteBuffer>, SSDOcr.Prediction, Map<Int, Array<FloatArray>>>(
+        interpreter
+    ) {
 
     data class Input(val fullImage: TrackedImage, val previewSize: Size, val cardFinder: Rect)
 

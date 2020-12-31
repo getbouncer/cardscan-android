@@ -1,5 +1,7 @@
 package com.getbouncer.scan.framework
 
+import java.io.Closeable
+
 /**
  * The default number of analyzers to run in parallel.
  */
@@ -36,5 +38,9 @@ data class AnalyzerPool<DataFrame, State, Output>(
             desiredAnalyzerCount = desiredAnalyzerCount,
             analyzers = (0 until desiredAnalyzerCount).mapNotNull { analyzerFactory.newInstance() }
         )
+    }
+
+    fun closeAllAnalyzers() {
+        analyzers.forEach { if (it is Closeable) it.close() }
     }
 }

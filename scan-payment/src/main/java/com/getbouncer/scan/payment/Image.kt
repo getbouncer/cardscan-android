@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Rect
+import android.os.Build
 import android.util.Log
 import android.util.Size
 import androidx.annotation.CheckResult
@@ -90,8 +91,8 @@ fun hasOpenGl31(context: Context): Boolean {
     val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
     val configInfo = activityManager.deviceConfigurationInfo
 
-    val isSupported =  if (configInfo.reqGlEsVersion != ConfigurationInfo.GL_ES_VERSION_UNDEFINED) {
-        configInfo.reqGlEsVersion >= openGlVersion
+    val isSupported = if (configInfo.reqGlEsVersion != ConfigurationInfo.GL_ES_VERSION_UNDEFINED) {
+        configInfo.reqGlEsVersion >= openGlVersion && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
     } else {
         false
     }
