@@ -23,6 +23,7 @@ import com.getbouncer.scan.camera.CameraAdapter
 import com.getbouncer.scan.camera.CameraErrorListener
 import com.getbouncer.scan.camera.nv21ToYuv
 import com.getbouncer.scan.camera.rotate
+import com.getbouncer.scan.camera.scaleAndCrop
 import com.getbouncer.scan.camera.toBitmap
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.Stats
@@ -118,6 +119,7 @@ class Camera1Adapter(
                         image = bytes
                             .nv21ToYuv(imageWidth, imageHeight)
                             .toBitmap()
+                            .scaleAndCrop(minimumResolution)
                             .rotate(mRotation.toFloat()),
                         tracker = Stats.trackRepeatingTask("image_processing")
                     )

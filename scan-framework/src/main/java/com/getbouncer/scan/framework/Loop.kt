@@ -216,6 +216,8 @@ class FiniteAnalyzerLoop<DataFrame, State, Output>(
         }
     }
 
+    fun cancel() = runBlocking { unsubscribeFromFlow() }
+
     override suspend fun onResult(result: Output, data: DataFrame): Boolean {
         val framesProcessed = this.framesProcessed.incrementAndGet()
         val timeElapsed = startedAt?.elapsedSince() ?: Duration.ZERO
@@ -223,8 +225,10 @@ class FiniteAnalyzerLoop<DataFrame, State, Output>(
 
         if (framesProcessed >= framesToProcess) {
             resultHandler.onAllDataProcessed()
+            unsubscribeFromFlow()
         } else if (timeElapsed > timeLimit) {
             resultHandler.onTerminatedEarly()
+            unsubscribeFromFlow()
         }
 
         val allFramesProcessed = framesProcessed >= framesToProcess

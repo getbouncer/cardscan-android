@@ -7,10 +7,14 @@ import android.graphics.Matrix
 import android.graphics.Rect
 import android.graphics.YuvImage
 import android.media.Image
+import android.util.Size
 import androidx.annotation.CheckResult
 import com.getbouncer.scan.camera.exception.ImageTypeNotSupportedException
+import com.getbouncer.scan.framework.util.centerOn
+import com.getbouncer.scan.framework.util.toRect
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
+import kotlin.math.max
 
 /**
  * Determine if this application supports an image format.
@@ -195,3 +199,16 @@ fun Bitmap.scale(percentage: Float, filter: Boolean = false): Bitmap = if (perce
         filter
     )
 }
+
+@CheckResult
+fun Bitmap.getSize() = Size(this.width, this.height)
+
+@CheckResult
+fun Bitmap.scaleAndCrop(size: Size, filter: Boolean = false): Bitmap =
+    if (size.width == width && size.height == height) {
+        this
+    } else {
+        val scaleFactor = max(size.width.toFloat() / this.width, size.height.toFloat() / this.height)
+        val scaled = this.scale(scaleFactor, filter)
+        scaled.crop(size.centerOn(scaled.getSize().toRect()))
+    }

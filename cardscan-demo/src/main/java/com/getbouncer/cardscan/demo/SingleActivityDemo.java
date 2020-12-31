@@ -244,8 +244,7 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
                 true,
                 true,
                 aggregateResultListener,
-                this,
-                completionLoopListener
+                this
             );
             cardScanFlow.startFlow(
                 this,
@@ -494,6 +493,7 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
             SingleActivityDemo.this.pan = result.getPan();
             cardScanFlow.launchCompletionLoop(
                 SingleActivityDemo.this,
+                completionLoopListener,
                 cardScanFlow.selectCompletionLoopFrames(
                     result.getAverageFrameRate(),
                     result.getSavedFrames()

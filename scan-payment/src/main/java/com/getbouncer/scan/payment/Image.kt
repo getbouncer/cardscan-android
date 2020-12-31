@@ -7,8 +7,11 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Rect
+import android.os.Build
+import android.util.Log
 import android.util.Size
 import androidx.annotation.CheckResult
+import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.util.intersectionWith
 import com.getbouncer.scan.framework.util.move
 import com.getbouncer.scan.framework.util.resizeRegion
@@ -88,11 +91,14 @@ fun hasOpenGl31(context: Context): Boolean {
     val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
     val configInfo = activityManager.deviceConfigurationInfo
 
-    return if (configInfo.reqGlEsVersion != ConfigurationInfo.GL_ES_VERSION_UNDEFINED) {
-        configInfo.reqGlEsVersion >= openGlVersion
+    val isSupported = if (configInfo.reqGlEsVersion != ConfigurationInfo.GL_ES_VERSION_UNDEFINED) {
+        configInfo.reqGlEsVersion >= openGlVersion && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
     } else {
         false
     }
+
+    Log.d(Config.logTag, "OpenGL is supported? $isSupported")
+    return isSupported
 }
 
 /**

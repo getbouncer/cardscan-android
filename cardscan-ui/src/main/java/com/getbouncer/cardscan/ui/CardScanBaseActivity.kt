@@ -45,7 +45,7 @@ interface CardScanResultListener : ScanResultListener {
     fun enterManually()
 }
 
-private val MINIMUM_RESOLUTION = Size(1280, 720) // minimum size of an object square
+private val MINIMUM_RESOLUTION = Size(1067, 600) // minimum size of screen detect
 
 private fun DetectionBox.forDebug() = DebugDetectionBox(rect, confidence, label.toString())
 

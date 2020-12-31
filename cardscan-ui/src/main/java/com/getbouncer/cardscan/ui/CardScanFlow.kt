@@ -37,7 +37,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 data class SavedFrame(
     val pan: String?,
@@ -58,7 +57,6 @@ open class CardScanFlow(
     private val enableExpiryExtraction: Boolean,
     private val scanResultListener: AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult>,
     private val scanErrorListener: AnalyzerLoopErrorListener,
-    private val completionResultListener: CompletionLoopListener,
 ) : ScanFlow {
     companion object {
         private const val MAX_COMPLETION_LOOP_FRAMES_FAST_DEVICE = 8
@@ -114,9 +112,14 @@ open class CardScanFlow(
      */
     private var canceled = false
 
+    private var mainLoopAnalyzerPool: AnalyzerPool<SSDOcr.Input, MainLoopState, MainLoopAnalyzer.Prediction>? = null
     private var mainLoopAggregator: MainLoopAggregator? = null
     private var mainLoop: ProcessBoundAnalyzerLoop<SSDOcr.Input, MainLoopState, MainLoopAnalyzer.Prediction>? = null
     private var mainLoopJob: Job? = null
+
+    private var completionLoopAnalyzerPool: AnalyzerPool<SavedFrame, Unit, CompletionLoopAnalyzer.Prediction>? = null
+    private var completionLoop: FiniteAnalyzerLoop<SavedFrame, Unit, CompletionLoopAnalyzer.Prediction>? = null
+    private var completionLoopJob: Job? = null
 
     /**
      * Start the image processing flow for scanning a card.
@@ -139,8 +142,13 @@ open class CardScanFlow(
                     mainLoop?.unsubscribe()
                     mainLoop = null
 
-                    mainLoopJob?.cancel()
+                    mainLoopJob?.apply { if (isActive) { cancel() } }
+                    mainLoopJob = null
+
                     mainLoopAggregator = null
+
+                    mainLoopAnalyzerPool?.closeAllAnalyzers()
+                    mainLoopAnalyzerPool = null
 
                     scanResultListener.onResult(result)
                 }
@@ -158,9 +166,9 @@ open class CardScanFlow(
             return@launch
         }
 
-        mainLoopAggregator = MainLoopAggregator(listener).also { mainLoopOcrAggregator ->
+        mainLoopAggregator = MainLoopAggregator(listener).also { aggregator ->
             // make this result aggregator pause and reset when the lifecycle pauses.
-            mainLoopOcrAggregator.bindToLifecycle(lifecycleOwner)
+            aggregator.bindToLifecycle(lifecycleOwner)
 
             val analyzerPool = AnalyzerPool.of(
                 MainLoopAnalyzer.Factory(
@@ -168,13 +176,14 @@ open class CardScanFlow(
                     CardDetect.Factory(context, getCardDetectModel(context, true)),
                 )
             )
+            mainLoopAnalyzerPool = analyzerPool
 
             mainLoop = ProcessBoundAnalyzerLoop(
                 analyzerPool = analyzerPool,
-                resultHandler = mainLoopOcrAggregator,
+                resultHandler = aggregator,
                 analyzerLoopErrorListener = scanErrorListener,
             ).apply {
-                subscribeTo(
+                mainLoopJob = subscribeTo(
                     imageStream.map {
                         SSDOcr.Input(
                             fullImage = it,
@@ -193,7 +202,6 @@ open class CardScanFlow(
      */
     override fun cancelFlow() {
         canceled = true
-        canceled = true
 
         mainLoopAggregator?.run { cancel() }
         mainLoopAggregator = null
@@ -201,12 +209,25 @@ open class CardScanFlow(
         mainLoop?.unsubscribe()
         mainLoop = null
 
+        mainLoopAnalyzerPool?.closeAllAnalyzers()
+        mainLoopAnalyzerPool = null
+
         mainLoopJob?.apply { if (isActive) { cancel() } }
         mainLoopJob = null
+
+        completionLoop?.cancel()
+        completionLoop = null
+
+        completionLoopAnalyzerPool?.closeAllAnalyzers()
+        completionLoopAnalyzerPool = null
+
+        completionLoopJob?.apply { if (isActive) { cancel() } }
+        completionLoopJob = null
     }
 
     open fun launchCompletionLoop(
         context: Context,
+        completionResultListener: CompletionLoopListener,
         savedFrames: Collection<SavedFrame>,
         isFastDevice: Boolean,
         coroutineScope: CoroutineScope,
@@ -218,36 +239,61 @@ open class CardScanFlow(
         val analyzerPool = AnalyzerPool.of(
             CompletionLoopAnalyzer.Factory(
                 nameAndExpiryFactory = NameAndExpiryAnalyzer.Factory(
-                    textDetectFactory = TextDetect.Factory(context, getTextDetectorModel(context, true)),
-                    alphabetDetectFactory = AlphabetDetect.Factory(context, getAlphabetDetectorModel(context, true)),
-                    expiryDetectFactory = ExpiryDetect.Factory(context, getExpiryDetectorModel(context, true)),
+                    textDetectFactory = TextDetect.Factory(
+                        context,
+                        getTextDetectorModel(context, true)
+                    ),
+                    alphabetDetectFactory = AlphabetDetect.Factory(
+                        context,
+                        getAlphabetDetectorModel(context, true)
+                    ),
+                    expiryDetectFactory = ExpiryDetect.Factory(
+                        context,
+                        getExpiryDetectorModel(context, true)
+                    ),
                     runNameExtraction = enableNameExtraction && isFastDevice,
                     runExpiryExtraction = enableExpiryExtraction,
                 )
             )
         )
+        completionLoopAnalyzerPool = analyzerPool
 
-        FiniteAnalyzerLoop(
+        completionLoop = FiniteAnalyzerLoop(
             analyzerPool = analyzerPool,
-            resultHandler = CompletionLoopAggregator(completionResultListener),
+            resultHandler = CompletionLoopAggregator(object : CompletionLoopListener {
+                override fun onCompletionLoopDone(result: CompletionLoopResult) {
+                    completionLoop = null
+
+                    completionLoopAnalyzerPool?.closeAllAnalyzers()
+                    completionLoopAnalyzerPool = null
+
+                    completionLoopJob?.apply { if (isActive) { cancel() } }
+                    completionLoopJob = null
+
+                    completionResultListener.onCompletionLoopDone(result)
+                }
+
+                override fun onCompletionLoopFrameProcessed(
+                    result: CompletionLoopAnalyzer.Prediction,
+                    frame: SavedFrame
+                ) = completionResultListener.onCompletionLoopFrameProcessed(result, frame)
+            }),
             analyzerLoopErrorListener = object : AnalyzerLoopErrorListener {
                 override fun onAnalyzerFailure(t: Throwable): Boolean {
                     Log.e(Config.logTag, "Completion loop analyzer failure", t)
-                    runBlocking {
-                        completionResultListener.onCompletionLoopDone(CompletionLoopResult())
-                    }
+                    completionResultListener.onCompletionLoopDone(CompletionLoopResult())
                     return true // terminate the loop on any analyzer failures
                 }
 
                 override fun onResultFailure(t: Throwable): Boolean {
                     Log.e(Config.logTag, "Completion loop result failures", t)
-                    runBlocking {
-                        completionResultListener.onCompletionLoopDone(CompletionLoopResult())
-                    }
+                    completionResultListener.onCompletionLoopDone(CompletionLoopResult())
                     return true // terminate the loop on any result failures
                 }
             }
-        ).process(savedFrames, coroutineScope)
+        ).apply {
+            completionLoopJob = process(savedFrames, coroutineScope)
+        }
     }.let { }
 
     /**

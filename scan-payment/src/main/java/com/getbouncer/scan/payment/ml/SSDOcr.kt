@@ -92,7 +92,9 @@ private val PRIORS = combinePriors()
  * This model performs SSD OCR recognition on a card.
  */
 class SSDOcr private constructor(interpreter: Interpreter) :
-    TensorFlowLiteAnalyzer<SSDOcr.Input, Array<ByteBuffer>, SSDOcr.Prediction, Map<Int, Array<FloatArray>>>(interpreter) {
+    TensorFlowLiteAnalyzer<SSDOcr.Input, Array<ByteBuffer>, SSDOcr.Prediction, Map<Int, Array<FloatArray>>>(
+        interpreter
+    ) {
 
     data class Input(val fullImage: TrackedImage, val previewSize: Size, val cardFinder: Rect)
 
@@ -212,7 +214,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
     ) : TFLAnalyzerFactory<Input, Unit, Prediction, SSDOcr>(context, fetchedModel) {
         companion object {
             private const val USE_GPU = false
-            private const val DEFAULT_THREADS = 4
+            private const val DEFAULT_THREADS = 3
 
             val TRAINED_IMAGE_SIZE = Size(600, 375)
         }

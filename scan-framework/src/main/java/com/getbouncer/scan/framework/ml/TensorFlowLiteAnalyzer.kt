@@ -11,6 +11,7 @@ import com.getbouncer.scan.framework.time.Timer
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.tensorflow.lite.Interpreter
+import org.tensorflow.lite.nnapi.NnApiDelegate
 import java.io.Closeable
 import java.nio.ByteBuffer
 
@@ -19,6 +20,7 @@ import java.nio.ByteBuffer
  */
 abstract class TensorFlowLiteAnalyzer<Input, MLInput, Output, MLOutput>(
     private val tfInterpreter: Interpreter,
+    private val delegate: NnApiDelegate? = null,
 ) : Analyzer<Input, Unit, Output>, Closeable {
 
     protected abstract suspend fun interpretMLOutput(data: Input, mlOutput: MLOutput): Output
@@ -45,7 +47,10 @@ abstract class TensorFlowLiteAnalyzer<Input, MLInput, Output, MLOutput>(
         }
     }
 
-    override fun close() = tfInterpreter.close()
+    override fun close() {
+        tfInterpreter.close()
+        delegate?.close()
+    }
 }
 
 /**
