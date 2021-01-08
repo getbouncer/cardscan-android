@@ -521,7 +521,7 @@ class MemoizeTest {
         // TODO: this should ideally use `runBlockingTest`, but that does not actually advance the time
         var functionRunCount = 0
 
-        val testFunction = memoizeSuspend { input1: Int, input2: Int ->
+        val testFunction = memoizeSuspend(50.milliseconds) { input1: Int, input2: Int ->
             functionRunCount++
             delay(1.milliseconds)
             input1 > 0 && input2 > 0
@@ -735,7 +735,7 @@ class MemoizeTest {
         // TODO: this should ideally use `runBlockingTest`, but that does not actually advance the time
         var functionRunCount = 0
 
-        val testFunction = memoizeSuspend { input1: Int, input2: Int, input3: Int ->
+        val testFunction = memoizeSuspend(50.milliseconds) { input1: Int, input2: Int, input3: Int ->
             functionRunCount++
             delay(1.milliseconds)
             input1 > 0 && input2 > 0 && input3 > 0
