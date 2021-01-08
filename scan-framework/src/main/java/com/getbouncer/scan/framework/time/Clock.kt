@@ -15,20 +15,26 @@ fun Long.asEpochMillisecondsClockMark(): ClockMark = AbsoluteClockMark(this)
 /**
  * A marked point in time.
  */
-interface ClockMark {
-    fun elapsedSince(): Duration
+sealed class ClockMark {
+    abstract fun elapsedSince(): Duration
 
-    fun toMillisecondsSinceEpoch(): Long
+    abstract fun toMillisecondsSinceEpoch(): Long
 
-    fun hasPassed(): Boolean
+    abstract fun hasPassed(): Boolean
 
-    fun isInFuture(): Boolean
+    abstract fun isInFuture(): Boolean
+
+    abstract operator fun plus(duration: Duration): ClockMark
+
+    abstract operator fun minus(duration: Duration): ClockMark
+
+    abstract operator fun compareTo(other: ClockMark): Int
 }
 
 /**
  * A clock mark based on milliseconds since epoch. This is precise to the nearest millisecond.
  */
-private class AbsoluteClockMark(private val millisecondsSinceEpoch: Long) : ClockMark {
+private class AbsoluteClockMark(private val millisecondsSinceEpoch: Long) : ClockMark() {
     override fun elapsedSince(): Duration = (System.currentTimeMillis() - millisecondsSinceEpoch).milliseconds
 
     override fun toMillisecondsSinceEpoch(): Long = millisecondsSinceEpoch
@@ -36,6 +42,15 @@ private class AbsoluteClockMark(private val millisecondsSinceEpoch: Long) : Cloc
     override fun hasPassed(): Boolean = elapsedSince() > Duration.ZERO
 
     override fun isInFuture(): Boolean = elapsedSince() < Duration.ZERO
+
+    override fun plus(duration: Duration): ClockMark =
+        AbsoluteClockMark(millisecondsSinceEpoch + duration.inMilliseconds.toLong())
+
+    override fun minus(duration: Duration): ClockMark =
+        AbsoluteClockMark(millisecondsSinceEpoch - duration.inMilliseconds.toLong())
+
+    override fun compareTo(other: ClockMark): Int =
+        millisecondsSinceEpoch.compareTo(other.toMillisecondsSinceEpoch())
 
     override fun equals(other: Any?): Boolean =
         this === other || when (other) {
@@ -56,8 +71,8 @@ private class AbsoluteClockMark(private val millisecondsSinceEpoch: Long) : Cloc
 /**
  * A precise clock mark that is not bound to epoch seconds. This is precise to the nearest nanosecond.
  */
-private class PreciseClockMark(private val originMark: Long) : ClockMark {
-    override fun elapsedSince(): Duration = (System.nanoTime() - originMark).nanoseconds
+private class PreciseClockMark(private val originMarkNanoseconds: Long) : ClockMark() {
+    override fun elapsedSince(): Duration = (System.nanoTime() - originMarkNanoseconds).nanoseconds
 
     override fun toMillisecondsSinceEpoch(): Long = System.currentTimeMillis() - elapsedSince().inMilliseconds.toLong()
 
@@ -65,15 +80,23 @@ private class PreciseClockMark(private val originMark: Long) : ClockMark {
 
     override fun isInFuture(): Boolean = elapsedSince() < Duration.ZERO
 
+    override fun plus(duration: Duration): ClockMark =
+        PreciseClockMark(originMarkNanoseconds + duration.inNanoseconds)
+
+    override fun minus(duration: Duration): ClockMark =
+        PreciseClockMark(originMarkNanoseconds + duration.inNanoseconds)
+
+    override fun compareTo(other: ClockMark): Int = elapsedSince().compareTo(other.elapsedSince())
+
     override fun equals(other: Any?): Boolean =
         this === other || when (other) {
-            is PreciseClockMark -> originMark == other.originMark
+            is PreciseClockMark -> originMarkNanoseconds == other.originMarkNanoseconds
             is ClockMark -> toMillisecondsSinceEpoch() == other.toMillisecondsSinceEpoch()
             else -> false
         }
 
     override fun hashCode(): Int {
-        return originMark.hashCode()
+        return originMarkNanoseconds.hashCode()
     }
 
     override fun toString(): String = elapsedSince().let {
