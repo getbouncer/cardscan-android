@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.0064](https://github.com/getbouncer/cardscan-android/tree/2.0.0064) (2021-01-09)
+
+**Merged pull requests:**
+
+- Allow optional fetchers [\#305](https://github.com/getbouncer/cardscan-android/pull/305) ([awushensky](https://github.com/awushensky))
+
 ## [2.0.0063](https://github.com/getbouncer/cardscan-android/tree/2.0.0063) (2021-01-04)
 
 ## [2.0.0062](https://github.com/getbouncer/cardscan-android/tree/2.0.0062) (2020-12-31)
@@ -253,6 +259,7 @@
 **Merged pull requests:**
 
 - Add unit tests for cardscan state machine [\#206](https://github.com/getbouncer/cardscan-android/pull/206) ([awushensky](https://github.com/awushensky))
+- Quick read support for android [\#203](https://github.com/getbouncer/cardscan-android/pull/203) ([dxaen](https://github.com/dxaen))
 
 ## [2.0.0029](https://github.com/getbouncer/cardscan-android/tree/2.0.0029) (2020-09-08)
 
@@ -260,7 +267,6 @@
 
 - Add proguard rules for tensorflow [\#205](https://github.com/getbouncer/cardscan-android/pull/205) ([awushensky](https://github.com/awushensky))
 - Standardize expiry to strings [\#204](https://github.com/getbouncer/cardscan-android/pull/204) ([awushensky](https://github.com/awushensky))
-- Quick read support for android [\#203](https://github.com/getbouncer/cardscan-android/pull/203) ([dxaen](https://github.com/dxaen))
 
 ## [2.0.0028](https://github.com/getbouncer/cardscan-android/tree/2.0.0028) (2020-09-03)
 
