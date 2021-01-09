@@ -35,7 +35,7 @@ class ExpiryDetectTest {
         val fetcher = ExpiryDetect.ModelFetcher(testContext)
         fetcher.clearCache()
 
-        val factory = ExpiryDetect.Factory(testContext, fetcher.fetchData(false))
+        val factory = ExpiryDetect.Factory(testContext, fetcher.fetchData(forImmediateUse = false, isOptional = false))
 
         assertNotNull(factory.newInstance())
     }.let { }

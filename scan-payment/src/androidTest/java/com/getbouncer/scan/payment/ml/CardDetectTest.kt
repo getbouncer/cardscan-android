@@ -28,7 +28,7 @@ class CardDetectTest {
     @MediumTest
     fun cardDetect_pan() = runBlocking {
         val bitmap = testContext.resources.getDrawable(R.drawable.card_pan, null).toBitmap()
-        val model = CardDetect.Factory(appContext, CardDetect.ModelFetcher(appContext).fetchData(false)).newInstance()
+        val model = CardDetect.Factory(appContext, CardDetect.ModelFetcher(appContext).fetchData(forImmediateUse = false, isOptional = false)).newInstance()
         assertNotNull(model)
 
         val prediction = model.analyze(CardDetect.Input(TrackedImage(bitmap, Stats.trackTask("no_op")), bitmap.size(), bitmap.size().toRect()), Unit)
@@ -47,7 +47,7 @@ class CardDetectTest {
     @MediumTest
     fun cardDetect_noPan() = runBlocking {
         val bitmap = testContext.resources.getDrawable(R.drawable.card_no_pan, null).toBitmap()
-        val model = CardDetect.Factory(appContext, CardDetect.ModelFetcher(appContext).fetchData(false)).newInstance()
+        val model = CardDetect.Factory(appContext, CardDetect.ModelFetcher(appContext).fetchData(forImmediateUse = false, isOptional = false)).newInstance()
         assertNotNull(model)
 
         val prediction = model.analyze(CardDetect.Input(TrackedImage(bitmap, Stats.trackTask("no_op")), bitmap.size(), bitmap.size().toRect()), Unit)
@@ -66,7 +66,7 @@ class CardDetectTest {
     @MediumTest
     fun cardDetect_noCard() = runBlocking {
         val bitmap = testContext.resources.getDrawable(R.drawable.card_no_card, null).toBitmap()
-        val model = CardDetect.Factory(appContext, CardDetect.ModelFetcher(appContext).fetchData(false)).newInstance()
+        val model = CardDetect.Factory(appContext, CardDetect.ModelFetcher(appContext).fetchData(forImmediateUse = false, isOptional = false)).newInstance()
         assertNotNull(model)
 
         val prediction = model.analyze(CardDetect.Input(TrackedImage(bitmap, Stats.trackTask("no_op")), bitmap.size(), bitmap.size().toRect()), Unit)

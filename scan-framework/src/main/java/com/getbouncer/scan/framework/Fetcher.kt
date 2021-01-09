@@ -10,12 +10,11 @@ import com.getbouncer.scan.framework.api.getModelDetails
 import com.getbouncer.scan.framework.api.getModelSignedUrl
 import com.getbouncer.scan.framework.time.ClockMark
 import com.getbouncer.scan.framework.time.asEpochMillisecondsClockMark
+import com.getbouncer.scan.framework.time.days
 import com.getbouncer.scan.framework.time.weeks
 import com.getbouncer.scan.framework.util.memoizeSuspend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
@@ -115,8 +114,10 @@ interface Fetcher {
     /**
      * Prepare data to be loaded into memory. If the fetched data is to be used immediately, the fetcher will prioritize
      * fetching from the cache over getting the latest version.
+     *
+     * @param forImmediateUse: if there is a cached version of the model, return that immediately instead of downloading a new model
      */
-    suspend fun fetchData(forImmediateUse: Boolean): FetchedData
+    suspend fun fetchData(forImmediateUse: Boolean, isOptional: Boolean): FetchedData
 }
 
 /**
@@ -128,7 +129,7 @@ abstract class ResourceFetcher : Fetcher {
     protected abstract val hashAlgorithm: String
     protected abstract val resource: Int
 
-    override suspend fun fetchData(forImmediateUse: Boolean): FetchedResource =
+    override suspend fun fetchData(forImmediateUse: Boolean, isOptional: Boolean): FetchedResource =
         FetchedResource(
             modelClass = modelClass,
             modelFrameworkVersion = modelFrameworkVersion,
@@ -145,8 +146,6 @@ abstract class ResourceFetcher : Fetcher {
 sealed class WebFetcher(protected val context: Context) : Fetcher {
     protected data class DownloadDetails(val url: URL, val hash: String, val hashAlgorithm: String, val modelVersion: String)
 
-    private val fetchDataMutex = Mutex()
-
     /**
      * Keep track of any exceptions that occurred when fetching data  after the specified number of retries. This is
      * used to prevent the fetcher from repeatedly trying to fetch the data from multiple threads after the number of
@@ -154,7 +153,7 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
      */
     private var fetchException: Throwable? = null
 
-    override suspend fun fetchData(forImmediateUse: Boolean): FetchedData = fetchDataMutex.withLock {
+    override suspend fun fetchData(forImmediateUse: Boolean, isOptional: Boolean): FetchedData {
         val stat = Stats.trackPersistentRepeatingTask("web_fetcher_$modelClass")
         val cachedData = FetchedData.fromFetchedModelMeta(modelClass, modelFrameworkVersion, tryFetchLatestCachedData())
 
@@ -165,7 +164,7 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
             } else {
                 stat.trackResult(this::class.java.simpleName)
             }
-            return@withLock cachedData
+            return@fetchData cachedData
         }
 
         // attempt to fetch the data from local cache if it's needed immediately
@@ -174,36 +173,41 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
                 val data = FetchedData.fromFetchedModelMeta(modelClass, modelFrameworkVersion, this)
                 if (data.successfullyFetched) {
                     stat.trackResult("success")
-                    return@withLock data
+                    return@fetchData data
                 }
             }
         }
 
         // get details for downloading the data. If download details cannot be retrieved, use the latest cached version
-        val downloadDetails = getDownloadDetails(cachedData.modelHash, cachedData.modelHashAlgorithm) ?: run {
+        val downloadDetails = fetchDownloadDetails(cachedData.modelHash, cachedData.modelHashAlgorithm) ?: run {
             stat.trackResult("no_download_details")
-            return@withLock cachedData
+            return@fetchData cachedData
         }
 
-        // check the local cache for a matching model
-        tryFetchMatchingCachedFile(downloadDetails.hash, downloadDetails.hashAlgorithm).run {
-            val data = FetchedData.fromFetchedModelMeta(modelClass, modelFrameworkVersion, this)
-            if (data.successfullyFetched) {
-                stat.trackResult("success")
-                return@withLock data
-            }
-        }
-
-        // download the model
-        val downloadOutputFile = getDownloadOutputFile(downloadDetails.modelVersion)
-        try {
-            downloadAndVerify(
-                context,
-                downloadDetails.url,
-                downloadOutputFile,
-                downloadDetails.hash,
-                downloadDetails.hashAlgorithm,
+        // if no cache is available, this is needed immediately, and this is optional, return a download failure
+        if (forImmediateUse && isOptional) {
+            return FetchedData.fromFetchedModelMeta(
+                modelClass = modelClass,
+                modelFrameworkVersion = modelFrameworkVersion,
+                meta = FetchedModelFileMeta(
+                    modelVersion = downloadDetails.modelVersion,
+                    hashAlgorithm = downloadDetails.hashAlgorithm,
+                    modelFile = null
+                )
             )
+        }
+
+        return try {
+            // check the local cache for a matching model
+            tryFetchMatchingCachedFile(downloadDetails.hash, downloadDetails.hashAlgorithm).run {
+                val data = FetchedData.fromFetchedModelMeta(modelClass, modelFrameworkVersion, this)
+                if (data.successfullyFetched) {
+                    stat.trackResult("success")
+                    return@fetchData data
+                }
+            }
+
+            downloadData(downloadDetails)
         } catch (t: Throwable) {
             fetchException = t
             if (cachedData.successfullyFetched) {
@@ -213,19 +217,39 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
                 Log.e(Config.logTag, "Failed to download model $modelClass, no local cache available", t)
                 stat.trackResult(t::class.java.simpleName)
             }
-            return@withLock cachedData
+            cachedData
         }
+    }
 
-        cleanUpPostDownload(downloadOutputFile)
+    private val fetchDownloadDetails = memoizeSuspend(3.days) { cachedHash: String?, cachedHashAlgorithm: String? ->
+        getDownloadDetails(cachedHash, cachedHashAlgorithm)
+    }
 
-        FetchedFile(
-            modelClass = modelClass,
-            modelFrameworkVersion = modelFrameworkVersion,
-            modelVersion = downloadDetails.modelVersion,
-            modelHash = downloadDetails.hash,
-            modelHashAlgorithm = downloadDetails.hashAlgorithm,
-            file = downloadOutputFile,
-        )
+    /**
+     * Download the data using memoization so that data is only downloaded once
+     */
+    private val downloadData = memoizeSuspend { downloadDetails: DownloadDetails ->
+        val downloadOutputFile = getDownloadOutputFile(downloadDetails.modelVersion)
+        try {
+            downloadAndVerify(
+                context = context,
+                url = downloadDetails.url,
+                outputFile = downloadOutputFile,
+                hash = downloadDetails.hash,
+                hashAlgorithm = downloadDetails.hashAlgorithm,
+            )
+
+            return@memoizeSuspend FetchedFile(
+                modelClass = modelClass,
+                modelFrameworkVersion = modelFrameworkVersion,
+                modelVersion = downloadDetails.modelVersion,
+                modelHash = downloadDetails.hash,
+                modelHashAlgorithm = downloadDetails.hashAlgorithm,
+                file = downloadOutputFile,
+            )
+        } finally {
+            cleanUpPostDownload(downloadOutputFile)
+        }
     }
 
     /**
