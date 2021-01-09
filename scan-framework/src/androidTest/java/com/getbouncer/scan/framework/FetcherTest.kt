@@ -267,7 +267,7 @@ class FetcherTest {
         val fetcher = FetcherImpl()
         fetcher.clearCache()
 
-        val fetchedModel = fetcher.fetchData(forImmediateUse = true, isOptional = false)
+        val fetchedModel = fetcher.fetchData(forImmediateUse = false, isOptional = false)
         assertTrue { fetchedModel is FetchedFile }
 
         assertNull((fetchedModel as FetchedFile).file)
@@ -289,8 +289,8 @@ class FetcherTest {
         val fetcher = FetcherImpl()
         fetcher.clearCache()
 
-        val fetchedModel = fetcher.fetchData(forImmediateUse = true, isOptional = false)
-        assertTrue { fetchedModel is FetchedFile }
+        val fetchedModel = fetcher.fetchData(forImmediateUse = false, isOptional = false)
+        assertTrue("fetchedModel is $fetchedModel") { fetchedModel is FetchedFile }
 
         val file = (fetchedModel as FetchedFile).file
         assertNotNull(file)
@@ -341,7 +341,7 @@ class FetcherTest {
         val fetcher = FetcherImpl()
         fetcher.clearCache()
 
-        val fetchedModel = fetcher.fetchData(forImmediateUse = true, isOptional = false)
+        val fetchedModel = fetcher.fetchData(forImmediateUse = false, isOptional = false)
         assertTrue { fetchedModel is FetchedResource }
 
         assertEquals(R.raw.sample_resource, (fetchedModel as FetchedResource).resourceId)
