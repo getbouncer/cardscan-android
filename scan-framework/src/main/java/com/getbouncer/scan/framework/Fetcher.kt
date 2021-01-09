@@ -157,16 +157,6 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
         val stat = Stats.trackPersistentRepeatingTask("web_fetcher_$modelClass")
         val cachedData = FetchedData.fromFetchedModelMeta(modelClass, modelFrameworkVersion, tryFetchLatestCachedData())
 
-        // if a previous exception was encountered, attempt to fetch cached data
-        fetchException?.run {
-            if (cachedData.successfullyFetched) {
-                stat.trackResult("success")
-            } else {
-                stat.trackResult(this::class.java.simpleName)
-            }
-            return@fetchData cachedData
-        }
-
         // attempt to fetch the data from local cache if it's needed immediately
         if (forImmediateUse) {
             tryFetchLatestCachedData().run {
@@ -223,15 +213,25 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
         }
     }
 
+    /**
+     * Get information about what version of the model to download.
+     */
     private val fetchDownloadDetails = memoizeSuspend(3.days) { cachedHash: String?, cachedHashAlgorithm: String? ->
         getDownloadDetails(cachedHash, cachedHashAlgorithm)
     }
 
     /**
-     * Download the data using memoization so that data is only downloaded once
+     * Download the data using memoization so that data is only downloaded once.
      */
     private val downloadData = memoizeSuspend { downloadDetails: DownloadDetails ->
         val downloadOutputFile = getDownloadOutputFile(downloadDetails.modelVersion)
+
+        // if a previous exception was encountered, attempt to fetch cached data
+        fetchException?.run {
+            Log.d(Config.logTag, "Previous exception encountered for $modelClass, rethrowing")
+            throw this
+        }
+
         try {
             downloadAndVerify(
                 context = context,
