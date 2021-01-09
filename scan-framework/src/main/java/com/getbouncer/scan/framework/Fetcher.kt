@@ -180,12 +180,14 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
 
         // get details for downloading the data. If download details cannot be retrieved, use the latest cached version
         val downloadDetails = fetchDownloadDetails(cachedData.modelHash, cachedData.modelHashAlgorithm) ?: run {
+            Log.d(Config.logTag, "Not downloading $modelClass, using cached version ${cachedData.modelVersion}")
             stat.trackResult("no_download_details")
             return@fetchData cachedData
         }
 
         // if no cache is available, this is needed immediately, and this is optional, return a download failure
         if (forImmediateUse && isOptional) {
+            Log.d(Config.logTag, "Optional $modelClass needed for immediate use, but no cache available.")
             return FetchedData.fromFetchedModelMeta(
                 modelClass = modelClass,
                 modelFrameworkVersion = modelFrameworkVersion,
@@ -239,6 +241,7 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
                 hashAlgorithm = downloadDetails.hashAlgorithm,
             )
 
+            Log.d(Config.logTag, "$modelClass downloaded version ${downloadDetails.modelVersion}")
             return@memoizeSuspend FetchedFile(
                 modelClass = modelClass,
                 modelFrameworkVersion = modelFrameworkVersion,
@@ -402,6 +405,7 @@ abstract class UpdatingModelWebFetcher(context: Context) : SignedUrlModelWebFetc
     ): DownloadDetails? {
         cachedDownloadDetails?.let { return DownloadDetails(url, hash, hashAlgorithm, modelVersion) }
 
+        Log.d("AGW", "getDownloadDetails for $modelClass $modelVersion with $hashAlgorithm=$hash")
         val nextUpgradeTime = getNextUpgradeTime()
         when {
             nextUpgradeTime.hasPassed() ->

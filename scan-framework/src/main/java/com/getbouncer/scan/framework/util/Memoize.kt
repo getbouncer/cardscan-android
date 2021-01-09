@@ -1,5 +1,6 @@
 package com.getbouncer.scan.framework.util
 
+import android.util.Log
 import com.getbouncer.scan.framework.time.Clock
 import com.getbouncer.scan.framework.time.ClockMark
 import com.getbouncer.scan.framework.time.Duration
