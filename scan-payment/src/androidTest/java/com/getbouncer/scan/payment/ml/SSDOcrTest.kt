@@ -28,7 +28,7 @@ class SSDOcrTest {
     @MediumTest
     fun resourceModelExecution_works() = runBlocking {
         val bitmap = testContext.resources.getDrawable(R.drawable.ocr_card_numbers_clear, null).toBitmap()
-        val model = SSDOcr.Factory(appContext, SSDOcr.ModelFetcher(appContext).fetchData(false)).newInstance()
+        val model = SSDOcr.Factory(appContext, SSDOcr.ModelFetcher(appContext).fetchData(forImmediateUse = false, isOptional = false)).newInstance()
         assertNotNull(model)
 
         val prediction = model.analyze(SSDOcr.Input(TrackedImage(bitmap, Stats.trackTask("no_op")), bitmap.size(), bitmap.size().toRect()), Unit)
@@ -47,7 +47,7 @@ class SSDOcrTest {
     @MediumTest
     fun resourceModelExecution_worksRepeatedly() = runBlocking {
         val bitmap = testContext.resources.getDrawable(R.drawable.ocr_card_numbers_clear, null).toBitmap()
-        val model = SSDOcr.Factory(appContext, SSDOcr.ModelFetcher(appContext).fetchData(false)).newInstance()
+        val model = SSDOcr.Factory(appContext, SSDOcr.ModelFetcher(appContext).fetchData(forImmediateUse = false, isOptional = false)).newInstance()
         assertNotNull(model)
 
         val prediction1 = model.analyze(SSDOcr.Input(TrackedImage(bitmap, Stats.trackTask("no_op")), bitmap.size(), bitmap.size().toRect()), Unit)
