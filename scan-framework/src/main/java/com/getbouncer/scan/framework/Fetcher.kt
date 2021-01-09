@@ -405,7 +405,6 @@ abstract class UpdatingModelWebFetcher(context: Context) : SignedUrlModelWebFetc
     ): DownloadDetails? {
         cachedDownloadDetails?.let { return DownloadDetails(url, hash, hashAlgorithm, modelVersion) }
 
-        Log.d("AGW", "getDownloadDetails for $modelClass $modelVersion with $hashAlgorithm=$hash")
         val nextUpgradeTime = getNextUpgradeTime()
         when {
             nextUpgradeTime.hasPassed() ->
