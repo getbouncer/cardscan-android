@@ -483,10 +483,7 @@ abstract class UpdatingModelWebFetcher(context: Context) : SignedUrlModelWebFetc
             .listFiles()
             ?.filter { it != downloadedFile && calculateHash(it, defaultModelHashAlgorithm) != defaultModelHash }
             ?.sortedByDescending { it.lastModified() }
-            ?.filterIndexed { index, file ->
-                file.lastModified().asEpochMillisecondsClockMark()
-                    .elapsedSince() > CACHE_MODEL_TIME || index > CACHE_MODEL_MAX_COUNT
-            }
+            ?.filterIndexed { index, _ -> index > CACHE_MODEL_MAX_COUNT }
             ?.forEach { it.delete() }
             .let { }
     }
