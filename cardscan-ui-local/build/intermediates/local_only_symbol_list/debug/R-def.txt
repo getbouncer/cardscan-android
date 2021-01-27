@@ -1,0 +1,8 @@
+R_DEF: Internal format may change without notice
+local
+color bouncerEnterCardManuallyColorDark
+color bouncerEnterCardManuallyColorLight
+dimen bouncerButtonMargin
+dimen bouncerEnterCardManuallyMargin
+dimen bouncerEnterCardManuallyTextSize
+string bouncer_enter_card_manually

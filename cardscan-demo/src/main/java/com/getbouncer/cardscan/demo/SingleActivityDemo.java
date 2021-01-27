@@ -37,7 +37,6 @@ import com.getbouncer.scan.framework.TrackedImage;
 import com.getbouncer.scan.framework.api.BouncerApi;
 import com.getbouncer.scan.framework.api.dto.ScanStatistics;
 import com.getbouncer.scan.framework.interop.BlockingAggregateResultListener;
-import com.getbouncer.scan.framework.interop.EmptyJavaContinuation;
 import com.getbouncer.scan.framework.util.AppDetails;
 import com.getbouncer.scan.framework.util.Device;
 import com.getbouncer.scan.payment.card.CardExpiryKt;

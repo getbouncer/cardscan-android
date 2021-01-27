@@ -7,7 +7,7 @@ import com.getbouncer.scan.payment.analyzer.NameAndExpiryAnalyzer
 import com.getbouncer.scan.payment.ml.SSDOcr
 
 class CompletionLoopAnalyzer private constructor(
-    private val nameAndExpiryAnalyzer: NameAndExpiryAnalyzer<Unit>?,
+    private val nameAndExpiryAnalyzer: NameAndExpiryAnalyzer?,
 ) : Analyzer<SavedFrame, Unit, CompletionLoopAnalyzer.Prediction> {
     class Prediction(
         val nameAndExpiryResult: NameAndExpiryAnalyzer.Prediction?,
@@ -29,7 +29,7 @@ class CompletionLoopAnalyzer private constructor(
     )
 
     class Factory(
-        private val nameAndExpiryFactory: AnalyzerFactory<SSDOcr.Input, Unit, NameAndExpiryAnalyzer.Prediction, out NameAndExpiryAnalyzer<Unit>>,
+        private val nameAndExpiryFactory: AnalyzerFactory<SSDOcr.Input, Any, NameAndExpiryAnalyzer.Prediction, out NameAndExpiryAnalyzer>,
     ) : AnalyzerFactory<SavedFrame, Unit, Prediction, CompletionLoopAnalyzer> {
         override suspend fun newInstance() = CompletionLoopAnalyzer(
             nameAndExpiryAnalyzer = nameAndExpiryFactory.newInstance(),

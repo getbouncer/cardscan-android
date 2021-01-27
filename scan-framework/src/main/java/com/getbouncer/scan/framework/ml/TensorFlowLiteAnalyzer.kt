@@ -21,7 +21,7 @@ import java.nio.ByteBuffer
 abstract class TensorFlowLiteAnalyzer<Input, MLInput, Output, MLOutput>(
     private val tfInterpreter: Interpreter,
     private val delegate: NnApiDelegate? = null,
-) : Analyzer<Input, Unit, Output>, Closeable {
+) : Analyzer<Input, Any, Output>, Closeable {
 
     protected abstract suspend fun interpretMLOutput(data: Input, mlOutput: MLOutput): Output
 
@@ -33,7 +33,7 @@ abstract class TensorFlowLiteAnalyzer<Input, MLInput, Output, MLOutput>(
         Timer.newInstance(Config.logTag, this::class.java.simpleName)
     }
 
-    override suspend fun analyze(data: Input, state: Unit): Output {
+    override suspend fun analyze(data: Input, state: Any): Output {
         val mlInput = loggingTimer.measureSuspend("transform") {
             transformData(data)
         }
@@ -56,10 +56,10 @@ abstract class TensorFlowLiteAnalyzer<Input, MLInput, Output, MLOutput>(
 /**
  * A factory that creates tensorflow models as analyzers.
  */
-abstract class TFLAnalyzerFactory<Input, State, Output, AnalyzerType : Analyzer<Input, State, Output>>(
+abstract class TFLAnalyzerFactory<Input, Output, AnalyzerType : Analyzer<Input, Any, Output>>(
     private val context: Context,
     private val fetchedModel: FetchedData,
-) : AnalyzerFactory<Input, State, Output, AnalyzerType> {
+) : AnalyzerFactory<Input, Any, Output, AnalyzerType> {
     protected abstract val tfOptions: Interpreter.Options
 
     private val loader by lazy { Loader(context) }

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bouncer_enter_card_manually" description="Text shown at the bottom of the screen offering for the user to type in card details manually">Enter card manually</string>
+</resources>

@@ -90,6 +90,15 @@
             android:text="@string/scan_card" />
 
         <Button
+            android:id="@+id/scanCardLocalButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/scan_card_local" />
+
+        <Button
             android:id="@+id/singleActivityDemo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

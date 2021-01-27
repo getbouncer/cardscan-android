@@ -1,7 +1,6 @@
-package com.getbouncer.cardscan.ui.result
+package com.getbouncer.cardscan.ui.local.result
 
 import androidx.test.filters.LargeTest
-import com.getbouncer.cardscan.ui.analyzer.MainLoopAnalyzer
 import com.getbouncer.scan.framework.time.delay
 import com.getbouncer.scan.framework.time.milliseconds
 import com.getbouncer.scan.framework.util.ItemTotalCounter

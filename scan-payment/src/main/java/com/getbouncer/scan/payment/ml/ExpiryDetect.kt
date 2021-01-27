@@ -34,7 +34,9 @@ private const val BACKGROUND_CLASS = 10
 private val ASPECT_RATIO = TRAINED_IMAGE_SIZE.height.toFloat() / TRAINED_IMAGE_SIZE.width.toFloat()
 
 class ExpiryDetect private constructor(interpreter: Interpreter) :
-    TensorFlowLiteAnalyzer<ExpiryDetect.Input, ByteBuffer,
+    TensorFlowLiteAnalyzer<
+        ExpiryDetect.Input,
+        ByteBuffer,
         ExpiryDetect.Prediction,
         Array<Array<Array<FloatArray>>>>(interpreter) {
 
@@ -130,7 +132,7 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
         context: Context,
         fetchedModel: FetchedData,
         threads: Int = DEFAULT_THREADS
-    ) : TFLAnalyzerFactory<Input, Unit, Prediction, ExpiryDetect>(context, fetchedModel) {
+    ) : TFLAnalyzerFactory<Input, Prediction, ExpiryDetect>(context, fetchedModel) {
         companion object {
             private const val USE_GPU = false
             private const val DEFAULT_THREADS = 1

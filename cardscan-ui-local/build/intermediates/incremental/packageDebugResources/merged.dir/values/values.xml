@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color description="The color of the Enter Card Manually text displayed at the bottom of the screen when the background is a dark color" name="bouncerEnterCardManuallyColorDark">@android:color/white</color>
+    <color description="The color of the Enter Card Manually text displayed at the bottom of the screen when the background is a light color" name="bouncerEnterCardManuallyColorLight">@android:color/black</color>
+    <dimen name="bouncerButtonMargin">24dp</dimen>
+    <dimen description="The minimum amount of space surrounding the Enter Card Mandually text at the bottom of the screen" name="bouncerEnterCardManuallyMargin">16dp</dimen>
+    <dimen description="The size of the Enter Card Manually text at the bottom of the screen" name="bouncerEnterCardManuallyTextSize">18sp</dimen>
+    <string description="Text shown at the bottom of the screen offering for the user to type in card details manually" name="bouncer_enter_card_manually">Enter card manually</string>
+</resources>

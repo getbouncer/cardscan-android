@@ -22,7 +22,9 @@ private val TRAINED_IMAGE_SIZE = Size(48, 48)
  */
 private const val NUM_CLASS = 27
 class AlphabetDetect private constructor(interpreter: Interpreter) :
-    TensorFlowLiteAnalyzer<AlphabetDetect.Input, ByteBuffer,
+    TensorFlowLiteAnalyzer<
+        AlphabetDetect.Input,
+        ByteBuffer,
         AlphabetDetect.Prediction,
         Array<FloatArray>>(interpreter) {
 
@@ -73,7 +75,7 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
         context: Context,
         fetchedModel: FetchedData,
         threads: Int = DEFAULT_THREADS
-    ) : TFLAnalyzerFactory<Input, Unit, Prediction, AlphabetDetect>(context, fetchedModel) {
+    ) : TFLAnalyzerFactory<Input, Prediction, AlphabetDetect>(context, fetchedModel) {
         companion object {
             private const val USE_GPU = false
             private const val DEFAULT_THREADS = 1
