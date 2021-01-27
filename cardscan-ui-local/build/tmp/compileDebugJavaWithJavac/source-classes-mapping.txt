@@ -1,2 +1,0 @@
-com/getbouncer/cardscan/ui/local/BuildConfig.java
- com.getbouncer.cardscan.ui.local.BuildConfig
