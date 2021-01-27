@@ -9,8 +9,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.supervisorScope
 
 class MainLoopAnalyzer(
-    private val ssdOcr: Analyzer<SSDOcr.Input, Unit, SSDOcr.Prediction>?,
-    private val cardDetect: Analyzer<CardDetect.Input, Unit, CardDetect.Prediction>?,
+    private val ssdOcr: Analyzer<SSDOcr.Input, Any, SSDOcr.Prediction>?,
+    private val cardDetect: Analyzer<CardDetect.Input, Any, CardDetect.Prediction>?,
 ) : Analyzer<SSDOcr.Input, MainLoopState, MainLoopAnalyzer.Prediction> {
 
     private fun SSDOcr.Input.toCardDetectInput() = CardDetect.Input(
@@ -37,10 +37,10 @@ class MainLoopAnalyzer(
     }
 
     class Factory(
-        private val ssdOcrFactory: AnalyzerFactory<SSDOcr.Input, Unit, SSDOcr.Prediction, out Analyzer<SSDOcr.Input, Unit, SSDOcr.Prediction>>,
-        private val cardDetectFactory: AnalyzerFactory<CardDetect.Input, Unit, CardDetect.Prediction, out Analyzer<CardDetect.Input, Unit, CardDetect.Prediction>>,
+        private val ssdOcrFactory: AnalyzerFactory<SSDOcr.Input, out Any, SSDOcr.Prediction, out Analyzer<SSDOcr.Input, Any, SSDOcr.Prediction>>,
+        private val cardDetectFactory: AnalyzerFactory<CardDetect.Input, out Any, CardDetect.Prediction, out Analyzer<CardDetect.Input, Any, CardDetect.Prediction>>,
     ) : AnalyzerFactory<SSDOcr.Input, MainLoopState, Prediction, MainLoopAnalyzer> {
-        override suspend fun newInstance(): MainLoopAnalyzer? = MainLoopAnalyzer(
+        override suspend fun newInstance(): MainLoopAnalyzer = MainLoopAnalyzer(
             ssdOcr = ssdOcrFactory.newInstance(),
             cardDetect = cardDetectFactory.newInstance(),
         )

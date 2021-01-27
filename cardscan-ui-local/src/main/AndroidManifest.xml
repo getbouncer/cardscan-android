@@ -1,0 +1,11 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.getbouncer.cardscan.ui.local">
+
+    <application>
+        <activity
+            android:name="com.getbouncer.cardscan.ui.local.CardScanActivity"
+            android:screenOrientation="nosensor"
+            android:theme="@style/BouncerDefaultTheme" />
+    </application>
+
+</manifest>

@@ -54,7 +54,7 @@ interface AnalyzerLoopErrorListener {
  * @param analyzerLoopErrorListener: An error handler for this loop
  */
 sealed class AnalyzerLoop<DataFrame, State, Output>(
-    private val analyzerPool: AnalyzerPool<DataFrame, State, Output>,
+    private val analyzerPool: AnalyzerPool<DataFrame, in State, Output>,
     private val analyzerLoopErrorListener: AnalyzerLoopErrorListener,
 ) : ResultHandler<DataFrame, Output, Boolean> {
     private val started = AtomicBoolean(false)
@@ -106,7 +106,7 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
      */
     private suspend fun startWorker(
         flow: Flow<DataFrame>,
-        analyzer: Analyzer<DataFrame, State, Output>,
+        analyzer: Analyzer<DataFrame, in State, Output>,
     ) {
         flow.collect { frame ->
             val stat = Stats.trackRepeatingTask("analyzer_execution:${analyzer::class.java.simpleName}")
@@ -156,12 +156,11 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
  *
  * @param analyzerPool: A pool of analyzers to use in this loop.
  * @param resultHandler: A result handler that will be called with the results from the analyzers in this loop.
- * @param name: The name of this loop for stat and event tracking.
  * @param analyzerLoopErrorListener: An error handler for this loop
  */
 class ProcessBoundAnalyzerLoop<DataFrame, State, Output>(
-    private val analyzerPool: AnalyzerPool<DataFrame, State, Output>,
-    private val resultHandler: StatefulResultHandler<DataFrame, State, Output, Boolean>,
+    private val analyzerPool: AnalyzerPool<DataFrame, in State, Output>,
+    private val resultHandler: StatefulResultHandler<DataFrame, out State, Output, Boolean>,
     analyzerLoopErrorListener: AnalyzerLoopErrorListener
 ) : AnalyzerLoop<DataFrame, State, Output>(
     analyzerPool,
@@ -189,14 +188,13 @@ class ProcessBoundAnalyzerLoop<DataFrame, State, Output>(
  *
  * @param analyzerPool: A pool of analyzers to use in this loop.
  * @param resultHandler: A result handler that will be called with the results from the analyzers in this loop.
- * @param name: The name of this loop for stat and event tracking.
  * @param analyzerLoopErrorListener: An error handler for this loop
  * @param timeLimit: If specified, this is the maximum allowed time for the loop to run. If the loop
  *     exceeds this duration, the loop will terminate
  */
 class FiniteAnalyzerLoop<DataFrame, State, Output>(
-    private val analyzerPool: AnalyzerPool<DataFrame, State, Output>,
-    private val resultHandler: TerminatingResultHandler<DataFrame, State, Output>,
+    private val analyzerPool: AnalyzerPool<DataFrame, in State, Output>,
+    private val resultHandler: TerminatingResultHandler<DataFrame, out State, Output>,
     analyzerLoopErrorListener: AnalyzerLoopErrorListener,
     private val timeLimit: Duration = Duration.INFINITE
 ) : AnalyzerLoop<DataFrame, State, Output>(

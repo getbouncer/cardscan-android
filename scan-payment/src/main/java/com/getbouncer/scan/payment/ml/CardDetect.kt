@@ -170,7 +170,7 @@ class CardDetect private constructor(interpreter: Interpreter) :
         context: Context,
         fetchedModel: FetchedData,
         threads: Int = DEFAULT_THREADS,
-    ) : TFLAnalyzerFactory<Input, Unit, Prediction, CardDetect>(context, fetchedModel) {
+    ) : TFLAnalyzerFactory<Input, Prediction, CardDetect>(context, fetchedModel) {
         companion object {
             private const val USE_GPU = false
             private const val DEFAULT_THREADS = 1

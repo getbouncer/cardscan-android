@@ -33,13 +33,13 @@ private const val NAME_BOX_Y_SCALE_RATIO = 1.4F
 private const val EXPIRY_BOX_X_SCALE_RATIO = 1.1F
 private const val EXPIRY_BOX_Y_SCALE_RATIO = 1.2F
 
-class NameAndExpiryAnalyzer<State> private constructor(
+class NameAndExpiryAnalyzer private constructor(
     private val textDetect: TextDetect?,
     private val alphabetDetect: AlphabetDetect?,
     private val expiryDetect: ExpiryDetect?,
     val runNameExtraction: Boolean,
     val runExpiryExtraction: Boolean,
-) : Analyzer<SSDOcr.Input, State, NameAndExpiryAnalyzer.Prediction> {
+) : Analyzer<SSDOcr.Input, Any, NameAndExpiryAnalyzer.Prediction> {
 
     data class Prediction(
         val name: String?,
@@ -53,7 +53,7 @@ class NameAndExpiryAnalyzer<State> private constructor(
 
     override suspend fun analyze(
         data: SSDOcr.Input,
-        state: State
+        state: Any
     ) = if ((!runNameExtraction && !runExpiryExtraction) || textDetect == null) {
         Prediction(null, null, null)
     } else {
@@ -306,14 +306,14 @@ class NameAndExpiryAnalyzer<State> private constructor(
         return word.toString().trim { it <= ' ' }
     }
 
-    class Factory<State>(
+    class Factory(
         private val textDetectFactory: TextDetect.Factory,
         private val alphabetDetectFactory: AlphabetDetect.Factory? = null,
         private val expiryDetectFactory: ExpiryDetect.Factory? = null,
         private val runNameExtraction: Boolean,
         private val runExpiryExtraction: Boolean,
-    ) : AnalyzerFactory<SSDOcr.Input, State, Prediction, NameAndExpiryAnalyzer<State>> {
-        override suspend fun newInstance() = NameAndExpiryAnalyzer<State>(
+    ) : AnalyzerFactory<SSDOcr.Input, Any, Prediction, NameAndExpiryAnalyzer> {
+        override suspend fun newInstance() = NameAndExpiryAnalyzer(
             textDetect = textDetectFactory.newInstance(),
             alphabetDetect = alphabetDetectFactory?.newInstance(),
             expiryDetect = expiryDetectFactory?.newInstance(),
