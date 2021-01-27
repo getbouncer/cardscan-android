@@ -11,7 +11,6 @@ import com.getbouncer.scan.framework.api.getModelSignedUrl
 import com.getbouncer.scan.framework.time.ClockMark
 import com.getbouncer.scan.framework.time.asEpochMillisecondsClockMark
 import com.getbouncer.scan.framework.time.days
-import com.getbouncer.scan.framework.time.weeks
 import com.getbouncer.scan.framework.util.memoizeSuspend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -24,7 +23,6 @@ import java.net.URL
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 
-private val CACHE_MODEL_TIME = 1.weeks
 private const val CACHE_MODEL_MAX_COUNT = 3
 
 private const val PURPOSE_MODEL_UPGRADE = "model_upgrade"
@@ -483,10 +481,7 @@ abstract class UpdatingModelWebFetcher(context: Context) : SignedUrlModelWebFetc
             .listFiles()
             ?.filter { it != downloadedFile && calculateHash(it, defaultModelHashAlgorithm) != defaultModelHash }
             ?.sortedByDescending { it.lastModified() }
-            ?.filterIndexed { index, file ->
-                file.lastModified().asEpochMillisecondsClockMark()
-                    .elapsedSince() > CACHE_MODEL_TIME || index > CACHE_MODEL_MAX_COUNT
-            }
+            ?.filterIndexed { index, _ -> index > CACHE_MODEL_MAX_COUNT }
             ?.forEach { it.delete() }
             .let { }
     }
