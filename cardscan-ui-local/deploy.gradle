@@ -3,8 +3,8 @@ apply plugin: 'com.jfrog.bintray'
 apply plugin: 'maven-publish'
 
 ext {
-    bintrayRepo = 'cardscan-ui-android'
-    bintrayName = 'cardscan-ui-android'
+    bintrayRepo = 'cardscan-ui-local-android'
+    bintrayName = 'cardscan-ui-local-android'
     bintrayOrg = 'bouncerpaid'
 
     publishedGroupId = 'com.getbouncer'
