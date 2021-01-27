@@ -11,27 +11,18 @@ import com.getbouncer.scan.payment.ml.SSDOcr
 internal val PAN_SEARCH_DURATION = 5.seconds
 
 @VisibleForTesting
-internal val PAN_AND_CARD_SEARCH_DURATION = 10.seconds
-
-@VisibleForTesting
 internal val DESIRED_PAN_AGREEMENT = 5
 
 @VisibleForTesting
 internal val MINIMUM_PAN_AGREEMENT = 2
 
-@VisibleForTesting
-internal val DESIRED_SIDE_COUNT = 8
-
-sealed class MainLoopState(
-    val runOcr: Boolean,
-    val runCardDetect: Boolean,
-) : MachineState() {
+sealed class MainLoopState : MachineState() {
 
     internal abstract suspend fun consumeTransition(
         transition: SSDOcr.Prediction,
     ): MainLoopState
 
-    class Initial : MainLoopState(runOcr = true, runCardDetect = false) {
+    class Initial : MainLoopState() {
         override suspend fun consumeTransition(
             transition: SSDOcr.Prediction,
         ): MainLoopState = when {
@@ -42,7 +33,7 @@ sealed class MainLoopState(
 
     class PanFound(
         private val panCounter: ItemTotalCounter<String>,
-    ) : MainLoopState(runOcr = true, runCardDetect = true) {
+    ) : MainLoopState() {
         fun getMostLikelyPan() = panCounter.getHighestCountItem()?.second
 
         private fun isPanSatisfied() =
@@ -60,14 +51,13 @@ sealed class MainLoopState(
             }
 
             return when {
-                reachedStateAt.elapsedSince() > PAN_AND_CARD_SEARCH_DURATION -> Finished(getMostLikelyPan() ?: "")
                 isPanSatisfied() -> Finished(getMostLikelyPan() ?: "")
                 else -> this
             }
         }
     }
 
-    class Finished(val pan: String) : MainLoopState(runOcr = false, runCardDetect = false) {
+    class Finished(val pan: String) : MainLoopState() {
         override suspend fun consumeTransition(
             transition: SSDOcr.Prediction,
         ): MainLoopState = this
