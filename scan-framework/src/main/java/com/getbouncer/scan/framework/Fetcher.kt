@@ -24,7 +24,6 @@ import java.net.URL
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 
-private val CACHE_MODEL_TIME = 1.weeks
 private const val CACHE_MODEL_MAX_COUNT = 3
 
 private const val PURPOSE_MODEL_UPGRADE = "model_upgrade"
