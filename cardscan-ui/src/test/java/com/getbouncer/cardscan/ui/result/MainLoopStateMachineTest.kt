@@ -1,4 +1,4 @@
-package com.getbouncer.cardscan.ui.local.result
+package com.getbouncer.cardscan.ui.result
 
 import androidx.test.filters.LargeTest
 import com.getbouncer.cardscan.ui.analyzer.MainLoopAnalyzer
