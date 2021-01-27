@@ -8,6 +8,9 @@ import com.getbouncer.scan.payment.card.isValidPan
 import com.getbouncer.scan.payment.ml.SSDOcr
 
 @VisibleForTesting
+internal val TOTAL_SCAN_DURATION = 10.seconds
+
+@VisibleForTesting
 internal val PAN_SEARCH_DURATION = 5.seconds
 
 @VisibleForTesting
@@ -51,6 +54,7 @@ sealed class MainLoopState : MachineState() {
             }
 
             return when {
+                reachedStateAt.elapsedSince() > TOTAL_SCAN_DURATION -> Finished(getMostLikelyPan() ?: "")
                 isPanSatisfied() -> Finished(getMostLikelyPan() ?: "")
                 else -> this
             }

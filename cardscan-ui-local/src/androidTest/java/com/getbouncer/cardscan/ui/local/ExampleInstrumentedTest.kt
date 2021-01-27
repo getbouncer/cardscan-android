@@ -9,6 +9,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.getbouncer.cardscan.ui.test", appContext.packageName)
+        assertEquals("com.getbouncer.cardscan.ui.local.test", appContext.packageName)
     }
 }

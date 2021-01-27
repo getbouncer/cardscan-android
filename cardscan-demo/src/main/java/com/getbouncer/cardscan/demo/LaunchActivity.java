@@ -73,7 +73,11 @@ public class LaunchActivity extends AppCompatActivity implements CardScanActivit
         if (CardScanActivity.isScanResult(requestCode)) {
             CardScanActivity.parseScanResult(resultCode, data, this);
         } else if (com.getbouncer.cardscan.ui.local.CardScanActivity.isScanResult(requestCode)) {
-            com.getbouncer.cardscan.ui.local.CardScanActivity.parseScanResult(resultCode, data, this);
+            com.getbouncer.cardscan.ui.local.CardScanActivity.parseScanResult(
+                resultCode,
+                data,
+                this
+            );
         }
     }
 
@@ -102,7 +106,10 @@ public class LaunchActivity extends AppCompatActivity implements CardScanActivit
     }
 
     @Override
-    public void cardScanned(@Nullable String scanId, @NotNull com.getbouncer.cardscan.ui.local.CardScanActivityResult scanResult) {
+    public void cardScanned(
+        @Nullable String scanId,
+        @NotNull com.getbouncer.cardscan.ui.local.CardScanActivityResult scanResult
+    ) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         StringBuilder message = new StringBuilder();
         message.append(scanResult.getPan());

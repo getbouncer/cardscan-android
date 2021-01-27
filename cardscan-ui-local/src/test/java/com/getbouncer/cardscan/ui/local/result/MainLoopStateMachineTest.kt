@@ -90,17 +90,51 @@ class MainLoopStateMachineTest {
      */
     @Test
     @LargeTest
-    fun panFound_timeout() = runBlocking {
+    fun panFound_totalTimeout() = runBlocking {
         val state = MainLoopState.PanFound(
             panCounter = ItemTotalCounter("4847186095118770"),
         )
 
-        delay(PAN_SEARCH_DURATION + 1.milliseconds)
+        delay(TOTAL_SCAN_DURATION + 1.milliseconds)
 
         val prediction = SSDOcr.Prediction(
             pan = "",
             detectedBoxes = emptyList(),
         )
+
+        val newState = state.consumeTransition(prediction)
+        assertTrue(newState is MainLoopState.Finished, "$newState is not Finished")
+        assertEquals("4847186095118770", newState.pan)
+    }
+
+    /**
+     * This test cannot use `runBlockingTest` because it requires a delay. While runBlockingTest
+     * advances the dispatcher's virtual time by the specified amount, it does not affect the timing
+     * of the duration.
+     */
+    @Test
+    @LargeTest
+    fun panFound_desiredTimeout() = runBlocking {
+        var state: MainLoopState = MainLoopState.PanFound(
+            panCounter = ItemTotalCounter("4847186095118770"),
+        )
+
+        repeat(MINIMUM_PAN_AGREEMENT - 1) {
+            state = state.consumeTransition(
+                SSDOcr.Prediction(
+                    pan = "4847186095118770",
+                    detectedBoxes = emptyList(),
+                )
+            )
+            assertTrue(state is MainLoopState.PanFound)
+        }
+
+        val prediction = SSDOcr.Prediction(
+            pan = "",
+            detectedBoxes = emptyList(),
+        )
+
+        delay(PAN_SEARCH_DURATION + 1.milliseconds)
 
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopState.Finished, "$newState is not Finished")
