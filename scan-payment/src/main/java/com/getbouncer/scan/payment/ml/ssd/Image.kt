@@ -14,7 +14,7 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-internal fun calculateObjectDetectionFromCardFinder(previewImage: Size, cardFinder: Rect): Rect {
+private fun calculateObjectDetectionFromCardFinder(previewImage: Size, cardFinder: Rect): Rect {
     val objectDetectionSquareSize = maxAspectRatioInSize(previewImage, 1F)
     return Rect(
         /* left */
