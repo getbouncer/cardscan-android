@@ -3,7 +3,7 @@ apply plugin: 'com.jfrog.bintray'
 apply plugin: 'maven-publish'
 
 ext {
-    bintrayRepo = 'scan-payment-android'
+    bintrayRepo = 'cardscan-android'
     bintrayName = 'scan-payment-android'
     bintrayOrg = 'bouncerpaid'
 
@@ -13,8 +13,8 @@ ext {
 
     libraryDescription = 'This library provides the framework processing payment cards.'
 
-    siteUrl = 'https://cardscan.io'
-    gitUrl = 'https://github.com/getbouncer/scan-payment-android.git'
+    siteUrl = 'https://getbouncer.com'
+    gitUrl = 'https://github.com/getbouncer/cardscan-android.git'
 
     libraryVersion = version
 
@@ -23,10 +23,9 @@ ext {
     developerEmail = 'contact@getbouncer.com'
 
     licenseName = 'bouncer-free-1'
-    licenseUrl = 'https://github.com/getbouncer/scan-framework-android/blob/6bfa1a01de4746e7f71d969dc2844efe3c9ac575/LICENSE'
+    licenseUrl = 'https://github.com/getbouncer/cardscan-android/blob/master/LICENSE'
     allLicenses = ["bouncer-free-1"]
 }
-
 
 group = publishedGroupId
 version = libraryVersion
