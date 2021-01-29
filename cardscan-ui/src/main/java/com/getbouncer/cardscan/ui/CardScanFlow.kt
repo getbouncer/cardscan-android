@@ -21,14 +21,18 @@ import com.getbouncer.scan.framework.ProcessBoundAnalyzerLoop
 import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.framework.time.Duration
 import com.getbouncer.scan.framework.time.Rate
+import com.getbouncer.scan.payment.AlphabetDetectModelManager
+import com.getbouncer.scan.payment.ExpiryDetectModelManager
 import com.getbouncer.scan.payment.FrameDetails
-import com.getbouncer.scan.payment.ScanPaymentModelManager
+import com.getbouncer.scan.payment.TextDetectModelManager
 import com.getbouncer.scan.payment.analyzer.NameAndExpiryAnalyzer
+import com.getbouncer.scan.payment.carddetect.CardDetect
+import com.getbouncer.scan.payment.carddetect.CardDetectModelManager
 import com.getbouncer.scan.payment.ml.AlphabetDetect
-import com.getbouncer.scan.payment.ml.CardDetect
 import com.getbouncer.scan.payment.ml.ExpiryDetect
-import com.getbouncer.scan.payment.ml.SSDOcr
 import com.getbouncer.scan.payment.ml.TextDetect
+import com.getbouncer.scan.payment.ocr.SSDOcr
+import com.getbouncer.scan.payment.ocr.SSDOcrModelManager
 import com.getbouncer.scan.ui.ScanFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -79,14 +83,14 @@ open class CardScanFlow(
             Config.apiKey = apiKey
 
             // pre-fetch all of the models used by this flow.
-            GlobalScope.launch(Dispatchers.IO) { ScanPaymentModelManager.getSsdOcr(context, forImmediateUse = false) }
-            GlobalScope.launch(Dispatchers.IO) { ScanPaymentModelManager.getCardDetect(context, forImmediateUse = false) }
+            GlobalScope.launch(Dispatchers.IO) { SSDOcrModelManager.fetchModel(context, forImmediateUse = false) }
+            GlobalScope.launch(Dispatchers.IO) { CardDetectModelManager.fetchModel(context, forImmediateUse = false) }
 
             if (initializeNameAndExpiryExtraction) {
                 attemptedNameAndExpiryInitialization = true
-                GlobalScope.launch(Dispatchers.IO) { ScanPaymentModelManager.getTextDetect(context, forImmediateUse = false) }
-                GlobalScope.launch(Dispatchers.IO) { ScanPaymentModelManager.getAlphabetDetect(context, forImmediateUse = false) }
-                GlobalScope.launch(Dispatchers.IO) { ScanPaymentModelManager.getExpiryDetect(context, forImmediateUse = false) }
+                GlobalScope.launch(Dispatchers.IO) { TextDetectModelManager.fetchModel(context, forImmediateUse = false) }
+                GlobalScope.launch(Dispatchers.IO) { AlphabetDetectModelManager.fetchModel(context, forImmediateUse = false) }
+                GlobalScope.launch(Dispatchers.IO) { ExpiryDetectModelManager.fetchModel(context, forImmediateUse = false) }
             }
         }
     }
@@ -156,8 +160,8 @@ open class CardScanFlow(
 
             val analyzerPool = AnalyzerPool.of(
                 MainLoopAnalyzer.Factory(
-                    SSDOcr.Factory(context, ScanPaymentModelManager.getSsdOcr(context, forImmediateUse = true, isOptional = false)),
-                    CardDetect.Factory(context, ScanPaymentModelManager.getCardDetect(context, forImmediateUse = true, isOptional = false)),
+                    SSDOcr.Factory(context, SSDOcrModelManager.fetchModel(context, forImmediateUse = true, isOptional = false)),
+                    CardDetect.Factory(context, CardDetectModelManager.fetchModel(context, forImmediateUse = true, isOptional = false)),
                 )
             )
             mainLoopAnalyzerPool = analyzerPool
@@ -225,15 +229,15 @@ open class CardScanFlow(
                 nameAndExpiryFactory = NameAndExpiryAnalyzer.Factory(
                     textDetectFactory = TextDetect.Factory(
                         context,
-                        ScanPaymentModelManager.getTextDetect(context, forImmediateUse = true, isOptional = true)
+                        TextDetectModelManager.fetchModel(context, forImmediateUse = true, isOptional = true)
                     ),
                     alphabetDetectFactory = AlphabetDetect.Factory(
                         context,
-                        ScanPaymentModelManager.getAlphabetDetect(context, forImmediateUse = true, isOptional = true)
+                        AlphabetDetectModelManager.fetchModel(context, forImmediateUse = true, isOptional = true)
                     ),
                     expiryDetectFactory = ExpiryDetect.Factory(
                         context,
-                        ScanPaymentModelManager.getExpiryDetect(context, forImmediateUse = true, isOptional = true)
+                        ExpiryDetectModelManager.fetchModel(context, forImmediateUse = true, isOptional = true)
                     ),
                     runNameExtraction = enableNameExtraction && isFastDevice,
                     runExpiryExtraction = enableExpiryExtraction,

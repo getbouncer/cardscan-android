@@ -1,4 +1,4 @@
-package com.getbouncer.scan.payment.ml
+package com.getbouncer.scan.payment.carddetect
 
 import android.content.Context
 import android.graphics.Rect
@@ -11,7 +11,6 @@ import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.util.indexOfMax
 import com.getbouncer.scan.framework.util.maxAspectRatioInSize
 import com.getbouncer.scan.framework.util.scaleAndCenterWithin
-import com.getbouncer.scan.payment.R
 import com.getbouncer.scan.payment.crop
 import com.getbouncer.scan.payment.hasOpenGl31
 import com.getbouncer.scan.payment.scale

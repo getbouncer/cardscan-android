@@ -1,4 +1,4 @@
-package com.getbouncer.scan.payment.ml
+package com.getbouncer.scan.payment.carddetect
 
 import androidx.core.graphics.drawable.toBitmap
 import androidx.test.filters.MediumTest
