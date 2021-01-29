@@ -4,7 +4,7 @@ apply plugin: 'maven-publish'
 
 ext {
     bintrayRepo = 'cardscan-android'
-    bintrayName = 'scan-payment-card-detect-android'
+    bintrayName = 'scan-payment-card-detect'
     bintrayOrg = 'bouncerpaid'
 
     publishedGroupId = 'com.getbouncer'
