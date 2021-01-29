@@ -1,4 +1,4 @@
-package com.getbouncer.scan.payment.ocr
+package com.getbouncer.scan.payment.ml
 
 import android.content.Context
 import android.graphics.Rect
@@ -15,14 +15,15 @@ import com.getbouncer.scan.framework.util.intersectionWith
 import com.getbouncer.scan.framework.util.projectRegionOfInterest
 import com.getbouncer.scan.framework.util.reshape
 import com.getbouncer.scan.framework.util.toRect
+import com.getbouncer.scan.payment.R
 import com.getbouncer.scan.payment.crop
 import com.getbouncer.scan.payment.hasOpenGl31
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
-import com.getbouncer.scan.payment.ocr.ssd.OcrFeatureMapSizes
-import com.getbouncer.scan.payment.ocr.ssd.combinePriors
-import com.getbouncer.scan.payment.ocr.ssd.determineLayoutAndFilter
-import com.getbouncer.scan.payment.ocr.ssd.extractPredictions
-import com.getbouncer.scan.payment.ocr.ssd.rearrangeOCRArray
+import com.getbouncer.scan.payment.ml.ssd.OcrFeatureMapSizes
+import com.getbouncer.scan.payment.ml.ssd.combinePriors
+import com.getbouncer.scan.payment.ml.ssd.determineLayoutAndFilter
+import com.getbouncer.scan.payment.ml.ssd.extractPredictions
+import com.getbouncer.scan.payment.ml.ssd.rearrangeOCRArray
 import com.getbouncer.scan.payment.scale
 import com.getbouncer.scan.payment.size
 import com.getbouncer.scan.payment.toRGBByteBuffer

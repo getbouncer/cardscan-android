@@ -1,10 +1,10 @@
-package com.getbouncer.scan.payment.ocr.ssd
+package com.getbouncer.scan.payment.ml.ssd
 
 import android.util.Size
 import com.getbouncer.scan.framework.ml.ssd.SizeAndCenter
 import com.getbouncer.scan.framework.ml.ssd.clampAll
 import com.getbouncer.scan.framework.ml.ssd.sizeAndCenter
-import com.getbouncer.scan.payment.ocr.SSDOcr
+import com.getbouncer.scan.payment.ml.SSDOcr
 import kotlin.math.sqrt
 
 private const val NUMBER_OF_PRIORS = 3

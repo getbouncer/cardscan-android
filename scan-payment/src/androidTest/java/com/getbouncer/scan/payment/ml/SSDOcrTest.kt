@@ -1,4 +1,4 @@
-package com.getbouncer.scan.payment.ocr
+package com.getbouncer.scan.payment.ml
 
 import androidx.core.graphics.drawable.toBitmap
 import androidx.test.filters.MediumTest
