@@ -30,6 +30,17 @@ ext {
 group = publishedGroupId
 version = libraryVersion
 
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId publishedGroupId
+            artifactId artifact
+            version version
+            artifact "$buildDir/../tensorflow-lite-all-models.aar"
+        }
+    }
+}
+
 Properties properties = new Properties()
 if (project.rootProject.file('local.properties').exists()) {
     properties.load(project.rootProject.file('local.properties').newDataInputStream())
@@ -39,7 +50,7 @@ bintray {
     user = properties.getProperty("bintray.user")
     key = properties.getProperty("bintray.apikey")
 
-    configurations = ['archives']
+    publications = ['maven']
     pkg {
         repo = bintrayRepo
         name = bintrayName

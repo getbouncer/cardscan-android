@@ -44,7 +44,10 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.2"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1"
-    implementation project(":tensorflow-lite")
+
+    // Allow the user to specify their own version of Tensorflow Lite to include
+    runtimeOnly project(":tensorflow-lite")
+    compileOnly "org.tensorflow:tensorflow-lite:2.4.0"
 }
 
 dependencies {

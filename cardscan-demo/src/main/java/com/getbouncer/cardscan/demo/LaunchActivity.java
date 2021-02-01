@@ -12,6 +12,7 @@ import com.getbouncer.cardscan.ui.CardScanActivity;
 import com.getbouncer.cardscan.ui.CardScanActivityResult;
 import com.getbouncer.cardscan.ui.CardScanActivityResultHandler;
 import com.getbouncer.scan.framework.Config;
+import com.getbouncer.scan.framework.Scan;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -51,6 +52,12 @@ public class LaunchActivity extends AppCompatActivity implements CardScanActivit
                 /* enableNameExtraction */ enableNameExtraction
             );
         });
+
+        if (Scan.INSTANCE.isSupportedWithMinimalTensorflow()) {
+            new AlertDialog.Builder(this).setMessage("Scan is supported").show();
+        } else {
+            new AlertDialog.Builder(this).setMessage("Scan is NOT supported").show();
+        }
 
         findViewById(R.id.scanCardLocalButton).setOnClickListener(v -> {
             final boolean enableEnterCardManually =
