@@ -55,9 +55,17 @@ public class LaunchActivity extends AppCompatActivity implements CardScanActivit
         });
 
         if (Scan.INSTANCE.isDeviceArchitectureArm()) {
-            ((TextView) findViewById(R.id.deviceArchitectureText)).setText(getString(R.string.deviceArchitecture, "arm: " + Scan.INSTANCE.getDeviceArchitecture()));
+            ((TextView) findViewById(R.id.deviceArchitectureText))
+                .setText(getString(
+                    R.string.deviceArchitecture,
+                    "arm: " + Scan.INSTANCE.getDeviceArchitecture()
+                ));
         } else {
-            ((TextView) findViewById(R.id.deviceArchitectureText)).setText(getString(R.string.deviceArchitecture, "NOT arm" + Scan.INSTANCE.getDeviceArchitecture()));
+            ((TextView) findViewById(R.id.deviceArchitectureText))
+                .setText(getString(
+                    R.string.deviceArchitecture,
+                    "NOT arm" + Scan.INSTANCE.getDeviceArchitecture()
+                ));
         }
 
         findViewById(R.id.scanCardLocalButton).setOnClickListener(v -> {

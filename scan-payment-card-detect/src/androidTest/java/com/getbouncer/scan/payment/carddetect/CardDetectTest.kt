@@ -6,8 +6,8 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.getbouncer.scan.framework.Stats
 import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.framework.util.toRect
+import com.getbouncer.scan.payment.carddetect.test.R
 import com.getbouncer.scan.payment.size
-import com.getbouncer.scan.payment.test.R
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import kotlin.test.assertEquals

@@ -2,9 +2,6 @@ package com.getbouncer.scan.framework
 
 import android.os.Build
 
-
-
-
 object Scan {
 
     /**
