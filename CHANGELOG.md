@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.0071](https://github.com/getbouncer/cardscan-android/tree/2.0.0071) (2021-02-01)
+
+**Merged pull requests:**
+
+- Custom tensorflow lite library [\#312](https://github.com/getbouncer/cardscan-android/pull/312) ([awushensky](https://github.com/awushensky))
+
 ## [2.0.0070](https://github.com/getbouncer/cardscan-android/tree/2.0.0070) (2021-01-29)
 
 **Merged pull requests:**
@@ -164,6 +170,7 @@
 - Upgrade gradle [\#248](https://github.com/getbouncer/cardscan-android/pull/248) ([awushensky](https://github.com/awushensky))
 - Force model download if no cache [\#247](https://github.com/getbouncer/cardscan-android/pull/247) ([awushensky](https://github.com/awushensky))
 - Bump junit from 4.13 to 4.13.1 [\#246](https://github.com/getbouncer/cardscan-android/pull/246) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
+- Bump constraintlayout from 2.0.1 to 2.0.2 [\#241](https://github.com/getbouncer/cardscan-android/pull/241) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 
 ## [1.0.5153](https://github.com/getbouncer/cardscan-android/tree/1.0.5153) (2020-10-09)
 
@@ -172,7 +179,6 @@
 **Merged pull requests:**
 
 - Fix zoom image [\#245](https://github.com/getbouncer/cardscan-android/pull/245) ([awushensky](https://github.com/awushensky))
-- Bump constraintlayout from 2.0.1 to 2.0.2 [\#241](https://github.com/getbouncer/cardscan-android/pull/241) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Support zoomed model [\#236](https://github.com/getbouncer/cardscan-android/pull/236) ([awushensky](https://github.com/awushensky))
 
 ## [2.0.0044](https://github.com/getbouncer/cardscan-android/tree/2.0.0044) (2020-10-09)
