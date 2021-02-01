@@ -3,8 +3,8 @@ apply plugin: 'com.jfrog.bintray'
 apply plugin: 'maven-publish'
 
 ext {
-    bintrayRepo = 'cardscan-ui-android'
-    bintrayName = 'cardscan-ui-android'
+    bintrayRepo = 'cardscan-ui-android'  // TODO: move this to `cardscan-android`
+    bintrayName = 'cardscan-ui-android'  // TODO: make this `cardscan-ui`
     bintrayOrg = 'bouncerpaid'
 
     publishedGroupId = 'com.getbouncer'
@@ -14,7 +14,7 @@ ext {
     libraryDescription = 'This library provides the framework for running CardScan ML models.'
 
     siteUrl = 'https://getbouncer.com'
-    gitUrl = 'https://github.com/getbouncer/cardscan-ui-android.git'
+    gitUrl = 'https://github.com/getbouncer/cardscan-android.git'
 
     libraryVersion = version
 
@@ -23,7 +23,7 @@ ext {
     developerEmail = 'contact@getbouncer.com'
 
     licenseName = 'bouncer-free-1'
-    licenseUrl = 'https://github.com/getbouncer/scan-framework-android/blob/6bfa1a01de4746e7f71d969dc2844efe3c9ac575/LICENSE'
+    licenseUrl = 'https://github.com/getbouncer/cardscan-android/blob/master/LICENSE'
     allLicenses = ["bouncer-free-1"]
 }
 

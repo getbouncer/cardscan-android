@@ -1,0 +1,4 @@
+configurations.maybeCreate("default")
+artifacts.add("default", file('tensorflow-lite-all-models.aar'))
+
+apply from: "deploy.gradle"

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>com.getbouncer</groupId>
+  <artifactId>tensorflow-lite-arm-only</artifactId>
+  <versioning>
+    <latest>2.0.0070</latest>
+    <release>2.0.0070</release>
+    <versions>
+      <version>2.0.0070</version>
+    </versions>
+    <lastUpdated>20210201202659</lastUpdated>
+  </versioning>
+</metadata>

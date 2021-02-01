@@ -13,7 +13,7 @@
 
         <LinearLayout
             android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginVertical="4dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -30,7 +30,7 @@
 
         <LinearLayout
             android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginVertical="4dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -47,7 +47,7 @@
 
         <LinearLayout
             android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginVertical="4dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -64,7 +64,7 @@
 
         <LinearLayout
             android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginVertical="4dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -84,28 +84,33 @@
             android:id="@+id/scanCardButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginVertical="4dp"
             android:text="@string/scan_card" />
 
         <Button
             android:id="@+id/scanCardLocalButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginVertical="4dp"
             android:text="@string/scan_card_local" />
 
         <Button
             android:id="@+id/singleActivityDemo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginVertical="4dp"
             android:text="@string/single_activity_demo" />
+
+        <TextView
+            android:id="@+id/deviceArchitectureText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginVertical="4dp"
+            android:text="@string/deviceArchitecture" />
 
     </LinearLayout>
 

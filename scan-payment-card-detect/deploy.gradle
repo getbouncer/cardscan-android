@@ -4,7 +4,7 @@ apply plugin: 'maven-publish'
 
 ext {
     bintrayRepo = 'cardscan-android'
-    bintrayName = 'scan-payment-card-detect-android'
+    bintrayName = 'scan-payment-card-detect'
     bintrayOrg = 'bouncerpaid'
 
     publishedGroupId = 'com.getbouncer'
@@ -13,7 +13,7 @@ ext {
 
     libraryDescription = 'This library provides the framework processing payment cards.'
 
-    siteUrl = 'https://cardscan.io'
+    siteUrl = 'https://getbouncer.com'
     gitUrl = 'https://github.com/getbouncer/cardscan-android.git'
 
     libraryVersion = version
@@ -26,7 +26,6 @@ ext {
     licenseUrl = 'https://github.com/getbouncer/cardscan-android/blob/master/LICENSE'
     allLicenses = ["bouncer-free-1"]
 }
-
 
 group = publishedGroupId
 version = libraryVersion

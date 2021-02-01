@@ -3,8 +3,8 @@ apply plugin: 'com.jfrog.bintray'
 apply plugin: 'maven-publish'
 
 ext {
-    bintrayRepo = 'scan-camera-android'
-    bintrayName = 'scan-camera-android'
+    bintrayRepo = 'scan-camera-android'  // TODO: move this to `cardscan-android`
+    bintrayName = 'scan-camera-android'  // TODO: make this `scan-camera`
     bintrayOrg = 'bouncerpaid'
 
     publishedGroupId = 'com.getbouncer'
@@ -13,8 +13,8 @@ ext {
 
     libraryDescription = 'This library provides the framework for integrating a camera into scan.'
 
-    siteUrl = 'https://cardscan.io'
-    gitUrl = 'https://github.com/getbouncer/scan-camera-android.git'
+    siteUrl = 'https://getbouncer.com'
+    gitUrl = 'https://github.com/getbouncer/cardscan-android.git'
 
     libraryVersion = version
 
@@ -23,10 +23,9 @@ ext {
     developerEmail = 'contact@getbouncer.com'
 
     licenseName = 'bouncer-free-1'
-    licenseUrl = 'https://github.com/getbouncer/scan-framework-android/blob/6bfa1a01de4746e7f71d969dc2844efe3c9ac575/LICENSE'
+    licenseUrl = 'https://github.com/getbouncer/cardscan-android/blob/master/LICENSE'
     allLicenses = ["bouncer-free-1"]
 }
-
 
 group = publishedGroupId
 version = libraryVersion
