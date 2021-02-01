@@ -15,4 +15,6 @@
     <string name="enableNameExtraction">Enable name extraction</string>
     <string name="enableExpiryExtraction">Enable expiry extraction</string>
     <string name="enableEnterCardManually">Enable manual entry</string>
+
+    <string name="deviceArchitecture">Device architecture is %1$s</string>
 </resources>

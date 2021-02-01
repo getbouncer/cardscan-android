@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.WindowManager;
 import android.widget.CheckBox;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -53,10 +54,10 @@ public class LaunchActivity extends AppCompatActivity implements CardScanActivit
             );
         });
 
-        if (Scan.INSTANCE.isSupportedWithMinimalTensorflow()) {
-            new AlertDialog.Builder(this).setMessage("Scan is supported").show();
+        if (Scan.INSTANCE.isDeviceArchitectureArm()) {
+            ((TextView) findViewById(R.id.deviceArchitectureText)).setText(getString(R.string.deviceArchitecture, "arm: " + Scan.INSTANCE.getDeviceArchitecture()));
         } else {
-            new AlertDialog.Builder(this).setMessage("Scan is NOT supported").show();
+            ((TextView) findViewById(R.id.deviceArchitectureText)).setText(getString(R.string.deviceArchitecture, "NOT arm" + Scan.INSTANCE.getDeviceArchitecture()));
         }
 
         findViewById(R.id.scanCardLocalButton).setOnClickListener(v -> {
