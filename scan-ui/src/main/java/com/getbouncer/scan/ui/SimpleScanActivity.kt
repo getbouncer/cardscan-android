@@ -19,8 +19,6 @@ import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.framework.util.getSdkVersion
 import com.getbouncer.scan.ui.util.asRect
 import com.getbouncer.scan.ui.util.dpToPixels
-import com.getbouncer.scan.ui.util.fadeIn
-import com.getbouncer.scan.ui.util.fadeOut
 import com.getbouncer.scan.ui.util.getColorByRes
 import com.getbouncer.scan.ui.util.getDrawableByRes
 import com.getbouncer.scan.ui.util.getFloatResource
@@ -28,6 +26,7 @@ import com.getbouncer.scan.ui.util.hide
 import com.getbouncer.scan.ui.util.setDrawable
 import com.getbouncer.scan.ui.util.setTextSizeByRes
 import com.getbouncer.scan.ui.util.setVisible
+import com.getbouncer.scan.ui.util.show
 import com.getbouncer.scan.ui.util.startAnimation
 import kotlinx.coroutines.flow.Flow
 
@@ -589,20 +588,20 @@ abstract class SimpleScanActivity : ScanActivity() {
                 viewFinderWindowView.setBackgroundResource(R.drawable.bouncer_card_background_found)
                 viewFinderBorderView.startAnimation(R.drawable.bouncer_card_border_found)
                 instructionsTextView.setText(R.string.bouncer_card_scan_instructions)
-                instructionsTextView.fadeIn()
+                instructionsTextView.show()
             }
             is ScanState.FoundLong -> {
                 viewFinderBackgroundView.setBackgroundColor(getColorByRes(R.color.bouncerFoundBackground))
                 viewFinderWindowView.setBackgroundResource(R.drawable.bouncer_card_background_found)
                 viewFinderBorderView.startAnimation(R.drawable.bouncer_card_border_found_long)
                 instructionsTextView.setText(R.string.bouncer_card_scan_instructions)
-                instructionsTextView.fadeIn()
+                instructionsTextView.show()
             }
             is ScanState.Correct -> {
                 viewFinderBackgroundView.setBackgroundColor(getColorByRes(R.color.bouncerCorrectBackground))
                 viewFinderWindowView.setBackgroundResource(R.drawable.bouncer_card_background_correct)
                 viewFinderBorderView.startAnimation(R.drawable.bouncer_card_border_correct)
-                instructionsTextView.fadeOut()
+                instructionsTextView.hide()
             }
             is ScanState.Wrong -> {
                 viewFinderBackgroundView.setBackgroundColor(getColorByRes(R.color.bouncerWrongBackground))
