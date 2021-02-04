@@ -1,5 +1,21 @@
 # Changelog
 
+## [Unreleased](https://github.com/getbouncer/cardscan-android/tree/HEAD)
+
+**Closed issues:**
+
+- Card scan crash on release [\#316](https://github.com/getbouncer/cardscan-android/issues/316)
+
+## [2.0.0072](https://github.com/getbouncer/cardscan-android/tree/2.0.0072) (2021-02-04)
+
+**Closed issues:**
+
+- Crash on animation [\#299](https://github.com/getbouncer/cardscan-android/issues/299)
+
+**Merged pull requests:**
+
+- Fix crash on fade animations when minifying resources [\#317](https://github.com/getbouncer/cardscan-android/pull/317) ([awushensky](https://github.com/awushensky))
+
 ## [2.0.0071](https://github.com/getbouncer/cardscan-android/tree/2.0.0071) (2021-02-01)
 
 **Merged pull requests:**
@@ -354,7 +370,6 @@
 **Merged pull requests:**
 
 - Chang custom card issuer [\#185](https://github.com/getbouncer/cardscan-android/pull/185) ([smkuhne](https://github.com/smkuhne))
-- Bump kotlinx-serialization-runtime from 1.0-M1-1.4.0-rc to 1.0-M1-1.4.0-rc-218 [\#184](https://github.com/getbouncer/cardscan-android/pull/184) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Add custom pans [\#183](https://github.com/getbouncer/cardscan-android/pull/183) ([smkuhne](https://github.com/smkuhne))
 - Update dependencies [\#182](https://github.com/getbouncer/cardscan-android/pull/182) ([awushensky](https://github.com/awushensky))
 - Local rules [\#181](https://github.com/getbouncer/cardscan-android/pull/181) ([awushensky](https://github.com/awushensky))
@@ -367,6 +382,7 @@
 
 **Merged pull requests:**
 
+- Bump kotlinx-serialization-runtime from 1.0-M1-1.4.0-rc to 1.0-M1-1.4.0-rc-218 [\#184](https://github.com/getbouncer/cardscan-android/pull/184) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Add aspect ratio method [\#173](https://github.com/getbouncer/cardscan-android/pull/173) ([smkuhne](https://github.com/smkuhne))
 - Prevent crash on bad model download [\#172](https://github.com/getbouncer/cardscan-android/pull/172) ([awushensky](https://github.com/awushensky))
 
