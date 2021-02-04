@@ -18,7 +18,6 @@ import com.getbouncer.scan.payment.ml.ssd.DetectionBox
 import com.getbouncer.scan.ui.DebugDetectionBox
 import com.getbouncer.scan.ui.ScanResultListener
 import com.getbouncer.scan.ui.SimpleScanActivity
-import com.getbouncer.scan.ui.util.fadeIn
 import com.getbouncer.scan.ui.util.getColorByRes
 import com.getbouncer.scan.ui.util.setTextSizeByRes
 import com.getbouncer.scan.ui.util.setVisible
@@ -170,7 +169,7 @@ abstract class CardScanBaseActivity :
             }
             if (mostLikelyPan?.isNotEmpty() == true) {
                 cardNumberTextView.text = formatPan(mostLikelyPan)
-                cardNumberTextView.fadeIn()
+                cardNumberTextView.show()
             }
         }
 

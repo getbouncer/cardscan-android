@@ -27,11 +27,11 @@ import com.getbouncer.scan.payment.card.getCardIssuer
 import com.getbouncer.scan.payment.card.isValidExpiry
 import com.getbouncer.scan.payment.ml.ssd.cropImageForObjectDetect
 import com.getbouncer.scan.ui.util.asRect
-import com.getbouncer.scan.ui.util.fadeIn
 import com.getbouncer.scan.ui.util.getColorByRes
 import com.getbouncer.scan.ui.util.hide
 import com.getbouncer.scan.ui.util.setTextSizeByRes
 import com.getbouncer.scan.ui.util.setVisible
+import com.getbouncer.scan.ui.util.show
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -380,9 +380,9 @@ open class CardScanActivity :
                 processingTextView.hide()
             }
             is ScanState.Correct -> {
-                processingOverlayView.fadeIn()
-                processingSpinnerView.fadeIn()
-                processingTextView.fadeIn()
+                processingOverlayView.show()
+                processingSpinnerView.show()
+                processingTextView.show()
             }
         }
     }

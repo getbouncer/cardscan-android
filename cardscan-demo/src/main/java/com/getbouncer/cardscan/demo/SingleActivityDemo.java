@@ -446,7 +446,7 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
                     final String pan = state.getMostLikelyPan();
                     if (pan != null) {
                         cardPanTextView.setText(PanFormatterKt.formatPan(pan));
-                        ViewExtensionsKt.fadeIn(cardPanTextView, null);
+                        ViewExtensionsKt.show(cardPanTextView);
                     }
                     setStateFound();
 
@@ -457,7 +457,7 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
                     final String pan = state.getMostLikelyPan();
                     if (pan != null) {
                         cardPanTextView.setText(PanFormatterKt.formatPan(pan));
-                        ViewExtensionsKt.fadeIn(cardPanTextView, null);
+                        ViewExtensionsKt.show(cardPanTextView);
                     }
 
                     setStateFound();
@@ -469,7 +469,7 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
                     final String pan = state.getPan();
                     if (pan != null) {
                         cardPanTextView.setText(PanFormatterKt.formatPan(pan));
-                        ViewExtensionsKt.fadeIn(cardPanTextView, null);
+                        ViewExtensionsKt.show(cardPanTextView);
                     }
 
                     setStateFound();
@@ -540,7 +540,7 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
     private void setStateCorrect() {
         if (scanState == State.CORRECT) return;
         ViewExtensionsKt.startAnimation(viewFinderBorder, R.drawable.bouncer_card_border_correct);
-        ViewExtensionsKt.fadeIn(processingOverlay, null);
+        ViewExtensionsKt.show(processingOverlay);
         scanState = State.CORRECT;
     }
 }

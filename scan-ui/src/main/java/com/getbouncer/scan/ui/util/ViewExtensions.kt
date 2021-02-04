@@ -44,35 +44,6 @@ fun View.show() = setVisible(true)
 fun View.hide() = setVisible(false)
 
 /**
- * Fade in a view.
- */
-fun View.fadeIn(duration: Duration? = null) {
-    if (isVisible()) return
-
-    val animation = AnimationUtils.loadAnimation(this.context, R.anim.bouncer_fade_in)
-    visibility = View.INVISIBLE
-    if (duration != null) {
-        animation.duration = duration.inMilliseconds.toLong()
-    }
-    startAnimation(animation)
-    show()
-}
-
-/**
- * Fade out a view.
- */
-fun View.fadeOut(duration: Duration? = null) {
-    if (!isVisible()) return
-
-    val animation = AnimationUtils.loadAnimation(this.context, R.anim.bouncer_fade_out)
-    if (duration != null) {
-        animation.duration = duration.inMilliseconds.toLong()
-    }
-    startAnimation(animation)
-    Handler(Looper.getMainLooper()).postDelayed({ hide() }, duration?.inMilliseconds?.toLong() ?: 400)
-}
-
-/**
  * Get a [ColorInt] from a [ColorRes].
  */
 @ColorInt
