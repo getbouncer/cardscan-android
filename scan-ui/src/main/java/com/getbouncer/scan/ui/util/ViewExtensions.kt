@@ -5,11 +5,8 @@ import android.content.res.Resources.NotFoundException
 import android.graphics.PointF
 import android.graphics.Rect
 import android.graphics.drawable.Animatable
-import android.os.Handler
-import android.os.Looper
 import android.util.TypedValue
 import android.view.View
-import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.ColorInt
@@ -17,8 +14,6 @@ import androidx.annotation.ColorRes
 import androidx.annotation.DimenRes
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
-import com.getbouncer.scan.framework.time.Duration
-import com.getbouncer.scan.ui.R
 import kotlin.math.roundToInt
 
 /**
