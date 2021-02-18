@@ -63,6 +63,12 @@ object Config {
     var displayLogo: Boolean = true
 
     /**
+     * Whether or not to display the result of the scan to the user
+     */
+    @JvmStatic
+    var displayScanResult: Boolean = true
+
+    /**
      * If set to true, opt-in to beta versions of the ML models.
      */
     @JvmStatic
