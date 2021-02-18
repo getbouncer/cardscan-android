@@ -156,20 +156,22 @@ abstract class CardScanBaseActivity :
             scanStat.trackResult("ocr_pan_observed")
         }
 
-        if (Config.isDebug && result.analyzerResult.ocr?.pan?.isNotEmpty() == true) {
-            cardNumberTextView.text = formatPan(result.analyzerResult.ocr.pan)
-            cardNumberTextView.show()
-        } else {
-            val mostLikelyPan = when (val state = result.state) {
-                is MainLoopState.Initial -> null
-                is MainLoopState.PanFound -> state.getMostLikelyPan()
-                is MainLoopState.PanSatisfied -> state.pan
-                is MainLoopState.CardSatisfied -> state.getMostLikelyPan()
-                is MainLoopState.Finished -> state.pan
-            }
-            if (mostLikelyPan?.isNotEmpty() == true) {
-                cardNumberTextView.text = formatPan(mostLikelyPan)
+        if (Config.displayScanResult) {
+            if (Config.isDebug && result.analyzerResult.ocr?.pan?.isNotEmpty() == true) {
+                cardNumberTextView.text = formatPan(result.analyzerResult.ocr.pan)
                 cardNumberTextView.show()
+            } else {
+                val mostLikelyPan = when (val state = result.state) {
+                    is MainLoopState.Initial -> null
+                    is MainLoopState.PanFound -> state.getMostLikelyPan()
+                    is MainLoopState.PanSatisfied -> state.pan
+                    is MainLoopState.CardSatisfied -> state.getMostLikelyPan()
+                    is MainLoopState.Finished -> state.pan
+                }
+                if (mostLikelyPan?.isNotEmpty() == true) {
+                    cardNumberTextView.text = formatPan(mostLikelyPan)
+                    cardNumberTextView.show()
+                }
             }
         }
 
