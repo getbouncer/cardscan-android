@@ -9,6 +9,7 @@ android {
         applicationId "com.getbouncer.cardscan.demo"
         minSdkVersion 21
         targetSdkVersion 30
+        versionCode 1
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
