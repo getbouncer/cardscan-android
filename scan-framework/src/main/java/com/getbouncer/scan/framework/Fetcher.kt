@@ -156,7 +156,7 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
         val cachedData = FetchedData.fromFetchedModelMeta(modelClass, modelFrameworkVersion, tryFetchLatestCachedData())
 
         // attempt to fetch the data from local cache if it's needed immediately
-        if (forImmediateUse) {
+        if (forImmediateUse || !Config.downloadModels) {
             tryFetchLatestCachedData().run {
                 val data = FetchedData.fromFetchedModelMeta(modelClass, modelFrameworkVersion, this)
                 if (data.successfullyFetched) {
@@ -164,6 +164,19 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
                     return@fetchData data
                 }
             }
+        }
+
+        if (!Config.downloadModels) {
+            Log.d(Config.logTag, "$modelClass cannot be downloaded since downloads are turned off")
+            return FetchedData.fromFetchedModelMeta(
+                modelClass = modelClass,
+                modelFrameworkVersion = modelFrameworkVersion,
+                meta = FetchedModelFileMeta(
+                    modelVersion = cachedData.modelVersion,
+                    hashAlgorithm = cachedData.modelHashAlgorithm ?: "",
+                    modelFile = null,
+                ),
+            )
         }
 
         // get details for downloading the data. If download details cannot be retrieved, use the latest cached version
@@ -182,8 +195,8 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
                 meta = FetchedModelFileMeta(
                     modelVersion = downloadDetails.modelVersion,
                     hashAlgorithm = downloadDetails.hashAlgorithm,
-                    modelFile = null
-                )
+                    modelFile = null,
+                ),
             )
         }
 
