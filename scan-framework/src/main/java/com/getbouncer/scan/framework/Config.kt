@@ -79,6 +79,12 @@ object Config {
      */
     @JvmStatic
     var slowDeviceFrameRate = Rate(2, 1.seconds)
+
+    /**
+     * Allow downloading ML models.
+     */
+    @JvmStatic
+    var downloadModels = true
 }
 
 object NetworkConfig {
