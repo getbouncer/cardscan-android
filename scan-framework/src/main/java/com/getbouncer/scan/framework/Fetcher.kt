@@ -2,7 +2,6 @@ package com.getbouncer.scan.framework
 
 import android.content.Context
 import android.util.Log
-import androidx.annotation.RawRes
 import com.getbouncer.scan.framework.api.FileCreationException
 import com.getbouncer.scan.framework.api.NetworkResult
 import com.getbouncer.scan.framework.api.downloadFileWithRetries
@@ -41,7 +40,7 @@ data class FetchedModelResourceMeta(
     override val modelVersion: String,
     override val hashAlgorithm: String,
     val hash: String,
-    @RawRes val resourceId: Int?,
+    val assetFileName: String?,
 ) : FetchedModelMeta(modelVersion, hashAlgorithm)
 
 /**
@@ -72,7 +71,7 @@ sealed class FetchedData(
                     modelVersion = meta.modelVersion,
                     modelHash = meta.hash,
                     modelHashAlgorithm = meta.hashAlgorithm,
-                    resourceId = meta.resourceId,
+                    assetFileName = meta.assetFileName,
                 )
         }
     }
@@ -86,9 +85,9 @@ data class FetchedResource(
     override val modelVersion: String,
     override val modelHash: String?,
     override val modelHashAlgorithm: String?,
-    @RawRes val resourceId: Int?,
+    val assetFileName: String?,
 ) : FetchedData(modelClass, modelFrameworkVersion, modelVersion, modelHash, modelHashAlgorithm) {
-    override val successfullyFetched: Boolean = resourceId != null
+    override val successfullyFetched: Boolean = assetFileName != null
 }
 
 data class FetchedFile(
@@ -125,7 +124,7 @@ abstract class ResourceFetcher : Fetcher {
     protected abstract val modelVersion: String
     protected abstract val hash: String
     protected abstract val hashAlgorithm: String
-    protected abstract val resource: Int
+    protected abstract val assetFileName: String
 
     override suspend fun fetchData(forImmediateUse: Boolean, isOptional: Boolean): FetchedResource =
         FetchedResource(
@@ -134,7 +133,7 @@ abstract class ResourceFetcher : Fetcher {
             modelVersion = modelVersion,
             modelHash = hash,
             modelHashAlgorithm = hashAlgorithm,
-            resourceId = resource,
+            assetFileName = assetFileName,
         )
 }
 
@@ -598,7 +597,7 @@ abstract class UpdatingModelWebFetcher(context: Context) : SignedUrlModelWebFetc
  * details match what is cached, return the cached version instead.
  */
 abstract class UpdatingResourceFetcher(context: Context) : UpdatingModelWebFetcher(context) {
-    protected abstract val resource: Int
+    protected abstract val assetFileName: String
     protected abstract val resourceModelVersion: String
     protected abstract val resourceModelHash: String
     protected abstract val resourceModelHashAlgorithm: String
@@ -632,7 +631,7 @@ abstract class UpdatingResourceFetcher(context: Context) : UpdatingModelWebFetch
     private fun fetchModelFromResource(): FetchedModelMeta =
         FetchedModelResourceMeta(
             modelVersion = resourceModelVersion,
-            resourceId = resource,
+            assetFileName = assetFileName,
             hash = resourceModelHash,
             hashAlgorithm = resourceModelHashAlgorithm,
         )
