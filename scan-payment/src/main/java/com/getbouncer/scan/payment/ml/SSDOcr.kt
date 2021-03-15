@@ -231,14 +231,11 @@ class SSDOcr private constructor(interpreter: Interpreter) :
     /**
      * A fetcher for downloading model data.
      */
-    class ModelFetcher(context: Context) : ResourceFetcher() {
-    //        override val resource: Int = R.raw.darknite_1_1_1_16
-//        override val resourceModelVersion: String = "1.1.1.16"
-//        override val resourceModelHash: String = "8d8e3f79aa0783ab0cfa5c8d65d663a9da6ba99401efb2298aaaee387c3b00d6"
+    class ModelFetcher(context: Context) : UpdatingResourceFetcher(context) {
         override val assetFileName: String = "mb2_brex_metal_synthetic_svhnextra_epoch_3_5_98_8.tflite"
-        override val modelVersion: String = "3.5.98.8"
-        override val hash: String = "a4739fa49caa3ff88e7ff1145c9334ee4cbf64354e91131d02d98d7bfd4c35cf"
-        override val hashAlgorithm: String = "SHA-256"
+        override val resourceModelVersion: String = "3.5.98.8"
+        override val resourceModelHash: String = "a4739fa49caa3ff88e7ff1145c9334ee4cbf64354e91131d02d98d7bfd4c35cf"
+        override val resourceModelHashAlgorithm: String = "SHA-256"
         override val modelClass: String = "ocr"
         override val modelFrameworkVersion: Int = 1
     }
