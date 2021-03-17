@@ -1,12 +1,12 @@
 package com.getbouncer.scan.payment.ml
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Rect
 import android.util.Size
 import com.getbouncer.scan.framework.FetchedData
 import com.getbouncer.scan.framework.ResourceFetcher
 import com.getbouncer.scan.framework.TrackedImage
-import com.getbouncer.scan.framework.UpdatingResourceFetcher
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.ml.ssd.adjustLocations
@@ -16,7 +16,6 @@ import com.getbouncer.scan.framework.util.intersectionWith
 import com.getbouncer.scan.framework.util.projectRegionOfInterest
 import com.getbouncer.scan.framework.util.reshape
 import com.getbouncer.scan.framework.util.toRect
-import com.getbouncer.scan.payment.R
 import com.getbouncer.scan.payment.crop
 import com.getbouncer.scan.payment.hasOpenGl31
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
@@ -97,7 +96,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
         interpreter
     ) {
 
-    data class Input(val fullImage: TrackedImage, val previewSize: Size, val cardFinder: Rect)
+    data class Input(val ssdOcrImage: TrackedImage<ByteBuffer>)
 
     data class Prediction(val pan: String, val detectedBoxes: List<DetectionBox>)
 
@@ -113,38 +112,54 @@ class SSDOcr private constructor(interpreter: Interpreter) :
          *    fullImage's
          * 3. the fullImage and the previewImage have the same orientation
          */
-        fun cropImage(input: Input): TrackedImage {
+        fun cropImage(
+            cameraPreviewImage: TrackedImage<Bitmap>,
+            previewSize: Size,
+            cardFinder: Rect,
+        ): TrackedImage<Bitmap> {
             require(
-                input.cardFinder.left >= 0 &&
-                    input.cardFinder.right <= input.previewSize.width &&
-                    input.cardFinder.top >= 0 &&
-                    input.cardFinder.bottom <= input.previewSize.height
-            ) { "Card finder is outside preview image bounds ${input.cardFinder} ${input.previewSize}" }
+                cardFinder.left >= 0 &&
+                    cardFinder.right <= previewSize.width &&
+                    cardFinder.top >= 0 &&
+                    cardFinder.bottom <= previewSize.height
+            ) { "Card finder is outside preview image bounds $cardFinder $previewSize" }
 
             // Scale the cardFinder to match the full image
-            val projectedViewFinder = input
-                .previewSize
+            val projectedViewFinder = previewSize
                 .projectRegionOfInterest(
-                    toSize = input.fullImage.image.size(),
-                    regionOfInterest = input.cardFinder
+                    toSize = cameraPreviewImage.image.size(),
+                    regionOfInterest = cardFinder
                 )
-                .intersectionWith(input.fullImage.image.size().toRect())
+                .intersectionWith(cameraPreviewImage.image.size().toRect())
 
             return TrackedImage(
-                image = input.fullImage.image.crop(projectedViewFinder),
-                tracker = input.fullImage.tracker,
+                image = cameraPreviewImage.image.crop(projectedViewFinder),
+                tracker = cameraPreviewImage.tracker,
             )
         }
+
+        /**
+         * Convert a camera preview image into a SSDOcr input
+         */
+        fun cameraPreviewToInput(
+            cameraPreviewImage: TrackedImage<Bitmap>,
+            previewSize: Size,
+            cardFinder: Rect
+        ) = Input(
+            cropImage(cameraPreviewImage, previewSize, cardFinder).let { image ->
+                TrackedImage(
+                    image.image
+                        .scale(Factory.TRAINED_IMAGE_SIZE)
+                        .toRGBByteBuffer(mean = IMAGE_MEAN, std = IMAGE_STD).also {
+                            image.tracker.trackResult("ocr_image_transform")
+                        },
+                    image.tracker
+                )
+            }
+        )
     }
 
-    override suspend fun transformData(data: Input): Array<ByteBuffer> = arrayOf(
-        cropImage(data)
-            .image
-            .scale(Factory.TRAINED_IMAGE_SIZE)
-            .toRGBByteBuffer(mean = IMAGE_MEAN, std = IMAGE_STD).also {
-                data.fullImage.tracker.trackResult("ocr_image_transform")
-            }
-    )
+    override suspend fun transformData(data: Input): Array<ByteBuffer> = arrayOf(data.ssdOcrImage.image)
 
     override suspend fun interpretMLOutput(
         data: Input,
@@ -188,7 +203,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
 
         val predictedNumber = detectedBoxes.map { it.label }.joinToString("")
 
-        data.fullImage.tracker.trackResult("ocr_prediction_complete")
+        data.ssdOcrImage.tracker.trackResult("ocr_prediction_complete")
         return Prediction(predictedNumber, detectedBoxes)
     }
 

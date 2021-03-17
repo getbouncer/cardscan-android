@@ -1,6 +1,7 @@
 package com.getbouncer.scan.payment.carddetect
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Rect
 import android.util.Size
 import com.getbouncer.scan.framework.FetchedData
@@ -54,7 +55,7 @@ class CardDetect private constructor(interpreter: Interpreter) :
          * Calculate what portion of the full image should be cropped for card detection based on
          * the position of card finder within the preview image.
          */
-        fun calculateCrop(fullImage: Size, previewImage: Size, cardFinder: Rect): Rect {
+        private fun calculateCrop(fullImage: Size, previewImage: Size, cardFinder: Rect): Rect {
             require(
                 cardFinder.left >= 0 &&
                     cardFinder.right <= previewImage.width &&
@@ -88,9 +89,33 @@ class CardDetect private constructor(interpreter: Interpreter) :
                 min(fullImage.height, scaledCardDetectionSquare.bottom + scaledPreviewImage.top),
             )
         }
+
+        /**
+         * Convert a camera preview image into a CardDetect input
+         */
+        fun cameraPreviewToInput(
+            cameraPreviewImage: TrackedImage<Bitmap>,
+            previewSize: Size,
+            cardFinder: Rect
+        ) = Input(
+            TrackedImage(
+                cameraPreviewImage.image
+                    .crop(
+                        calculateCrop(
+                            cameraPreviewImage.image.size(),
+                            previewSize,
+                            cardFinder,
+                        )
+                    )
+                    .scale(TRAINED_IMAGE_SIZE)
+                    .toRGBByteBuffer()
+                    .also { cameraPreviewImage.tracker.trackResult("card_detect_image_cropped") },
+                cameraPreviewImage.tracker,
+            )
+        )
     }
 
-    data class Input(val fullImage: TrackedImage, val previewSize: Size, val cardFinder: Rect)
+    data class Input(val cardDetectImage: TrackedImage<ByteBuffer>)
 
     /**
      * A prediction returned by this analyzer.
@@ -130,7 +155,7 @@ class CardDetect private constructor(interpreter: Interpreter) :
             )
         }
 
-        data.fullImage.tracker.trackResult("card_detect_prediction_complete")
+        data.cardDetectImage.tracker.trackResult("card_detect_prediction_complete")
 
         return Prediction(
             side = side,
@@ -140,19 +165,7 @@ class CardDetect private constructor(interpreter: Interpreter) :
         )
     }
 
-    override suspend fun transformData(data: Input): ByteBuffer = data.fullImage.image
-        .crop(
-            calculateCrop(
-                data.fullImage.image.size(),
-                data.previewSize,
-                data.cardFinder,
-            )
-        )
-        .scale(TRAINED_IMAGE_SIZE)
-        .toRGBByteBuffer()
-        .also {
-            data.fullImage.tracker.trackResult("card_detect_image_cropped")
-        }
+    override suspend fun transformData(data: Input): ByteBuffer = data.cardDetectImage.image
 
     override suspend fun executeInference(
         tfInterpreter: Interpreter,

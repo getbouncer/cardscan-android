@@ -1,6 +1,7 @@
 package com.getbouncer.scan.payment.ml
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.util.Size
 import com.getbouncer.scan.framework.FetchedData
 import com.getbouncer.scan.framework.TrackedImage
@@ -28,7 +29,7 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
         AlphabetDetect.Prediction,
         Array<FloatArray>>(interpreter) {
 
-    data class Input(val objDetectionImage: TrackedImage)
+    data class Input(val alphabetDetectImage: TrackedImage<Bitmap>)
 
     data class Prediction(val character: Char, val confidence: Float)
 
@@ -47,15 +48,15 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
             character,
             confidence
         ).also {
-            data.objDetectionImage.tracker.trackResult("alphabet_detect_prediction_complete")
+            data.alphabetDetectImage.tracker.trackResult("alphabet_detect_prediction_complete")
         }
     }
 
-    override suspend fun transformData(data: Input): ByteBuffer = data.objDetectionImage.image
+    override suspend fun transformData(data: Input): ByteBuffer = data.alphabetDetectImage.image
         .scale(TRAINED_IMAGE_SIZE)
         .toRGBByteBuffer()
         .also {
-            data.objDetectionImage.tracker.trackResult("alphabet_detect_image_cropped")
+            data.alphabetDetectImage.tracker.trackResult("alphabet_detect_image_cropped")
         }
 
     override suspend fun executeInference(

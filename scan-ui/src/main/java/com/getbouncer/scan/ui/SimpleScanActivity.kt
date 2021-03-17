@@ -1,9 +1,12 @@
 package com.getbouncer.scan.ui
 
 import android.annotation.SuppressLint
+import android.content.res.Resources
+import android.graphics.Bitmap
 import android.graphics.PointF
 import android.graphics.Typeface
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.util.Size
 import android.view.Gravity
 import android.view.View
@@ -29,6 +32,8 @@ import com.getbouncer.scan.ui.util.setVisible
 import com.getbouncer.scan.ui.util.show
 import com.getbouncer.scan.ui.util.startAnimation
 import kotlinx.coroutines.flow.Flow
+import kotlin.math.min
+import kotlin.math.roundToInt
 
 abstract class SimpleScanActivity : ScanActivity() {
 
@@ -120,7 +125,7 @@ abstract class SimpleScanActivity : ScanActivity() {
 
     private val logoView: ImageView by lazy { ImageView(this) }
 
-    private val versionTextView: TextView by lazy { TextView(this) }
+    protected open val versionTextView: TextView by lazy { TextView(this) }
 
     /**
      * The aspect ratio of the view finder.
@@ -402,12 +407,17 @@ abstract class SimpleScanActivity : ScanActivity() {
 
         viewFinderBackgroundView.constrainToParent()
 
+        val screenSize = Resources.getSystem().displayMetrics.let {
+            Size(it.widthPixels, it.heightPixels)
+        }
+        val viewFinderMargin = (min(screenSize.width, screenSize.height) * 0.1F).roundToInt()
+
         listOf(viewFinderWindowView, viewFinderBorderView).forEach { view ->
             view.layoutParams = ConstraintLayout.LayoutParams(0, 0).apply {
-                topMargin = resources.getDimensionPixelSize(R.dimen.bouncerViewFinderMargin)
-                bottomMargin = resources.getDimensionPixelSize(R.dimen.bouncerViewFinderMargin)
-                marginStart = resources.getDimensionPixelSize(R.dimen.bouncerViewFinderMargin)
-                marginEnd = resources.getDimensionPixelSize(R.dimen.bouncerViewFinderMargin)
+                topMargin = viewFinderMargin  // resources.getDimensionPixelSize(R.dimen.bouncerViewFinderMargin)
+                bottomMargin = viewFinderMargin  // resources.getDimensionPixelSize(R.dimen.bouncerViewFinderMargin)
+                marginStart = viewFinderMargin  // resources.getDimensionPixelSize(R.dimen.bouncerViewFinderMargin)
+                marginEnd = viewFinderMargin  // resources.getDimensionPixelSize(R.dimen.bouncerViewFinderMargin)
             }
 
             view.constrainToParent()
@@ -654,7 +664,7 @@ abstract class SimpleScanActivity : ScanActivity() {
     /**
      * Once the camera stream is available, start processing images.
      */
-    override fun onCameraStreamAvailable(cameraStream: Flow<TrackedImage>) {
+    override fun onCameraStreamAvailable(cameraStream: Flow<TrackedImage<Bitmap>>) {
         scanFlow.startFlow(
             context = this,
             imageStream = cameraStream,

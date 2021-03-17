@@ -1,7 +1,6 @@
 package com.getbouncer.scan.payment.ml
 
 import android.content.Context
-import android.graphics.Rect
 import android.graphics.RectF
 import android.util.Log
 import android.util.Size
@@ -15,10 +14,7 @@ import com.getbouncer.scan.framework.ml.hardNonMaximumSuppression
 import com.getbouncer.scan.framework.ml.ssd.rectForm
 import com.getbouncer.scan.payment.hasOpenGl31
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
-import com.getbouncer.scan.payment.ml.ssd.cropImageForObjectDetect
 import com.getbouncer.scan.payment.ml.yolo.processYoloLayer
-import com.getbouncer.scan.payment.scale
-import com.getbouncer.scan.payment.toRGBByteBuffer
 import org.tensorflow.lite.Interpreter
 import java.io.FileNotFoundException
 import java.nio.ByteBuffer
@@ -76,9 +72,7 @@ class TextDetect private constructor(interpreter: Interpreter) :
         Map<Int, Array<Array<Array<FloatArray>>>>>(interpreter) {
 
     data class Input(
-        val fullImage: TrackedImage,
-        val previewSize: Size,
-        val cardFinder: Rect
+        val textDetectImage: TrackedImage<ByteBuffer>,
     )
 
     data class Prediction(
@@ -158,7 +152,7 @@ class TextDetect private constructor(interpreter: Interpreter) :
             nameBoxes?.subBoxes ?: emptyList(),
             outputBoxes.filter { it.label == LABELS.EXPIRATION_DATE.ordinal }.sortedByDescending { it.confidence }.take(2)
         ).also {
-            data.fullImage.tracker.trackResult("text_detect_prediction_complete")
+            data.textDetectImage.tracker.trackResult("text_detect_prediction_complete")
         }
     }
 
@@ -297,18 +291,6 @@ class TextDetect private constructor(interpreter: Interpreter) :
     }
 
     /**
-     * Calculates a component of the name score derived from the delta of rect.top  of
-     * the proposed name box and the pan box
-     */
-    private fun getYDistScore(prediction: DetectionBox, panBox: DetectionBox): Float {
-        val mean = 2.146477635934552f // -2.136458074582795f //
-        val std = 0.6993319317136948f // 0.7293684170784801f //
-        val panHeight = panBox.rect.height()
-        val yDist = (panBox.rect.top - prediction.rect.top) / panHeight
-        return (-1 / 2f) * (abs(yDist - mean) / std).pow(2)
-    }
-
-    /**
      * Calculates a component of the name score derived from the height ratio between the
      * proposed name box and the pan box
      */
@@ -341,18 +323,7 @@ class TextDetect private constructor(interpreter: Interpreter) :
         return nameWidthScore
     }
 
-    override suspend fun transformData(data: Input): Array<ByteBuffer> = arrayOf(
-        cropImageForObjectDetect(
-            data.fullImage.image,
-            data.previewSize,
-            data.cardFinder
-        )
-            .scale(TRAINED_IMAGE_SIZE)
-            .toRGBByteBuffer()
-            .also {
-                data.fullImage.tracker.trackResult("text_detect_image_cropped")
-            }
-    )
+    override suspend fun transformData(data: Input): Array<ByteBuffer> = arrayOf(data.textDetectImage.image)
 
     override suspend fun executeInference(
         tfInterpreter: Interpreter,

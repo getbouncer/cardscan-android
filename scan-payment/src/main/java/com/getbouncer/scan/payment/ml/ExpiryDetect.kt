@@ -1,6 +1,7 @@
 package com.getbouncer.scan.payment.ml
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Rect
 import android.graphics.RectF
 import android.util.Size
@@ -40,7 +41,7 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
         ExpiryDetect.Prediction,
         Array<Array<Array<FloatArray>>>>(interpreter) {
 
-    data class Input(val image: TrackedImage, val expiryBox: RectF)
+    data class Input(val expiryDetectImage: TrackedImage<Bitmap>, val expiryBox: RectF)
 
     data class Prediction(val expiry: Expiry?)
 
@@ -90,13 +91,13 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
         } else {
             Prediction(null)
         }.also {
-            data.image.tracker.trackResult("expiry_detect_prediction_complete")
+            data.expiryDetectImage.tracker.trackResult("expiry_detect_prediction_complete")
         }
     }
 
     override suspend fun transformData(data: Input): ByteBuffer {
         val targetAspectRatio = ASPECT_RATIO
-        val scaledRect = data.expiryBox.scaled(data.image.image.size())
+        val scaledRect = data.expiryBox.scaled(data.expiryDetectImage.image.size())
         val scaledExpRectNewHeight = scaledRect.width() * targetAspectRatio
 
         val rect = Rect(
@@ -106,12 +107,12 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
             (scaledRect.centerY() + scaledExpRectNewHeight / 2).roundToInt()
         )
 
-        return data.image.image
+        return data.expiryDetectImage.image
             .crop(rect)
             .scale(TRAINED_IMAGE_SIZE)
             .toRGBByteBuffer()
             .also {
-                data.image.tracker.trackResult("expiry_detect_image_cropped")
+                data.expiryDetectImage.tracker.trackResult("expiry_detect_image_cropped")
             }
     }
 

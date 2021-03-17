@@ -1,6 +1,7 @@
 package com.getbouncer.scan.ui
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Rect
 import android.util.Size
 import androidx.lifecycle.LifecycleOwner
@@ -26,7 +27,7 @@ interface ScanFlow {
      */
     fun startFlow(
         context: Context,
-        imageStream: Flow<TrackedImage>,
+        imageStream: Flow<TrackedImage<Bitmap>>,
         previewSize: Size,
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,

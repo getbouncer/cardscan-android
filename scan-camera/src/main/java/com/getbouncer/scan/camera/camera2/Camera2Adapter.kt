@@ -19,6 +19,7 @@ package com.getbouncer.scan.camera.camera2
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.ImageFormat
 import android.graphics.Matrix
 import android.graphics.PointF
@@ -106,7 +107,7 @@ class Camera2Adapter(
     private val minimumResolution: Size,
     private val cameraErrorListener: CameraErrorListener,
     private val coroutineScope: CoroutineScope,
-) : CameraAdapter<TrackedImage>(), LifecycleObserver {
+) : CameraAdapter<TrackedImage<Bitmap>>(), LifecycleObserver {
 
     companion object {
         /**

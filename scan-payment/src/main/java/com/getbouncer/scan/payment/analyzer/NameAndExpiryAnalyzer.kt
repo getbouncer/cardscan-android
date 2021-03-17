@@ -13,11 +13,10 @@ import com.getbouncer.scan.framework.util.centerScaled
 import com.getbouncer.scan.framework.util.scaled
 import com.getbouncer.scan.payment.ml.AlphabetDetect
 import com.getbouncer.scan.payment.ml.ExpiryDetect
-import com.getbouncer.scan.payment.ml.SSDOcr
 import com.getbouncer.scan.payment.ml.TextDetect
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
-import com.getbouncer.scan.payment.ml.ssd.cropImageForObjectDetect
 import com.getbouncer.scan.payment.size
+import com.getbouncer.scan.payment.toRGBByteBuffer
 import kotlin.math.max
 import kotlin.math.min
 
@@ -39,7 +38,11 @@ class NameAndExpiryAnalyzer private constructor(
     private val expiryDetect: ExpiryDetect?,
     val runNameExtraction: Boolean,
     val runExpiryExtraction: Boolean,
-) : Analyzer<SSDOcr.Input, Any, NameAndExpiryAnalyzer.Prediction> {
+) : Analyzer<NameAndExpiryAnalyzer.Input, Any, NameAndExpiryAnalyzer.Prediction> {
+
+    data class Input(
+        val squareImage: TrackedImage<Bitmap>,
+    )
 
     data class Prediction(
         val name: String?,
@@ -52,30 +55,21 @@ class NameAndExpiryAnalyzer private constructor(
     fun isNameDetectorAvailable() = textDetect != null && alphabetDetect != null
 
     override suspend fun analyze(
-        data: SSDOcr.Input,
+        data: Input,
         state: Any
     ) = if ((!runNameExtraction && !runExpiryExtraction) || textDetect == null) {
         Prediction(null, null, null)
     } else {
-        val objDetectBitmap = TrackedImage(
-            image = cropImageForObjectDetect(
-                data.fullImage.image,
-                data.previewSize,
-                data.cardFinder,
-            ),
-            tracker = data.fullImage.tracker,
+        val squareImageBytes = TrackedImage(
+            data.squareImage.image
+                .toRGBByteBuffer()
+                .also { data.squareImage.tracker.trackResult("text_detect_image_cropped") },
+            data.squareImage.tracker
         )
 
-        val textDetectorPrediction = textDetect.analyze(
-            TextDetect.Input(
-                data.fullImage,
-                data.previewSize,
-                data.cardFinder
-            ),
-            Unit
-        )
+        val textDetectorPrediction = textDetect.analyze(TextDetect.Input(squareImageBytes), Unit)
 
-        data.fullImage.tracker.trackResult("name_and_expiry_image_cropped")
+        data.squareImage.tracker.trackResult("name_and_expiry_image_cropped")
 
         val expiry = if (runExpiryExtraction && textDetectorPrediction.expiryBoxes.isNotEmpty()) {
             // pick the expiry box by oldest date
@@ -84,7 +78,7 @@ class NameAndExpiryAnalyzer private constructor(
             textDetectorPrediction.expiryBoxes.mapNotNull { box ->
                 expiryDetect?.analyze(
                     ExpiryDetect.Input(
-                        objDetectBitmap,
+                        data.squareImage,
                         // the boxes produced by textDetector are sometimes too tight, especially in the Y
                         // direction. Scale it out a bit
                         box.rect.centerScaled(
@@ -108,7 +102,7 @@ class NameAndExpiryAnalyzer private constructor(
                         NAME_BOX_X_SCALE_RATIO,
                         NAME_BOX_Y_SCALE_RATIO,
                     ),
-                    objDetectBitmap,
+                    data.squareImage,
                 )?.filter { it != ' ' }
             }.joinToString(" ").trim().ifEmpty { null }
         } else {
@@ -129,13 +123,13 @@ class NameAndExpiryAnalyzer private constructor(
 
     private suspend fun processNamePredictions(
         nameRect: RectF,
-        bitmapForObjectDetection: TrackedImage
+        squareImage: TrackedImage<Bitmap>
     ): String? {
         if (alphabetDetect == null) {
             return null
         }
 
-        val scaledNameRect = nameRect.scaled(bitmapForObjectDetection.image.size())
+        val scaledNameRect = nameRect.scaled(squareImage.image.size())
         val x = scaledNameRect.left.toInt()
         val y = scaledNameRect.top.toInt()
         val width = scaledNameRect.width().toInt()
@@ -147,14 +141,14 @@ class NameAndExpiryAnalyzer private constructor(
 
         // We adjust the start and end of the name bounding box to better capture the first char
         val xStart = max(0, x - charWidth / 4)
-        val nameWidth = min(bitmapForObjectDetection.image.width - xStart, width + charWidth / 2)
+        val nameWidth = min(squareImage.image.width - xStart, width + charWidth / 2)
 
-        if (y < 0 || height < 0 || y + height > bitmapForObjectDetection.image.height || xStart + nameWidth > bitmapForObjectDetection.image.width) {
+        if (y < 0 || height < 0 || y + height > squareImage.image.height || xStart + nameWidth > squareImage.image.width) {
             Log.w(Config.logTag, "Invalid name dimensions. height=$height, y=$y")
             return null
         }
 
-        val nameBitmap = Bitmap.createBitmap(bitmapForObjectDetection.image, xStart, y, nameWidth, height)
+        val nameBitmap = Bitmap.createBitmap(squareImage.image, xStart, y, nameWidth, height)
         val predictions: MutableList<CharPredictionWithBox> = ArrayList()
 
         // iterate through each stride, making a prediction per stride
@@ -162,7 +156,7 @@ class NameAndExpiryAnalyzer private constructor(
         while (nameX < nameWidth - charWidth) {
             val firstLetterBitmap = TrackedImage(
                 image = Bitmap.createBitmap(nameBitmap, nameX, 0, height, height),
-                tracker = bitmapForObjectDetection.tracker,
+                tracker = squareImage.tracker,
             )
             predictions.add(
                 CharPredictionWithBox(
@@ -175,8 +169,8 @@ class NameAndExpiryAnalyzer private constructor(
 
         val (boxes, probabilities) = predictions.map {
             it.getNormalizedRectForm(
-                width = bitmapForObjectDetection.image.width,
-                height = bitmapForObjectDetection.image.height
+                width = squareImage.image.width,
+                height = squareImage.image.height,
             ) to it.characterPrediction.confidence
         }.unzip()
 
@@ -312,7 +306,7 @@ class NameAndExpiryAnalyzer private constructor(
         private val expiryDetectFactory: ExpiryDetect.Factory? = null,
         private val runNameExtraction: Boolean,
         private val runExpiryExtraction: Boolean,
-    ) : AnalyzerFactory<SSDOcr.Input, Any, Prediction, NameAndExpiryAnalyzer> {
+    ) : AnalyzerFactory<Input, Any, Prediction, NameAndExpiryAnalyzer> {
         override suspend fun newInstance() = NameAndExpiryAnalyzer(
             textDetect = textDetectFactory.newInstance(),
             alphabetDetect = alphabetDetectFactory?.newInstance(),
