@@ -12,6 +12,7 @@ import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.ml.ssd.adjustLocations
 import com.getbouncer.scan.framework.ml.ssd.softMax
 import com.getbouncer.scan.framework.ml.ssd.toRectForm
+import com.getbouncer.scan.framework.util.centerScaled
 import com.getbouncer.scan.framework.util.intersectionWith
 import com.getbouncer.scan.framework.util.projectRegionOfInterest
 import com.getbouncer.scan.framework.util.reshape
@@ -128,7 +129,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
             val projectedViewFinder = previewSize
                 .projectRegionOfInterest(
                     toSize = cameraPreviewImage.image.size(),
-                    regionOfInterest = cardFinder
+                    regionOfInterest = cardFinder.centerScaled(0.9F, 0.9F)  // take the inner 90% of the view finder
                 )
                 .intersectionWith(cameraPreviewImage.image.size().toRect())
 

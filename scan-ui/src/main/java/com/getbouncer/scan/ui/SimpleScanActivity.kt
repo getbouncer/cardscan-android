@@ -410,7 +410,7 @@ abstract class SimpleScanActivity : ScanActivity() {
         val screenSize = Resources.getSystem().displayMetrics.let {
             Size(it.widthPixels, it.heightPixels)
         }
-        val viewFinderMargin = (min(screenSize.width, screenSize.height) * 0.1F).roundToInt()
+        val viewFinderMargin = (min(screenSize.width, screenSize.height) * 0.05F).roundToInt()
 
         listOf(viewFinderWindowView, viewFinderBorderView).forEach { view ->
             view.layoutParams = ConstraintLayout.LayoutParams(0, 0).apply {
