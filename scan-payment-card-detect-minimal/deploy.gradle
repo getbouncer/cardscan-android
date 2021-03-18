@@ -1,0 +1,118 @@
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'maven-publish'
+
+ext {
+    bintrayRepo = 'cardscan-android'
+    bintrayName = 'scan-payment-card-detect'
+    bintrayOrg = 'bouncerpaid'
+
+    publishedGroupId = 'com.getbouncer'
+    libraryName = 'scan-payment-card-detect'
+    artifact = 'scan-payment-card-detect'
+
+    libraryDescription = 'This library provides the framework processing payment cards.'
+
+    siteUrl = 'https://getbouncer.com'
+    gitUrl = 'https://github.com/getbouncer/cardscan-android.git'
+
+    libraryVersion = version
+
+    developerId = 'getbouncer'
+    developerName = 'Bouncer Technologies'
+    developerEmail = 'contact@getbouncer.com'
+
+    licenseName = 'bouncer-free-1'
+    licenseUrl = 'https://github.com/getbouncer/cardscan-android/blob/master/LICENSE'
+    allLicenses = ["bouncer-free-1"]
+}
+
+group = publishedGroupId
+version = libraryVersion
+
+install {
+    repositories.mavenInstaller {
+        pom.project {
+            packaging 'aar'
+            groupId publishedGroupId
+            artifactId artifact
+
+            name libraryName
+            description libraryDescription
+            url siteUrl
+
+            licenses {
+                license {
+                    name licenseName
+                    url licenseUrl
+                }
+            }
+
+            developers {
+                developer {
+                    id developerId
+                    name developerName
+                    email developerEmail
+                }
+            }
+
+            scm {
+                connection gitUrl
+                developerConnection gitUrl
+                url siteUrl
+            }
+        }
+    }
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
+task javadoc(type: Javadoc) {
+    //source = android.sourceSets.main.java.srcDirs
+    //classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+Properties properties = new Properties()
+if (project.rootProject.file('local.properties').exists()) {
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+}
+
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+
+    configurations = ['archives']
+    pkg {
+        repo = bintrayRepo
+        name = bintrayName
+        userOrg = bintrayOrg
+        desc = libraryDescription
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        licenses = allLicenses
+        dryRun = false
+        publish = true
+        override = false
+        publicDownloadNumbers = true
+        version {
+            desc = libraryDescription
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+}

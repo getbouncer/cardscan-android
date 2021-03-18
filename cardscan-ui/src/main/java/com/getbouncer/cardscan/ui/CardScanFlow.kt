@@ -1,6 +1,7 @@
 package com.getbouncer.cardscan.ui
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Rect
 import android.util.Log
 import android.util.Size
@@ -26,13 +27,13 @@ import com.getbouncer.scan.payment.TextDetectModelManager
 import com.getbouncer.scan.payment.analyzer.NameAndExpiryAnalyzer
 import com.getbouncer.scan.payment.carddetect.CardDetect
 import com.getbouncer.scan.payment.carddetect.CardDetectModelManager
-import com.getbouncer.scan.payment.ml.AlphabetDetect
-import com.getbouncer.scan.payment.ml.AlphabetDetectModelManager
-import com.getbouncer.scan.payment.ml.ExpiryDetect
-import com.getbouncer.scan.payment.ml.ExpiryDetectModelManager
-import com.getbouncer.scan.payment.ml.SSDOcr
-import com.getbouncer.scan.payment.ml.SSDOcrModelManager
-import com.getbouncer.scan.payment.ml.TextDetect
+import com.getbouncer.scan.payment.ocr.AlphabetDetect
+import com.getbouncer.scan.payment.ocr.AlphabetDetectModelManager
+import com.getbouncer.scan.payment.ocr.ExpiryDetect
+import com.getbouncer.scan.payment.ocr.ExpiryDetectModelManager
+import com.getbouncer.scan.payment.ocr.SSDOcr
+import com.getbouncer.scan.payment.ocr.SSDOcrModelManager
+import com.getbouncer.scan.payment.ocr.TextDetect
 import com.getbouncer.scan.ui.ScanFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -44,7 +45,7 @@ import kotlinx.coroutines.launch
 
 data class SavedFrame(
     val pan: String?,
-    val frame: SSDOcr.Input,
+    val frame: MainLoopAnalyzer.Input,
     val details: FrameDetails,
 )
 
@@ -100,9 +101,9 @@ open class CardScanFlow(
      */
     private var canceled = false
 
-    private var mainLoopAnalyzerPool: AnalyzerPool<SSDOcr.Input, MainLoopState, MainLoopAnalyzer.Prediction>? = null
+    private var mainLoopAnalyzerPool: AnalyzerPool<MainLoopAnalyzer.Input, MainLoopState, MainLoopAnalyzer.Prediction>? = null
     private var mainLoopAggregator: MainLoopAggregator? = null
-    private var mainLoop: ProcessBoundAnalyzerLoop<SSDOcr.Input, MainLoopState, MainLoopAnalyzer.Prediction>? = null
+    private var mainLoop: ProcessBoundAnalyzerLoop<MainLoopAnalyzer.Input, MainLoopState, MainLoopAnalyzer.Prediction>? = null
     private var mainLoopJob: Job? = null
 
     private var completionLoopAnalyzerPool: AnalyzerPool<SavedFrame, Unit, CompletionLoopAnalyzer.Prediction>? = null
@@ -118,7 +119,7 @@ open class CardScanFlow(
      */
     override fun startFlow(
         context: Context,
-        imageStream: Flow<TrackedImage>,
+        imageStream: Flow<TrackedImage<Bitmap>>,
         previewSize: Size,
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,
@@ -173,8 +174,8 @@ open class CardScanFlow(
             ).apply {
                 mainLoopJob = subscribeTo(
                     imageStream.map {
-                        SSDOcr.Input(
-                            fullImage = it,
+                        MainLoopAnalyzer.Input(
+                            cameraPreviewImage = it,
                             previewSize = previewSize,
                             cardFinder = viewFinder,
                         )

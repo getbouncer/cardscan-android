@@ -480,6 +480,12 @@ abstract class UpdatingModelWebFetcher(context: Context) : SignedUrlModelWebFetc
             .storeValue(modelClass, time.toMillisecondsSinceEpoch())
     }
 
+    protected open fun clearNextUpgradeTime() {
+        StorageFactory
+            .getStorageInstance(context, PURPOSE_MODEL_UPGRADE)
+            .remove(modelClass)
+    }
+
     /**
      * Fall back to getting the download details.
      */
@@ -586,9 +592,7 @@ abstract class UpdatingModelWebFetcher(context: Context) : SignedUrlModelWebFetc
         getCacheFolder().deleteRecursively()
         getCacheFolder().mkdirs()
 
-        StorageFactory
-            .getStorageInstance(context, PURPOSE_MODEL_UPGRADE)
-            .clear()
+        clearNextUpgradeTime()
     }.let { }
 }
 

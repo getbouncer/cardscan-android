@@ -5,7 +5,6 @@ import android.graphics.Bitmap
 import android.graphics.Rect
 import android.util.Size
 import com.getbouncer.scan.framework.FetchedData
-import com.getbouncer.scan.framework.ResourceFetcher
 import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.framework.UpdatingResourceFetcher
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
@@ -90,13 +89,19 @@ class CardDetect private constructor(interpreter: Interpreter) :
             )
         }
 
+        fun cropCameraPreviewForCardDetect(
+            cameraPreviewImage: Bitmap,
+            previewSize: Size,
+            cardFinder: Rect,
+        ) = cameraPreviewImage.crop(calculateCrop(cameraPreviewImage.size(), previewSize, cardFinder))
+
         /**
          * Convert a camera preview image into a CardDetect input
          */
         fun cameraPreviewToInput(
             cameraPreviewImage: TrackedImage<Bitmap>,
             previewSize: Size,
-            cardFinder: Rect
+            cardFinder: Rect,
         ) = Input(
             TrackedImage(
                 cameraPreviewImage.image
@@ -186,7 +191,7 @@ class CardDetect private constructor(interpreter: Interpreter) :
     ) : TFLAnalyzerFactory<Input, Prediction, CardDetect>(context, fetchedModel) {
         companion object {
             private const val USE_GPU = false
-            private const val DEFAULT_THREADS = 1
+            private const val DEFAULT_THREADS = 4
         }
 
         override val tfOptions: Interpreter.Options = Interpreter
@@ -200,11 +205,11 @@ class CardDetect private constructor(interpreter: Interpreter) :
     /**
      * A fetcher for downloading model data.
      */
-    class ModelFetcher(context: Context) : ResourceFetcher() {
-        override val assetFileName: String = "ux_0_25_107_8.tflite"
-        override val modelVersion: String = "0.25.107.8"
-        override val hash: String = "60dd83387136e1b6420f705489048e28f17efbdebdef0dbcbe424d3c4881e679"
-        override val hashAlgorithm: String = "SHA-256"
+    class ModelFetcher(context: Context) : UpdatingResourceFetcher(context) {
+        override val assetFileName: String = "ux_0_5_23_16.tflite"
+        override val resourceModelVersion: String = "0.5.23.16"
+        override val resourceModelHash: String = "ea51ca5c693a4b8733b1cf1a63557a713a13fabf0bcb724385077694e63a51a7"
+        override val resourceModelHashAlgorithm: String = "SHA-256"
         override val modelClass: String = "card_detection"
         override val modelFrameworkVersion: Int = 1
     }

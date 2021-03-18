@@ -12,7 +12,6 @@ import com.getbouncer.scan.framework.time.Rate
 import com.getbouncer.scan.framework.util.FrameSaver
 import com.getbouncer.scan.payment.FrameDetails
 import com.getbouncer.scan.payment.card.isValidPan
-import com.getbouncer.scan.payment.ml.SSDOcr
 import kotlinx.coroutines.runBlocking
 
 private const val MAX_SAVED_FRAMES_PER_TYPE = 6
@@ -26,7 +25,7 @@ private const val MAX_SAVED_FRAMES_PER_TYPE = 6
  */
 class MainLoopAggregator(
     listener: AggregateResultListener<InterimResult, FinalResult>,
-) : ResultAggregator<SSDOcr.Input, MainLoopState, MainLoopAnalyzer.Prediction, MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult>(
+) : ResultAggregator<MainLoopAnalyzer.Input, MainLoopState, MainLoopAnalyzer.Prediction, MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult>(
     listener = listener,
     initialState = MainLoopState.Initial()
 ) {
@@ -41,7 +40,7 @@ class MainLoopAggregator(
     @Keep
     data class InterimResult(
         val analyzerResult: MainLoopAnalyzer.Prediction,
-        val frame: SSDOcr.Input,
+        val frame: MainLoopAnalyzer.Input,
         val state: MainLoopState,
     )
 
@@ -56,7 +55,7 @@ class MainLoopAggregator(
     }
 
     override suspend fun aggregateResult(
-        frame: SSDOcr.Input,
+        frame: MainLoopAnalyzer.Input,
         result: MainLoopAnalyzer.Prediction
     ): Pair<InterimResult, FinalResult?> {
         val previousState = state
@@ -89,9 +88,9 @@ class MainLoopAggregator(
             ),
         )
 
-        frame.fullImage.tracker.trackResult("main_loop_aggregated")
+        frame.cameraPreviewImage.tracker.trackResult("main_loop_aggregated")
         if (Config.isDebug) {
-            Log.d(Config.logTag, "Delay between capture and process of image is ${frame.fullImage.tracker.startedAt.elapsedSince()}")
+            Log.d(Config.logTag, "Delay between capture and process of image is ${frame.cameraPreviewImage.tracker.startedAt.elapsedSince()}")
         }
 
         frameSaver.saveFrame(savedFrame, interimResult)

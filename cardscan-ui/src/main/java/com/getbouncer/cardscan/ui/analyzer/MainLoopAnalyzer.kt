@@ -1,22 +1,25 @@
 package com.getbouncer.cardscan.ui.analyzer
 
+import android.graphics.Bitmap
+import android.graphics.Rect
+import android.util.Size
 import com.getbouncer.cardscan.ui.result.MainLoopState
 import com.getbouncer.scan.framework.Analyzer
 import com.getbouncer.scan.framework.AnalyzerFactory
+import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.payment.carddetect.CardDetect
-import com.getbouncer.scan.payment.ml.SSDOcr
-import kotlinx.coroutines.async
+import com.getbouncer.scan.payment.ocr.SSDOcr
 import kotlinx.coroutines.supervisorScope
 
 class MainLoopAnalyzer(
     private val ssdOcr: Analyzer<SSDOcr.Input, Any, SSDOcr.Prediction>?,
     private val cardDetect: Analyzer<CardDetect.Input, Any, CardDetect.Prediction>?,
-) : Analyzer<SSDOcr.Input, MainLoopState, MainLoopAnalyzer.Prediction> {
+) : Analyzer<MainLoopAnalyzer.Input, MainLoopState, MainLoopAnalyzer.Prediction> {
 
-    private fun SSDOcr.Input.toCardDetectInput() = CardDetect.Input(
-        fullImage = fullImage,
-        previewSize = previewSize,
-        cardFinder = cardFinder,
+    data class Input(
+        val cameraPreviewImage: TrackedImage<Bitmap>,
+        val previewSize: Size,
+        val cardFinder: Rect,
     )
 
     class Prediction(
@@ -26,20 +29,20 @@ class MainLoopAnalyzer(
         val isCardVisible = card?.side?.let { it == CardDetect.Prediction.Side.NO_PAN || it == CardDetect.Prediction.Side.PAN }
     }
 
-    override suspend fun analyze(data: SSDOcr.Input, state: MainLoopState): Prediction = supervisorScope {
-        val ocrDeferred = if (state.runOcr) async { ssdOcr?.analyze(data, Unit) } else null
-        val cardDeferred = if (state.runCardDetect) async { cardDetect?.analyze(data.toCardDetectInput(), Unit) } else null
+    override suspend fun analyze(data: Input, state: MainLoopState): Prediction = supervisorScope {
+        val cardResult = if (state.runCardDetect) cardDetect?.analyze(CardDetect.cameraPreviewToInput(data.cameraPreviewImage, data.previewSize, data.cardFinder), Unit) else null
+        val ocrResult = if (state.runOcr) ssdOcr?.analyze(SSDOcr.cameraPreviewToInput(data.cameraPreviewImage, data.previewSize, data.cardFinder), Unit) else null
 
         Prediction(
-            ocr = ocrDeferred?.await(),
-            card = cardDeferred?.await(),
+            ocr = ocrResult,
+            card = cardResult,
         )
     }
 
     class Factory(
         private val ssdOcrFactory: AnalyzerFactory<SSDOcr.Input, out Any, SSDOcr.Prediction, out Analyzer<SSDOcr.Input, Any, SSDOcr.Prediction>>,
         private val cardDetectFactory: AnalyzerFactory<CardDetect.Input, out Any, CardDetect.Prediction, out Analyzer<CardDetect.Input, Any, CardDetect.Prediction>>,
-    ) : AnalyzerFactory<SSDOcr.Input, MainLoopState, Prediction, MainLoopAnalyzer> {
+    ) : AnalyzerFactory<Input, MainLoopState, Prediction, MainLoopAnalyzer> {
         override suspend fun newInstance(): MainLoopAnalyzer = MainLoopAnalyzer(
             ssdOcr = ssdOcrFactory.newInstance(),
             cardDetect = cardDetectFactory.newInstance(),

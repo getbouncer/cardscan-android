@@ -59,7 +59,12 @@ interface Storage {
     fun getBoolean(key: String, defaultValue: Boolean): Boolean
 
     /**
-     * Clear out all values from shared preferences.
+     * Clears out a single value from storage.
+     */
+    fun remove(key: String): Boolean
+
+    /**
+     * Clear out all values from storage.
      */
     fun clear(): Boolean
 }
@@ -190,6 +195,15 @@ class SharedPreferencesStorage(private val context: Context, private val purpose
             }
             defaultValue
         }
+    }
+
+    override fun remove(key: String): Boolean = sharedPrefs?.run {
+        with(edit()) {
+            remove(key)
+            commit()
+        }
+    } ?: false.apply {
+        Log.e(Config.logTag, "Shared preferences is unavailable to remove values")
     }
 
     override fun clear(): Boolean = sharedPrefs?.run {

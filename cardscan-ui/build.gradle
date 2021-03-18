@@ -35,8 +35,9 @@ dependencies {
     api project(":scan-framework")
     api project(":scan-camera")
     api project(":scan-ui")
-    api project(":scan-payment")
-    api project(":scan-payment-card-detect")
+    api project(":scan-payment-base")
+    implementation project(":scan-payment-ocr")
+    implementation project(":scan-payment-card-detect")
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2"
     implementation "androidx.appcompat:appcompat:1.2.0"

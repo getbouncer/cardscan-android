@@ -6,7 +6,6 @@ import android.graphics.Bitmap
 import android.graphics.PointF
 import android.graphics.Typeface
 import android.os.Bundle
-import android.util.DisplayMetrics
 import android.util.Size
 import android.view.Gravity
 import android.view.View
@@ -410,14 +409,14 @@ abstract class SimpleScanActivity : ScanActivity() {
         val screenSize = Resources.getSystem().displayMetrics.let {
             Size(it.widthPixels, it.heightPixels)
         }
-        val viewFinderMargin = (min(screenSize.width, screenSize.height) * 0.05F).roundToInt()
+        val viewFinderMargin = (min(screenSize.width, screenSize.height) * getFloatResource(R.dimen.bouncerViewFinderMargin)).roundToInt()
 
         listOf(viewFinderWindowView, viewFinderBorderView).forEach { view ->
             view.layoutParams = ConstraintLayout.LayoutParams(0, 0).apply {
-                topMargin = viewFinderMargin  // resources.getDimensionPixelSize(R.dimen.bouncerViewFinderMargin)
-                bottomMargin = viewFinderMargin  // resources.getDimensionPixelSize(R.dimen.bouncerViewFinderMargin)
-                marginStart = viewFinderMargin  // resources.getDimensionPixelSize(R.dimen.bouncerViewFinderMargin)
-                marginEnd = viewFinderMargin  // resources.getDimensionPixelSize(R.dimen.bouncerViewFinderMargin)
+                topMargin = viewFinderMargin
+                bottomMargin = viewFinderMargin
+                marginStart = viewFinderMargin
+                marginEnd = viewFinderMargin
             }
 
             view.constrainToParent()
