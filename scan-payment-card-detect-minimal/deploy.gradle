@@ -4,12 +4,12 @@ apply plugin: 'maven-publish'
 
 ext {
     bintrayRepo = 'cardscan-android'
-    bintrayName = 'scan-payment-card-detect'
+    bintrayName = 'scan-payment-card-detect-minimal'
     bintrayOrg = 'bouncerpaid'
 
     publishedGroupId = 'com.getbouncer'
-    libraryName = 'scan-payment-card-detect'
-    artifact = 'scan-payment-card-detect'
+    libraryName = 'scan-payment-card-detect-minimal'
+    artifact = 'scan-payment-card-detect-minimal'
 
     libraryDescription = 'This library provides the framework processing payment cards.'
 

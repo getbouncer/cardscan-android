@@ -3,13 +3,13 @@ apply plugin: 'com.jfrog.bintray'
 apply plugin: 'maven-publish'
 
 ext {
-    bintrayRepo = 'scan-payment-android'  // TODO: move this to `cardscan-android`
-    bintrayName = 'scan-payment-android'  // TODO: change this to `scan-payment`
+    bintrayRepo = 'cardscan-android'
+    bintrayName = 'scan-payment-base'
     bintrayOrg = 'bouncerpaid'
 
     publishedGroupId = 'com.getbouncer'
-    libraryName = 'scan-payment'
-    artifact = 'scan-payment'
+    libraryName = 'scan-payment-base'
+    artifact = 'scan-payment-base'
 
     libraryDescription = 'This library provides the framework processing payment cards.'
 
