@@ -200,9 +200,9 @@ class CardDetect private constructor(interpreter: Interpreter) :
      * A fetcher for downloading model data.
      */
     class ModelFetcher(context: Context) : UpdatingResourceFetcher(context) {
-        override val assetFileName: String = "ux_0_25_107_8.tflite"
-        override val resourceModelVersion: String = "0.25.107.8"
-        override val resourceModelHash: String = "60dd83387136e1b6420f705489048e28f17efbdebdef0dbcbe424d3c4881e679"
+        override val assetFileName: String = "UX.0.25.106.8.tflite"
+        override val resourceModelVersion: String = "0.25.106.8"
+        override val resourceModelHash: String = "c2a39c9034a9f0073933488021676c46910cec0d1bf330ac22a908dcd7dd448a"
         override val resourceModelHashAlgorithm: String = "SHA-256"
         override val modelClass: String = "card_detection"
         override val modelFrameworkVersion: Int = 1
