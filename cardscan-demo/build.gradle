@@ -37,6 +37,9 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation project(":scan-payment-card-detect")
+    implementation project(":scan-payment-ocr")
     implementation project(":cardscan-ui")
 
     implementation "androidx.appcompat:appcompat:1.2.0"
