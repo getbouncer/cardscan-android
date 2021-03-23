@@ -2,7 +2,6 @@ package com.getbouncer.scan.framework
 
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
-import com.getbouncer.scan.framework.test.R
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import java.io.File
@@ -22,7 +21,7 @@ class LoaderTest {
             modelVersion = "sample_resource",
             modelHash = "0dcf3e387c68dfea8dd72a183f1f765478ebaa4d8544cfc09a16e87a795d8ccf",
             modelHashAlgorithm = "SHA-256",
-            resourceId = R.raw.sample_resource,
+            assetFileName = "sample_resource.tflite",
         )
 
         val byteBuffer = Loader(testContext).loadData(fetchedData)

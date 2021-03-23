@@ -3,6 +3,7 @@ package com.getbouncer.cardscan.demo;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.PointF;
 import android.os.Bundle;
 import android.os.Handler;
@@ -81,7 +82,7 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
 
     private TextView cardPanTextView;
 
-    private CameraAdapter<TrackedImage> cameraAdapter;
+    private CameraAdapter<TrackedImage<Bitmap>> cameraAdapter;
 
     private CardScanFlow cardScanFlow;
 

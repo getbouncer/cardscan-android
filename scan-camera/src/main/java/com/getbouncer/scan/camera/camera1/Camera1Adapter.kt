@@ -4,6 +4,7 @@ package com.getbouncer.scan.camera.camera1
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.ImageFormat
 import android.graphics.PointF
 import android.graphics.Rect
@@ -54,7 +55,7 @@ class Camera1Adapter(
     private val minimumResolution: Size,
     private val cameraErrorListener: CameraErrorListener,
     private val coroutineScope: CoroutineScope,
-) : CameraAdapter<TrackedImage>(), PreviewCallback {
+) : CameraAdapter<TrackedImage<Bitmap>>(), PreviewCallback {
 
     private var mCamera: Camera? = null
     private var cameraPreview: CameraPreview? = null

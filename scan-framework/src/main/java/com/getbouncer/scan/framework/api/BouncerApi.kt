@@ -9,9 +9,11 @@ import com.getbouncer.scan.framework.api.dto.ClientDevice
 import com.getbouncer.scan.framework.api.dto.ModelDetailsRequest
 import com.getbouncer.scan.framework.api.dto.ModelDetailsResponse
 import com.getbouncer.scan.framework.api.dto.ModelSignedUrlResponse
+import com.getbouncer.scan.framework.api.dto.ModelVersion
 import com.getbouncer.scan.framework.api.dto.ScanStatistics
 import com.getbouncer.scan.framework.api.dto.StatsPayload
 import com.getbouncer.scan.framework.api.dto.ValidateApiKeyResponse
+import com.getbouncer.scan.framework.ml.getLoadedModelVersions
 import com.getbouncer.scan.framework.util.AppDetails
 import com.getbouncer.scan.framework.util.Device
 import com.getbouncer.scan.framework.util.getPlatform
@@ -46,7 +48,8 @@ fun uploadScanStats(
             scanId = scanId,
             device = ClientDevice.fromDevice(device),
             app = AppInfo.fromAppDetails(appDetails),
-            scanStats = scanStatistics
+            scanStats = scanStatistics,
+            modelVersions = getLoadedModelVersions().map { ModelVersion.fromModelLoadDetails(it) },
         ),
         requestSerializer = StatsPayload.serializer(),
     )

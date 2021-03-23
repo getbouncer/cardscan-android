@@ -1,6 +1,7 @@
 package com.getbouncer.scan.payment.carddetect
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Rect
 import android.util.Size
 import com.getbouncer.scan.framework.FetchedData
@@ -53,7 +54,7 @@ class CardDetect private constructor(interpreter: Interpreter) :
          * Calculate what portion of the full image should be cropped for card detection based on
          * the position of card finder within the preview image.
          */
-        fun calculateCrop(fullImage: Size, previewImage: Size, cardFinder: Rect): Rect {
+        private fun calculateCrop(fullImage: Size, previewImage: Size, cardFinder: Rect): Rect {
             require(
                 cardFinder.left >= 0 &&
                     cardFinder.right <= previewImage.width &&
@@ -87,9 +88,39 @@ class CardDetect private constructor(interpreter: Interpreter) :
                 min(fullImage.height, scaledCardDetectionSquare.bottom + scaledPreviewImage.top),
             )
         }
+
+        fun cropCameraPreviewForCardDetect(
+            cameraPreviewImage: Bitmap,
+            previewSize: Size,
+            cardFinder: Rect,
+        ) = cameraPreviewImage.crop(calculateCrop(cameraPreviewImage.size(), previewSize, cardFinder))
+
+        /**
+         * Convert a camera preview image into a CardDetect input
+         */
+        fun cameraPreviewToInput(
+            cameraPreviewImage: TrackedImage<Bitmap>,
+            previewSize: Size,
+            cardFinder: Rect,
+        ) = Input(
+            TrackedImage(
+                cameraPreviewImage.image
+                    .crop(
+                        calculateCrop(
+                            cameraPreviewImage.image.size(),
+                            previewSize,
+                            cardFinder,
+                        )
+                    )
+                    .scale(TRAINED_IMAGE_SIZE)
+                    .toRGBByteBuffer()
+                    .also { cameraPreviewImage.tracker.trackResult("card_detect_image_cropped") },
+                cameraPreviewImage.tracker,
+            )
+        )
     }
 
-    data class Input(val fullImage: TrackedImage, val previewSize: Size, val cardFinder: Rect)
+    data class Input(val cardDetectImage: TrackedImage<ByteBuffer>)
 
     /**
      * A prediction returned by this analyzer.
@@ -129,7 +160,7 @@ class CardDetect private constructor(interpreter: Interpreter) :
             )
         }
 
-        data.fullImage.tracker.trackResult("card_detect_prediction_complete")
+        data.cardDetectImage.tracker.trackResult("card_detect_prediction_complete")
 
         return Prediction(
             side = side,
@@ -139,19 +170,7 @@ class CardDetect private constructor(interpreter: Interpreter) :
         )
     }
 
-    override suspend fun transformData(data: Input): ByteBuffer = data.fullImage.image
-        .crop(
-            calculateCrop(
-                data.fullImage.image.size(),
-                data.previewSize,
-                data.cardFinder,
-            )
-        )
-        .scale(TRAINED_IMAGE_SIZE)
-        .toRGBByteBuffer()
-        .also {
-            data.fullImage.tracker.trackResult("card_detect_image_cropped")
-        }
+    override suspend fun transformData(data: Input): ByteBuffer = data.cardDetectImage.image
 
     override suspend fun executeInference(
         tfInterpreter: Interpreter,
@@ -172,7 +191,7 @@ class CardDetect private constructor(interpreter: Interpreter) :
     ) : TFLAnalyzerFactory<Input, Prediction, CardDetect>(context, fetchedModel) {
         companion object {
             private const val USE_GPU = false
-            private const val DEFAULT_THREADS = 1
+            private const val DEFAULT_THREADS = 4
         }
 
         override val tfOptions: Interpreter.Options = Interpreter
@@ -187,7 +206,7 @@ class CardDetect private constructor(interpreter: Interpreter) :
      * A fetcher for downloading model data.
      */
     class ModelFetcher(context: Context) : UpdatingResourceFetcher(context) {
-        override val resource: Int = R.raw.ux_0_5_23_16
+        override val assetFileName: String = "ux_0_5_23_16.tflite"
         override val resourceModelVersion: String = "0.5.23.16"
         override val resourceModelHash: String = "ea51ca5c693a4b8733b1cf1a63557a713a13fabf0bcb724385077694e63a51a7"
         override val resourceModelHashAlgorithm: String = "SHA-256"

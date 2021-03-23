@@ -7,7 +7,7 @@ import com.getbouncer.scan.framework.time.Duration
 import com.getbouncer.scan.framework.util.FrameRateTracker
 import com.getbouncer.scan.framework.util.ItemCounter
 import com.getbouncer.scan.framework.util.ItemTotalCounter
-import com.getbouncer.scan.payment.ml.ExpiryDetect
+import com.getbouncer.scan.payment.ocr.ExpiryDetect
 
 private const val MINIMUM_NAME_AGREEMENT = 2
 private const val MINIMUM_EXPIRY_AGREEMENT = 2

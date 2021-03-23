@@ -2,7 +2,6 @@ package com.getbouncer.scan.framework
 
 import android.content.Context
 import android.util.Log
-import androidx.annotation.RawRes
 import com.getbouncer.scan.framework.ml.trackModelLoaded
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -31,14 +30,14 @@ class Loader(private val context: Context) {
     private suspend fun loadResourceData(fetchedData: FetchedResource): ByteBuffer? {
         val stat = Stats.trackPersistentRepeatingTask("resource_loader:${fetchedData.modelClass}")
 
-        if (fetchedData.resourceId == null) {
+        if (fetchedData.assetFileName == null) {
             trackModelLoaded(fetchedData.modelClass, fetchedData.modelVersion, fetchedData.modelFrameworkVersion, false)
             stat.trackResult("failure:${fetchedData.modelClass}")
             return null
         }
 
         return try {
-            val loadedData = readRawResourceToByteBuffer(context, fetchedData.resourceId)
+            val loadedData = readAssetToByteBuffer(context, fetchedData.assetFileName)
             stat.trackResult("success")
             trackModelLoaded(fetchedData.modelClass, fetchedData.modelVersion, fetchedData.modelFrameworkVersion, true)
             loadedData
@@ -84,16 +83,15 @@ private suspend fun readFileToByteBuffer(file: File) = withContext(Dispatchers.I
 /**
  * Read a raw resource into a [ByteBuffer].
  */
-private suspend fun readRawResourceToByteBuffer(context: Context, @RawRes resourceId: Int) =
+private suspend fun readAssetToByteBuffer(context: Context, assetFileName: String) =
     withContext(Dispatchers.IO) {
-        context.resources.openRawResourceFd(resourceId).use { fileDescriptor ->
+        context.assets.openFd(assetFileName).use { fileDescriptor ->
             FileInputStream(fileDescriptor.fileDescriptor).use { input ->
-                val data = readFileToByteBuffer(
+                readFileToByteBuffer(
                     input,
                     fileDescriptor.startOffset,
-                    fileDescriptor.declaredLength
+                    fileDescriptor.declaredLength,
                 )
-                data
             }
         }
     }

@@ -18,8 +18,7 @@ import com.getbouncer.scan.framework.Scan;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class LaunchActivity extends AppCompatActivity implements CardScanActivityResultHandler,
-    com.getbouncer.cardscan.ui.local.CardScanActivityResultHandler {
+public class LaunchActivity extends AppCompatActivity implements CardScanActivityResultHandler {
 
     private static final String API_KEY = "qOJ_fF-WLDMbG05iBq5wvwiTNTmM2qIn";
 
@@ -68,13 +67,6 @@ public class LaunchActivity extends AppCompatActivity implements CardScanActivit
                 ));
         }
 
-        findViewById(R.id.scanCardLocalButton).setOnClickListener(v -> {
-            final boolean enableEnterCardManually =
-                ((CheckBox) findViewById(R.id.enableEnterCardManuallyCheckbox)).isChecked();
-
-            com.getbouncer.cardscan.ui.local.CardScanActivity.start(LaunchActivity.this, API_KEY);
-        });
-
         findViewById(R.id.singleActivityDemo).setOnClickListener(v ->
                 startActivity(new Intent(this, SingleActivityDemo.class))
         );
@@ -88,12 +80,6 @@ public class LaunchActivity extends AppCompatActivity implements CardScanActivit
 
         if (CardScanActivity.isScanResult(requestCode)) {
             CardScanActivity.parseScanResult(resultCode, data, this);
-        } else if (com.getbouncer.cardscan.ui.local.CardScanActivity.isScanResult(requestCode)) {
-            com.getbouncer.cardscan.ui.local.CardScanActivity.parseScanResult(
-                resultCode,
-                data,
-                this
-            );
         }
     }
 
@@ -117,18 +103,6 @@ public class LaunchActivity extends AppCompatActivity implements CardScanActivit
             message.append("\nError: ");
             message.append(scanResult.getErrorString());
         }
-        builder.setMessage(message);
-        builder.show();
-    }
-
-    @Override
-    public void cardScanned(
-        @Nullable String scanId,
-        @NotNull com.getbouncer.cardscan.ui.local.CardScanActivityResult scanResult
-    ) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        StringBuilder message = new StringBuilder();
-        message.append(scanResult.getPan());
         builder.setMessage(message);
         builder.show();
     }

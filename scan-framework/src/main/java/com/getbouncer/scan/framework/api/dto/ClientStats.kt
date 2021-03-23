@@ -3,6 +3,7 @@ package com.getbouncer.scan.framework.api.dto
 import com.getbouncer.scan.framework.RepeatingTaskStats
 import com.getbouncer.scan.framework.Stats
 import com.getbouncer.scan.framework.TaskStats
+import com.getbouncer.scan.framework.ml.ModelLoadDetails
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -13,7 +14,8 @@ data class StatsPayload(
     @SerialName("payload_version") val payloadVersion: Int = 2,
     @SerialName("device") val device: ClientDevice,
     @SerialName("app") val app: AppInfo,
-    @SerialName("scan_stats") val scanStats: ScanStatistics
+    @SerialName("scan_stats") val scanStats: ScanStatistics,
+    @SerialName("model_versions") val modelVersions: List<ModelVersion>,
 )
 
 @Serializable
@@ -35,6 +37,23 @@ data class ScanStatistics(
                     )
                 }
             }
+        )
+    }
+}
+
+@Serializable
+data class ModelVersion(
+    @SerialName("name") val name: String,
+    @SerialName("version") val version: String,
+    @SerialName("framework_version") val frameworkVersion: Int,
+    @SerialName("loaded_successfully") val loadedSuccessfully: Boolean
+) {
+    companion object {
+        fun fromModelLoadDetails(details: ModelLoadDetails) = ModelVersion(
+            name = details.modelClass,
+            version = details.modelVersion,
+            frameworkVersion = details.modelFrameworkVersion,
+            loadedSuccessfully = details.success
         )
     }
 }

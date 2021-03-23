@@ -7,8 +7,11 @@ import com.getbouncer.scan.framework.Stats
 import com.getbouncer.scan.framework.api.dto.AppInfo
 import com.getbouncer.scan.framework.api.dto.BouncerErrorResponse
 import com.getbouncer.scan.framework.api.dto.ClientDevice
+import com.getbouncer.scan.framework.api.dto.ModelVersion
 import com.getbouncer.scan.framework.api.dto.ScanStatistics
 import com.getbouncer.scan.framework.api.dto.StatsPayload
+import com.getbouncer.scan.framework.ml.getLoadedModelVersions
+import com.getbouncer.scan.framework.ml.trackModelLoaded
 import com.getbouncer.scan.framework.util.AppDetails
 import com.getbouncer.scan.framework.util.Device
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -61,6 +64,8 @@ class BouncerApiTest {
             task1.trackResult("$i")
         }
 
+        trackModelLoaded("test_model_class", "test_model_vesion", 2, true)
+
         when (
             val result = postForResult(
                 context = appContext,
@@ -70,7 +75,8 @@ class BouncerApiTest {
                     scanId = "test_scan_id",
                     device = ClientDevice.fromDevice(Device.fromContext(testContext)),
                     app = AppInfo.fromAppDetails(AppDetails.fromContext(testContext)),
-                    scanStats = ScanStatistics.fromStats()
+                    scanStats = ScanStatistics.fromStats(),
+                    modelVersions = getLoadedModelVersions().map { ModelVersion.fromModelLoadDetails(it) },
                 ),
                 requestSerializer = StatsPayload.serializer(),
                 responseSerializer = ScanStatsResults.serializer(),

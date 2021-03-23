@@ -75,7 +75,6 @@ allprojects {
         args "-F", "src/**/*.kt"
     }
 
-    assemble.dependsOn('lint')
     check.dependsOn checkJavaStyle
     check.dependsOn ktlint
 }

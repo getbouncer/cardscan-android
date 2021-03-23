@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.PointF
 import android.net.Uri
 import android.os.Build
@@ -452,7 +453,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     /**
      * Generate a camera adapter
      */
-    protected open fun buildCameraAdapter(): CameraAdapter<TrackedImage> = when (cameraApi) {
+    protected open fun buildCameraAdapter(): CameraAdapter<TrackedImage<Bitmap>> = when (cameraApi) {
         is CameraApi.Camera2 -> {
             Camera2Adapter(
                 activity = this,
@@ -480,7 +481,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     /**
      * A stream of images from the camera is available to be processed.
      */
-    protected abstract fun onCameraStreamAvailable(cameraStream: Flow<TrackedImage>)
+    protected abstract fun onCameraStreamAvailable(cameraStream: Flow<TrackedImage<Bitmap>>)
 
     /**
      * The API key was invalid.

@@ -35,8 +35,10 @@ dependencies {
     api project(":scan-framework")
     api project(":scan-camera")
     api project(":scan-ui")
-    api project(":scan-payment")
-    api project(":scan-payment-card-detect")
+    api project(":scan-payment-base")
+
+    compileOnly project(":scan-payment-ocr")
+    compileOnly project(":scan-payment-card-detect")
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2"
     implementation "androidx.appcompat:appcompat:1.2.0"
@@ -50,12 +52,18 @@ dependencies {
     testImplementation "junit:junit:4.13.2"
     testImplementation "org.jetbrains.kotlin:kotlin-test:1.4.31"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.4.2"
+
+    testImplementation project(":scan-payment-ocr")
+    testImplementation project(":scan-payment-card-detect")
 }
 
 dependencies {
     androidTestImplementation "androidx.test.ext:junit:1.1.2"
     androidTestImplementation "androidx.test.espresso:espresso-core:3.3.0"
     androidTestImplementation "org.jetbrains.kotlin:kotlin-test:1.4.31"
+
+    androidTestImplementation project(":scan-payment-ocr")
+    androidTestImplementation project(":scan-payment-card-detect")
 }
 
 apply from: 'deploy.gradle'

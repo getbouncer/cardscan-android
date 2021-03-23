@@ -13,8 +13,8 @@ import com.getbouncer.scan.framework.AggregateResultListener
 import com.getbouncer.scan.framework.AnalyzerLoopErrorListener
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.payment.card.formatPan
-import com.getbouncer.scan.payment.ml.SSDOcr
-import com.getbouncer.scan.payment.ml.ssd.DetectionBox
+import com.getbouncer.scan.payment.ocr.SSDOcr
+import com.getbouncer.scan.payment.ocr.ssd.DetectionBox
 import com.getbouncer.scan.ui.DebugDetectionBox
 import com.getbouncer.scan.ui.ScanResultListener
 import com.getbouncer.scan.ui.SimpleScanActivity
@@ -185,7 +185,9 @@ abstract class CardScanBaseActivity :
 
         result.analyzerResult.ocr?.detectedBoxes?.let { detectionBoxes ->
             if (Config.isDebug) {
-                val bitmap = withContext(Dispatchers.Default) { SSDOcr.cropImage(result.frame).image }
+                val bitmap = withContext(Dispatchers.Default) {
+                    SSDOcr.cropImage(result.frame.cameraPreviewImage, result.frame.previewSize, result.frame.cardFinder).image
+                }
                 debugImageView.setImageBitmap(bitmap)
                 debugOverlayView.setBoxes(detectionBoxes.map { it.forDebug() })
             }
