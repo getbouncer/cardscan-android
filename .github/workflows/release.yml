@@ -99,8 +99,11 @@ jobs:
         run: |
           ./gradlew scan-framework:bintrayUpload || ./gradlew scan-framework:bintrayUpload || ./gradlew scan-framework:bintrayUpload
           ./gradlew scan-camera:bintrayUpload || ./gradlew scan-camera:bintrayUpload || ./gradlew scan-camera:bintrayUpload
-          ./gradlew scan-payment:bintrayUpload || ./gradlew scan-payment:bintrayUpload || ./gradlew scan-payment:bintrayUpload
+          ./gradlew scan-payment-base:bintrayUpload || ./gradlew scan-payment-base:bintrayUpload || ./gradlew scan-payment-base:bintrayUpload
           ./gradlew scan-payment-card-detect:bintrayUpload || ./gradlew scan-payment-card-detect:bintrayUpload || ./gradlew scan-payment-card-detect:bintrayUpload
+          ./gradlew scan-payment-card-detect-minimal:bintrayUpload || ./gradlew scan-payment-card-detect-minimal:bintrayUpload || ./gradlew scan-payment-card-detect-minimal:bintrayUpload
+          ./gradlew scan-payment-ocr:bintrayUpload || ./gradlew scan-payment-ocr:bintrayUpload || ./gradlew scan-payment-ocr:bintrayUpload
+          ./gradlew scan-payment-ocr-minimal:bintrayUpload || ./gradlew scan-payment-ocr-minimal:bintrayUpload || ./gradlew scan-payment-ocr-minimal:bintrayUpload
           ./gradlew scan-ui:bintrayUpload || ./gradlew scan-ui:bintrayUpload || ./gradlew scan-ui:bintrayUpload
           ./gradlew cardscan-ui:bintrayUpload || ./gradlew cardscan-ui:bintrayUpload || ./gradlew cardscan-ui:bintrayUpload
           ./gradlew cardscan-ui-local:bintrayUpload || ./gradlew cardscan-ui-local:bintrayUpload || ./gradlew cardscan-ui-local:bintrayUpload
