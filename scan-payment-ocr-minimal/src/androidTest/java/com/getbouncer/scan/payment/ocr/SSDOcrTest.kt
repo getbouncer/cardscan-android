@@ -44,7 +44,7 @@ class SSDOcrTest {
         val bitmap = testContext.resources.getDrawable(R.drawable.ocr_card_numbers_clear, null).toBitmap()
         val fetcher = SSDOcr.ModelFetcher(appContext)
         fetcher.clearCache()
-        val fetchedData = fetcher.fetchData(forImmediateUse = false, isOptional = false)
+        val fetchedData = fetcher.fetchData(forImmediateUse = true, isOptional = false)
 
         assertEquals(fetcher.hash, fetchedData.modelHash)
 

@@ -12,6 +12,7 @@ import com.getbouncer.scan.payment.size
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -115,6 +116,7 @@ class CardDetectTest {
      */
     @Test
     @MediumTest
+    @Ignore("ignore this test until the server deploy that makes UX download for free goes live")
     fun cardDetect_download_pan() = runBlocking {
         val bitmap = testContext.resources.getDrawable(R.drawable.card_pan, null).toBitmap()
         val fetcher = CardDetect.ModelFetcher(appContext)
