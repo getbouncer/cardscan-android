@@ -106,6 +106,5 @@ jobs:
           ./gradlew scan-payment-ocr-minimal:bintrayUpload || ./gradlew scan-payment-ocr-minimal:bintrayUpload || ./gradlew scan-payment-ocr-minimal:bintrayUpload
           ./gradlew scan-ui:bintrayUpload || ./gradlew scan-ui:bintrayUpload || ./gradlew scan-ui:bintrayUpload
           ./gradlew cardscan-ui:bintrayUpload || ./gradlew cardscan-ui:bintrayUpload || ./gradlew cardscan-ui:bintrayUpload
-          ./gradlew cardscan-ui-local:bintrayUpload || ./gradlew cardscan-ui-local:bintrayUpload || ./gradlew cardscan-ui-local:bintrayUpload
           ./gradlew tensorflow-lite:bintrayUpload || ./gradlew tensorflow-lite:bintrayUpload || ./gradlew tensorflow-lite:bintrayUpload
           ./gradlew tensorflow-lite-arm-only:bintrayUpload || ./gradlew tensorflow-lite-arm-only:bintrayUpload || ./gradlew tensorflow-lite-arm-only:bintrayUpload
