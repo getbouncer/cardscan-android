@@ -20,7 +20,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class LaunchActivity extends AppCompatActivity implements CardScanActivityResultHandler {
 
-    private static final String API_KEY = "Qm4Jo22kO0wVkSxsVu4VQJjevYMYFTVB";
+    private static final String API_KEY = "qOJ_fF-WLDMbG05iBq5wvwiTNTmM2qIn";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
