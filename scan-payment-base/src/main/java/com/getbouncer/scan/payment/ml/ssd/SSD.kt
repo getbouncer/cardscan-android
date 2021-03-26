@@ -1,4 +1,4 @@
-package com.getbouncer.scan.payment.ocr.ssd
+package com.getbouncer.scan.payment.ml.ssd
 
 import com.getbouncer.scan.framework.ml.hardNonMaximumSuppression
 import com.getbouncer.scan.framework.ml.ssd.ClassifierScores

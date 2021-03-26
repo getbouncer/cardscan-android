@@ -14,7 +14,7 @@ import com.getbouncer.scan.framework.AnalyzerLoopErrorListener
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.payment.card.formatPan
 import com.getbouncer.scan.payment.ocr.SSDOcr
-import com.getbouncer.scan.payment.ocr.ssd.DetectionBox
+import com.getbouncer.scan.payment.ml.ssd.DetectionBox
 import com.getbouncer.scan.ui.DebugDetectionBox
 import com.getbouncer.scan.ui.ScanResultListener
 import com.getbouncer.scan.ui.SimpleScanActivity

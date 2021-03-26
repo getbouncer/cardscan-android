@@ -1,4 +1,4 @@
-package com.getbouncer.scan.payment.ocr
+package com.getbouncer.scan.payment.ml
 
 import android.content.Context
 import android.graphics.Bitmap

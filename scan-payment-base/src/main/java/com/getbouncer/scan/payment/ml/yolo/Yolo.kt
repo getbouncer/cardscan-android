@@ -1,10 +1,10 @@
-package com.getbouncer.scan.payment.ocr.yolo
+package com.getbouncer.scan.payment.ml.yolo
 
 import android.graphics.RectF
 import android.util.Size
 import com.getbouncer.scan.framework.ml.ssd.softMax
 import com.getbouncer.scan.framework.util.indexOfMax
-import com.getbouncer.scan.payment.ocr.ssd.DetectionBox
+import com.getbouncer.scan.payment.ml.ssd.DetectionBox
 import kotlin.math.exp
 
 fun sigmoid(x: Float): Float = (1.0f / (1.0f + exp((-x))))
