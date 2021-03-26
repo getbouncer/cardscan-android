@@ -1,8 +1,48 @@
-apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: 'com.jfrog.bintray'
 apply plugin: 'maven-publish'
+apply plugin: 'org.jetbrains.dokka'
+apply plugin: 'signing'
+
+task androidSourcesJar(type: Jar) {
+    archiveClassifier.set('sources')
+    if (project.plugins.findPlugin("com.android.library")) {
+        // Android library
+        from android.sourceSets.main.java.srcDirs
+        from android.sourceSets.main.kotlin.srcDirs
+    } else {
+        // Pure kotlin library
+        from sourceSets.main.java.srcDirs
+        from sourceSets.main.kotlin.srcDirs
+    }
+}
+
+tasks.withType(dokkaHtmlPartial.getClass()).configureEach {
+    pluginsMapConfiguration.set(
+        ["org.jetbrains.dokka.base.DokkaBase": """{ "separateInheritedMembers": true}"""]
+    )
+}
+
+task javadocJar(type: Jar, dependsOn: dokkaJavadoc) {
+    archiveClassifier.set('javadoc')
+    from dokkaJavadoc.outputDirectory
+}
+
+artifacts {
+    archives androidSourcesJar
+    archives javadocJar
+}
+
+group = PUBLISH_GROUP_ID
+version = PUBLISH_VERSION
 
 ext {
+    signing.keyId = ''
+    signing.password = ''
+    signing.secretKeyRingFile = ''
+
+    ossrhUsername = ''
+    ossrhPassword = ''
+    sonatypeStagingProfileId = ''
+
     bintrayRepo = 'scan-framework-android'
     bintrayName = 'scan-framework-android'
     bintrayOrg = 'bouncerpaid'
@@ -27,8 +67,27 @@ ext {
     allLicenses = ["bouncer-free-1"]
 }
 
-group = publishedGroupId
-version = libraryVersion
+File secretPropsFile = project.rootProject.file('local.properties')
+if (secretPropsFile.exists()) {
+    Properties p = new Properties()
+    new FileInputStream(secretPropsFile).withCloseable { is ->
+        p.load(is)
+    }
+    p.each { name, value ->
+        ext[name] = value
+    }
+} else {
+    ext["signing.keyId"] = System.getenv('SIGNING_KEY_ID')
+    ext["signing.password"] = System.getenv('SIGNING_PASSWORD')
+    ext["signing.secretKeyRingFile"] = System.getenv('SIGNING_SECRET_KEY_RING_FILE')
+
+    ext["ossrhUsername"] = System.getenv('OSSRH_USERNAME')
+    ext["ossrhPassword"] = System.getenv('OSSRH_PASSWORD')
+
+    ext["sonatypeStagingProfileId"] = System.getenv('SONATYPE_STAGING_PROFILE_ID')
+}
+
+
 
 install {
     repositories.mavenInstaller {
