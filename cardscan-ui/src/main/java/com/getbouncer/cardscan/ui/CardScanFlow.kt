@@ -31,9 +31,9 @@ import com.getbouncer.scan.payment.ml.AlphabetDetect
 import com.getbouncer.scan.payment.ml.AlphabetDetectModelManager
 import com.getbouncer.scan.payment.ml.ExpiryDetect
 import com.getbouncer.scan.payment.ml.ExpiryDetectModelManager
+import com.getbouncer.scan.payment.ml.TextDetect
 import com.getbouncer.scan.payment.ocr.SSDOcr
 import com.getbouncer.scan.payment.ocr.SSDOcrModelManager
-import com.getbouncer.scan.payment.ml.TextDetect
 import com.getbouncer.scan.ui.ScanFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
