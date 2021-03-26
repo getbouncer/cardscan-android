@@ -3,6 +3,7 @@
 buildscript {
     repositories {
         mavenLocal()
+        mavenCentral()
         google()
         jcenter()
         maven { url "https://plugins.gradle.org/m2/" }
@@ -35,7 +36,11 @@ allprojects {
     }
 
     dependencies {
-        kotlinlint "com.pinterest:ktlint:0.40.0"
+        kotlinlint("com.pinterest:ktlint:0.41.0") {
+            attributes {
+                attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling, Bundling.EXTERNAL))
+            }
+        }
     }
 
     repositories {
