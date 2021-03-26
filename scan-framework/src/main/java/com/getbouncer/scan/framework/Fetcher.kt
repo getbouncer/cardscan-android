@@ -159,6 +159,7 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
             tryFetchLatestCachedData().run {
                 val data = FetchedData.fromFetchedModelMeta(modelClass, modelFrameworkVersion, this)
                 if (data.successfullyFetched) {
+                    Log.d(Config.logTag, "Fetcher: $modelClass is needed immediately and cached version ${data.modelVersion} is available.")
                     stat.trackResult("success")
                     return@fetchData data
                 }
@@ -167,7 +168,7 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
 
         // if downloading models is not allowed, return an empty fetched data
         if (!Config.downloadModels) {
-            Log.d(Config.logTag, "$modelClass cannot be downloaded since downloads are turned off")
+            Log.d(Config.logTag, "Fetcher: $modelClass cannot be downloaded since downloads are turned off")
             return FetchedData.fromFetchedModelMeta(
                 modelClass = modelClass,
                 modelFrameworkVersion = modelFrameworkVersion,
@@ -181,14 +182,14 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
 
         // get details for downloading the data. If download details cannot be retrieved, use the latest cached version
         val downloadDetails = fetchDownloadDetails(cachedData.modelHash, cachedData.modelHashAlgorithm) ?: run {
-            Log.d(Config.logTag, "Not downloading $modelClass, using cached version ${cachedData.modelVersion}")
+            Log.d(Config.logTag, "Fetcher: not downloading $modelClass, using cached version ${cachedData.modelVersion}")
             stat.trackResult("no_download_details")
             return@fetchData cachedData
         }
 
         // if no cache is available, this is needed immediately, and this is optional, return a download failure
         if (forImmediateUse && isOptional) {
-            Log.d(Config.logTag, "Optional $modelClass needed for immediate use, but no cache available.")
+            Log.d(Config.logTag, "Fetcher: optional $modelClass needed for immediate use, but no cache available.")
             return FetchedData.fromFetchedModelMeta(
                 modelClass = modelClass,
                 modelFrameworkVersion = modelFrameworkVersion,
@@ -205,6 +206,7 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
             tryFetchMatchingCachedFile(downloadDetails.hash, downloadDetails.hashAlgorithm).run {
                 val data = FetchedData.fromFetchedModelMeta(modelClass, modelFrameworkVersion, this)
                 if (data.successfullyFetched) {
+                    Log.d(Config.logTag, "Fetcher: $modelClass already has latest version downloaded.")
                     stat.trackResult("success")
                     return@fetchData data
                 }
@@ -214,10 +216,10 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
         } catch (t: Throwable) {
             fetchException = t
             if (cachedData.successfullyFetched) {
-                Log.w(Config.logTag, "Failed to download model $modelClass, loaded from local cache", t)
+                Log.w(Config.logTag, "Fetcher: Failed to download model $modelClass, loaded from local cache", t)
                 stat.trackResult("success")
             } else {
-                Log.e(Config.logTag, "Failed to download model $modelClass, no local cache available", t)
+                Log.e(Config.logTag, "Fetcher: Failed to download model $modelClass, no local cache available", t)
                 stat.trackResult(t::class.java.simpleName)
             }
             cachedData
@@ -239,7 +241,7 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
 
         // if a previous exception was encountered, attempt to fetch cached data
         fetchException?.run {
-            Log.d(Config.logTag, "Previous exception encountered for $modelClass, rethrowing")
+            Log.d(Config.logTag, "Fetcher: Previous exception encountered for $modelClass, rethrowing")
             throw this
         }
 
@@ -252,7 +254,7 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
                 hashAlgorithm = downloadDetails.hashAlgorithm,
             )
 
-            Log.d(Config.logTag, "$modelClass downloaded version ${downloadDetails.modelVersion}")
+            Log.d(Config.logTag, "Fetcher: $modelClass downloaded version ${downloadDetails.modelVersion}")
             return@memoizeSuspend FetchedFile(
                 modelClass = modelClass,
                 modelFrameworkVersion = modelFrameworkVersion,
@@ -366,15 +368,15 @@ abstract class SignedUrlModelWebFetcher(context: Context) : DirectDownloadWebFet
             try {
                 URL(signedUrlResponse.body.modelUrl)
             } catch (t: Throwable) {
-                Log.e(Config.logTag, "Invalid signed url for model $modelClass: ${signedUrlResponse.body.modelUrl}", t)
+                Log.e(Config.logTag, "Fetcher: Invalid signed url for model $modelClass: ${signedUrlResponse.body.modelUrl}", t)
                 null
             }
         is NetworkResult.Error -> {
-            Log.w(Config.logTag, "Failed to get signed url for model $modelClass: ${signedUrlResponse.error}")
+            Log.w(Config.logTag, "Fetcher: Failed to get signed url for model $modelClass: ${signedUrlResponse.error}")
             null
         }
         is NetworkResult.Exception -> {
-            Log.e(Config.logTag, "Exception fetching signed url for model $modelClass: ${signedUrlResponse.responseCode}", signedUrlResponse.exception)
+            Log.e(Config.logTag, "Fetcher: Exception fetching signed url for model $modelClass: ${signedUrlResponse.responseCode}", signedUrlResponse.exception)
             null
         }
     }?.let { DownloadDetails(it, hash, hashAlgorithm, modelVersion) }
@@ -419,11 +421,11 @@ abstract class UpdatingModelWebFetcher(context: Context) : SignedUrlModelWebFetc
         val nextUpgradeTime = getNextUpgradeTime()
         when {
             nextUpgradeTime.hasPassed() ->
-                Log.d(Config.logTag, "Time to upgrade $modelClass, fetching upgrade details")
+                Log.d(Config.logTag, "Fetcher: Time to upgrade $modelClass, fetching upgrade details")
             cachedModelHash == null ->
-                Log.d(Config.logTag, "Downloading initial version of $modelClass")
+                Log.d(Config.logTag, "Fetcher: Downloading initial version of $modelClass")
             else -> {
-                Log.d(Config.logTag, "Not yet time to upgrade $modelClass (will upgrade at $nextUpgradeTime)")
+                Log.d(Config.logTag, "Fetcher: Not yet time to upgrade $modelClass (will upgrade at $nextUpgradeTime)")
                 return null
             }
         }
@@ -451,15 +453,15 @@ abstract class UpdatingModelWebFetcher(context: Context) : SignedUrlModelWebFetc
                         ).apply { cachedDownloadDetails = this }
                     }
                 } catch (t: Throwable) {
-                    Log.e(Config.logTag, "Invalid signed url for model $modelClass: ${detailsResponse.body.url}", t)
+                    Log.e(Config.logTag, "Fetcher: Invalid signed url for model $modelClass: ${detailsResponse.body.url}", t)
                     null
                 }
             is NetworkResult.Error -> {
-                Log.w(Config.logTag, "Failed to get latest details for model $modelClass: ${detailsResponse.error}")
+                Log.w(Config.logTag, "Fetcher: Failed to get latest details for model $modelClass: ${detailsResponse.error}")
                 fallbackDownloadDetails()
             }
             is NetworkResult.Exception -> {
-                Log.e(Config.logTag, "Exception retrieving latest details for model $modelClass: ${detailsResponse.responseCode}", detailsResponse.exception)
+                Log.e(Config.logTag, "Fetcher: Exception retrieving latest details for model $modelClass: ${detailsResponse.responseCode}", detailsResponse.exception)
                 fallbackDownloadDetails()
             }
         }

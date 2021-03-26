@@ -3,9 +3,7 @@ package com.getbouncer.cardscan.ui.analyzer
 import com.getbouncer.cardscan.ui.SavedFrame
 import com.getbouncer.scan.framework.Analyzer
 import com.getbouncer.scan.framework.AnalyzerFactory
-import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.payment.analyzer.NameAndExpiryAnalyzer
-import com.getbouncer.scan.payment.carddetect.CardDetect
 
 class CompletionLoopAnalyzer private constructor(
     private val nameAndExpiryAnalyzer: NameAndExpiryAnalyzer?,
@@ -23,16 +21,7 @@ class CompletionLoopAnalyzer private constructor(
         state: Unit,
     ) = Prediction(
         nameAndExpiryResult = nameAndExpiryAnalyzer?.analyze(
-            NameAndExpiryAnalyzer.Input(
-                squareImage = TrackedImage(
-                    CardDetect.cropCameraPreviewForCardDetect(
-                        cameraPreviewImage = data.frame.cameraPreviewImage.image,
-                        previewSize = data.frame.previewSize,
-                        cardFinder = data.frame.cardFinder,
-                    ),
-                    data.frame.cameraPreviewImage.tracker,
-                ),
-            ),
+            NameAndExpiryAnalyzer.Input(data.frame.cameraPreviewImage, data.frame.previewSize, data.frame.cardFinder),
             state,
         ),
         isNameExtractionAvailable = nameAndExpiryAnalyzer?.isNameDetectorAvailable() ?: false,

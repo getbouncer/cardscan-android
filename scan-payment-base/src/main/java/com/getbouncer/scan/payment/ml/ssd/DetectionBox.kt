@@ -1,4 +1,4 @@
-package com.getbouncer.scan.payment.ocr.ssd
+package com.getbouncer.scan.payment.ml.ssd
 
 import android.graphics.RectF
 import androidx.annotation.RestrictTo

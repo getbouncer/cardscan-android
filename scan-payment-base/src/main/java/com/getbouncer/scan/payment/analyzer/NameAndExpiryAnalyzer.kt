@@ -1,8 +1,10 @@
 package com.getbouncer.scan.payment.analyzer
 
 import android.graphics.Bitmap
+import android.graphics.Rect
 import android.graphics.RectF
 import android.util.Log
+import android.util.Size
 import com.getbouncer.scan.framework.Analyzer
 import com.getbouncer.scan.framework.AnalyzerFactory
 import com.getbouncer.scan.framework.Config
@@ -11,12 +13,11 @@ import com.getbouncer.scan.framework.ml.hardNonMaximumSuppression
 import com.getbouncer.scan.framework.ml.ssd.rectForm
 import com.getbouncer.scan.framework.util.centerScaled
 import com.getbouncer.scan.framework.util.scaled
-import com.getbouncer.scan.payment.ocr.AlphabetDetect
-import com.getbouncer.scan.payment.ocr.ExpiryDetect
-import com.getbouncer.scan.payment.ocr.TextDetect
-import com.getbouncer.scan.payment.ocr.ssd.DetectionBox
+import com.getbouncer.scan.payment.ml.AlphabetDetect
+import com.getbouncer.scan.payment.ml.ExpiryDetect
+import com.getbouncer.scan.payment.ml.TextDetect
+import com.getbouncer.scan.payment.ml.ssd.DetectionBox
 import com.getbouncer.scan.payment.size
-import com.getbouncer.scan.payment.toRGBByteBuffer
 import kotlin.math.max
 import kotlin.math.min
 
@@ -41,7 +42,9 @@ class NameAndExpiryAnalyzer private constructor(
 ) : Analyzer<NameAndExpiryAnalyzer.Input, Any, NameAndExpiryAnalyzer.Prediction> {
 
     data class Input(
-        val squareImage: TrackedImage<Bitmap>,
+        val cameraPreviewImage: TrackedImage<Bitmap>,
+        val previewSize: Size,
+        val cardFinder: Rect,
     )
 
     data class Prediction(
@@ -60,16 +63,17 @@ class NameAndExpiryAnalyzer private constructor(
     ) = if ((!runNameExtraction && !runExpiryExtraction) || textDetect == null) {
         Prediction(null, null, null)
     } else {
-        val squareImageBytes = TrackedImage(
-            data.squareImage.image
-                .toRGBByteBuffer()
-                .also { data.squareImage.tracker.trackResult("text_detect_image_cropped") },
-            data.squareImage.tracker
+        val textDetectorPrediction = textDetect.analyze(
+            TextDetect.cameraPreviewToInput(data.cameraPreviewImage, data.previewSize, data.cardFinder),
+            Unit,
         )
 
-        val textDetectorPrediction = textDetect.analyze(TextDetect.Input(squareImageBytes), Unit)
+        val squareImage = TrackedImage(
+            TextDetect.cropCameraPreview(data.cameraPreviewImage.image, data.previewSize, data.cardFinder),
+            data.cameraPreviewImage.tracker,
+        )
 
-        data.squareImage.tracker.trackResult("name_and_expiry_image_cropped")
+        data.cameraPreviewImage.tracker.trackResult("name_and_expiry_image_cropped")
 
         val expiry = if (runExpiryExtraction && textDetectorPrediction.expiryBoxes.isNotEmpty()) {
             // pick the expiry box by oldest date
@@ -77,14 +81,16 @@ class NameAndExpiryAnalyzer private constructor(
             // direction. Scale it out a bit
             textDetectorPrediction.expiryBoxes.mapNotNull { box ->
                 expiryDetect?.analyze(
-                    ExpiryDetect.Input(
-                        data.squareImage,
+                    ExpiryDetect.cameraPreviewToInput(
+                        data.cameraPreviewImage,
+                        data.previewSize,
+                        data.cardFinder,
                         // the boxes produced by textDetector are sometimes too tight, especially in the Y
                         // direction. Scale it out a bit
                         box.rect.centerScaled(
                             EXPIRY_BOX_X_SCALE_RATIO,
                             EXPIRY_BOX_Y_SCALE_RATIO
-                        )
+                        ),
                     ),
                     Unit
                 )?.expiry
@@ -102,7 +108,7 @@ class NameAndExpiryAnalyzer private constructor(
                         NAME_BOX_X_SCALE_RATIO,
                         NAME_BOX_Y_SCALE_RATIO,
                     ),
-                    data.squareImage,
+                    squareImage,
                 )?.filter { it != ' ' }
             }.joinToString(" ").trim().ifEmpty { null }
         } else {

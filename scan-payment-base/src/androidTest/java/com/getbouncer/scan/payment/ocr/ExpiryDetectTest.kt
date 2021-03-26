@@ -3,6 +3,7 @@ package com.getbouncer.scan.payment.ocr
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.getbouncer.scan.framework.Config
+import com.getbouncer.scan.payment.ml.ExpiryDetect
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
