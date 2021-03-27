@@ -80,9 +80,6 @@ allprojects {
         classpath = configurations.kotlinlint
         args "-F", "src/**/*.kt"
     }
-
-    check.dependsOn checkJavaStyle
-    check.dependsOn ktlint
 }
 
 ext {

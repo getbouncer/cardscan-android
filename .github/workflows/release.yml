@@ -60,8 +60,35 @@ jobs:
           commit_message: "Automatic changelog update"
           file_pattern: "gradle.properties CHANGELOG.md"
 
-  publish_to_bintray:
+  run_final_checks:
     needs: finalize_release
+    name: Run final checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+        with:
+          ref: "master"
+          token: ${{secrets.SERVICE_PERSONAL_ACCESS_TOKEN}}
+          submodules: recursive
+
+      - name: set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+
+      - name: lint
+        run: ./gradlew ktlint
+
+      - name: CheckStyle
+        run: ./gradlew checkJavaStyle
+
+      - name: test
+        run: ./gradlew test
+
+  publish:
+    needs: run_final_checks
     name: Publish to BinTray
     runs-on: ubuntu-latest
 
@@ -78,33 +105,27 @@ jobs:
         with:
           java-version: 1.8
 
-      - name: create local properties
+      # Base64 decodes and pipes the GPG key content into the secret file
+      - name: Prepare environment
         env:
-          BINTRAY_USER: ${{ secrets.BINTRAY_USER }}
-          BINTRAY_API_KEY: ${{ secrets.BINTRAY_API_KEY }}
+          GPG_KEY_CONTENTS: ${{ secrets.GPG_KEY }}
+          SIGNING_SECRET_KEY_RING_FILE: ${{ secrets.SIGNING_SECRET_KEY_RING_FILE }}
         run: |
-          echo "bintray.user=$BINTRAY_USER" >> local.properties
-          echo "bintray.apikey=$BINTRAY_API_KEY" >> local.properties
+          git fetch --unshallow
+          sudo bash -c "echo '$GPG_KEY_CONTENTS' | base64 -d > '$SIGNING_SECRET_KEY_RING_FILE'"
 
-      - name: lint
-        run: ./gradlew ktlint
+      - name: Build release
+        run: ./gradlew assembleRelease
 
-      - name: CheckStyle
-        run: ./gradlew checkJavaStyle
+      - name: Source jar and dokka
+        run: ./gradlew androidSourcesJar javadocJar
 
-      - name: test
-        run: ./gradlew test
-
-      - name: upload to bintray
-        run: |
-          ./gradlew scan-framework:bintrayUpload || ./gradlew scan-framework:bintrayUpload || ./gradlew scan-framework:bintrayUpload
-          ./gradlew scan-camera:bintrayUpload || ./gradlew scan-camera:bintrayUpload || ./gradlew scan-camera:bintrayUpload
-          ./gradlew scan-payment-base:bintrayUpload || ./gradlew scan-payment-base:bintrayUpload || ./gradlew scan-payment-base:bintrayUpload
-          ./gradlew scan-payment-card-detect:bintrayUpload || ./gradlew scan-payment-card-detect:bintrayUpload || ./gradlew scan-payment-card-detect:bintrayUpload
-          ./gradlew scan-payment-card-detect-minimal:bintrayUpload || ./gradlew scan-payment-card-detect-minimal:bintrayUpload || ./gradlew scan-payment-card-detect-minimal:bintrayUpload
-          ./gradlew scan-payment-ocr:bintrayUpload || ./gradlew scan-payment-ocr:bintrayUpload || ./gradlew scan-payment-ocr:bintrayUpload
-          ./gradlew scan-payment-ocr-minimal:bintrayUpload || ./gradlew scan-payment-ocr-minimal:bintrayUpload || ./gradlew scan-payment-ocr-minimal:bintrayUpload
-          ./gradlew scan-ui:bintrayUpload || ./gradlew scan-ui:bintrayUpload || ./gradlew scan-ui:bintrayUpload
-          ./gradlew cardscan-ui:bintrayUpload || ./gradlew cardscan-ui:bintrayUpload || ./gradlew cardscan-ui:bintrayUpload
-          ./gradlew tensorflow-lite:bintrayUpload || ./gradlew tensorflow-lite:bintrayUpload || ./gradlew tensorflow-lite:bintrayUpload
-          ./gradlew tensorflow-lite-arm-only:bintrayUpload || ./gradlew tensorflow-lite-arm-only:bintrayUpload || ./gradlew tensorflow-lite-arm-only:bintrayUpload
+      - name: Publish to MavenCentral
+        env:
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+          SIGNING_SECRET_KEY_RING_FILE: ${{ secrets.SIGNING_SECRET_KEY_RING_FILE }}
+          SONATYPE_STAGING_PROFILE_ID: ${{ secrets.SONATYPE_STAGING_PROFILE_ID }}
+        run: ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
