@@ -31,41 +31,38 @@ artifacts {
     archives javadocJar
 }
 
-group = PUBLISH_GROUP_ID
-version = PUBLISH_VERSION
+ext["signing.keyId"] = ''
+ext["signing.password"] = ''
+ext["signing.secretKeyRingFile"] = ''
+
+ext["ossrhUsername"] = ''
+ext["ossrhPassword"] = ''
+ext["sonatypeStagingProfileId"] = ''
 
 ext {
-    signing.keyId = ''
-    signing.password = ''
-    signing.secretKeyRingFile = ''
-
-    ossrhUsername = ''
-    ossrhPassword = ''
-    sonatypeStagingProfileId = ''
-
-    bintrayRepo = 'scan-framework-android'
-    bintrayName = 'scan-framework-android'
-    bintrayOrg = 'bouncerpaid'
-
-    publishedGroupId = 'com.getbouncer'
-    libraryName = 'scan-framework'
-    artifact = 'scan-framework'
 
     libraryDescription = 'This library provides the framework for scanning'
 
     siteUrl = 'https://getbouncer.com'
-    gitUrl = 'https://github.com/getbouncer/cardscan-android.git'
 
-    libraryVersion = version
+    scmConnection = 'scm:git:github.com/getbouncer/cardscan-android.git'
+    scmDeveloperConnection = 'scm:git:https://github.com/getbouncer/cardscan-android.git'
+    scmUrl = 'https://github.com/getbouncer/cardscan-android'
+
+    licenseName = 'bouncer-free-1'
+    licenseUrl = 'https://github.com/getbouncer/cardscan-android/blob/master/LICENSE'
 
     developerId = 'getbouncer'
     developerName = 'Bouncer Technologies'
     developerEmail = 'contact@getbouncer.com'
 
-    licenseName = 'bouncer-free-1'
-    licenseUrl = 'https://github.com/getbouncer/cardscan-android/blob/master/LICENSE'
-    allLicenses = ["bouncer-free-1"]
+    publishGroupId = 'com.getbouncer'
+    publishArtifactId = 'scan-framework'
+    publishVersion = version
 }
+
+group = publishGroupId
+version = publishVersion
 
 File secretPropsFile = project.rootProject.file('local.properties')
 if (secretPropsFile.exists()) {
@@ -87,91 +84,82 @@ if (secretPropsFile.exists()) {
     ext["sonatypeStagingProfileId"] = System.getenv('SONATYPE_STAGING_PROFILE_ID')
 }
 
+publishing {
+    publications {
+        release(MavenPublication) {
+            groupId publishGroupId
+            artifactId publishArtifactId
+            version publishVersion
 
+            // Two artifacts, the `aar` (or `jar`) and the sources
+            if (project.plugins.findPlugin("com.android.library")) {
+                artifact("$buildDir/outputs/aar/${project.getName()}-release.aar")
+            } else {
+                artifact("$buildDir/libs/${project.getName()}-${version}.jar")
+            }
+            artifact androidSourcesJar
 
-install {
-    repositories.mavenInstaller {
-        pom.project {
-            packaging 'aar'
-            groupId publishedGroupId
-            artifactId artifact
+            pom {
+                name = publishArtifactId
+                description = libraryDescription
+                url = siteUrl
+                licenses {
+                    license {
+                        name = licenseName
+                        url = licenseUrl
+                    }
+                }
+                developers {
+                    developer {
+                        id = developerId
+                        name = developerName
+                        email = developerEmail
+                    }
+                }
+                scm {
+                    connection = scmConnection
+                    developerConnection = scmDeveloperConnection
+                    url = scmUrl
+                }
+                // A slightly hacky fix so that your POM will include any transitive dependencies
+                // that your library builds upon
+                withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
 
-            name libraryName
-            description libraryDescription
-            url siteUrl
-
-            licenses {
-                license {
-                    name licenseName
-                    url licenseUrl
+                    project.configurations.implementation.allDependencies.each {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.group)
+                        dependencyNode.appendNode('artifactId', it.name)
+                        dependencyNode.appendNode('version', it.version)
+                    }
                 }
             }
+        }
+    }
 
-            developers {
-                developer {
-                    id developerId
-                    name developerName
-                    email developerEmail
-                }
-            }
-
-            scm {
-                connection gitUrl
-                developerConnection gitUrl
-                url siteUrl
+    // The repository to publish to, Sonatype/MavenCentral
+    repositories {
+        maven {
+            // This is an arbitrary name, you may also use "mavencentral" or
+            // any other name that's descriptive for you
+            name = "sonatype"
+            url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            credentials {
+                username ossrhUsername
+                password ossrhPassword
             }
         }
     }
 }
 
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from android.sourceSets.main.java.srcDirs
+signing {
+    sign publishing.publications
 }
 
-task javadoc(type: Javadoc) {
-    //source = android.sourceSets.main.java.srcDirs
-    //classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-}
-
-artifacts {
-    archives javadocJar
-    archives sourcesJar
-}
-
-Properties properties = new Properties()
-if (project.rootProject.file('local.properties').exists()) {
-    properties.load(project.rootProject.file('local.properties').newDataInputStream())
-}
-
-bintray {
-    user = properties.getProperty("bintray.user")
-    key = properties.getProperty("bintray.apikey")
-
-    configurations = ['archives']
-    pkg {
-        repo = bintrayRepo
-        name = bintrayName
-        userOrg = bintrayOrg
-        desc = libraryDescription
-        websiteUrl = siteUrl
-        vcsUrl = gitUrl
-        licenses = allLicenses
-        dryRun = false
-        publish = true
-        override = false
-        publicDownloadNumbers = true
-        version {
-            desc = libraryDescription
-        }
-    }
-}
-
-repositories {
-    mavenCentral()
+nexusStaging {
+    serverUrl = "https://s01.oss.sonatype.org/service/local"
+    packageGroup = publishGroupId
+    stagingProfileId = sonatypeStagingProfileId
+    username = ossrhUsername
+    password = ossrhPassword
 }

@@ -21,6 +21,9 @@ plugins {
     id "com.jfrog.bintray" version "1.8.5"
     id "com.github.dcendents.android-maven" version "2.1"
     id 'org.jetbrains.kotlin.plugin.serialization' version "1.4.32"
+    id 'org.jetbrains.dokka' version '1.4.30'
+    id 'io.codearte.nexus-staging' version '0.30.0'
+    id "io.github.gradle-nexus.publish-plugin" version "1.0.0"
 }
 
 allprojects {
@@ -82,4 +85,41 @@ allprojects {
 
     check.dependsOn checkJavaStyle
     check.dependsOn ktlint
+}
+
+ext {
+    publishGroupId = 'com.getbouncer'
+}
+
+File secretPropsFile = project.rootProject.file('local.properties')
+if (secretPropsFile.exists()) {
+    Properties p = new Properties()
+    new FileInputStream(secretPropsFile).withCloseable { is ->
+        p.load(is)
+    }
+    p.each { name, value ->
+        ext[name] = value
+    }
+} else {
+    ext["signing.keyId"] = System.getenv('SIGNING_KEY_ID')
+    ext["signing.password"] = System.getenv('SIGNING_PASSWORD')
+    ext["signing.secretKeyRingFile"] = System.getenv('SIGNING_SECRET_KEY_RING_FILE')
+
+    ext["ossrhUsername"] = System.getenv('OSSRH_USERNAME')
+    ext["ossrhPassword"] = System.getenv('OSSRH_PASSWORD')
+
+    ext["sonatypeStagingProfileId"] = System.getenv('SONATYPE_STAGING_PROFILE_ID')
+}
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+            packageGroup = publishGroupId
+            stagingProfileId = sonatypeStagingProfileId
+            username = ossrhUsername
+            password = ossrhPassword
+        }
+    }
 }
