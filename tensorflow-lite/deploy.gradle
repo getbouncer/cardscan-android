@@ -1,74 +1,108 @@
-apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: 'com.jfrog.bintray'
 apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+ext["signing.keyId"] = ''
+ext["signing.password"] = ''
+ext["signing.secretKeyRingFile"] = ''
+
+ext["ossrhUsername"] = ''
+ext["ossrhPassword"] = ''
+ext["sonatypeStagingProfileId"] = ''
 
 ext {
-    bintrayRepo = 'cardscan-android'
-    bintrayName = 'tensorflow-lite'
-    bintrayOrg = 'bouncerpaid'
-
-    publishedGroupId = 'com.getbouncer'
-    libraryName = 'tensorflow-lite'
-    artifact = 'tensorflow-lite'
 
     libraryDescription = 'This library provides a custom implementation of TFLite for Bouncer products.'
 
     siteUrl = 'https://getbouncer.com'
-    gitUrl = 'https://github.com/getbouncer/cardscan-android.git'
 
-    libraryVersion = version
+    scmConnection = 'scm:git:github.com/getbouncer/cardscan-android.git'
+    scmDeveloperConnection = 'scm:git:https://github.com/getbouncer/cardscan-android.git'
+    scmUrl = 'https://github.com/getbouncer/cardscan-android'
+
+    licenseName = 'bouncer-free-1'
+    licenseUrl = 'https://github.com/getbouncer/cardscan-android/blob/master/LICENSE'
 
     developerId = 'getbouncer'
     developerName = 'Bouncer Technologies'
     developerEmail = 'contact@getbouncer.com'
 
-    licenseName = 'bouncer-free-1'
-    licenseUrl = 'https://github.com/getbouncer/cardscan-android/blob/master/LICENSE'
-    allLicenses = ["bouncer-free-1"]
+    publishGroupId = 'com.getbouncer'
+    publishArtifactId = 'tensorflow-lite'
+    publishVersion = version
 }
 
-group = publishedGroupId
-version = libraryVersion
+group = publishGroupId
+version = publishVersion
+
+File secretPropsFile = project.rootProject.file('local.properties')
+if (secretPropsFile.exists()) {
+    Properties p = new Properties()
+    new FileInputStream(secretPropsFile).withCloseable { is ->
+        p.load(is)
+    }
+    p.each { name, value ->
+        ext[name] = value
+    }
+} else {
+    ext["signing.keyId"] = System.getenv('SIGNING_KEY_ID')
+    ext["signing.password"] = System.getenv('SIGNING_PASSWORD')
+    ext["signing.secretKeyRingFile"] = System.getenv('SIGNING_SECRET_KEY_RING_FILE')
+
+    ext["ossrhUsername"] = System.getenv('OSSRH_USERNAME')
+    ext["ossrhPassword"] = System.getenv('OSSRH_PASSWORD')
+
+    ext["sonatypeStagingProfileId"] = System.getenv('SONATYPE_STAGING_PROFILE_ID')
+}
 
 publishing {
     publications {
         maven(MavenPublication) {
-            groupId publishedGroupId
-            artifactId artifact
-            version version
+            groupId publishGroupId
+            artifactId publishArtifactId
+            version publishVersion
             artifact "$buildDir/../tensorflow-lite-all-models.aar"
+
+            pom {
+                name = publishArtifactId
+                description = libraryDescription
+                url = siteUrl
+                licenses {
+                    license {
+                        name = licenseName
+                        url = licenseUrl
+                    }
+                }
+                developers {
+                    developer {
+                        id = developerId
+                        name = developerName
+                        email = developerEmail
+                    }
+                }
+                scm {
+                    connection = scmConnection
+                    developerConnection = scmDeveloperConnection
+                    url = scmUrl
+                }
+            }
+        }
+    }
+
+    // The repository to publish to, Sonatype/MavenCentral
+    repositories {
+        maven {
+            // This is an arbitrary name, you may also use "mavencentral" or
+            // any other name that's descriptive for you
+            name = "sonatype"
+            url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            credentials {
+                username ossrhUsername
+                password ossrhPassword
+            }
         }
     }
 }
 
-Properties properties = new Properties()
-if (project.rootProject.file('local.properties').exists()) {
-    properties.load(project.rootProject.file('local.properties').newDataInputStream())
-}
-
-bintray {
-    user = properties.getProperty("bintray.user")
-    key = properties.getProperty("bintray.apikey")
-
-    publications = ['maven']
-    pkg {
-        repo = bintrayRepo
-        name = bintrayName
-        userOrg = bintrayOrg
-        desc = libraryDescription
-        websiteUrl = siteUrl
-        vcsUrl = gitUrl
-        licenses = allLicenses
-        dryRun = false
-        publish = true
-        override = false
-        publicDownloadNumbers = true
-        version {
-            desc = libraryDescription
-        }
-    }
-}
-
-repositories {
-    mavenCentral()
+signing {
+    sign publishing.publications
 }
