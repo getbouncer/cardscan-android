@@ -155,11 +155,3 @@ publishing {
 signing {
     sign publishing.publications
 }
-
-nexusStaging {
-    serverUrl = "https://s01.oss.sonatype.org/service/local"
-    packageGroup = publishGroupId
-    stagingProfileId = sonatypeStagingProfileId
-    username = ossrhUsername
-    password = ossrhPassword
-}

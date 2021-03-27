@@ -19,10 +19,8 @@ buildscript {
 
 plugins {
     id "com.jfrog.bintray" version "1.8.5"
-    id "com.github.dcendents.android-maven" version "2.1"
     id 'org.jetbrains.kotlin.plugin.serialization' version "1.4.32"
     id 'org.jetbrains.dokka' version '1.4.30'
-    id 'io.codearte.nexus-staging' version '0.30.0'
     id "io.github.gradle-nexus.publish-plugin" version "1.0.0"
 }
 
