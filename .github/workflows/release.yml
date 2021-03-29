@@ -89,7 +89,7 @@ jobs:
 
   publish:
     needs: run_final_checks
-    name: Publish to BinTray
+    name: Publish to MavenCentral
     runs-on: ubuntu-latest
 
     steps:
