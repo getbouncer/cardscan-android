@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.0080](https://github.com/getbouncer/cardscan-android/tree/2.0.0080) (2021-03-30)
+
+**Merged pull requests:**
+
+- Update kotlin versions [\#344](https://github.com/getbouncer/cardscan-android/pull/344) ([awushensky](https://github.com/awushensky))
+- Update release names [\#339](https://github.com/getbouncer/cardscan-android/pull/339) ([awushensky](https://github.com/awushensky))
+
 ## [2.0.0079](https://github.com/getbouncer/cardscan-android/tree/2.0.0079) (2021-03-27)
 
 **Merged pull requests:**
@@ -345,12 +352,12 @@
 - Support better camera autofocus [\#211](https://github.com/getbouncer/cardscan-android/pull/211) ([awushensky](https://github.com/awushensky))
 - Update state machine tests [\#210](https://github.com/getbouncer/cardscan-android/pull/210) ([awushensky](https://github.com/awushensky))
 - Bump kotlin-gradle-plugin from 1.4.0 to 1.4.10 [\#209](https://github.com/getbouncer/cardscan-android/pull/209) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
+- Bump org.jetbrains.kotlin.plugin.serialization from 1.4.0 to 1.4.10 [\#208](https://github.com/getbouncer/cardscan-android/pull/208) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 
 ## [2.0.0031](https://github.com/getbouncer/cardscan-android/tree/2.0.0031) (2020-09-11)
 
 **Merged pull requests:**
 
-- Bump org.jetbrains.kotlin.plugin.serialization from 1.4.0 to 1.4.10 [\#208](https://github.com/getbouncer/cardscan-android/pull/208) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - fixes the bitmap test [\#207](https://github.com/getbouncer/cardscan-android/pull/207) ([dxaen](https://github.com/dxaen))
 
 ## [2.0.0030](https://github.com/getbouncer/cardscan-android/tree/2.0.0030) (2020-09-08)
@@ -425,7 +432,6 @@
 - Add custom pans [\#183](https://github.com/getbouncer/cardscan-android/pull/183) ([smkuhne](https://github.com/smkuhne))
 - Update dependencies [\#182](https://github.com/getbouncer/cardscan-android/pull/182) ([awushensky](https://github.com/awushensky))
 - Local rules [\#181](https://github.com/getbouncer/cardscan-android/pull/181) ([awushensky](https://github.com/awushensky))
-- Support extracting iin and last4 from utils [\#170](https://github.com/getbouncer/cardscan-android/pull/170) ([awushensky](https://github.com/awushensky))
 
 ## [2.0.0020](https://github.com/getbouncer/cardscan-android/tree/2.0.0020) (2020-08-13)
 
@@ -443,6 +449,7 @@
 **Merged pull requests:**
 
 - Fix display bug [\#171](https://github.com/getbouncer/cardscan-android/pull/171) ([awushensky](https://github.com/awushensky))
+- Support extracting iin and last4 from utils [\#170](https://github.com/getbouncer/cardscan-android/pull/170) ([awushensky](https://github.com/awushensky))
 - Add check result [\#169](https://github.com/getbouncer/cardscan-android/pull/169) ([awushensky](https://github.com/awushensky))
 - Bump appcompat from 1.1.0 to 1.2.0 [\#168](https://github.com/getbouncer/cardscan-android/pull/168) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Add zoomOffset method [\#167](https://github.com/getbouncer/cardscan-android/pull/167) ([smkuhne](https://github.com/smkuhne))
