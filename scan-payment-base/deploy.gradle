@@ -57,7 +57,7 @@ ext {
     developerEmail = 'contact@getbouncer.com'
 
     publishGroupId = 'com.getbouncer'
-    publishArtifactId = 'scan-payment'
+    publishArtifactId = 'scan-payment-base'
     publishVersion = version
 }
 
