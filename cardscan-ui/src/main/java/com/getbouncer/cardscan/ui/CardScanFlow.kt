@@ -121,7 +121,7 @@ open class CardScanFlow(
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,
         coroutineScope: CoroutineScope
-    ) = coroutineScope.launch {
+    ) = coroutineScope.launch(Dispatchers.Main) {
         val listener =
             object : AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult> {
                 override suspend fun onResult(result: MainLoopAggregator.FinalResult) {
