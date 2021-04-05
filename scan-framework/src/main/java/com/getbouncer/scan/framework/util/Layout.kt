@@ -3,6 +3,7 @@ package com.getbouncer.scan.framework.util
 import android.graphics.Rect
 import android.graphics.RectF
 import android.util.Size
+import android.util.SizeF
 import androidx.annotation.CheckResult
 import kotlin.math.max
 import kotlin.math.min
@@ -143,6 +144,46 @@ fun Size.scaleAndCenterSurrounding(surroundedSize: Size): Rect {
 }
 
 /**
+ * Scale a size based on percentage scale values, and keep track of its position.
+ */
+@CheckResult
+fun Size.scaleCentered(x: Float, y: Float): Rect {
+    val newSize = this.scale(x, y)
+    val left = (this.width - newSize.width) / 2
+    val top = (this.height - newSize.height) / 2
+    return Rect(
+        left,
+        top,
+        left + newSize.width,
+        top + newSize.height,
+    )
+}
+
+/**
+ * Calculate the new size based on percentage scale values.
+ */
+@CheckResult
+fun SizeF.scale(x: Float, y: Float) = SizeF(this.width * x, this.height * y)
+
+/**
+ * Calculate the new size based on a percentage scale.
+ */
+@CheckResult
+fun SizeF.scale(scale: Float) = this.scale(scale, scale)
+
+/**
+ * Calculate the new size based on percentage scale values.
+ */
+@CheckResult
+fun Size.scale(x: Float, y: Float): Size = Size((this.width * x).roundToInt(), (this.height * y).roundToInt())
+
+/**
+ * Calculate the new size based on a percentage scale.
+ */
+@CheckResult
+fun Size.scale(scale: Float) = this.scale(scale, scale)
+
+/**
  * Center a size on a given rectangle. The size may be larger or smaller than the rect.
  */
 @CheckResult
@@ -214,7 +255,7 @@ fun Size.transpose() = Size(this.height, this.width)
 @CheckResult
 fun Rect.intersectionWith(rect: Rect): Rect {
     require(this.intersect(rect)) {
-        "Given rects do not intersect"
+        "Given rects do not intersect $this <> $rect"
     }
 
     return Rect(
@@ -242,7 +283,7 @@ fun Rect.move(relativeX: Int, relativeY: Int) = Rect(
  */
 @CheckResult
 fun Size.projectRegionOfInterest(toSize: Size, regionOfInterest: Rect): Rect {
-    require(this.width > 0 || this.height > 0) {
+    require(this.width > 0 && this.height > 0) {
         "Cannot project from container with non-positive dimensions"
     }
 
@@ -250,7 +291,21 @@ fun Size.projectRegionOfInterest(toSize: Size, regionOfInterest: Rect): Rect {
         regionOfInterest.left * toSize.width / this.width,
         regionOfInterest.top * toSize.height / this.height,
         regionOfInterest.right * toSize.width / this.width,
-        regionOfInterest.bottom * toSize.height / this.height
+        regionOfInterest.bottom * toSize.height / this.height,
+    )
+}
+
+@CheckResult
+fun Rect.projectRegionOfInterest(toSize: Size, regionOfInterest: Rect): Rect {
+    require(this.width() > 0 && this.height() > 0) {
+        "Cannot project from container with non-positive dimensions"
+    }
+
+    return Rect(
+        (regionOfInterest.left - this.left) * toSize.width / this.width(),
+        (regionOfInterest.top - this.top) * toSize.height / this.height(),
+        toSize.width + ((regionOfInterest.right - this.right) * toSize.width / this.width()),
+        toSize.height + ((regionOfInterest.bottom - this.bottom) * toSize.height / this.height()),
     )
 }
 

@@ -15,6 +15,7 @@ import com.getbouncer.scan.framework.util.indexOfMax
 import com.getbouncer.scan.framework.util.maxAspectRatioInSize
 import com.getbouncer.scan.framework.util.scaleAndCenterWithin
 import com.getbouncer.scan.framework.util.scaled
+import com.getbouncer.scan.framework.util.size
 import com.getbouncer.scan.payment.card.formatExpiry
 import com.getbouncer.scan.payment.card.isValidExpiry
 import com.getbouncer.scan.payment.card.isValidMonth
@@ -49,17 +50,17 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
         /**
          * Given a card finder region of a preview image, calculate the associated square.
          */
-        private fun calculateSquareFromCardFinder(previewImage: Size, cardFinder: Rect): Rect {
-            val squareSize = maxAspectRatioInSize(previewImage, 1F)
+        private fun calculateSquareFromCardFinder(previewBounds: Rect, cardFinder: Rect): Rect {
+            val squareSize = maxAspectRatioInSize(previewBounds.size(), 1F)
             return Rect(
                 /* left */
-                max(0, cardFinder.centerX() - squareSize.width / 2),
+                max(previewBounds.left, cardFinder.centerX() - squareSize.width / 2),
                 /* top */
-                max(0, cardFinder.centerY() - squareSize.height / 2),
+                max(previewBounds.top, cardFinder.centerY() - squareSize.height / 2),
                 /* right */
-                min(previewImage.width, cardFinder.centerX() + squareSize.width / 2),
+                min(previewBounds.right, cardFinder.centerX() + squareSize.width / 2),
                 /* bottom */
-                min(previewImage.height, cardFinder.centerY() + squareSize.height / 2)
+                min(previewBounds.bottom, cardFinder.centerY() + squareSize.height / 2)
             )
         }
 
@@ -67,19 +68,19 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
          * Calculate what portion of the full image should be cropped based on the position of card finder within the
          * preview image.
          */
-        private fun calculateCrop(fullImage: Size, previewImage: Size, cardFinder: Rect): Rect {
+        private fun calculateCrop(fullImage: Size, previewBounds: Rect, cardFinder: Rect): Rect {
             require(
-                cardFinder.left >= 0 &&
-                    cardFinder.right <= previewImage.width &&
-                    cardFinder.top >= 0 &&
-                    cardFinder.bottom <= previewImage.height
+                cardFinder.left >= previewBounds.left &&
+                    cardFinder.right <= previewBounds.right &&
+                    cardFinder.top >= previewBounds.top &&
+                    cardFinder.bottom <= previewBounds.bottom
             ) { "Card finder is outside preview image bounds" }
 
             // Calculate the card detection square based on the card finder, limited by the preview
-            val square = calculateSquareFromCardFinder(previewImage, cardFinder)
+            val square = calculateSquareFromCardFinder(previewBounds, cardFinder)
 
-            val scaledPreviewImage = previewImage.scaleAndCenterWithin(fullImage)
-            val previewScale = scaledPreviewImage.width().toFloat() / previewImage.width
+            val scaledPreviewImage = previewBounds.size().scaleAndCenterWithin(fullImage)
+            val previewScale = scaledPreviewImage.width().toFloat() / previewBounds.width()
 
             // Scale the cardDetectionSquare to match the scaledPreviewImage
             val scaledSquare = Rect(
@@ -100,23 +101,23 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
 
         fun cropCameraPreview(
             cameraPreviewImage: Bitmap,
-            previewSize: Size,
+            previewBounds: Rect,
             cardFinder: Rect,
-        ) = cameraPreviewImage.crop(calculateCrop(cameraPreviewImage.size(), previewSize, cardFinder))
+        ) = cameraPreviewImage.crop(calculateCrop(cameraPreviewImage.size(), previewBounds, cardFinder))
 
         /**
          * Convert a camera preview image into a CardDetect input
          */
         fun cameraPreviewToInput(
             cameraPreviewImage: TrackedImage<Bitmap>,
-            previewSize: Size,
+            previewBounds: Rect,
             cardFinder: Rect,
             expiryBox: RectF,
         ) = Input(
             TrackedImage(
                 cropCameraPreview(
                     cameraPreviewImage = cameraPreviewImage.image,
-                    previewSize = previewSize,
+                    previewBounds = previewBounds,
                     cardFinder = cardFinder,
                 )
                     .also { cameraPreviewImage.tracker.trackResult("expiry_detect_image_cropped") },

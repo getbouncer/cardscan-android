@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.util.Log
-import android.util.Size
 import androidx.lifecycle.LifecycleOwner
 import com.getbouncer.cardscan.ui.analyzer.CompletionLoopAnalyzer
 import com.getbouncer.cardscan.ui.analyzer.MainLoopAnalyzer
@@ -13,13 +12,13 @@ import com.getbouncer.cardscan.ui.result.CompletionLoopListener
 import com.getbouncer.cardscan.ui.result.CompletionLoopResult
 import com.getbouncer.cardscan.ui.result.MainLoopAggregator
 import com.getbouncer.cardscan.ui.result.MainLoopState
+import com.getbouncer.scan.camera.CameraPreviewImage
 import com.getbouncer.scan.framework.AggregateResultListener
 import com.getbouncer.scan.framework.AnalyzerLoopErrorListener
 import com.getbouncer.scan.framework.AnalyzerPool
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.FiniteAnalyzerLoop
 import com.getbouncer.scan.framework.ProcessBoundAnalyzerLoop
-import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.framework.time.Duration
 import com.getbouncer.scan.framework.time.Rate
 import com.getbouncer.scan.payment.FrameDetails
@@ -115,12 +114,10 @@ open class CardScanFlow(
      *
      * @param context: The context used to download analyzers if needed
      * @param imageStream: The flow of images to process
-     * @param previewSize: The size of the preview frame where the view finder is located
      */
     override fun startFlow(
         context: Context,
-        imageStream: Flow<TrackedImage<Bitmap>>,
-        previewSize: Size,
+        imageStream: Flow<CameraPreviewImage<Bitmap>>,
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,
         coroutineScope: CoroutineScope
@@ -176,7 +173,6 @@ open class CardScanFlow(
                     imageStream.map {
                         MainLoopAnalyzer.Input(
                             cameraPreviewImage = it,
-                            previewSize = previewSize,
                             cardFinder = viewFinder,
                         )
                     },

@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.graphics.PointF
 import android.util.Log
 import android.util.Size
+import android.util.SizeF
 import android.view.Surface
 import androidx.annotation.IntDef
 import androidx.annotation.MainThread
@@ -104,6 +105,20 @@ abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
         }
 
         /**
+         * Calculate how much an image must scale in X and Y to match a view size.
+         */
+        internal fun calculatePreviewScale(
+            viewSize: Size,
+            imageSize: Size,
+            @RotationValue displayRotation: Int,
+            sensorRotationDegrees: Int
+        ) = if (areScreenAndSensorPerpendicular(displayRotation, sensorRotationDegrees)) {
+            SizeF(viewSize.height.toFloat() / imageSize.height, viewSize.width.toFloat() / imageSize.width)
+        } else {
+            SizeF(viewSize.width.toFloat() / imageSize.width, viewSize.height.toFloat() / imageSize.height)
+        }
+
+        /**
          * Determines if the dimensions are swapped given the phone's current rotation.
          *
          * @param displayRotation The current rotation of the display
@@ -182,6 +197,16 @@ abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
      * Determine if the torch is currently on.
      */
     abstract fun isTorchOn(): Boolean
+
+    /**
+     * Determine if the device has multiple cameras.
+     */
+    abstract fun supportsMultipleCameras(): Boolean
+
+    /**
+     * Change to a new camera.
+     */
+    abstract fun changeCamera()
 
     /**
      * Set the focus on a particular point on the screen.

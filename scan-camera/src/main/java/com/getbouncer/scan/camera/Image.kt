@@ -10,6 +10,7 @@ import android.media.Image
 import android.util.Size
 import androidx.annotation.CheckResult
 import com.getbouncer.scan.camera.exception.ImageTypeNotSupportedException
+import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.framework.util.centerOn
 import com.getbouncer.scan.framework.util.toRect
 import java.io.ByteArrayOutputStream
@@ -212,3 +213,8 @@ fun Bitmap.scaleAndCrop(size: Size, filter: Boolean = false): Bitmap =
         val scaled = this.scale(scaleFactor, filter)
         scaled.crop(size.centerOn(scaled.getSize().toRect()))
     }
+
+data class CameraPreviewImage<ImageBase>(
+    val image: TrackedImage<ImageBase>,
+    val previewImageBounds: Rect,
+)

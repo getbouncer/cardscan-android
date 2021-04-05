@@ -23,12 +23,12 @@ import androidx.core.content.ContextCompat
 import com.getbouncer.scan.camera.CameraAdapter
 import com.getbouncer.scan.camera.CameraApi
 import com.getbouncer.scan.camera.CameraErrorListener
+import com.getbouncer.scan.camera.CameraPreviewImage
 import com.getbouncer.scan.camera.camera1.Camera1Adapter
 import com.getbouncer.scan.camera.camera2.Camera2Adapter
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.Stats
 import com.getbouncer.scan.framework.StorageFactory
-import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.framework.api.ERROR_CODE_NOT_AUTHENTICATED
 import com.getbouncer.scan.framework.api.NetworkResult
 import com.getbouncer.scan.framework.api.dto.ScanStatistics
@@ -119,7 +119,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     /**
      * Override this value to use a different camera API.
      */
-    protected open val cameraApi: CameraApi = CameraApi.Camera1
+    protected open val cameraApi: CameraApi = CameraApi.Camera2
 
     protected val storage by lazy {
         StorageFactory.getStorageInstance(this, "scan_camera_permissions")
@@ -453,7 +453,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     /**
      * Generate a camera adapter
      */
-    protected open fun buildCameraAdapter(): CameraAdapter<TrackedImage<Bitmap>> = when (cameraApi) {
+    protected open fun buildCameraAdapter(): CameraAdapter<CameraPreviewImage<Bitmap>> = when (cameraApi) {
         is CameraApi.Camera2 -> {
             Camera2Adapter(
                 activity = this,
@@ -481,7 +481,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     /**
      * A stream of images from the camera is available to be processed.
      */
-    protected abstract fun onCameraStreamAvailable(cameraStream: Flow<TrackedImage<Bitmap>>)
+    protected abstract fun onCameraStreamAvailable(cameraStream: Flow<CameraPreviewImage<Bitmap>>)
 
     /**
      * The API key was invalid.

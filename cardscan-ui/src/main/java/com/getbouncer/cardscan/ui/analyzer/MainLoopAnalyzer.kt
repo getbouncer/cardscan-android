@@ -4,11 +4,13 @@ import android.graphics.Bitmap
 import android.graphics.Rect
 import android.util.Size
 import com.getbouncer.cardscan.ui.result.MainLoopState
+import com.getbouncer.scan.camera.CameraPreviewImage
 import com.getbouncer.scan.framework.Analyzer
 import com.getbouncer.scan.framework.AnalyzerFactory
 import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.payment.carddetect.CardDetect
 import com.getbouncer.scan.payment.ocr.SSDOcr
+import kotlinx.coroutines.async
 import kotlinx.coroutines.supervisorScope
 
 class MainLoopAnalyzer(
@@ -17,8 +19,7 @@ class MainLoopAnalyzer(
 ) : Analyzer<MainLoopAnalyzer.Input, MainLoopState, MainLoopAnalyzer.Prediction> {
 
     data class Input(
-        val cameraPreviewImage: TrackedImage<Bitmap>,
-        val previewSize: Size,
+        val cameraPreviewImage: CameraPreviewImage<Bitmap>,
         val cardFinder: Rect,
     )
 
@@ -29,11 +30,10 @@ class MainLoopAnalyzer(
         val isCardVisible = card?.side?.let { it == CardDetect.Prediction.Side.NO_PAN || it == CardDetect.Prediction.Side.PAN }
     }
 
-    override suspend fun analyze(data: Input, state: MainLoopState): Prediction = supervisorScope {
-        val cardResult = if (state.runCardDetect) cardDetect?.analyze(CardDetect.cameraPreviewToInput(data.cameraPreviewImage, data.previewSize, data.cardFinder), Unit) else null
-        val ocrResult = if (state.runOcr) ssdOcr?.analyze(SSDOcr.cameraPreviewToInput(data.cameraPreviewImage, data.previewSize, data.cardFinder), Unit) else null
-
-        Prediction(
+    override suspend fun analyze(data: Input, state: MainLoopState): Prediction {
+        val cardResult = if (state.runCardDetect) cardDetect?.analyze(CardDetect.cameraPreviewToInput(data.cameraPreviewImage.image, data.cameraPreviewImage.previewImageBounds, data.cardFinder), Unit) else null
+        val ocrResult = if (state.runOcr) ssdOcr?.analyze(SSDOcr.cameraPreviewToInput(data.cameraPreviewImage.image, data.cameraPreviewImage.previewImageBounds, data.cardFinder), Unit) else null
+        return Prediction(
             ocr = ocrResult,
             card = cardResult,
         )

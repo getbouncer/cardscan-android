@@ -18,10 +18,12 @@ import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.ViewGroup
+import androidx.core.view.size
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.OnLifecycleEvent
 import com.getbouncer.scan.camera.CameraAdapter
 import com.getbouncer.scan.camera.CameraErrorListener
+import com.getbouncer.scan.camera.CameraPreviewImage
 import com.getbouncer.scan.camera.nv21ToYuv
 import com.getbouncer.scan.camera.rotate
 import com.getbouncer.scan.camera.scaleAndCrop
@@ -55,7 +57,7 @@ class Camera1Adapter(
     private val minimumResolution: Size,
     private val cameraErrorListener: CameraErrorListener,
     private val coroutineScope: CoroutineScope,
-) : CameraAdapter<TrackedImage<Bitmap>>(), PreviewCallback {
+) : CameraAdapter<CameraPreviewImage<Bitmap>>(), PreviewCallback {
 
     private var mCamera: Camera? = null
     private var cameraPreview: CameraPreview? = null
@@ -116,14 +118,17 @@ class Camera1Adapter(
         if (bytes != null) {
             try {
                 sendImageToStream(
-                    TrackedImage(
-                        image = bytes
-                            .nv21ToYuv(imageWidth, imageHeight)
-                            .toBitmap()
-                            .scaleAndCrop(minimumResolution)
-                            .rotate(mRotation.toFloat()),
-                        tracker = Stats.trackRepeatingTask("image_processing")
-                    )
+                    CameraPreviewImage(
+                        TrackedImage(
+                            image = bytes
+                                .nv21ToYuv(imageWidth, imageHeight)
+                                .toBitmap()
+                                .scaleAndCrop(minimumResolution)
+                                .rotate(mRotation.toFloat()),
+                            tracker = Stats.trackRepeatingTask("image_processing")
+                        ),
+                        Rect(0, 0, previewView.width, previewView.height),
+                    ),
                 )
             } catch (t: Throwable) {
                 // ignore errors transforming the image (OOM, etc)
@@ -415,5 +420,14 @@ class Camera1Adapter(
                 }
             }
         }
+    }
+
+    override fun supportsMultipleCameras(): Boolean {
+        // TODO("Not yet implemented")
+        return false
+    }
+
+    override fun changeCamera() {
+        // TODO("Not yet implemented")
     }
 }

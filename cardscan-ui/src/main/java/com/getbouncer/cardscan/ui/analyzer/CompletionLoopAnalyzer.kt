@@ -21,7 +21,7 @@ class CompletionLoopAnalyzer private constructor(
         state: Unit,
     ) = Prediction(
         nameAndExpiryResult = nameAndExpiryAnalyzer?.analyze(
-            NameAndExpiryAnalyzer.Input(data.frame.cameraPreviewImage, data.frame.previewSize, data.frame.cardFinder),
+            NameAndExpiryAnalyzer.Input(data.frame.cameraPreviewImage.image, data.frame.cameraPreviewImage.previewImageBounds, data.frame.cardFinder),
             state,
         ),
         isNameExtractionAvailable = nameAndExpiryAnalyzer?.isNameDetectorAvailable() ?: false,

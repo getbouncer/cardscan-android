@@ -3,6 +3,7 @@ package com.getbouncer.scan.payment.ocr
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
+import android.util.Log
 import android.util.Size
 import com.getbouncer.scan.framework.FetchedData
 import com.getbouncer.scan.framework.TrackedImage
@@ -15,6 +16,7 @@ import com.getbouncer.scan.framework.ml.ssd.toRectForm
 import com.getbouncer.scan.framework.util.intersectionWith
 import com.getbouncer.scan.framework.util.projectRegionOfInterest
 import com.getbouncer.scan.framework.util.reshape
+import com.getbouncer.scan.framework.util.size
 import com.getbouncer.scan.framework.util.toRect
 import com.getbouncer.scan.payment.crop
 import com.getbouncer.scan.payment.hasOpenGl31
@@ -114,18 +116,18 @@ class SSDOcr private constructor(interpreter: Interpreter) :
          */
         fun cropImage(
             cameraPreviewImage: TrackedImage<Bitmap>,
-            previewSize: Size,
+            previewBounds: Rect,
             cardFinder: Rect,
         ): TrackedImage<Bitmap> {
             require(
-                cardFinder.left >= 0 &&
-                    cardFinder.right <= previewSize.width &&
-                    cardFinder.top >= 0 &&
-                    cardFinder.bottom <= previewSize.height
-            ) { "Card finder is outside preview image bounds $cardFinder $previewSize" }
+                cardFinder.left >= previewBounds.left &&
+                    cardFinder.right <= previewBounds.right &&
+                    cardFinder.top >= previewBounds.top &&
+                    cardFinder.bottom <= previewBounds.bottom
+            ) { "View finder $cardFinder is outside preview image bounds $previewBounds" }
 
             // Scale the cardFinder to match the full image
-            val projectedViewFinder = previewSize
+            val projectedViewFinder = previewBounds
                 .projectRegionOfInterest(
                     toSize = cameraPreviewImage.image.size(),
                     regionOfInterest = cardFinder
@@ -143,10 +145,10 @@ class SSDOcr private constructor(interpreter: Interpreter) :
          */
         fun cameraPreviewToInput(
             cameraPreviewImage: TrackedImage<Bitmap>,
-            previewSize: Size,
+            previewBounds: Rect,
             cardFinder: Rect
         ) = Input(
-            cropImage(cameraPreviewImage, previewSize, cardFinder).let { image ->
+            cropImage(cameraPreviewImage, previewBounds, cardFinder).let { image ->
                 TrackedImage(
                     image.image
                         .scale(Factory.TRAINED_IMAGE_SIZE)

@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.Rect
 import android.util.Size
 import androidx.lifecycle.LifecycleOwner
+import com.getbouncer.scan.camera.CameraPreviewImage
 import com.getbouncer.scan.framework.TrackedImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -19,7 +20,6 @@ interface ScanFlow {
      *
      * @param context: The context used to download analyzers if needed
      * @param imageStream: The flow of images to process
-     * @param previewSize: The size of the preview frame where the view finder is located
      * @param viewFinder: The location of the view finder in the previewSize
      * @param lifecycleOwner: The activity that owns this flow. The flow will pause if the activity
      * is paused
@@ -27,8 +27,7 @@ interface ScanFlow {
      */
     fun startFlow(
         context: Context,
-        imageStream: Flow<TrackedImage<Bitmap>>,
-        previewSize: Size,
+        imageStream: Flow<CameraPreviewImage<Bitmap>>,
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,
         coroutineScope: CoroutineScope

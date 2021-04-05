@@ -4,7 +4,6 @@ import android.graphics.Bitmap
 import android.graphics.Rect
 import android.graphics.RectF
 import android.util.Log
-import android.util.Size
 import com.getbouncer.scan.framework.Analyzer
 import com.getbouncer.scan.framework.AnalyzerFactory
 import com.getbouncer.scan.framework.Config
@@ -43,7 +42,7 @@ class NameAndExpiryAnalyzer private constructor(
 
     data class Input(
         val cameraPreviewImage: TrackedImage<Bitmap>,
-        val previewSize: Size,
+        val previewBounds: Rect,
         val cardFinder: Rect,
     )
 
@@ -64,12 +63,12 @@ class NameAndExpiryAnalyzer private constructor(
         Prediction(null, null, null)
     } else {
         val textDetectorPrediction = textDetect.analyze(
-            TextDetect.cameraPreviewToInput(data.cameraPreviewImage, data.previewSize, data.cardFinder),
+            TextDetect.cameraPreviewToInput(data.cameraPreviewImage, data.previewBounds, data.cardFinder),
             Unit,
         )
 
         val squareImage = TrackedImage(
-            TextDetect.cropCameraPreview(data.cameraPreviewImage.image, data.previewSize, data.cardFinder),
+            TextDetect.cropCameraPreview(data.cameraPreviewImage.image, data.previewBounds, data.cardFinder),
             data.cameraPreviewImage.tracker,
         )
 
@@ -83,7 +82,7 @@ class NameAndExpiryAnalyzer private constructor(
                 expiryDetect?.analyze(
                     ExpiryDetect.cameraPreviewToInput(
                         data.cameraPreviewImage,
-                        data.previewSize,
+                        data.previewBounds,
                         data.cardFinder,
                         // the boxes produced by textDetector are sometimes too tight, especially in the Y
                         // direction. Scale it out a bit

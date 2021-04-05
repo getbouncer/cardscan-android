@@ -496,7 +496,7 @@ open class CardScanActivity :
     ) = launch(Dispatchers.Main) {
         if (Config.isDebug) {
             val bitmap = withContext(Dispatchers.Default) {
-                CardDetect.cropCameraPreviewForCardDetect(frame.frame.cameraPreviewImage.image, frame.frame.previewSize, frame.frame.cardFinder)
+                CardDetect.cropCameraPreviewForCardDetect(frame.frame.cameraPreviewImage.image.image, frame.frame.cameraPreviewImage.previewImageBounds, frame.frame.cardFinder)
             }
             debugCompletionImageView.setImageBitmap(bitmap)
         }

@@ -183,13 +183,20 @@ abstract class CardScanBaseActivity :
             is MainLoopState.Finished -> changeScanState(ScanState.Correct)
         }
 
-        result.analyzerResult.ocr?.detectedBoxes?.let { detectionBoxes ->
-            if (Config.isDebug) {
-                val bitmap = withContext(Dispatchers.Default) {
-                    SSDOcr.cropImage(result.frame.cameraPreviewImage, result.frame.previewSize, result.frame.cardFinder).image
-                }
-                debugImageView.setImageBitmap(bitmap)
+        if (Config.isDebug) {
+            val bitmap = withContext(Dispatchers.Default) {
+                SSDOcr.cropImage(
+                    result.frame.cameraPreviewImage.image,
+                    result.frame.cameraPreviewImage.previewImageBounds,
+                    result.frame.cardFinder
+                ).image
+            }
+            debugImageView.setImageBitmap(bitmap)
+
+            result.analyzerResult.ocr?.detectedBoxes?.let { detectionBoxes ->
                 debugOverlayView.setBoxes(detectionBoxes.map { it.forDebug() })
+            } ?: run {
+                debugOverlayView.clearBoxes()
             }
         }
     }.let { }
