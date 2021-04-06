@@ -111,6 +111,10 @@ fun Size.scaleAndCenterWithin(containingSize: Size): Rect {
     )
 }
 
+@CheckResult
+fun Size.scaleAndCenterWithin(containingRect: Rect): Rect =
+    this.scaleAndCenterWithin(containingRect.size()).move(containingRect.left, containingRect.top)
+
 /**
  * Calculate the position of the [Size] surrounding the [surroundedSize]. This makes a few
  * assumptions:
@@ -274,20 +278,43 @@ fun Rect.move(relativeX: Int, relativeY: Int) = Rect(
     this.left + relativeX,
     this.top + relativeY,
     this.right + relativeX,
-    this.bottom + relativeY
+    this.bottom + relativeY,
 )
+
+/**
+ * Move relative to its current position
+ */
+@CheckResult
+fun RectF.move(relativeX: Float, relativeY: Float) = RectF(
+    this.left + relativeX,
+    this.top + relativeY,
+    this.right + relativeX,
+    this.bottom + relativeY,
+)
+
+@CheckResult
+fun Size.toSizeF() = SizeF(width.toFloat(), height.toFloat())
+
+@CheckResult
+fun SizeF.toSize() = Size(width.roundToInt(), height.roundToInt())
+
+@CheckResult
+fun Rect.toRectF() = RectF(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat())
+
+@CheckResult
+fun RectF.toRect() = Rect(left.roundToInt(), top.roundToInt(), right.roundToInt(), bottom.roundToInt())
 
 /**
  * Takes a relation between a region of interest and a size and projects the region of interest
  * to that new location
  */
 @CheckResult
-fun Size.projectRegionOfInterest(toSize: Size, regionOfInterest: Rect): Rect {
+fun SizeF.projectRegionOfInterest(toSize: SizeF, regionOfInterest: RectF): RectF {
     require(this.width > 0 && this.height > 0) {
         "Cannot project from container with non-positive dimensions"
     }
 
-    return Rect(
+    return RectF(
         regionOfInterest.left * toSize.width / this.width,
         regionOfInterest.top * toSize.height / this.height,
         regionOfInterest.right * toSize.width / this.width,
@@ -295,19 +322,63 @@ fun Size.projectRegionOfInterest(toSize: Size, regionOfInterest: Rect): Rect {
     )
 }
 
+/**
+ * Takes a relation between a region of interest and a size and projects the region of interest
+ * to that new location
+ */
 @CheckResult
-fun Rect.projectRegionOfInterest(toSize: Size, regionOfInterest: Rect): Rect {
-    require(this.width() > 0 && this.height() > 0) {
-        "Cannot project from container with non-positive dimensions"
-    }
+fun Size.projectRegionOfInterest(toSize: Size, regionOfInterest: Rect) =
+    this.toSizeF().projectRegionOfInterest(toSize.toSizeF(), regionOfInterest.toRectF()).toRect()
 
-    return Rect(
-        (regionOfInterest.left - this.left) * toSize.width / this.width(),
-        (regionOfInterest.top - this.top) * toSize.height / this.height(),
-        toSize.width + ((regionOfInterest.right - this.right) * toSize.width / this.width()),
-        toSize.height + ((regionOfInterest.bottom - this.bottom) * toSize.height / this.height()),
-    )
-}
+@CheckResult
+fun RectF.projectRegionOfInterest(toSize: SizeF, regionOfInterest: RectF) =
+    this.size().projectRegionOfInterest(toSize, regionOfInterest.move(-this.left, -this.top))
+
+@CheckResult
+fun Rect.projectRegionOfInterest(toSize: Size, regionOfInterest: Rect) =
+    this.size().projectRegionOfInterest(toSize, regionOfInterest.move(-this.left, -this.top))
+
+/**
+ * Project a region of interest from one [Rect] to another. For example, given the rect and region of interest:
+ *  _______
+ * |       |
+ * |    _  |
+ * |   |_| |
+ * |       |
+ * |_______|
+ *
+ * When projected to the following region:
+ *  ___________
+ * |           |
+ * |           |
+ * |___________|
+ *
+ * The position and size of the region of interest are scaled to the new rect.
+ */
+@CheckResult
+fun RectF.projectRegionOfInterest(toRect: RectF, regionOfInterest: RectF) =
+    this.projectRegionOfInterest(toRect.size(), regionOfInterest).move(toRect.left, toRect.top)
+
+/**
+ * Project a region of interest from one [Rect] to another. For example, given the rect and region of interest:
+ *  _______
+ * |       |
+ * |    _  |
+ * |   |_| |
+ * |       |
+ * |_______|
+ *
+ * When projected to the following region:
+ *  ___________
+ * |           |
+ * |           |
+ * |___________|
+ *
+ * The position and size of the region of interest are scaled to the new rect.
+ */
+@CheckResult
+fun Rect.projectRegionOfInterest(toRect: Rect, regionOfInterest: Rect) =
+    this.projectRegionOfInterest(toRect.size(), regionOfInterest).move(toRect.left, toRect.top)
 
 /**
  * This method allows relocating and resizing a portion of a [Size]. It returns the required
@@ -457,6 +528,16 @@ fun Size.resizeRegion(
 fun Rect.size() = Size(width(), height())
 
 /**
- * Determine the aspect ratio of a size.
+ * Determine the size of a [RectF].
+ */
+fun RectF.size() = SizeF(width(), height())
+
+/**
+ * Determine the aspect ratio of a [Size].
  */
 fun Size.aspectRatio() = width.toFloat() / height.toFloat()
+
+/**
+ * Determine the aspect ratio of a [SizeF].
+ */
+fun SizeF.aspectRatio() = width / height

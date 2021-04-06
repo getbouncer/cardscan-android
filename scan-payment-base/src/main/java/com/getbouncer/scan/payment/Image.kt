@@ -12,8 +12,11 @@ import android.util.Log
 import android.util.Size
 import androidx.annotation.CheckResult
 import com.getbouncer.scan.framework.Config
+import com.getbouncer.scan.framework.util.centerOn
 import com.getbouncer.scan.framework.util.intersectionWith
+import com.getbouncer.scan.framework.util.maxAspectRatioInSize
 import com.getbouncer.scan.framework.util.move
+import com.getbouncer.scan.framework.util.projectRegionOfInterest
 import com.getbouncer.scan.framework.util.resizeRegion
 import com.getbouncer.scan.framework.util.size
 import com.getbouncer.scan.framework.util.toRect
@@ -28,6 +31,82 @@ private const val DIM_PIXEL_SIZE = 3
 private const val NUM_BYTES_PER_CHANNEL = 4 // Float.size / Byte.size
 
 data class ImageTransformValues(val red: Float, val green: Float, val blue: Float)
+
+/**
+ * Get a rect indicating what part of the preview is actually visible on screen. This assumes that the preview
+ * is the same size or larger than the screen in both dimensions.
+ */
+private fun getVisiblePreview(previewBounds: Rect) = Size(
+    previewBounds.right + previewBounds.left,
+    previewBounds.bottom + previewBounds.top,
+)
+
+/**
+ * Crop the preview image from the camera based on the view finder's position in the preview bounds.
+ *
+ * Note: This algorithm makes some assumptions:
+ * 1. the previewBounds and the cameraPreviewImage are centered relative to each other.
+ * 2. the previewBounds circumscribes the cameraPreviewImage. I.E. they share at least one field of
+ *    view, and the cameraPreviewImage's fields of view are smaller than or the same size as the
+ *    previewBounds's
+ * 3. the previewBounds and the cameraPreviewImage have the same orientation
+ */
+fun cropCameraPreviewToViewFinder(
+    cameraPreviewImage: Bitmap,
+    previewBounds: Rect,
+    viewFinder: Rect,
+): Bitmap {
+    require(
+        viewFinder.left >= previewBounds.left &&
+            viewFinder.right <= previewBounds.right &&
+            viewFinder.top >= previewBounds.top &&
+            viewFinder.bottom <= previewBounds.bottom
+    ) { "View finder $viewFinder is outside preview image bounds $previewBounds" }
+
+    // Scale the cardFinder to match the full image
+    val projectedViewFinder = previewBounds
+        .projectRegionOfInterest(
+            toSize = cameraPreviewImage.size(),
+            regionOfInterest = viewFinder
+        )
+        .intersectionWith(cameraPreviewImage.size().toRect())
+
+    return cameraPreviewImage.crop(projectedViewFinder)
+}
+
+/**
+ * Crop the preview image from the camera based on a square surrounding the view finder's position in the preview
+ * bounds.
+ *
+ * Note: This algorithm makes some assumptions:
+ * 1. the previewBounds and the cameraPreviewImage are centered relative to each other.
+ * 2. the previewBounds circumscribes the cameraPreviewImage. I.E. they share at least one field of
+ *    view, and the cameraPreviewImage's fields of view are smaller than or the same size as the
+ *    previewBounds's
+ * 3. the previewBounds and the cameraPreviewImage have the same orientation
+ */
+fun cropCameraPreviewToSquare(
+    cameraPreviewImage: Bitmap,
+    previewBounds: Rect,
+    viewFinder: Rect,
+): Bitmap {
+    require(
+        viewFinder.left >= previewBounds.left &&
+            viewFinder.right <= previewBounds.right &&
+            viewFinder.top >= previewBounds.top &&
+            viewFinder.bottom <= previewBounds.bottom
+    ) { "Card finder is outside preview image bounds" }
+
+    val visiblePreview = getVisiblePreview(previewBounds)
+    val squareViewFinder = maxAspectRatioInSize(visiblePreview, 1F).centerOn(viewFinder)
+
+    // calculate the projected squareViewFinder
+    val projectedSquare = previewBounds
+        .projectRegionOfInterest(cameraPreviewImage.size(), squareViewFinder)
+        .intersectionWith(cameraPreviewImage.size().toRect())
+
+    return cameraPreviewImage.crop(projectedSquare)
+}
 
 /**
  * Convert a bitmap to an RGB byte buffer for use in TensorFlow Lite ML models.

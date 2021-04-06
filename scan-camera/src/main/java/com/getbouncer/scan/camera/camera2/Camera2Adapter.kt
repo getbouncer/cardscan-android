@@ -54,6 +54,7 @@ import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.framework.util.aspectRatio
 import com.getbouncer.scan.framework.util.minAspectRatioSurroundingSize
 import com.getbouncer.scan.framework.util.scale
+import com.getbouncer.scan.framework.util.scaleAndCenterSurrounding
 import com.getbouncer.scan.framework.util.scaleCentered
 import com.getbouncer.scan.framework.util.toRectF
 import kotlinx.coroutines.CoroutineScope
@@ -613,7 +614,8 @@ class Camera2Adapter(
         matrix.postScale(finalScale.width, finalScale.height, viewRect.centerX(), viewRect.centerY())
         matrix.postRotate(rotation, viewRect.centerX(), viewRect.centerY())
 
-        scaledPreviewSize = viewSize.scaleCentered(imageScale.width / minScale, imageScale.height / minScale)
+        scaledPreviewSize = imageSize.scaleAndCenterSurrounding(viewSize)
+        Log.d("AGW", "scales:\noriginal image size: $imageSize\nviewSize: $viewSize\nscaled image size: $scaledPreviewSize")
         textureView.setTransform(matrix)
     }
 

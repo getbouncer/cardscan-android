@@ -3,17 +3,25 @@ package com.getbouncer.scan.payment.carddetect
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
+import android.util.Log
 import android.util.Size
 import com.getbouncer.scan.framework.FetchedData
 import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.framework.UpdatingResourceFetcher
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
+import com.getbouncer.scan.framework.util.adjustSizeToAspectRatio
+import com.getbouncer.scan.framework.util.centerOn
 import com.getbouncer.scan.framework.util.indexOfMax
+import com.getbouncer.scan.framework.util.intersectionWith
 import com.getbouncer.scan.framework.util.maxAspectRatioInSize
+import com.getbouncer.scan.framework.util.move
+import com.getbouncer.scan.framework.util.projectRegionOfInterest
 import com.getbouncer.scan.framework.util.scaleAndCenterWithin
 import com.getbouncer.scan.framework.util.size
+import com.getbouncer.scan.framework.util.toRect
 import com.getbouncer.scan.payment.crop
+import com.getbouncer.scan.payment.cropCameraPreviewToSquare
 import com.getbouncer.scan.payment.hasOpenGl31
 import com.getbouncer.scan.payment.scale
 import com.getbouncer.scan.payment.size
@@ -34,69 +42,6 @@ class CardDetect private constructor(interpreter: Interpreter) :
 
     companion object {
         /**
-         * Given a card finder region of a preview image, calculate the associated card detection
-         * square.
-         */
-        private fun calculateCardDetectionFromCardFinder(previewBounds: Rect, cardFinder: Rect): Rect {
-            val cardDetectionSquareSize = maxAspectRatioInSize(previewBounds.size(), 1F)
-            return Rect(
-                /* left */
-                max(previewBounds.left, cardFinder.centerX() - cardDetectionSquareSize.width / 2),
-                /* top */
-                max(previewBounds.top, cardFinder.centerY() - cardDetectionSquareSize.height / 2),
-                /* right */
-                min(previewBounds.right, cardFinder.centerX() + cardDetectionSquareSize.width / 2),
-                /* bottom */
-                min(previewBounds.bottom, cardFinder.centerY() + cardDetectionSquareSize.height / 2)
-            )
-        }
-
-        /**
-         * Calculate what portion of the full image should be cropped for card detection based on
-         * the position of card finder within the preview image.
-         */
-        private fun calculateCrop(fullImage: Size, previewBounds: Rect, cardFinder: Rect): Rect {
-            require(
-                cardFinder.left >= previewBounds.left &&
-                    cardFinder.right <= previewBounds.right &&
-                    cardFinder.top >= previewBounds.top &&
-                    cardFinder.bottom <= previewBounds.bottom
-            ) { "Card finder is outside preview image bounds" }
-
-            // Calculate the card detection square based on the card finder, limited by the preview
-            val cardDetectionSquare =
-                calculateCardDetectionFromCardFinder(
-                    previewBounds,
-                    cardFinder
-                )
-
-            val scaledPreviewImage = previewBounds.size().scaleAndCenterWithin(fullImage)
-            val previewScale = scaledPreviewImage.width().toFloat() / previewBounds.width()
-
-            // Scale the cardDetectionSquare to match the scaledPreviewImage
-            val scaledCardDetectionSquare = Rect(
-                (cardDetectionSquare.left * previewScale).roundToInt(),
-                (cardDetectionSquare.top * previewScale).roundToInt(),
-                (cardDetectionSquare.right * previewScale).roundToInt(),
-                (cardDetectionSquare.bottom * previewScale).roundToInt()
-            )
-
-            // Position the scaledCardDetectionSquare on the fullImage
-            return Rect(
-                max(0, scaledCardDetectionSquare.left + scaledPreviewImage.left),
-                max(0, scaledCardDetectionSquare.top + scaledPreviewImage.top),
-                min(fullImage.width, scaledCardDetectionSquare.right + scaledPreviewImage.left),
-                min(fullImage.height, scaledCardDetectionSquare.bottom + scaledPreviewImage.top),
-            )
-        }
-
-        fun cropCameraPreviewForCardDetect(
-            cameraPreviewImage: Bitmap,
-            previewBounds: Rect,
-            cardFinder: Rect,
-        ) = cameraPreviewImage.crop(calculateCrop(cameraPreviewImage.size(), previewBounds, cardFinder))
-
-        /**
          * Convert a camera preview image into a CardDetect input
          */
         fun cameraPreviewToInput(
@@ -105,14 +50,7 @@ class CardDetect private constructor(interpreter: Interpreter) :
             cardFinder: Rect,
         ) = Input(
             TrackedImage(
-                cameraPreviewImage.image
-                    .crop(
-                        calculateCrop(
-                            cameraPreviewImage.image.size(),
-                            previewBounds,
-                            cardFinder,
-                        )
-                    )
+                cropCameraPreviewToSquare(cameraPreviewImage.image, previewBounds, cardFinder)
                     .scale(TRAINED_IMAGE_SIZE)
                     .toRGBByteBuffer()
                     .also { cameraPreviewImage.tracker.trackResult("card_detect_image_cropped") },

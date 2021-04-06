@@ -33,6 +33,7 @@ class MainLoopAnalyzer(
     override suspend fun analyze(data: Input, state: MainLoopState): Prediction {
         val cardResult = if (state.runCardDetect) cardDetect?.analyze(CardDetect.cameraPreviewToInput(data.cameraPreviewImage.image, data.cameraPreviewImage.previewImageBounds, data.cardFinder), Unit) else null
         val ocrResult = if (state.runOcr) ssdOcr?.analyze(SSDOcr.cameraPreviewToInput(data.cameraPreviewImage.image, data.cameraPreviewImage.previewImageBounds, data.cardFinder), Unit) else null
+
         return Prediction(
             ocr = ocrResult,
             card = cardResult,
