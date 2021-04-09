@@ -18,19 +18,18 @@ import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.ViewGroup
-import androidx.core.view.size
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.OnLifecycleEvent
 import com.getbouncer.scan.camera.CameraAdapter
 import com.getbouncer.scan.camera.CameraErrorListener
 import com.getbouncer.scan.camera.CameraPreviewImage
-import com.getbouncer.scan.camera.nv21ToYuv
-import com.getbouncer.scan.camera.rotate
-import com.getbouncer.scan.camera.scaleAndCrop
-import com.getbouncer.scan.camera.toBitmap
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.Stats
 import com.getbouncer.scan.framework.TrackedImage
+import com.getbouncer.scan.framework.image.NV21Image
+import com.getbouncer.scan.framework.image.getRenderScript
+import com.getbouncer.scan.framework.image.rotate
+import com.getbouncer.scan.framework.image.scaleAndCrop
 import com.getbouncer.scan.framework.time.milliseconds
 import com.getbouncer.scan.framework.util.retry
 import kotlinx.coroutines.CoroutineScope
@@ -117,19 +116,20 @@ class Camera1Adapter(
 
         if (bytes != null) {
             try {
-                sendImageToStream(
-                    CameraPreviewImage(
-                        TrackedImage(
-                            image = bytes
-                                .nv21ToYuv(imageWidth, imageHeight)
-                                .toBitmap()
-                                .scaleAndCrop(minimumResolution)
-                                .rotate(mRotation.toFloat()),
-                            tracker = Stats.trackRepeatingTask("image_processing")
+                coroutineScope.launch {
+                    sendImageToStream(
+                        CameraPreviewImage(
+                            TrackedImage(
+                                image = NV21Image(imageWidth, imageHeight, bytes)
+                                    .toBitmap(getRenderScript(activity))
+                                    .scaleAndCrop(minimumResolution)
+                                    .rotate(mRotation.toFloat()),
+                                tracker = Stats.trackRepeatingTask("image_processing")
+                            ),
+                            Rect(0, 0, previewView.width, previewView.height),
                         ),
-                        Rect(0, 0, previewView.width, previewView.height),
-                    ),
-                )
+                    )
+                }
             } catch (t: Throwable) {
                 // ignore errors transforming the image (OOM, etc)
                 Log.e(Config.logTag, "Exception caught during camera transform", t)
@@ -422,9 +422,9 @@ class Camera1Adapter(
         }
     }
 
-    override fun supportsMultipleCameras(): Boolean {
+    override fun withSupportsMultipleCameras(task: (Boolean) -> Unit) {
         // TODO("Not yet implemented")
-        return false
+        task(false)
     }
 
     override fun changeCamera() {

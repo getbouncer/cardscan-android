@@ -8,15 +8,16 @@ import com.getbouncer.scan.framework.Analyzer
 import com.getbouncer.scan.framework.AnalyzerFactory
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.TrackedImage
+import com.getbouncer.scan.framework.image.size
 import com.getbouncer.scan.framework.ml.hardNonMaximumSuppression
 import com.getbouncer.scan.framework.ml.ssd.rectForm
 import com.getbouncer.scan.framework.util.centerScaled
 import com.getbouncer.scan.framework.util.scaled
+import com.getbouncer.scan.payment.cropCameraPreviewToSquare
 import com.getbouncer.scan.payment.ml.AlphabetDetect
 import com.getbouncer.scan.payment.ml.ExpiryDetect
 import com.getbouncer.scan.payment.ml.TextDetect
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
-import com.getbouncer.scan.payment.size
 import kotlin.math.max
 import kotlin.math.min
 
@@ -68,7 +69,7 @@ class NameAndExpiryAnalyzer private constructor(
         )
 
         val squareImage = TrackedImage(
-            TextDetect.cropCameraPreview(data.cameraPreviewImage.image, data.previewBounds, data.cardFinder),
+            cropCameraPreviewToSquare(data.cameraPreviewImage.image, data.previewBounds, data.cardFinder),
             data.cameraPreviewImage.tracker,
         )
 

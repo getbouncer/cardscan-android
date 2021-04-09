@@ -1,4 +1,4 @@
-package com.getbouncer.scan.camera.exception
+package com.getbouncer.scan.framework.exception
 
 import java.lang.Exception
 

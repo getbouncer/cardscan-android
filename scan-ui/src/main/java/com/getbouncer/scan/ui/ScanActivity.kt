@@ -26,6 +26,7 @@ import com.getbouncer.scan.camera.CameraErrorListener
 import com.getbouncer.scan.camera.CameraPreviewImage
 import com.getbouncer.scan.camera.camera1.Camera1Adapter
 import com.getbouncer.scan.camera.camera2.Camera2Adapter
+import com.getbouncer.scan.camera.camerax.CameraXAdapter
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.Stats
 import com.getbouncer.scan.framework.StorageFactory
@@ -119,7 +120,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     /**
      * Override this value to use a different camera API.
      */
-    protected open val cameraApi: CameraApi = CameraApi.Camera2
+    protected open val cameraApi: CameraApi = CameraApi.CameraX
 
     protected val storage by lazy {
         StorageFactory.getStorageInstance(this, "scan_camera_permissions")
@@ -454,15 +455,21 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      * Generate a camera adapter
      */
     protected open fun buildCameraAdapter(): CameraAdapter<CameraPreviewImage<Bitmap>> = when (cameraApi) {
-        is CameraApi.Camera2 -> {
+        is CameraApi.CameraX ->
+            CameraXAdapter(
+                activity = this,
+                previewView = previewFrame,
+                minimumResolution = minimumAnalysisResolution,
+                cameraErrorListener = cameraErrorListener,
+            )
+
+        is CameraApi.Camera2 ->
             Camera2Adapter(
                 activity = this,
                 previewView = previewFrame,
                 minimumResolution = minimumAnalysisResolution,
                 cameraErrorListener = cameraErrorListener,
-                coroutineScope = this,
             )
-        }
 
         else ->
             Camera1Adapter(

@@ -10,6 +10,9 @@ import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.FetchedData
 import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.framework.UpdatingModelWebFetcher
+import com.getbouncer.scan.framework.image.MLImage
+import com.getbouncer.scan.framework.image.scale
+import com.getbouncer.scan.framework.image.toMLImage
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.ml.hardNonMaximumSuppression
@@ -18,8 +21,6 @@ import com.getbouncer.scan.payment.cropCameraPreviewToSquare
 import com.getbouncer.scan.payment.hasOpenGl31
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
 import com.getbouncer.scan.payment.ml.yolo.processYoloLayer
-import com.getbouncer.scan.payment.scale
-import com.getbouncer.scan.payment.toRGBByteBuffer
 import org.tensorflow.lite.Interpreter
 import java.io.FileNotFoundException
 import java.nio.ByteBuffer
@@ -92,7 +93,7 @@ class TextDetect private constructor(interpreter: Interpreter) :
                     viewFinder = viewFinder,
                 )
                     .scale(TRAINED_IMAGE_SIZE)
-                    .toRGBByteBuffer()
+                    .toMLImage()
                     .also { cameraPreviewImage.tracker.trackResult("text_detect_image_cropped") },
                 cameraPreviewImage.tracker,
             )
@@ -100,7 +101,7 @@ class TextDetect private constructor(interpreter: Interpreter) :
     }
 
     data class Input(
-        val textDetectImage: TrackedImage<ByteBuffer>,
+        val textDetectImage: TrackedImage<MLImage>,
     )
 
     data class Prediction(
@@ -351,7 +352,7 @@ class TextDetect private constructor(interpreter: Interpreter) :
         return nameWidthScore
     }
 
-    override suspend fun transformData(data: Input): Array<ByteBuffer> = arrayOf(data.textDetectImage.image)
+    override suspend fun transformData(data: Input): Array<ByteBuffer> = arrayOf(data.textDetectImage.image.getData())
 
     override suspend fun executeInference(
         tfInterpreter: Interpreter,

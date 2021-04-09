@@ -4,6 +4,7 @@ import android.graphics.Rect
 import android.graphics.RectF
 import android.util.Size
 import android.util.SizeF
+import android.view.View
 import androidx.annotation.CheckResult
 import kotlin.math.max
 import kotlin.math.min
@@ -541,3 +542,8 @@ fun Size.aspectRatio() = width.toFloat() / height.toFloat()
  * Determine the aspect ratio of a [SizeF].
  */
 fun SizeF.aspectRatio() = width / height
+
+/**
+ * Determine the size of a [View].
+ */
+fun View.size() = Size(width, height)

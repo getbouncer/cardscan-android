@@ -110,16 +110,14 @@ class SSDOcr private constructor(interpreter: Interpreter) :
             previewBounds: Rect,
             cardFinder: Rect
         ) = Input(
-            cropCameraPreviewToViewFinder(cameraPreviewImage, previewBounds, cardFinder).let { image ->
-                TrackedImage(
-                    image.image
-                        .scale(Factory.TRAINED_IMAGE_SIZE)
-                        .toRGBByteBuffer(mean = IMAGE_MEAN, std = IMAGE_STD).also {
-                            image.tracker.trackResult("ocr_image_transform")
-                        },
-                    image.tracker
-                )
-            }
+            TrackedImage(
+                cropCameraPreviewToViewFinder(cameraPreviewImage.image, previewBounds, cardFinder)
+                    .scale(Factory.TRAINED_IMAGE_SIZE)
+                    .toRGBByteBuffer(mean = IMAGE_MEAN, std = IMAGE_STD).also {
+                        cameraPreviewImage.tracker.trackResult("ocr_image_transform")
+                    },
+                cameraPreviewImage.tracker
+            )
         )
     }
 

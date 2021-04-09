@@ -3,34 +3,21 @@ package com.getbouncer.scan.payment.carddetect
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
-import android.util.Log
 import android.util.Size
 import com.getbouncer.scan.framework.FetchedData
 import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.framework.UpdatingResourceFetcher
+import com.getbouncer.scan.framework.image.MLImage
+import com.getbouncer.scan.framework.image.scale
+import com.getbouncer.scan.framework.image.toMLImage
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
-import com.getbouncer.scan.framework.util.adjustSizeToAspectRatio
-import com.getbouncer.scan.framework.util.centerOn
 import com.getbouncer.scan.framework.util.indexOfMax
-import com.getbouncer.scan.framework.util.intersectionWith
-import com.getbouncer.scan.framework.util.maxAspectRatioInSize
-import com.getbouncer.scan.framework.util.move
-import com.getbouncer.scan.framework.util.projectRegionOfInterest
-import com.getbouncer.scan.framework.util.scaleAndCenterWithin
-import com.getbouncer.scan.framework.util.size
-import com.getbouncer.scan.framework.util.toRect
-import com.getbouncer.scan.payment.crop
 import com.getbouncer.scan.payment.cropCameraPreviewToSquare
 import com.getbouncer.scan.payment.hasOpenGl31
-import com.getbouncer.scan.payment.scale
-import com.getbouncer.scan.payment.size
-import com.getbouncer.scan.payment.toRGBByteBuffer
 import org.tensorflow.lite.Interpreter
 import java.nio.ByteBuffer
 import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.roundToInt
 
 private val TRAINED_IMAGE_SIZE = Size(224, 224)
 
@@ -52,14 +39,14 @@ class CardDetect private constructor(interpreter: Interpreter) :
             TrackedImage(
                 cropCameraPreviewToSquare(cameraPreviewImage.image, previewBounds, cardFinder)
                     .scale(TRAINED_IMAGE_SIZE)
-                    .toRGBByteBuffer()
+                    .toMLImage()
                     .also { cameraPreviewImage.tracker.trackResult("card_detect_image_cropped") },
                 cameraPreviewImage.tracker,
             )
         )
     }
 
-    data class Input(val cardDetectImage: TrackedImage<ByteBuffer>)
+    data class Input(val cardDetectImage: TrackedImage<MLImage>)
 
     /**
      * A prediction returned by this analyzer.
@@ -109,7 +96,7 @@ class CardDetect private constructor(interpreter: Interpreter) :
         )
     }
 
-    override suspend fun transformData(data: Input): ByteBuffer = data.cardDetectImage.image
+    override suspend fun transformData(data: Input): ByteBuffer = data.cardDetectImage.image.getData()
 
     override suspend fun executeInference(
         tfInterpreter: Interpreter,

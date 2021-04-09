@@ -3,6 +3,7 @@ package com.getbouncer.scan.camera
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.PointF
+import android.graphics.Rect
 import android.util.Log
 import android.util.Size
 import android.util.SizeF
@@ -14,6 +15,7 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
 import com.getbouncer.scan.framework.Config
+import com.getbouncer.scan.framework.TrackedImage
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -37,10 +39,16 @@ private annotation class RotationValue
  * A list of supported camera adapter types. If you create a new adapter, create a new object that
  * subclasses this class.
  */
-open class CameraApi {
-    object Camera1 : CameraApi()
-    object Camera2 : CameraApi()
+interface CameraApi {
+    object Camera1 : CameraApi
+    object Camera2 : CameraApi
+    object CameraX : CameraApi
 }
+
+data class CameraPreviewImage<ImageBase>(
+    val image: TrackedImage<ImageBase>,
+    val previewImageBounds: Rect,
+)
 
 abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
 
@@ -141,12 +149,10 @@ abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
         }
     }
 
-    protected fun sendImageToStream(image: CameraOutput) {
-        runBlocking { imageChannel.offer(image) }
-    }
+    protected fun sendImageToStream(image: CameraOutput) = imageChannel.offer(image)
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-    fun onDestroy() {
+    fun onDestroyed() {
         runBlocking { imageChannel.close() }
     }
 
@@ -201,7 +207,7 @@ abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
     /**
      * Determine if the device has multiple cameras.
      */
-    abstract fun supportsMultipleCameras(): Boolean
+    abstract fun withSupportsMultipleCameras(task: (Boolean) -> Unit)
 
     /**
      * Change to a new camera.

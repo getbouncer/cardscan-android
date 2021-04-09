@@ -6,12 +6,12 @@ import android.util.Size
 import com.getbouncer.scan.framework.FetchedData
 import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.framework.UpdatingModelWebFetcher
+import com.getbouncer.scan.framework.image.scale
+import com.getbouncer.scan.framework.image.toMLImage
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.util.indexOfMax
 import com.getbouncer.scan.payment.hasOpenGl31
-import com.getbouncer.scan.payment.scale
-import com.getbouncer.scan.payment.toRGBByteBuffer
 import org.tensorflow.lite.Interpreter
 import java.io.FileNotFoundException
 import java.nio.ByteBuffer
@@ -54,7 +54,8 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
 
     override suspend fun transformData(data: Input): ByteBuffer = data.alphabetDetectImage.image
         .scale(TRAINED_IMAGE_SIZE)
-        .toRGBByteBuffer()
+        .toMLImage()
+        .getData()
         .also {
             data.alphabetDetectImage.tracker.trackResult("alphabet_detect_image_cropped")
         }
