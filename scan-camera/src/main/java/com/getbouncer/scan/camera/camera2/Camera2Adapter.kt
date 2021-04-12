@@ -38,7 +38,6 @@ import android.media.ImageReader
 import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
-import android.os.Looper
 import android.util.Size
 import android.view.Surface
 import android.view.TextureView
@@ -225,7 +224,9 @@ class Camera2Adapter(
 
         override fun onError(camera: CameraDevice, error: Int) {
             onDisconnected(camera)
-            cameraErrorListener.onCameraOpenError(CameraDeviceCallbackOpenException(camera.id, error))
+            mainThreadHandler.post {
+                cameraErrorListener.onCameraOpenError(CameraDeviceCallbackOpenException(camera.id, error))
+            }
         }
     }
 
@@ -334,11 +335,11 @@ class Camera2Adapter(
                 cameraId = cameraDetails.cameraId
             }
         } catch (e: CameraAccessException) {
-            cameraErrorListener.onCameraAccessError(e)
+            mainThreadHandler.post { cameraErrorListener.onCameraAccessError(e) }
         } catch (e: NullPointerException) {
             // Currently an NPE is thrown when the Camera2API is used but not supported on the
             // device this code runs.
-            cameraErrorListener.onCameraUnsupportedError(e)
+            mainThreadHandler.post { cameraErrorListener.onCameraUnsupportedError(e) }
         }
     }
 
@@ -422,14 +423,14 @@ class Camera2Adapter(
         try {
             // Wait for camera to open - 2.5 seconds is sufficient
             if (!cameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
-                cameraErrorListener.onCameraOpenError(null)
+                mainThreadHandler.post { cameraErrorListener.onCameraOpenError(null) }
                 return
             }
             manager.openCamera(cameraId, stateCallback, cameraHandler)
         } catch (e: CameraAccessException) {
-            cameraErrorListener.onCameraAccessError(e)
+            mainThreadHandler.post { cameraErrorListener.onCameraAccessError(e) }
         } catch (e: InterruptedException) {
-            cameraErrorListener.onCameraOpenError(e)
+            mainThreadHandler.post { cameraErrorListener.onCameraOpenError(e) }
         }
     }
 
@@ -444,7 +445,9 @@ class Camera2Adapter(
             cameraDevice?.close()
             cameraDevice = null
         } catch (e: InterruptedException) {
-            cameraErrorListener.onCameraOpenError(e)
+            mainThreadHandler.post {
+                cameraErrorListener.onCameraOpenError(e)
+            }
         } finally {
             cameraOpenCloseLock.release()
         }
@@ -469,7 +472,7 @@ class Camera2Adapter(
             cameraThread = null
             cameraHandler = null
         } catch (e: InterruptedException) {
-            cameraErrorListener.onCameraOpenError(e)
+            mainThreadHandler.post { cameraErrorListener.onCameraOpenError(e) }
         }
     }
 
@@ -525,7 +528,7 @@ class Camera2Adapter(
                     }
 
                     override fun onConfigureFailed(session: CameraCaptureSession) {
-                        Handler(Looper.getMainLooper()).post {
+                        mainThreadHandler.post {
                             cameraErrorListener.onCameraOpenError(
                                 CameraConfigurationFailedException(
                                     session.device.id
@@ -537,7 +540,7 @@ class Camera2Adapter(
                 null
             )
         } catch (e: CameraAccessException) {
-            cameraErrorListener.onCameraAccessError(e)
+            mainThreadHandler.post { cameraErrorListener.onCameraAccessError(e) }
         }
     }
 

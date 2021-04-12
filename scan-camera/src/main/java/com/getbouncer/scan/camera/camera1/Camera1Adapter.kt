@@ -187,7 +187,9 @@ class Camera1Adapter(
                     mCamera?.startPreview()
                 }
             } catch (t: Throwable) {
-                cameraErrorListener.onCameraOpenError(t)
+                withContext(Dispatchers.Main) {
+                    cameraErrorListener.onCameraOpenError(t)
+                }
             }
         }
     }
@@ -196,7 +198,9 @@ class Camera1Adapter(
         if (camera == null) {
             withContext(Dispatchers.Main) {
                 cameraPreview?.apply { holder.removeCallback(this) }
-                cameraErrorListener.onCameraOpenError(null)
+                coroutineScope.launch(Dispatchers.Main) {
+                    cameraErrorListener.onCameraOpenError(null)
+                }
             }
         } else {
             mCamera = camera
@@ -363,7 +367,9 @@ class Camera1Adapter(
                 mCamera?.setPreviewCallbackWithBuffer(mPreviewCallback)
                 startCameraPreview()
             } catch (t: Throwable) {
-                cameraErrorListener.onCameraOpenError(t)
+                coroutineScope.launch(Dispatchers.Main) {
+                    cameraErrorListener.onCameraOpenError(t)
+                }
             }
         }
 
@@ -404,7 +410,9 @@ class Camera1Adapter(
                 mCamera?.setPreviewCallbackWithBuffer(mPreviewCallback)
                 startCameraPreview()
             } catch (t: Throwable) {
-                cameraErrorListener.onCameraOpenError(t)
+                coroutineScope.launch(Dispatchers.Main) {
+                    cameraErrorListener.onCameraOpenError(t)
+                }
             }
         }
     }
