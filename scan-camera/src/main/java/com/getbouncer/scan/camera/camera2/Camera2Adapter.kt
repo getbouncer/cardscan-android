@@ -38,7 +38,6 @@ import android.media.ImageReader
 import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
-import android.os.Looper
 import android.util.Size
 import android.view.Surface
 import android.view.TextureView
@@ -57,7 +56,6 @@ import com.getbouncer.scan.framework.util.aspectRatio
 import com.getbouncer.scan.framework.util.minAspectRatioSurroundingSize
 import com.getbouncer.scan.framework.util.toRectF
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
