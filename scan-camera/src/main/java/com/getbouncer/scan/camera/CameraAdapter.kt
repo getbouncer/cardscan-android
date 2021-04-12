@@ -7,6 +7,7 @@ import android.util.Log
 import android.util.Size
 import android.view.Surface
 import androidx.annotation.IntDef
+import androidx.annotation.MainThread
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -196,9 +197,12 @@ abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
 
 interface CameraErrorListener {
 
+    @MainThread
     fun onCameraOpenError(cause: Throwable?)
 
+    @MainThread
     fun onCameraAccessError(cause: Throwable?)
 
+    @MainThread
     fun onCameraUnsupportedError(cause: Throwable?)
 }

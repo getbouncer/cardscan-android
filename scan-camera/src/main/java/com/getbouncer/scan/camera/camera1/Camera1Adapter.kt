@@ -37,6 +37,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
 import java.util.ArrayList
+import kotlin.coroutines.coroutineContext
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -187,7 +188,9 @@ class Camera1Adapter(
                     mCamera?.startPreview()
                 }
             } catch (t: Throwable) {
-                cameraErrorListener.onCameraOpenError(t)
+                withContext(Dispatchers.Main) {
+                    cameraErrorListener.onCameraOpenError(t)
+                }
             }
         }
     }
@@ -196,7 +199,9 @@ class Camera1Adapter(
         if (camera == null) {
             withContext(Dispatchers.Main) {
                 cameraPreview?.apply { holder.removeCallback(this) }
-                cameraErrorListener.onCameraOpenError(null)
+                coroutineScope.launch(Dispatchers.Main) {
+                    cameraErrorListener.onCameraOpenError(null)
+                }
             }
         } else {
             mCamera = camera
@@ -363,7 +368,9 @@ class Camera1Adapter(
                 mCamera?.setPreviewCallbackWithBuffer(mPreviewCallback)
                 startCameraPreview()
             } catch (t: Throwable) {
-                cameraErrorListener.onCameraOpenError(t)
+                coroutineScope.launch(Dispatchers.Main) {
+                    cameraErrorListener.onCameraOpenError(t)
+                }
             }
         }
 
@@ -404,7 +411,9 @@ class Camera1Adapter(
                 mCamera?.setPreviewCallbackWithBuffer(mPreviewCallback)
                 startCameraPreview()
             } catch (t: Throwable) {
-                cameraErrorListener.onCameraOpenError(t)
+                coroutineScope.launch(Dispatchers.Main) {
+                    cameraErrorListener.onCameraOpenError(t)
+                }
             }
         }
     }
