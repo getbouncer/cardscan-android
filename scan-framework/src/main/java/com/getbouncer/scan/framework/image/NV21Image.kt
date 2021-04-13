@@ -151,11 +151,12 @@ class NV21Image(val width: Int, val height: Int, val nv21Data: ByteArray) {
         }
     }
 
-    fun scale(percent: Float) {
-        TODO("Implement this")
-    }
+//    fun scale(percent: Float) {
+//        TODO("Implement this")
+//    }
 
 //    fun toRGBByteBuffer(mean: ImageTransformValues, std: ImageTransformValues) {
+//        TODO("Finish implementing this")
 //        val startTime = System.currentTimeMillis()
 //        val frameSize = width * height
 //

@@ -6,6 +6,8 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.getbouncer.scan.camera.test.R
+import com.getbouncer.scan.framework.image.crop
+import com.getbouncer.scan.framework.image.scale
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
