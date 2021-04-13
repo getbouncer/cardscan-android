@@ -17,6 +17,7 @@ import androidx.lifecycle.OnLifecycleEvent
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.TrackedImage
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.runBlocking
@@ -189,7 +190,13 @@ abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
         }
     }
 
-    protected fun sendImageToStream(image: CameraOutput) = imageChannel.offer(image)
+    protected fun sendImageToStream(image: CameraOutput) = try {
+        imageChannel.offer(image)
+    } catch (e: ClosedSendChannelException) {
+        Log.w(Config.logTag, "Attempted to send image to closed channel")
+    } catch (t: Throwable) {
+        Log.e(Config.logTag, "Unable to send image to channel", t)
+    }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun onDestroyed() {

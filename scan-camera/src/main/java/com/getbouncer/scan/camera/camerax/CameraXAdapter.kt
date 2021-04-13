@@ -92,7 +92,7 @@ class CameraXAdapter(
     private val displayAspectRatio by lazy { aspectRatioFrom(displayMetrics.widthPixels, displayMetrics.heightPixels) }
     private val displaySize by lazy { Size(displayMetrics.widthPixels, displayMetrics.heightPixels) }
 
-    private val previewTextureView by lazy { PreviewView(activity).apply { implementationMode = PreviewView.ImplementationMode.COMPATIBLE } }
+    private val previewTextureView by lazy { PreviewView(activity).apply { implementationMode = PreviewView.ImplementationMode.PERFORMANCE } }
 
     override fun withFlashSupport(task: (Boolean) -> Unit) {
         withCamera { task(it.cameraInfo.hasFlashUnit()) }
