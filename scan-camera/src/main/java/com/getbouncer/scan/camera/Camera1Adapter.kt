@@ -439,4 +439,9 @@ internal class Camera1Adapter(
     override fun changeCamera() {
         // TODO("Not yet implemented")
     }
+
+    override fun getCurrentCamera(): Int {
+        // TODO("Not yet implemented")
+        return 0
+    }
 }

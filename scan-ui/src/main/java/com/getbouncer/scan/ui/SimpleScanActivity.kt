@@ -83,6 +83,11 @@ abstract class SimpleScanActivity : ScanActivity() {
     protected open val torchButtonView: View by lazy { ImageView(this) }
 
     /**
+     * The view that a user can tap to swap cameras.
+     */
+    protected open val swapCameraButtonView: View by lazy { ImageView(this) }
+
+    /**
      * The text view that informs the user what to do.
      */
     protected open val instructionsTextView: TextView by lazy { TextView(this) }
@@ -137,6 +142,11 @@ abstract class SimpleScanActivity : ScanActivity() {
     protected var isFlashlightSupported: Boolean? = null
 
     /**
+     * Determine if multiple cameras are available.
+     */
+    protected var hasMultipleCameras: Boolean? = null
+
+    /**
      * The flow used to scan an item.
      */
     protected abstract val scanFlow: ScanFlow
@@ -164,6 +174,7 @@ abstract class SimpleScanActivity : ScanActivity() {
 
         closeButtonView.setOnClickListener { userCancelScan() }
         torchButtonView.setOnClickListener { toggleFlashlight() }
+        swapCameraButtonView.setOnClickListener { toggleCamera() }
 
         viewFinderBorderView.setOnTouchListener { _, e ->
             setFocus(PointF(e.x + viewFinderWindowView.left, e.y + viewFinderWindowView.top))
@@ -206,6 +217,7 @@ abstract class SimpleScanActivity : ScanActivity() {
             instructionsTextView,
             closeButtonView,
             torchButtonView,
+            swapCameraButtonView,
             cardNameTextView,
             cardNumberTextView,
             debugImageView,
@@ -228,6 +240,7 @@ abstract class SimpleScanActivity : ScanActivity() {
     protected open fun setupUiComponents() {
         setupCloseButtonViewUi()
         setupTorchButtonViewUi()
+        setupSwapCameraButtonViewUi()
         setupViewFinderViewUI()
         setupInstructionsViewUi()
         setupSecurityNoticeUi()
@@ -257,7 +270,7 @@ abstract class SimpleScanActivity : ScanActivity() {
     }
 
     protected open fun setupTorchButtonViewUi() {
-        torchButtonView.setVisible(isFlashlightSupported ?: false)
+        torchButtonView.setVisible(isFlashlightSupported == true)
         when (val view = torchButtonView) {
             is ImageView -> {
                 view.contentDescription = getString(R.string.bouncer_torch_button_description)
@@ -281,6 +294,28 @@ abstract class SimpleScanActivity : ScanActivity() {
                     view.setTextColor(getColorByRes(R.color.bouncerFlashButtonDarkColor))
                 } else {
                     view.setTextColor(getColorByRes(R.color.bouncerFlashButtonLightColor))
+                }
+            }
+        }
+    }
+
+    protected open fun setupSwapCameraButtonViewUi() {
+        swapCameraButtonView.setVisible(hasMultipleCameras == true)
+        when (val view = swapCameraButtonView) {
+            is ImageView -> {
+                view.contentDescription = getString(R.string.bouncer_swap_camera_button_description)
+                if (isBackgroundDark()) {
+                    view.setDrawable(R.drawable.bouncer_camera_swap_dark)
+                } else {
+                    view.setDrawable(R.drawable.bouncer_camera_swap_light)
+                }
+            }
+            is TextView -> {
+                view.text = getString(R.string.bouncer_swap_camera_button_description)
+                if (isBackgroundDark()) {
+                    view.setTextColor(getColorByRes(R.color.bouncerCameraSwapButtonDarkColor))
+                } else {
+                    view.setTextColor(getColorByRes(R.color.bouncerCameraSwapButtonLightColor))
                 }
             }
         }
@@ -365,6 +400,7 @@ abstract class SimpleScanActivity : ScanActivity() {
         setupPreviewFrameConstraints()
         setupCloseButtonViewConstraints()
         setupTorchButtonViewConstraints()
+        setupSwapCameraButtonViewConstraints()
         setupViewFinderConstraints()
         setupInstructionsViewConstraints()
         setupSecurityNoticeConstraints()
@@ -398,6 +434,18 @@ abstract class SimpleScanActivity : ScanActivity() {
         torchButtonView.addConstraints {
             connect(it.id, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
             connect(it.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
+        }
+    }
+
+    protected open fun setupSwapCameraButtonViewConstraints() {
+        swapCameraButtonView.layoutParams = ConstraintLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT, // width
+            ViewGroup.LayoutParams.WRAP_CONTENT, // height
+        )
+
+        swapCameraButtonView.addConstraints {
+            connect(it.id, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
+            connect(it.id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
         }
     }
 
@@ -635,6 +683,11 @@ abstract class SimpleScanActivity : ScanActivity() {
     override fun onFlashSupported(supported: Boolean) {
         isFlashlightSupported = supported
         torchButtonView.setVisible(supported)
+    }
+
+    override fun onSupportsMultipleCameras(supported: Boolean) {
+        hasMultipleCameras = supported
+        swapCameraButtonView.setVisible(supported)
     }
 
     /**
