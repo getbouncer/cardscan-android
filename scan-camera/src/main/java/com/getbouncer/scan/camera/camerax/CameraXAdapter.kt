@@ -1,14 +1,12 @@
 package com.getbouncer.scan.camera.camerax
 
 import android.app.Activity
-import android.graphics.Matrix
 import android.graphics.PointF
 import android.os.Build
 import android.os.Handler
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Size
-import android.view.TextureView
 import android.view.ViewGroup
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
@@ -36,7 +34,6 @@ import com.getbouncer.scan.framework.util.centerOn
 import com.getbouncer.scan.framework.util.minAspectRatioSurroundingSize
 import com.getbouncer.scan.framework.util.size
 import com.getbouncer.scan.framework.util.toRect
-import com.getbouncer.scan.framework.util.toRectF
 import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -192,14 +189,14 @@ class CameraXAdapter<ImageOutput>(
             .setTargetRotation(displayRotation)
             .setTargetResolution(minimumResolution.resolutionToSize(displaySize))
             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-            .setImageQueueDepth(2)
+            .setImageQueueDepth(1)
             .build()
             .also { analysis ->
                 analysis.setAnalyzer(
                     cameraExecutor,
                     { image ->
                         val adaptedImage = imageAdapter(image)
-                        val imageSize = image.size()
+                        val imageSize = image.size().resolutionToSize(displaySize)
                         image.close()
                         sendImageToStream(
                             CameraPreviewImage(
@@ -219,59 +216,10 @@ class CameraXAdapter<ImageOutput>(
             camera = newCamera
 
             preview?.setSurfaceProvider(previewTextureView.surfaceProvider)
-//            preview?.setSurfaceProvider {
-//                previewTextureView.post {
-//                    configureTransform(previewTextureView, it.resolution.resolutionToSize(displaySize))
-//                    if (!cameraExecutor.isShutdown && !cameraExecutor.isTerminated) {
-//                        it.provideSurface(Surface(previewTextureView.surfaceTexture), cameraExecutor, {
-//                            // TODO: we might not have to do anything here.
-//                        })
-//                    } else {
-//                        it.willNotProvideSurface()
-//                    }
-//                }
-//            }
         } catch (t: Throwable) {
             Log.e(Config.logTag, "Use case camera binding failed", t)
             mainThreadHandler.post { cameraErrorListener.onCameraOpenError(t) }
         }
-    }
-
-    /**
-     * Configures the necessary [android.graphics.Matrix] transformation to `textureView`.
-     * This method should be called after the camera preview size is determined in
-     * setUpCameraOutputs and also the size of `textureView` is fixed.
-     *
-     * @param viewSize The size of `textureView`
-     */
-    private fun configureTransform(view: TextureView, imageSize: Size) {
-        val viewSize = view.size()
-        val matrix = Matrix()
-        val viewRect = viewSize.toRectF()
-        val bufferRect = imageSize.toRectF()
-        val sensorRotation = camera?.cameraInfo?.sensorRotationDegrees ?: 0
-
-        val rotation = -(displayRotation.rotationToDegrees()).toFloat()
-//        val imageScale = calculatePreviewScale(
-//            viewSize = viewSize,
-//            imageSize = imageSize,
-//            displayRotation = displayRotation,
-//            sensorRotationDegrees = sensorRotation,
-//        )
-//        val finalScale = imageScale.scale(
-//            max(
-//                imageScale.width * imageSize.width / viewSize.width,
-//                imageScale.height * imageSize.height / viewSize.height,
-//            )
-//        )
-
-        // TODO(awushensky): this breaks on rotation. See https://stackoverflow.com/questions/34536798/android-camera2-preview-is-rotated-90deg-while-in-landscape?rq=1
-//        bufferRect.offset(viewRect.centerX() - bufferRect.centerX(), viewRect.centerY() - bufferRect.centerY())
-//        matrix.setRectToRect(viewRect, bufferRect, Matrix.ScaleToFit.CENTER)
-        matrix.postScale(2F, 1F, viewRect.centerX(), viewRect.centerY())
-        matrix.postRotate(rotation, viewRect.centerX(), viewRect.centerY())
-
-        view.setTransform(matrix)
     }
 
     private fun notifyCameraListeners(camera: Camera) {
