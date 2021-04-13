@@ -73,6 +73,8 @@ abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
          *
          * @param displayOrientation: The enum value of the display rotation (e.g. Surface.ROTATION_0)
          * @param sensorRotationDegrees: The rotation of the sensor in degrees
+         *
+         * @return the difference in degrees.
          */
         internal fun calculateImageRotationDegrees(
             @RotationValue displayOrientation: Int,
@@ -90,26 +92,64 @@ abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
             ) % 360
 
         /**
+         * Determine the surface rotation from a degrees rotation. Snap to 90 degree increments.
+         *
+         * @param degrees: the degrees of rotation to convert
+         *
+         * @return the degrees, snapped to 90, as a [Surface] rotation value.
+         */
+        @RotationValue
+        internal fun Int.degreesToSurfaceRotation(): Int =
+            when (if (this % 360 < 0) this % 360 + 360 else this % 360) {
+                in 45 until 135 -> Surface.ROTATION_90
+                in 135 until 225 -> Surface.ROTATION_180
+                in 225 until 315 -> Surface.ROTATION_270
+                else -> Surface.ROTATION_0
+            }
+
+        /**
+         * Calculate degrees from a [RotationValue].
+         */
+        internal fun Int.rotationToDegrees(): Int = this * 90
+
+        /**
          * Convert a size on the screen to a resolution.
          */
-        internal fun sizeToResolution(size: Size): Size = Size(
+        internal fun Size.toResolution(): Size = Size(
             /* width */
-            max(size.width, size.height),
+            max(width, height),
             /* height */
-            min(size.width, size.height)
+            min(width, height),
         )
 
         /**
          * Convert a resolution to a size on the screen.
          */
-        internal fun resolutionToSize(
-            resolution: Size,
+        internal fun Size.resolutionToSize(
             @RotationValue displayRotation: Int,
             sensorRotationDegrees: Int
         ) = if (areScreenAndSensorPerpendicular(displayRotation, sensorRotationDegrees)) {
-            Size(resolution.height, resolution.width)
+            Size(this.height, this.width)
         } else {
-            resolution
+            this
+        }
+
+        /**
+         * Convert a resolution to a size on the screen based only on the display size.
+         */
+        internal fun Size.resolutionToSize(displaySize: Size) = when {
+            displaySize.width >= displaySize.height -> Size(
+                /* width */
+                max(width, height),
+                /* height */
+                min(width, height),
+            )
+            else -> Size(
+                /* width */
+                min(width, height),
+                /* height */
+                max(width, height),
+            )
         }
 
         /**

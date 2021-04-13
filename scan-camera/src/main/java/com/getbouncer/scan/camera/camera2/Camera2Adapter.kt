@@ -39,6 +39,7 @@ import android.media.ImageReader
 import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
+import android.util.Log
 import android.util.Size
 import android.view.Surface
 import android.view.TextureView
@@ -367,10 +368,9 @@ class Camera2Adapter(
                 // rotate the preview resolution to match the orientation
                 val previewFormat = previewFormatAndResolution.first
                 previewResolution = previewFormatAndResolution.second
-                previewSize = resolutionToSize(
-                    previewResolution,
+                previewSize = previewResolution.resolutionToSize(
                     displayRotation,
-                    cameraDetails.sensorRotation
+                    cameraDetails.sensorRotation,
                 )
                 Log.d(Config.logTag, "Camera2 API selected resolution $previewResolution with format $previewFormat")
 
@@ -632,7 +632,7 @@ class Camera2Adapter(
         val viewRect = viewSize.toRectF()
         val bufferRect = imageSize.toRectF()
 
-        val rotation = -(displayRotation * 90).toFloat()
+        val rotation = -(displayRotation.rotationToDegrees()).toFloat()
         val imageScale = calculatePreviewScale(
             viewSize = viewSize,
             imageSize = imageSize,

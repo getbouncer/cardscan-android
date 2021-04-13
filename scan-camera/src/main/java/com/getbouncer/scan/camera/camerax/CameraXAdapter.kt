@@ -4,6 +4,7 @@ import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.PointF
 import android.os.Build
+import android.os.Handler
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Size
@@ -13,8 +14,11 @@ import android.view.ViewGroup
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.DisplayOrientedMeteringPointFactory
+import androidx.camera.core.FocusMeteringAction
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
+import androidx.camera.core.TorchState
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
@@ -29,6 +33,11 @@ import com.getbouncer.scan.framework.Stats
 import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.framework.image.getRenderScript
 import com.getbouncer.scan.framework.image.rotate
+import com.getbouncer.scan.framework.image.size
+import com.getbouncer.scan.framework.util.aspectRatio
+import com.getbouncer.scan.framework.util.centerOn
+import com.getbouncer.scan.framework.util.minAspectRatioSurroundingSize
+import com.getbouncer.scan.framework.util.size
 import com.getbouncer.scan.framework.util.toRect
 import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
@@ -49,11 +58,15 @@ class CameraXAdapter(
 
     private var lensFacing: Int = CameraSelector.LENS_FACING_BACK
 
+    private val mainThreadHandler = Handler(activity.mainLooper)
+
     private var preview: Preview? = null
     private var imageAnalyzer: ImageAnalysis? = null
     private var camera: Camera? = null
     private val cameraProviderFuture = ProcessCameraProvider.getInstance(activity)
     private lateinit var lifecycleOwner: LifecycleOwner
+
+    private val cameraListeners = mutableListOf<(Camera) -> Unit>()
 
     /** Blocking camera operations are performed using this executor */
     private lateinit var cameraExecutor: ExecutorService
@@ -74,18 +87,15 @@ class CameraXAdapter(
     private val previewTextureView by lazy { TextureView(activity) }
 
     override fun withFlashSupport(task: (Boolean) -> Unit) {
-        // TODO("Not yet implemented")
-        task(false)
+        withCamera { task(it.cameraInfo.hasFlashUnit()) }
     }
 
     override fun setTorchState(on: Boolean) {
-        // TODO("Not yet implemented")
+        camera?.cameraControl?.enableTorch(on)
     }
 
-    override fun isTorchOn(): Boolean {
-        // TODO("Not yet implemented")
-        return false
-    }
+    override fun isTorchOn(): Boolean =
+        camera?.cameraInfo?.torchState?.value == TorchState.ON
 
     override fun withSupportsMultipleCameras(task: (Boolean) -> Unit) {
         withCameraProvider {
@@ -94,11 +104,30 @@ class CameraXAdapter(
     }
 
     override fun changeCamera() {
-        // TODO("Not yet implemented")
+        withCameraProvider {
+            lensFacing = when {
+                lensFacing == CameraSelector.LENS_FACING_BACK && hasFrontCamera(it) -> CameraSelector.LENS_FACING_FRONT
+                lensFacing == CameraSelector.LENS_FACING_FRONT && hasBackCamera(it) -> CameraSelector.LENS_FACING_BACK
+                hasBackCamera(it) -> CameraSelector.LENS_FACING_BACK
+                hasFrontCamera(it) -> CameraSelector.LENS_FACING_FRONT
+                else -> CameraSelector.LENS_FACING_BACK
+            }
+
+            setUpCamera()
+        }
     }
 
     override fun setFocus(point: PointF) {
-        // TODO("Not yet implemented")
+        camera?.let { cam ->
+            val meteringPointFactory = DisplayOrientedMeteringPointFactory(
+                display,
+                cam.cameraInfo,
+                displaySize.width.toFloat(),
+                displaySize.height.toFloat(),
+            )
+            val action = FocusMeteringAction.Builder(meteringPointFactory.createPoint(point.x, point.y)).build()
+            cam.cameraControl.startFocusAndMetering(action)
+        }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
@@ -127,7 +156,9 @@ class CameraXAdapter(
                 hasBackCamera(it) -> CameraSelector.LENS_FACING_BACK
                 hasFrontCamera(it) -> CameraSelector.LENS_FACING_FRONT
                 else -> {
-                    cameraErrorListener.onCameraUnsupportedError(IllegalStateException("No camera is available"))
+                    mainThreadHandler.post {
+                        cameraErrorListener.onCameraUnsupportedError(IllegalStateException("No camera is available"))
+                    }
                     CameraSelector.LENS_FACING_BACK
                 }
             }
@@ -136,8 +167,8 @@ class CameraXAdapter(
         }
     }
 
+    @Synchronized
     private fun bindCameraUseCases(cameraProvider: ProcessCameraProvider) {
-
         // CameraSelector
         val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
 
@@ -148,19 +179,19 @@ class CameraXAdapter(
 
         imageAnalyzer = ImageAnalysis.Builder()
             .setTargetRotation(displayRotation)
-            .setTargetResolution(minimumResolution)
+            .setTargetResolution(minimumResolution.resolutionToSize(displaySize))
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            .setImageQueueDepth(2)
             .build()
             .also { analysis ->
                 analysis.setAnalyzer(cameraExecutor, { image ->
-                    val sensorRotation = camera?.cameraInfo?.sensorRotationDegrees ?: 0
-                    val bitmap = image.toBitmap(getRenderScript(activity)).rotate(
-                        calculateImageRotationDegrees(displayRotation, sensorRotation).toFloat()
-                    )
+                    val bitmap = image.toBitmap(getRenderScript(activity))
+                        .rotate(image.imageInfo.rotationDegrees.toFloat())
                     image.close()
                     sendImageToStream(
                         CameraPreviewImage(
                             TrackedImage(bitmap, Stats.trackRepeatingTask("image_analysis")),
-                            displaySize.toRect()
+                            minAspectRatioSurroundingSize(previewView?.size() ?: displaySize, bitmap.size().aspectRatio()).centerOn(displaySize.toRect())
                         )
                     )
                 })
@@ -169,18 +200,40 @@ class CameraXAdapter(
         cameraProvider.unbindAll()
 
         try {
-            camera = cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageAnalyzer)
+            val newCamera = cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageAnalyzer)
+            notifyCameraListeners(newCamera)
+            camera = newCamera
 
-            preview?.setSurfaceProvider(Preview.SurfaceProvider {
+            preview?.setSurfaceProvider {
                 previewTextureView.post {
-                    it.provideSurface(Surface(previewTextureView.surfaceTexture), cameraExecutor, {
-                        // TODO: we might not have to do anything here.
-                    })
+                    if (!cameraExecutor.isShutdown && !cameraExecutor.isTerminated) {
+                        it.provideSurface(Surface(previewTextureView.surfaceTexture), cameraExecutor, {
+                            // TODO: we might not have to do anything here.
+                        })
+                    }
                 }
-            })
+            }
         } catch (t: Throwable) {
             Log.e(Config.logTag, "Use case camera binding failed", t)
-            cameraErrorListener.onCameraOpenError(t)
+            mainThreadHandler.post { cameraErrorListener.onCameraOpenError(t) }
+        }
+    }
+
+    private fun notifyCameraListeners(camera: Camera) {
+        val listenerIterator = cameraListeners.iterator()
+        while (listenerIterator.hasNext()) {
+            listenerIterator.next()(camera)
+            listenerIterator.remove()
+        }
+    }
+
+    @Synchronized
+    private fun <T> withCamera(task: (Camera) -> T) {
+        val camera = this.camera
+        if (camera != null) {
+            task(camera)
+        } else {
+            cameraListeners.add { task(it) }
         }
     }
 
@@ -208,7 +261,7 @@ class CameraXAdapter(
     }
 
     /**
-     *  [androidx.camera.core.ImageAnalysisConfig] requires enum value of
+     *  [androidx.camera.core.ImageAnalysis] requires enum value of
      *  [androidx.camera.core.AspectRatio]. Currently it has values of 4:3 & 16:9.
      *
      *  Detecting the most suitable ratio for dimensions provided in @params by counting absolute

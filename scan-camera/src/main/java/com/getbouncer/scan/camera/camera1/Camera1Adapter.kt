@@ -14,7 +14,6 @@ import android.hardware.Camera.PreviewCallback
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Size
-import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.ViewGroup
@@ -306,14 +305,7 @@ class Camera1Adapter(
         Camera.getCameraInfo(Camera.CameraInfo.CAMERA_FACING_BACK, info)
 
         val rotation = activity.windowManager.defaultDisplay.rotation
-        var degrees = 0
-
-        when (rotation) {
-            Surface.ROTATION_0 -> degrees = 0
-            Surface.ROTATION_90 -> degrees = 90
-            Surface.ROTATION_180 -> degrees = 180
-            Surface.ROTATION_270 -> degrees = 270
-        }
+        val degrees = rotation.rotationToDegrees()
 
         val result = if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
             (360 - (info.orientation + degrees) % 360) % 360 // compensate for the mirror
