@@ -2,7 +2,9 @@ package com.getbouncer.scan.camera.camerax
 
 import android.app.Activity
 import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.graphics.PointF
+import android.graphics.Rect
 import android.os.Build
 import android.os.Handler
 import android.util.DisplayMetrics
@@ -10,6 +12,7 @@ import android.util.Log
 import android.util.Size
 import android.view.Surface
 import android.view.TextureView
+import android.view.View
 import android.view.ViewGroup
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.Camera
@@ -20,6 +23,7 @@ import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.core.TorchState
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -37,8 +41,10 @@ import com.getbouncer.scan.framework.image.size
 import com.getbouncer.scan.framework.util.aspectRatio
 import com.getbouncer.scan.framework.util.centerOn
 import com.getbouncer.scan.framework.util.minAspectRatioSurroundingSize
+import com.getbouncer.scan.framework.util.scaleAndCenterSurrounding
 import com.getbouncer.scan.framework.util.size
 import com.getbouncer.scan.framework.util.toRect
+import com.getbouncer.scan.framework.util.toRectF
 import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -71,6 +77,8 @@ class CameraXAdapter(
     /** Blocking camera operations are performed using this executor */
     private lateinit var cameraExecutor: ExecutorService
 
+    private var scaledPreviewSize: Rect? = null
+
     private val display by lazy {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             activity.display
@@ -84,7 +92,7 @@ class CameraXAdapter(
     private val displayAspectRatio by lazy { aspectRatioFrom(displayMetrics.widthPixels, displayMetrics.heightPixels) }
     private val displaySize by lazy { Size(displayMetrics.widthPixels, displayMetrics.heightPixels) }
 
-    private val previewTextureView by lazy { TextureView(activity) }
+    private val previewTextureView by lazy { PreviewView(activity).apply { implementationMode = PreviewView.ImplementationMode.COMPATIBLE } }
 
     override fun withFlashSupport(task: (Boolean) -> Unit) {
         withCamera { task(it.cameraInfo.hasFlashUnit()) }
@@ -139,6 +147,13 @@ class CameraXAdapter(
             previewView.removeAllViews()
             previewView.addView(previewTextureView)
 
+            previewTextureView.layoutParams.apply {
+                width = ViewGroup.LayoutParams.MATCH_PARENT
+                height = ViewGroup.LayoutParams.MATCH_PARENT
+            }
+
+            previewTextureView.requestLayout()
+
             setUpCamera()
         } ?: run {
             setUpCamera()
@@ -147,7 +162,19 @@ class CameraXAdapter(
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun onDestroy() {
-        cameraExecutor.shutdown()
+        withCameraProvider {
+            it.unbindAll()
+            cameraExecutor.shutdown()
+        }
+    }
+
+    override fun unbindFromLifecycle(lifecycleOwner: LifecycleOwner) {
+        super.unbindFromLifecycle(lifecycleOwner)
+        withCameraProvider { cameraProvider ->
+            preview?.let { preview ->
+                cameraProvider.unbind(preview)
+            }
+        }
     }
 
     private fun setUpCamera() {
@@ -173,8 +200,9 @@ class CameraXAdapter(
         val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
 
         preview = Preview.Builder()
-            .setTargetAspectRatio(displayAspectRatio)
             .setTargetRotation(displayRotation)
+            .setTargetResolution(minimumResolution.resolutionToSize(displaySize))
+//            .setTargetAspectRatio(displayAspectRatio)
             .build()
 
         imageAnalyzer = ImageAnalysis.Builder()
@@ -191,7 +219,7 @@ class CameraXAdapter(
                     sendImageToStream(
                         CameraPreviewImage(
                             TrackedImage(bitmap, Stats.trackRepeatingTask("image_analysis")),
-                            minAspectRatioSurroundingSize(previewView?.size() ?: displaySize, bitmap.size().aspectRatio()).centerOn(displaySize.toRect())
+                            scaledPreviewSize ?: minAspectRatioSurroundingSize(previewView?.size() ?: displaySize, bitmap.size().aspectRatio()).centerOn(displaySize.toRect())
                         )
                     )
                 })
@@ -204,19 +232,61 @@ class CameraXAdapter(
             notifyCameraListeners(newCamera)
             camera = newCamera
 
-            preview?.setSurfaceProvider {
-                previewTextureView.post {
-                    if (!cameraExecutor.isShutdown && !cameraExecutor.isTerminated) {
-                        it.provideSurface(Surface(previewTextureView.surfaceTexture), cameraExecutor, {
-                            // TODO: we might not have to do anything here.
-                        })
-                    }
-                }
-            }
+            preview?.setSurfaceProvider(previewTextureView.surfaceProvider)
+//            preview?.setSurfaceProvider {
+//                previewTextureView.post {
+//                    configureTransform(previewTextureView, it.resolution.resolutionToSize(displaySize))
+//                    if (!cameraExecutor.isShutdown && !cameraExecutor.isTerminated) {
+//                        it.provideSurface(Surface(previewTextureView.surfaceTexture), cameraExecutor, {
+//                            // TODO: we might not have to do anything here.
+//                        })
+//                    } else {
+//                        it.willNotProvideSurface()
+//                    }
+//                }
+//            }
         } catch (t: Throwable) {
             Log.e(Config.logTag, "Use case camera binding failed", t)
             mainThreadHandler.post { cameraErrorListener.onCameraOpenError(t) }
         }
+    }
+
+    /**
+     * Configures the necessary [android.graphics.Matrix] transformation to `textureView`.
+     * This method should be called after the camera preview size is determined in
+     * setUpCameraOutputs and also the size of `textureView` is fixed.
+     *
+     * @param viewSize The size of `textureView`
+     */
+    private fun configureTransform(view: TextureView, imageSize: Size) {
+        val viewSize = view.size()
+        val matrix = Matrix()
+        val viewRect = viewSize.toRectF()
+        val bufferRect = imageSize.toRectF()
+        val sensorRotation = camera?.cameraInfo?.sensorRotationDegrees ?: 0
+
+        val rotation = -(displayRotation.rotationToDegrees()).toFloat()
+//        val imageScale = calculatePreviewScale(
+//            viewSize = viewSize,
+//            imageSize = imageSize,
+//            displayRotation = displayRotation,
+//            sensorRotationDegrees = sensorRotation,
+//        )
+//        val finalScale = imageScale.scale(
+//            max(
+//                imageScale.width * imageSize.width / viewSize.width,
+//                imageScale.height * imageSize.height / viewSize.height,
+//            )
+//        )
+
+        // TODO(awushensky): this breaks on rotation. See https://stackoverflow.com/questions/34536798/android-camera2-preview-is-rotated-90deg-while-in-landscape?rq=1
+//        bufferRect.offset(viewRect.centerX() - bufferRect.centerX(), viewRect.centerY() - bufferRect.centerY())
+//        matrix.setRectToRect(viewRect, bufferRect, Matrix.ScaleToFit.CENTER)
+        matrix.postScale(2F, 1F, viewRect.centerX(), viewRect.centerY())
+        matrix.postRotate(rotation, viewRect.centerX(), viewRect.centerY())
+
+        scaledPreviewSize = imageSize.scaleAndCenterSurrounding(viewSize)
+        view.setTransform(matrix)
     }
 
     private fun notifyCameraListeners(camera: Camera) {
