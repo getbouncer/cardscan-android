@@ -2,18 +2,12 @@ package com.getbouncer.cardscan.ui.analyzer
 
 import android.graphics.Bitmap
 import android.graphics.Rect
-import android.util.Log
-import android.util.Size
 import com.getbouncer.cardscan.ui.result.MainLoopState
 import com.getbouncer.scan.camera.CameraPreviewImage
 import com.getbouncer.scan.framework.Analyzer
 import com.getbouncer.scan.framework.AnalyzerFactory
-import com.getbouncer.scan.framework.Config
-import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.payment.carddetect.CardDetect
 import com.getbouncer.scan.payment.ocr.SSDOcr
-import kotlinx.coroutines.async
-import kotlinx.coroutines.supervisorScope
 
 class MainLoopAnalyzer(
     private val ssdOcr: Analyzer<SSDOcr.Input, Any, SSDOcr.Prediction>?,

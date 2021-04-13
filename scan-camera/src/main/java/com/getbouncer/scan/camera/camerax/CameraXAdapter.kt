@@ -4,17 +4,13 @@ import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.graphics.PointF
-import android.graphics.Rect
 import android.os.Build
 import android.os.Handler
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Size
-import android.view.Surface
 import android.view.TextureView
-import android.view.View
 import android.view.ViewGroup
-import androidx.camera.core.AspectRatio
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.DisplayOrientedMeteringPointFactory
@@ -41,19 +37,12 @@ import com.getbouncer.scan.framework.image.size
 import com.getbouncer.scan.framework.util.aspectRatio
 import com.getbouncer.scan.framework.util.centerOn
 import com.getbouncer.scan.framework.util.minAspectRatioSurroundingSize
-import com.getbouncer.scan.framework.util.scaleAndCenterSurrounding
 import com.getbouncer.scan.framework.util.size
 import com.getbouncer.scan.framework.util.toRect
 import com.getbouncer.scan.framework.util.toRectF
 import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import kotlin.math.abs
-import kotlin.math.max
-import kotlin.math.min
-
-private const val RATIO_4_3_VALUE = 4.0 / 3.0
-private const val RATIO_16_9_VALUE = 16.0 / 9.0
 
 class CameraXAdapter(
     private val activity: Activity,
@@ -77,8 +66,6 @@ class CameraXAdapter(
     /** Blocking camera operations are performed using this executor */
     private lateinit var cameraExecutor: ExecutorService
 
-    private var scaledPreviewSize: Rect? = null
-
     private val display by lazy {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             activity.display
@@ -89,7 +76,6 @@ class CameraXAdapter(
 
     private val displayRotation by lazy { display.rotation }
     private val displayMetrics by lazy { DisplayMetrics().also { display.getRealMetrics(it) } }
-    private val displayAspectRatio by lazy { aspectRatioFrom(displayMetrics.widthPixels, displayMetrics.heightPixels) }
     private val displaySize by lazy { Size(displayMetrics.widthPixels, displayMetrics.heightPixels) }
 
     private val previewTextureView by lazy { PreviewView(activity).apply { implementationMode = PreviewView.ImplementationMode.PERFORMANCE } }
@@ -202,7 +188,6 @@ class CameraXAdapter(
         preview = Preview.Builder()
             .setTargetRotation(displayRotation)
             .setTargetResolution(minimumResolution.resolutionToSize(displaySize))
-//            .setTargetAspectRatio(displayAspectRatio)
             .build()
 
         imageAnalyzer = ImageAnalysis.Builder()
@@ -212,17 +197,20 @@ class CameraXAdapter(
             .setImageQueueDepth(2)
             .build()
             .also { analysis ->
-                analysis.setAnalyzer(cameraExecutor, { image ->
-                    val bitmap = image.toBitmap(getRenderScript(activity))
-                        .rotate(image.imageInfo.rotationDegrees.toFloat())
-                    image.close()
-                    sendImageToStream(
-                        CameraPreviewImage(
-                            TrackedImage(bitmap, Stats.trackRepeatingTask("image_analysis")),
-                            scaledPreviewSize ?: minAspectRatioSurroundingSize(previewView?.size() ?: displaySize, bitmap.size().aspectRatio()).centerOn(displaySize.toRect())
+                analysis.setAnalyzer(
+                    cameraExecutor,
+                    { image ->
+                        val bitmap = image.toBitmap(getRenderScript(activity))
+                            .rotate(image.imageInfo.rotationDegrees.toFloat())
+                        image.close()
+                        sendImageToStream(
+                            CameraPreviewImage(
+                                TrackedImage(bitmap, Stats.trackRepeatingTask("image_analysis")),
+                                minAspectRatioSurroundingSize(previewView?.size() ?: displaySize, bitmap.size().aspectRatio()).centerOn(displaySize.toRect())
+                            )
                         )
-                    )
-                })
+                    }
+                )
             }
 
         cameraProvider.unbindAll()
@@ -285,7 +273,6 @@ class CameraXAdapter(
         matrix.postScale(2F, 1F, viewRect.centerX(), viewRect.centerY())
         matrix.postRotate(rotation, viewRect.centerX(), viewRect.centerY())
 
-        scaledPreviewSize = imageSize.scaleAndCenterSurrounding(viewSize)
         view.setTransform(matrix)
     }
 
@@ -328,25 +315,5 @@ class CameraXAdapter(
         task: (ProcessCameraProvider) -> Unit,
     ) {
         cameraProviderFuture.addListener({ task(cameraProviderFuture.get()) }, executor)
-    }
-
-    /**
-     *  [androidx.camera.core.ImageAnalysis] requires enum value of
-     *  [androidx.camera.core.AspectRatio]. Currently it has values of 4:3 & 16:9.
-     *
-     *  Detecting the most suitable ratio for dimensions provided in @params by counting absolute
-     *  of preview ratio to one of the provided values.
-     *
-     *  @param width - preview width
-     *  @param height - preview height
-     *  @return suitable aspect ratio
-     */
-    private fun aspectRatioFrom(width: Int, height: Int): Int {
-        val previewRatio = max(width, height).toDouble() / min(width, height)
-        return if (abs(previewRatio - RATIO_4_3_VALUE) <= abs(previewRatio - RATIO_16_9_VALUE)) {
-            AspectRatio.RATIO_4_3
-        } else {
-            AspectRatio.RATIO_16_9
-        }
     }
 }

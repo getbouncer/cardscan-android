@@ -10,6 +10,7 @@ import android.util.SizeF
 import android.view.Surface
 import androidx.annotation.IntDef
 import androidx.annotation.MainThread
+import androidx.camera.core.AspectRatio
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -21,6 +22,7 @@ import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.runBlocking
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
@@ -50,6 +52,9 @@ data class CameraPreviewImage<ImageBase>(
     val image: TrackedImage<ImageBase>,
     val previewImageBounds: Rect,
 )
+
+private const val RATIO_4_3_VALUE = 4.0 / 3.0
+private const val RATIO_16_9_VALUE = 16.0 / 9.0
 
 abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
 
@@ -186,6 +191,26 @@ abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
             }
             else -> {
                 false
+            }
+        }
+
+        /**
+         *  [androidx.camera.core.ImageAnalysis] requires enum value of
+         *  [androidx.camera.core.AspectRatio]. Currently it has values of 4:3 & 16:9.
+         *
+         *  Detecting the most suitable ratio for dimensions provided in @params by counting absolute
+         *  of preview ratio to one of the provided values.
+         *
+         *  @param width - preview width
+         *  @param height - preview height
+         *  @return suitable aspect ratio
+         */
+        private fun aspectRatioFrom(width: Int, height: Int): Int {
+            val previewRatio = max(width, height).toDouble() / min(width, height)
+            return if (abs(previewRatio - RATIO_4_3_VALUE) <= abs(previewRatio - RATIO_16_9_VALUE)) {
+                AspectRatio.RATIO_4_3
+            } else {
+                AspectRatio.RATIO_16_9
             }
         }
     }

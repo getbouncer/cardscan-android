@@ -573,7 +573,7 @@ class Camera2Adapter(
             imageReaderSurface?.apply { previewRequestBuilder.addTarget(this) }
 
             // Here, we create a CameraCaptureSession for camera preview.
-            @Suppress("Deprecation")  // SessionConfiguration is not available until API 28.
+            @Suppress("Deprecation") // SessionConfiguration is not available until API 28.
             cameraDevice?.createCaptureSession(
                 listOfNotNull(imageReaderSurface, previewSurface, captureSurface),
                 object : CameraCaptureSession.StateCallback() {
