@@ -28,19 +28,19 @@ class MLImage(val width: Int, val height: Int, private val imageData: ByteBuffer
         IntArray(bitmap.width * bitmap.height)
             .also { bitmap.getPixels(it, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height) }
             .let {
-            val rgbFloat =
-                ByteBuffer.allocateDirect(bitmap.width * bitmap.height * DIM_PIXEL_SIZE * NUM_BYTES_PER_CHANNEL)
-            rgbFloat.order(ByteOrder.nativeOrder())
+                val rgbFloat =
+                    ByteBuffer.allocateDirect(bitmap.width * bitmap.height * DIM_PIXEL_SIZE * NUM_BYTES_PER_CHANNEL)
+                rgbFloat.order(ByteOrder.nativeOrder())
 
-            it.forEach {
-                // ignore the alpha value ((it shr 24 and 0xFF) - mean.alpha) / std.alpha)
-                rgbFloat.putFloat(((it shr 16 and 0xFF) - mean.red) / std.red)
-                rgbFloat.putFloat(((it shr 8 and 0xFF) - mean.green) / std.green)
-                rgbFloat.putFloat(((it and 0xFF) - mean.blue) / std.blue)
+                it.forEach {
+                    // ignore the alpha value ((it shr 24 and 0xFF) - mean.alpha) / std.alpha)
+                    rgbFloat.putFloat(((it shr 16 and 0xFF) - mean.red) / std.red)
+                    rgbFloat.putFloat(((it shr 8 and 0xFF) - mean.green) / std.green)
+                    rgbFloat.putFloat(((it and 0xFF) - mean.blue) / std.blue)
+                }
+
+                rgbFloat
             }
-
-            rgbFloat
-        }
     )
 
     /**

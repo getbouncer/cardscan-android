@@ -19,7 +19,6 @@ package com.getbouncer.scan.camera.camera2
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.ImageFormat
 import android.graphics.Matrix
 import android.graphics.PointF
@@ -35,6 +34,7 @@ import android.hardware.camera2.CaptureRequest
 import android.hardware.camera2.TotalCaptureResult
 import android.hardware.camera2.params.MeteringRectangle
 import android.hardware.camera2.params.StreamConfigurationMap
+import android.media.Image
 import android.media.ImageReader
 import android.os.Build
 import android.os.Handler
@@ -53,10 +53,7 @@ import com.getbouncer.scan.camera.CameraPreviewImage
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.Stats
 import com.getbouncer.scan.framework.TrackedImage
-import com.getbouncer.scan.framework.image.getRenderScript
 import com.getbouncer.scan.framework.image.isSupportedFormat
-import com.getbouncer.scan.framework.image.rotate
-import com.getbouncer.scan.framework.image.toBitmap
 import com.getbouncer.scan.framework.util.scale
 import com.getbouncer.scan.framework.util.scaleAndCenterSurrounding
 import com.getbouncer.scan.framework.util.size
@@ -109,17 +106,13 @@ class CameraConfigurationFailedException(val cameraId: String) : Exception() {
 /**
  * A [CameraAdapter] that uses android's Camera 2 APIs to show previews and process images.
  */
-class Camera2Adapter(
+class Camera2Adapter<ImageOutput>(
     private val activity: Activity,
     private val previewView: ViewGroup?,
     private val minimumResolution: Size,
     private val cameraErrorListener: CameraErrorListener,
-) : CameraAdapter<CameraPreviewImage<Bitmap>>(), LifecycleObserver {
-
-    /**
-     * Set this to true to use an [ImageReader] to capture images for analysis. Set it to false to use a [TextureView].
-     */
-    private val useImageReader = true
+    private val imageAdapter: (Image, Float) -> ImageOutput
+) : CameraAdapter<CameraPreviewImage<ImageOutput>>(), LifecycleObserver {
 
     companion object {
         /**
@@ -145,7 +138,6 @@ class Camera2Adapter(
     }
 
     private val previewTextureView by lazy { TextureView(activity) }
-    private val captureTextureView by lazy { TextureView(activity) }
 
     private val processingImage = AtomicBoolean(false)
 
@@ -205,32 +197,6 @@ class Camera2Adapter(
         override fun onSurfaceTextureUpdated(surface: SurfaceTexture) { }
     }
 
-    private val captureSurfaceTextureListener = object : TextureView.SurfaceTextureListener {
-        override fun onSurfaceTextureAvailable(surface: SurfaceTexture, width: Int, height: Int) {
-        }
-
-        override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture, width: Int, height: Int) { }
-
-        override fun onSurfaceTextureDestroyed(surface: SurfaceTexture): Boolean = true
-
-        override fun onSurfaceTextureUpdated(surface: SurfaceTexture) {
-            if (!processingImage.compareAndSet(false, true)) {
-                return
-            }
-
-            captureTextureView.bitmap?.let {
-                sendImageToStream(
-                    CameraPreviewImage(
-                        TrackedImage(it, Stats.trackRepeatingTask("image_analysis")),
-                        scaledPreviewSize,
-                    ),
-                )
-            }
-
-            processingImage.set(false)
-        }
-    }
-
     private val imageAvailableListener = ImageReader.OnImageAvailableListener { reader ->
         if (!processingImage.compareAndSet(false, true)) {
             return@OnImageAvailableListener
@@ -238,14 +204,7 @@ class Camera2Adapter(
 
         reader.acquireLatestImage()?.let {
             try {
-                it
-                    .toBitmap(getRenderScript(activity))
-                    .rotate(
-                        calculateImageRotationDegrees(
-                            displayRotation,
-                            sensorRotation
-                        ).toFloat()
-                    )
+                imageAdapter(it, calculateImageRotationDegrees(displayRotation, sensorRotation).toFloat())
             } catch (t: Throwable) {
                 Log.e(Config.logTag, "Unable to convert image to bitmap: $t")
                 null
@@ -325,7 +284,6 @@ class Camera2Adapter(
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun onCreate() {
         previewView?.removeAllViews()
-        previewView?.addView(captureTextureView)
         previewView?.addView(previewTextureView)
     }
 
@@ -333,9 +291,6 @@ class Camera2Adapter(
     fun onResume() {
         startCameraThread()
 
-        if (!useImageReader) {
-            captureTextureView.surfaceTextureListener = captureSurfaceTextureListener
-        }
         if (previewTextureView.isAvailable) {
             openCamera()
         } else {
@@ -374,12 +329,10 @@ class Camera2Adapter(
                 )
                 Log.d(Config.logTag, "Camera2 API selected resolution $previewResolution with format $previewFormat")
 
-                if (useImageReader) {
-                    imageReader = ImageReader.newInstance(previewResolution.width, previewResolution.height, previewFormat, 1)
-                        .apply {
-                            setOnImageAvailableListener(imageAvailableListener, cameraHandler)
-                        }
-                }
+                imageReader = ImageReader.newInstance(previewResolution.width, previewResolution.height, previewFormat, 1)
+                    .apply {
+                        setOnImageAvailableListener(imageAvailableListener, cameraHandler)
+                    }
 
                 previewTextureView.layoutParams.apply {
                     width = ViewGroup.LayoutParams.MATCH_PARENT
@@ -552,15 +505,12 @@ class Camera2Adapter(
     private fun createCameraPreviewSession(previewResolution: Size) {
         try {
             val previewTexture = previewTextureView.surfaceTexture
-            val captureTexture = if (!useImageReader) captureTextureView.surfaceTexture else null
 
             // We configure the size of default buffer to be the size of camera preview we want.
             previewTexture?.setDefaultBufferSize(previewResolution.width, previewResolution.height)
-            captureTexture?.setDefaultBufferSize(previewResolution.width, previewResolution.height)
 
             // This is the output Surface we need to start preview.
             val previewSurface = previewTexture?.let { Surface(it) }
-            val captureSurface = captureTexture?.let { Surface(it) }
             val imageReaderSurface = imageReader?.surface
 
             // We set up a CaptureRequest.Builder with the output Surface.
@@ -569,13 +519,12 @@ class Camera2Adapter(
             )
 
             previewSurface?.apply { previewRequestBuilder.addTarget(this) }
-            captureSurface?.apply { previewRequestBuilder.addTarget(this) }
             imageReaderSurface?.apply { previewRequestBuilder.addTarget(this) }
 
             // Here, we create a CameraCaptureSession for camera preview.
             @Suppress("Deprecation") // SessionConfiguration is not available until API 28.
             cameraDevice?.createCaptureSession(
-                listOfNotNull(imageReaderSurface, previewSurface, captureSurface),
+                listOfNotNull(imageReaderSurface, previewSurface),
                 object : CameraCaptureSession.StateCallback() {
 
                     override fun onConfigured(cameraCaptureSession: CameraCaptureSession) {

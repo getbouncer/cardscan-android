@@ -24,6 +24,9 @@ import com.getbouncer.scan.camera.CameraAdapter
 import com.getbouncer.scan.camera.CameraApi
 import com.getbouncer.scan.camera.CameraErrorListener
 import com.getbouncer.scan.camera.CameraPreviewImage
+import com.getbouncer.scan.camera.buildBitmapImageAdapter
+import com.getbouncer.scan.camera.buildBitmapImageProxyAdapter
+import com.getbouncer.scan.camera.buildBitmapNV21ImageAdapter
 import com.getbouncer.scan.camera.camera1.Camera1Adapter
 import com.getbouncer.scan.camera.camera2.Camera2Adapter
 import com.getbouncer.scan.camera.camerax.CameraXAdapter
@@ -461,6 +464,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
                 previewView = previewFrame,
                 minimumResolution = minimumAnalysisResolution,
                 cameraErrorListener = cameraErrorListener,
+                buildBitmapImageProxyAdapter(this),
             )
 
         is CameraApi.Camera2 ->
@@ -469,6 +473,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
                 previewView = previewFrame,
                 minimumResolution = minimumAnalysisResolution,
                 cameraErrorListener = cameraErrorListener,
+                buildBitmapImageAdapter(this),
             )
 
         else ->
@@ -478,6 +483,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
                 minimumResolution = minimumAnalysisResolution,
                 cameraErrorListener = cameraErrorListener,
                 coroutineScope = this,
+                buildBitmapNV21ImageAdapter(this),
             )
     }
 

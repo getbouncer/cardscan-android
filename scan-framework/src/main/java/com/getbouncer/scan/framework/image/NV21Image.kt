@@ -99,11 +99,11 @@ class NV21Image(val width: Int, val height: Int, val nv21Data: ByteArray) {
         var uvSrcPos0 = uvIndexSrc
         var uvDestPos0 = uvIndexDst
         for (i in y until y + h) {
-            System.arraycopy(nv21Data, srcPos0 + x, nData, destPos0, w)  //y memory block copy
+            System.arraycopy(nv21Data, srcPos0 + x, nData, destPos0, w) // y memory block copy
             srcPos0 += width
             destPos0 += w
             if ((i and 1) == 0) {
-                System.arraycopy(nv21Data, uvSrcPos0, nData, uvDestPos0, w)  //uv memory block copy
+                System.arraycopy(nv21Data, uvSrcPos0, nData, uvDestPos0, w) // uv memory block copy
                 uvSrcPos0 += width
                 uvDestPos0 += w
             }
@@ -344,7 +344,7 @@ private fun Image.yuvToNV21BytesSlow(): ByteArray {
     // however I simply get the last byte of buffer 2 and the entire buffer 1
     val buffer0Size = buffer0.remaining()
     val buffer1Size = buffer1.remaining() // / 2 + 1;
-    val buffer2Size = 1 //buffer2.remaining(); // / 2 + 1;
+    val buffer2Size = 1 // buffer2.remaining(); // / 2 + 1;
     val buffer0Byte = ByteArray(buffer0Size)
     val buffer1Byte = ByteArray(buffer1Size)
     val buffer2Byte = ByteArray(buffer2Size)

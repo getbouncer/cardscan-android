@@ -1,7 +1,6 @@
 package com.getbouncer.scan.camera.camerax
 
 import android.app.Activity
-import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.graphics.PointF
 import android.os.Build
@@ -16,6 +15,7 @@ import androidx.camera.core.CameraSelector
 import androidx.camera.core.DisplayOrientedMeteringPointFactory
 import androidx.camera.core.FocusMeteringAction
 import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.core.TorchState
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -27,13 +27,10 @@ import androidx.lifecycle.OnLifecycleEvent
 import com.getbouncer.scan.camera.CameraAdapter
 import com.getbouncer.scan.camera.CameraErrorListener
 import com.getbouncer.scan.camera.CameraPreviewImage
-import com.getbouncer.scan.camera.toBitmap
+import com.getbouncer.scan.camera.size
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.Stats
 import com.getbouncer.scan.framework.TrackedImage
-import com.getbouncer.scan.framework.image.getRenderScript
-import com.getbouncer.scan.framework.image.rotate
-import com.getbouncer.scan.framework.image.size
 import com.getbouncer.scan.framework.util.aspectRatio
 import com.getbouncer.scan.framework.util.centerOn
 import com.getbouncer.scan.framework.util.minAspectRatioSurroundingSize
@@ -44,12 +41,13 @@ import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-class CameraXAdapter(
+class CameraXAdapter<ImageOutput>(
     private val activity: Activity,
     private val previewView: ViewGroup?,
     private val minimumResolution: Size,
     private val cameraErrorListener: CameraErrorListener,
-) : CameraAdapter<CameraPreviewImage<Bitmap>>() {
+    private val imageAdapter: (ImageProxy) -> ImageOutput,
+) : CameraAdapter<CameraPreviewImage<ImageOutput>>() {
 
     private var lensFacing: Int = CameraSelector.LENS_FACING_BACK
 
@@ -200,13 +198,13 @@ class CameraXAdapter(
                 analysis.setAnalyzer(
                     cameraExecutor,
                     { image ->
-                        val bitmap = image.toBitmap(getRenderScript(activity))
-                            .rotate(image.imageInfo.rotationDegrees.toFloat())
+                        val adaptedImage = imageAdapter(image)
+                        val imageSize = image.size()
                         image.close()
                         sendImageToStream(
                             CameraPreviewImage(
-                                TrackedImage(bitmap, Stats.trackRepeatingTask("image_analysis")),
-                                minAspectRatioSurroundingSize(previewView?.size() ?: displaySize, bitmap.size().aspectRatio()).centerOn(displaySize.toRect())
+                                TrackedImage(adaptedImage, Stats.trackRepeatingTask("image_analysis")),
+                                minAspectRatioSurroundingSize(previewView?.size() ?: displaySize, imageSize.aspectRatio()).centerOn(displaySize.toRect())
                             )
                         )
                     }

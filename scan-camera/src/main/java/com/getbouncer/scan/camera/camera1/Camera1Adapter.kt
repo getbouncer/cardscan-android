@@ -4,7 +4,6 @@ package com.getbouncer.scan.camera.camera1
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.ImageFormat
 import android.graphics.PointF
 import android.graphics.Rect
@@ -26,9 +25,6 @@ import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.Stats
 import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.framework.image.NV21Image
-import com.getbouncer.scan.framework.image.getRenderScript
-import com.getbouncer.scan.framework.image.rotate
-import com.getbouncer.scan.framework.image.scaleAndCrop
 import com.getbouncer.scan.framework.time.milliseconds
 import com.getbouncer.scan.framework.util.retry
 import kotlinx.coroutines.CoroutineScope
@@ -49,13 +45,14 @@ private val MAXIMUM_RESOLUTION = Size(1920, 1080)
 /**
  * A [CameraAdapter] that uses android's Camera 1 APIs to show previews and process images.
  */
-class Camera1Adapter(
+class Camera1Adapter<ImageOutput>(
     private val activity: Activity,
     private val previewView: ViewGroup,
     private val minimumResolution: Size,
     private val cameraErrorListener: CameraErrorListener,
     private val coroutineScope: CoroutineScope,
-) : CameraAdapter<CameraPreviewImage<Bitmap>>(), PreviewCallback {
+    private val imageAdapter: (NV21Image, Float) -> ImageOutput
+) : CameraAdapter<CameraPreviewImage<ImageOutput>>(), PreviewCallback {
 
     private var mCamera: Camera? = null
     private var cameraPreview: CameraPreview? = null
@@ -119,10 +116,7 @@ class Camera1Adapter(
                     sendImageToStream(
                         CameraPreviewImage(
                             TrackedImage(
-                                image = NV21Image(imageWidth, imageHeight, bytes)
-                                    .toBitmap(getRenderScript(activity))
-                                    .scaleAndCrop(minimumResolution)
-                                    .rotate(mRotation.toFloat()),
+                                image = imageAdapter(NV21Image(imageWidth, imageHeight, bytes), mRotation.toFloat()),
                                 tracker = Stats.trackRepeatingTask("image_processing")
                             ),
                             Rect(0, 0, previewView.width, previewView.height),
