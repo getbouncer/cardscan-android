@@ -21,15 +21,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.getbouncer.scan.camera.CameraAdapter
-import com.getbouncer.scan.camera.CameraApi
 import com.getbouncer.scan.camera.CameraErrorListener
 import com.getbouncer.scan.camera.CameraPreviewImage
-import com.getbouncer.scan.camera.buildBitmapImageAdapter
-import com.getbouncer.scan.camera.buildBitmapImageProxyAdapter
-import com.getbouncer.scan.camera.buildBitmapNV21ImageAdapter
-import com.getbouncer.scan.camera.camera1.Camera1Adapter
-import com.getbouncer.scan.camera.camera2.Camera2Adapter
-import com.getbouncer.scan.camera.camerax.CameraXAdapter
+import com.getbouncer.scan.camera.CameraAdapterImpl
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.Stats
 import com.getbouncer.scan.framework.StorageFactory
@@ -119,11 +113,6 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      * The listener which will handle the results from the scan.
      */
     protected abstract val resultListener: ScanResultListener
-
-    /**
-     * Override this value to use a different camera API.
-     */
-    protected open val cameraApi: CameraApi = CameraApi.CameraX
 
     protected val storage by lazy {
         StorageFactory.getStorageInstance(this, "scan_camera_permissions")
@@ -457,35 +446,13 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     /**
      * Generate a camera adapter
      */
-    protected open fun buildCameraAdapter(): CameraAdapter<CameraPreviewImage<Bitmap>> = when (cameraApi) {
-        is CameraApi.CameraX ->
-            CameraXAdapter(
-                activity = this,
-                previewView = previewFrame,
-                minimumResolution = minimumAnalysisResolution,
-                cameraErrorListener = cameraErrorListener,
-                buildBitmapImageProxyAdapter(this),
-            )
-
-        is CameraApi.Camera2 ->
-            Camera2Adapter(
-                activity = this,
-                previewView = previewFrame,
-                minimumResolution = minimumAnalysisResolution,
-                cameraErrorListener = cameraErrorListener,
-                buildBitmapImageAdapter(this),
-            )
-
-        else ->
-            Camera1Adapter(
-                activity = this,
-                previewView = previewFrame,
-                minimumResolution = minimumAnalysisResolution,
-                cameraErrorListener = cameraErrorListener,
-                coroutineScope = this,
-                buildBitmapNV21ImageAdapter(this),
-            )
-    }
+    protected open fun buildCameraAdapter(): CameraAdapter<CameraPreviewImage<Bitmap>> =
+        CameraAdapterImpl(
+            activity = this,
+            previewView = previewFrame,
+            minimumResolution = minimumAnalysisResolution,
+            cameraErrorListener = cameraErrorListener,
+        )
 
     protected abstract val previewFrame: ViewGroup
 

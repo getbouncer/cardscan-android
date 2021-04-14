@@ -1,0 +1,2 @@
+com/getbouncer/scan/camera/BuildConfig.java
+ com.getbouncer.scan.camera.BuildConfig

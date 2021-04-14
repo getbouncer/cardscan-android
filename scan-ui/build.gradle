@@ -27,12 +27,19 @@ android {
     lintOptions {
         enable "Interoperability"
     }
+
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(":scan-framework")
-    implementation project(":scan-camera")
+    implementation project(":scan-camera-base")
+
+    compileOnly project(":scan-camerax")
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3-native-mt"
     implementation "androidx.appcompat:appcompat:1.2.0"
