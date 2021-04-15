@@ -21,7 +21,7 @@ fun Image.isSupportedFormat() = isSupportedFormat(this.format)
 @CheckResult
 fun isSupportedFormat(imageFormat: Int) = when (imageFormat) {
     ImageFormat.YUV_420_888, ImageFormat.JPEG -> true
-    ImageFormat.NV21 -> true // this fails on older devices
+    ImageFormat.NV21 -> false // this fails on devices with android API 21.
     else -> false
 }
 

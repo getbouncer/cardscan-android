@@ -71,7 +71,7 @@ class CameraAdapterImpl(
     private val displayMetrics by lazy { DisplayMetrics().also { display.getRealMetrics(it) } }
     private val displaySize by lazy { Size(displayMetrics.widthPixels, displayMetrics.heightPixels) }
 
-    private val previewTextureView by lazy { PreviewView(activity).apply { implementationMode = PreviewView.ImplementationMode.PERFORMANCE } }
+    private val previewTextureView by lazy { PreviewView(activity) }
 
     override fun withFlashSupport(task: (Boolean) -> Unit) {
         withCamera { task(it.cameraInfo.hasFlashUnit()) }

@@ -2,6 +2,7 @@ package com.getbouncer.scan.framework.image
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.ImageFormat
 import android.graphics.Rect
 import android.graphics.YuvImage
@@ -42,7 +43,7 @@ class NV21Image(val width: Int, val height: Int, val nv21Data: ByteArray) {
         image.height,
         when (image.format) {
             ImageFormat.NV21 -> image.planes[0].buffer.toByteArray()
-            ImageFormat.YUV_420_888 -> image.yuvToNV21BytesFast()
+            ImageFormat.YUV_420_888 -> image.yuvToNV21Bytes()
             else -> throw ImageTypeNotSupportedException(image.format)
         }
     )
@@ -246,6 +247,18 @@ class NV21Image(val width: Int, val height: Int, val nv21Data: ByteArray) {
 }
 
 /**
+ * Convert YUV420_888 image into NV21
+ */
+@CheckResult
+private fun Image.yuvToNV21Bytes() = yuvPlanesToNV21Fast(
+    width = width,
+    height = height,
+    planeBuffers = planes.mapArray { it.buffer },
+    rowStrides = planes.mapToIntArray { it.rowStride },
+    pixelStrides = planes.mapToIntArray { it.pixelStride },
+)
+
+/**
  * https://stackoverflow.com/questions/32276522/convert-nv21-byte-array-into-bitmap-readable-format
  *
  * https://stackoverflow.com/questions/41773621/camera2-output-to-bitmap
@@ -253,40 +266,45 @@ class NV21Image(val width: Int, val height: Int, val nv21Data: ByteArray) {
  * On Revvl2, average performance is ~27ms
  */
 @CheckResult
-private fun Image.yuvToNV21BytesCompat(): ByteArray {
-    val crop = this.cropRect
-    val format = this.format
-    val width = crop.width()
-    val height = crop.height()
-    val planes = this.planes
-    val nv21Bytes = ByteArray(width * height * ImageFormat.getBitsPerPixel(format) / 8)
-    val rowData = ByteArray(planes[0].rowStride)
+fun yuvPlanesToNV21Compat(
+    width: Int,
+    height: Int,
+    planeBuffers: Array<ByteBuffer>,
+    rowStrides: IntArray,
+    pixelStrides: IntArray,
+    format: Int,
+    crop: Rect = Rect(0, 0, width, height),
+): ByteArray {
+    val cropWidth = crop.width()
+    val cropHeight = crop.height()
+    val nv21Bytes = ByteArray(cropWidth * cropHeight * ImageFormat.getBitsPerPixel(format) / 8)
+    val rowData = ByteArray(rowStrides[0])
 
     var channelOffset = 0
     var outputStride = 1
 
-    for (i in planes.indices) {
+    for (i in planeBuffers.indices) {
         when (i) {
             0 -> {
                 channelOffset = 0
                 outputStride = 1
             }
             1 -> {
-                channelOffset = width * height + 1
+                channelOffset = cropWidth * cropHeight + 1
                 outputStride = 2
             }
             2 -> {
-                channelOffset = width * height
+                channelOffset = cropWidth * cropHeight
                 outputStride = 2
             }
         }
 
-        val buffer = planes[i].buffer
-        val rowStride = planes[i].rowStride
-        val pixelStride = planes[i].pixelStride
+        val buffer = planeBuffers[i]
+        val rowStride = rowStrides[i]
+        val pixelStride = pixelStrides[i]
         val shift = if (i == 0) 0 else 1
-        val w = width shr shift
-        val h = height shr shift
+        val w = cropWidth shr shift
+        val h = cropHeight shr shift
 
         buffer.position(rowStride * (crop.top shr shift) + pixelStride * (crop.left shr shift))
 
@@ -316,29 +334,16 @@ private fun Image.yuvToNV21BytesCompat(): ByteArray {
 }
 
 /**
- * https://stackoverflow.com/questions/52726002/camera2-captured-picture-conversion-from-yuv-420-888-to-nv21/52740776#52740776
- *
- * On Revvl2, average performance is ~5ms
- */
-@CheckResult
-private fun Image.yuvToNV21BytesFast() = yuvPlanesToNV21(
-    width = width,
-    height = height,
-    planeBuffers = planes.mapArray { it.buffer },
-    rowStrides = planes.mapToIntArray { it.rowStride },
-    pixelStrides = planes.mapToIntArray { it.pixelStride },
-)
-
-/**
  * https://stackoverflow.com/questions/44994510/how-to-convert-rotate-raw-nv21-array-image-android-media-image-from-front-ca
  *
  * On Revvl2, average performance is ~60ms
  */
-private fun Image.yuvToNV21BytesSlow(): ByteArray {
+@CheckResult
+fun yuvPlanesToNV21Slow(planeBuffers: Array<ByteBuffer>): ByteArray {
     val rez: ByteArray
-    val buffer0 = planes[0].buffer
-    val buffer1 = planes[1].buffer
-    val buffer2 = planes[2].buffer
+    val buffer0 = planeBuffers[0]
+    val buffer1 = planeBuffers[1]
+    val buffer2 = planeBuffers[2]
 
     // actually here should be something like each second byte
     // however I simply get the last byte of buffer 2 and the entire buffer 1
@@ -367,8 +372,12 @@ private fun Image.yuvToNV21BytesSlow(): ByteArray {
 
 /**
  * Utility function for converting YUV planes into an NV21 byte array
+ *
+ * https://stackoverflow.com/questions/52726002/camera2-captured-picture-conversion-from-yuv-420-888-to-nv21/52740776#52740776
+ *
+ * On Revvl2, average performance is ~5ms
  */
-fun yuvPlanesToNV21(
+fun yuvPlanesToNV21Fast(
     width: Int,
     height: Int,
     planeBuffers: Array<ByteBuffer>,
@@ -432,4 +441,17 @@ fun yuvPlanesToNV21(
     }
 
     return nv21
+}
+
+/**
+ * https://stackoverflow.com/questions/33542708/camera2-api-convert-yuv420-to-rgb-green-out
+ */
+fun yuvPlanesToBitmap(
+    width: Int,
+    height: Int,
+    planeBuffers: Array<ByteBuffer>,
+): Bitmap {
+    val bitmap = ByteArrayOutputStream()
+    YuvImage(planeBuffers.toList().toByteArray(), ImageFormat.NV21, width, height, null).compressToJpeg(Rect(0, 0, width, height), 95, bitmap)
+    return BitmapFactory.decodeByteArray(bitmap.toByteArray(), 0, bitmap.size())
 }
