@@ -88,9 +88,9 @@ class MainLoopAggregator(
             ),
         )
 
-        frame.cameraPreviewImage.tracker.trackResult("main_loop_aggregated")
+        frame.cameraPreviewImage.image.tracker.trackResult("main_loop_aggregated")
         if (Config.isDebug) {
-            Log.d(Config.logTag, "Delay between capture and process of image is ${frame.cameraPreviewImage.tracker.startedAt.elapsedSince()}")
+            Log.d(Config.logTag, "Delay between capture and process of image is ${frame.cameraPreviewImage.image.tracker.startedAt.elapsedSince()}")
         }
 
         frameSaver.saveFrame(savedFrame, interimResult)

@@ -29,12 +29,12 @@ import com.getbouncer.cardscan.ui.result.MainLoopAggregator;
 import com.getbouncer.cardscan.ui.result.MainLoopState;
 import com.getbouncer.scan.camera.CameraAdapter;
 import com.getbouncer.scan.camera.CameraErrorListener;
-import com.getbouncer.scan.camera.camera1.Camera1Adapter;
+import com.getbouncer.scan.camera.CameraPreviewImage;
+import com.getbouncer.scan.camera.CameraSelectorKt;
 import com.getbouncer.scan.framework.AggregateResultListener;
 import com.getbouncer.scan.framework.AnalyzerLoopErrorListener;
 import com.getbouncer.scan.framework.Config;
 import com.getbouncer.scan.framework.Stats;
-import com.getbouncer.scan.framework.TrackedImage;
 import com.getbouncer.scan.framework.api.BouncerApi;
 import com.getbouncer.scan.framework.api.dto.ScanStatistics;
 import com.getbouncer.scan.framework.interop.BlockingAggregateResultListener;
@@ -82,7 +82,7 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
 
     private TextView cardPanTextView;
 
-    private CameraAdapter<TrackedImage<Bitmap>> cameraAdapter;
+    private CameraAdapter<CameraPreviewImage<Bitmap>> cameraAdapter;
 
     private CardScanFlow cardScanFlow;
 
@@ -232,7 +232,12 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
             viewFinderBackground.setViewFinderRect(ViewExtensionsKt.asRect(viewFinderWindow));
 
             // Create a camera adapter and bind it to this activity.
-            cameraAdapter = new Camera1Adapter(this, cameraPreview, MINIMUM_RESOLUTION, this, this);
+            cameraAdapter = CameraSelectorKt.getCameraAdapter(
+                this,
+                cameraPreview,
+                MINIMUM_RESOLUTION,
+                this
+            );
             cameraAdapter.bindToLifecycle(this);
             cameraAdapter.withFlashSupport(supported -> {
                 flashButtonView.setVisibility(supported ? View.VISIBLE : View.INVISIBLE);
@@ -249,7 +254,6 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
             cardScanFlow.startFlow(
                 this,
                 cameraAdapter.getImageStream(),
-                new Size(cameraPreview.getWidth(), cameraPreview.getHeight()),
                 ViewExtensionsKt.asRect(viewFinderWindow),
                 this,
                 this

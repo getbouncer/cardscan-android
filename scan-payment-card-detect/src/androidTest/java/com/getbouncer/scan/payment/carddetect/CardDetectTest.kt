@@ -5,9 +5,9 @@ import androidx.test.filters.MediumTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.getbouncer.scan.framework.Stats
 import com.getbouncer.scan.framework.TrackedImage
+import com.getbouncer.scan.framework.image.size
 import com.getbouncer.scan.framework.util.toRect
 import com.getbouncer.scan.payment.carddetect.test.R
-import com.getbouncer.scan.payment.size
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -31,7 +31,7 @@ class CardDetectTest {
         val model = CardDetect.Factory(appContext, CardDetect.ModelFetcher(appContext).fetchData(forImmediateUse = false, isOptional = false)).newInstance()
         assertNotNull(model)
 
-        val prediction = model.analyze(CardDetect.cameraPreviewToInput(TrackedImage(bitmap, Stats.trackTask("no_op")), bitmap.size(), bitmap.size().toRect()), Unit)
+        val prediction = model.analyze(CardDetect.cameraPreviewToInput(TrackedImage(bitmap, Stats.trackTask("no_op")), bitmap.size().toRect(), bitmap.size().toRect()), Unit)
         assertNotNull(prediction)
         assertEquals(CardDetect.Prediction.Side.PAN, prediction.side)
     }
@@ -50,7 +50,7 @@ class CardDetectTest {
         val model = CardDetect.Factory(appContext, CardDetect.ModelFetcher(appContext).fetchData(forImmediateUse = false, isOptional = false)).newInstance()
         assertNotNull(model)
 
-        val prediction = model.analyze(CardDetect.cameraPreviewToInput(TrackedImage(bitmap, Stats.trackTask("no_op")), bitmap.size(), bitmap.size().toRect()), Unit)
+        val prediction = model.analyze(CardDetect.cameraPreviewToInput(TrackedImage(bitmap, Stats.trackTask("no_op")), bitmap.size().toRect(), bitmap.size().toRect()), Unit)
         assertNotNull(prediction)
         assertEquals(CardDetect.Prediction.Side.NO_PAN, prediction.side)
     }
@@ -69,7 +69,7 @@ class CardDetectTest {
         val model = CardDetect.Factory(appContext, CardDetect.ModelFetcher(appContext).fetchData(forImmediateUse = false, isOptional = false)).newInstance()
         assertNotNull(model)
 
-        val prediction = model.analyze(CardDetect.cameraPreviewToInput(TrackedImage(bitmap, Stats.trackTask("no_op")), bitmap.size(), bitmap.size().toRect()), Unit)
+        val prediction = model.analyze(CardDetect.cameraPreviewToInput(TrackedImage(bitmap, Stats.trackTask("no_op")), bitmap.size().toRect(), bitmap.size().toRect()), Unit)
         assertNotNull(prediction)
         assertEquals(CardDetect.Prediction.Side.NO_CARD, prediction.side)
     }

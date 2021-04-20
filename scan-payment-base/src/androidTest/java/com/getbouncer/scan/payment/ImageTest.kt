@@ -10,6 +10,12 @@ import android.util.Size
 import androidx.core.graphics.drawable.toBitmap
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
+import com.getbouncer.scan.framework.image.crop
+import com.getbouncer.scan.framework.image.cropWithFill
+import com.getbouncer.scan.framework.image.scale
+import com.getbouncer.scan.framework.image.size
+import com.getbouncer.scan.framework.image.toMLImage
+import com.getbouncer.scan.framework.image.zoom
 import com.getbouncer.scan.framework.util.centerOn
 import com.getbouncer.scan.framework.util.toRect
 import com.getbouncer.scan.payment.test.R
@@ -32,7 +38,7 @@ class ImageTest {
         assertEquals(375, bitmap.height, "Bitmap height is not expected")
 
         // convert the bitmap to a byte buffer
-        val convertedImage = bitmap.toRGBByteBuffer(mean = 127.5f, std = 128.5f)
+        val convertedImage = bitmap.toMLImage(mean = 127.5f, std = 128.5f).getData()
 
         // read in an expected converted file
         val rawStream = testResources.openRawResource(R.raw.ocr_card_numbers_clear)
@@ -65,7 +71,7 @@ class ImageTest {
         assertEquals(100, bitmap.height, "Bitmap height is not expected")
 
         // convert the bitmap to a byte buffer
-        val convertedImage = bitmap.toRGBByteBuffer(mean = 127.5f, std = 128.5f)
+        val convertedImage = bitmap.toMLImage(mean = 127.5f, std = 128.5f).getData()
 
         // read in an expected converted file
         val rawStream = testResources.openRawResource(R.raw.sample_bitmap)

@@ -24,7 +24,7 @@ import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.Stats
 import com.getbouncer.scan.payment.card.getCardIssuer
 import com.getbouncer.scan.payment.card.isValidExpiry
-import com.getbouncer.scan.payment.carddetect.CardDetect
+import com.getbouncer.scan.payment.cropCameraPreviewToSquare
 import com.getbouncer.scan.ui.util.getColorByRes
 import com.getbouncer.scan.ui.util.hide
 import com.getbouncer.scan.ui.util.setTextSizeByRes
@@ -496,7 +496,7 @@ open class CardScanActivity :
     ) = launch(Dispatchers.Main) {
         if (Config.isDebug) {
             val bitmap = withContext(Dispatchers.Default) {
-                CardDetect.cropCameraPreviewForCardDetect(frame.frame.cameraPreviewImage.image, frame.frame.previewSize, frame.frame.cardFinder)
+                cropCameraPreviewToSquare(frame.frame.cameraPreviewImage.image.image, frame.frame.cameraPreviewImage.previewImageBounds, frame.frame.cardFinder)
             }
             debugCompletionImageView.setImageBitmap(bitmap)
         }

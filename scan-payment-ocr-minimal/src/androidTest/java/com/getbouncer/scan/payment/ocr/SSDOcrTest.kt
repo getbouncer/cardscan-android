@@ -6,9 +6,9 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.Stats
 import com.getbouncer.scan.framework.TrackedImage
+import com.getbouncer.scan.framework.image.size
 import com.getbouncer.scan.framework.util.toRect
 import com.getbouncer.scan.payment.ocr.test.R
-import com.getbouncer.scan.payment.size
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
@@ -54,7 +54,7 @@ class SSDOcrTest {
         val prediction = model.analyze(
             SSDOcr.cameraPreviewToInput(
                 TrackedImage(bitmap, Stats.trackTask("no_op")),
-                bitmap.size(),
+                bitmap.size().toRect(),
                 bitmap.size().toRect(),
             ),
             Unit
@@ -86,7 +86,7 @@ class SSDOcrTest {
         val prediction1 = model.analyze(
             SSDOcr.cameraPreviewToInput(
                 TrackedImage(bitmap, Stats.trackTask("no_op")),
-                bitmap.size(),
+                bitmap.size().toRect(),
                 bitmap.size().toRect(),
             ),
             Unit
@@ -94,7 +94,7 @@ class SSDOcrTest {
         val prediction2 = model.analyze(
             SSDOcr.cameraPreviewToInput(
                 TrackedImage(bitmap, Stats.trackTask("no_op")),
-                bitmap.size(),
+                bitmap.size().toRect(),
                 bitmap.size().toRect(),
             ),
             Unit
@@ -122,7 +122,7 @@ class SSDOcrTest {
         val prediction = model.analyze(
             SSDOcr.cameraPreviewToInput(
                 TrackedImage(bitmap, Stats.trackTask("no_op")),
-                bitmap.size(),
+                bitmap.size().toRect(),
                 bitmap.size().toRect(),
             ),
             Unit

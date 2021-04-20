@@ -79,4 +79,8 @@ class DebugOverlay(context: Context, attrs: AttributeSet? = null) : View(context
         invalidate()
         requestLayout()
     }
+
+    fun clearBoxes() {
+        setBoxes(emptyList())
+    }
 }

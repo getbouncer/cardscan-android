@@ -7,16 +7,16 @@ import android.util.Size
 import com.getbouncer.scan.framework.FetchedData
 import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.framework.UpdatingResourceFetcher
+import com.getbouncer.scan.framework.image.MLImage
+import com.getbouncer.scan.framework.image.scale
+import com.getbouncer.scan.framework.image.toMLImage
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.ml.ssd.adjustLocations
 import com.getbouncer.scan.framework.ml.ssd.softMax
 import com.getbouncer.scan.framework.ml.ssd.toRectForm
-import com.getbouncer.scan.framework.util.intersectionWith
-import com.getbouncer.scan.framework.util.projectRegionOfInterest
 import com.getbouncer.scan.framework.util.reshape
-import com.getbouncer.scan.framework.util.toRect
-import com.getbouncer.scan.payment.crop
+import com.getbouncer.scan.payment.cropCameraPreviewToViewFinder
 import com.getbouncer.scan.payment.hasOpenGl31
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
 import com.getbouncer.scan.payment.ml.ssd.OcrFeatureMapSizes
@@ -24,9 +24,6 @@ import com.getbouncer.scan.payment.ml.ssd.combinePriors
 import com.getbouncer.scan.payment.ml.ssd.determineLayoutAndFilter
 import com.getbouncer.scan.payment.ml.ssd.extractPredictions
 import com.getbouncer.scan.payment.ml.ssd.rearrangeOCRArray
-import com.getbouncer.scan.payment.scale
-import com.getbouncer.scan.payment.size
-import com.getbouncer.scan.payment.toRGBByteBuffer
 import org.tensorflow.lite.Interpreter
 import java.nio.ByteBuffer
 
@@ -96,70 +93,31 @@ class SSDOcr private constructor(interpreter: Interpreter) :
         interpreter
     ) {
 
-    data class Input(val ssdOcrImage: TrackedImage<ByteBuffer>)
+    data class Input(val ssdOcrImage: TrackedImage<MLImage>)
 
     data class Prediction(val pan: String, val detectedBoxes: List<DetectionBox>)
 
     companion object {
         /**
-         * Calculate the crop from the full image for the credit card based on the view finder
-         * within the preview size.
-         *
-         * Note: This algorithm makes some assumptions:
-         * 1. the previewImage and the fullImage are centered relative to each other.
-         * 2. the fullImage circumscribes the previewImage. I.E. they share at least one field of
-         *    view, and the previewImage's fields of view are smaller than or the same size as the
-         *    fullImage's
-         * 3. the fullImage and the previewImage have the same orientation
-         */
-        fun cropImage(
-            cameraPreviewImage: TrackedImage<Bitmap>,
-            previewSize: Size,
-            cardFinder: Rect,
-        ): TrackedImage<Bitmap> {
-            require(
-                cardFinder.left >= 0 &&
-                    cardFinder.right <= previewSize.width &&
-                    cardFinder.top >= 0 &&
-                    cardFinder.bottom <= previewSize.height
-            ) { "Card finder is outside preview image bounds $cardFinder $previewSize" }
-
-            // Scale the cardFinder to match the full image
-            val projectedViewFinder = previewSize
-                .projectRegionOfInterest(
-                    toSize = cameraPreviewImage.image.size(),
-                    regionOfInterest = cardFinder,
-                )
-                .intersectionWith(cameraPreviewImage.image.size().toRect())
-
-            return TrackedImage(
-                image = cameraPreviewImage.image.crop(projectedViewFinder),
-                tracker = cameraPreviewImage.tracker,
-            )
-        }
-
-        /**
          * Convert a camera preview image into a SSDOcr input
          */
         fun cameraPreviewToInput(
             cameraPreviewImage: TrackedImage<Bitmap>,
-            previewSize: Size,
+            previewBounds: Rect,
             cardFinder: Rect
         ) = Input(
-            cropImage(cameraPreviewImage, previewSize, cardFinder).let { image ->
-                TrackedImage(
-                    image.image
-                        .scale(Factory.TRAINED_IMAGE_SIZE)
-                        .toRGBByteBuffer(mean = IMAGE_MEAN, std = IMAGE_STD).also {
-                            image.tracker.trackResult("ocr_image_transform")
-                        },
-                    image.tracker
-                )
-            }
+            TrackedImage(
+                cropCameraPreviewToViewFinder(cameraPreviewImage.image, previewBounds, cardFinder)
+                    .scale(Factory.TRAINED_IMAGE_SIZE)
+                    .toMLImage(mean = IMAGE_MEAN, std = IMAGE_STD).also {
+                        cameraPreviewImage.tracker.trackResult("ocr_image_transform")
+                    },
+                cameraPreviewImage.tracker
+            )
         )
     }
 
-    override suspend fun transformData(data: Input): Array<ByteBuffer> = arrayOf(data.ssdOcrImage.image)
+    override suspend fun transformData(data: Input): Array<ByteBuffer> = arrayOf(data.ssdOcrImage.image.getData())
 
     override suspend fun interpretMLOutput(
         data: Input,

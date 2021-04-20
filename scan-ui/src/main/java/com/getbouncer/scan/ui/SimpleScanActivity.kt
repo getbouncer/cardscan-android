@@ -16,8 +16,8 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
+import com.getbouncer.scan.camera.CameraPreviewImage
 import com.getbouncer.scan.framework.Config
-import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.framework.util.getSdkVersion
 import com.getbouncer.scan.ui.util.asRect
 import com.getbouncer.scan.ui.util.dpToPixels
@@ -663,11 +663,10 @@ abstract class SimpleScanActivity : ScanActivity() {
     /**
      * Once the camera stream is available, start processing images.
      */
-    override fun onCameraStreamAvailable(cameraStream: Flow<TrackedImage<Bitmap>>) {
+    override fun onCameraStreamAvailable(cameraStream: Flow<CameraPreviewImage<Bitmap>>) {
         scanFlow.startFlow(
             context = this,
             imageStream = cameraStream,
-            previewSize = Size(previewFrame.width, previewFrame.height),
             viewFinder = viewFinderWindowView.asRect(),
             lifecycleOwner = this,
             coroutineScope = this,

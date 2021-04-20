@@ -1,6 +1,7 @@
 package com.getbouncer.scan.framework.util
 
 import androidx.annotation.CheckResult
+import java.nio.ByteBuffer
 import kotlin.math.max
 import kotlin.math.min
 
@@ -134,3 +135,37 @@ fun FloatArray.indexOfMax(): Int? {
 
     return maxIndex
 }
+
+/**
+ * Convert a [ByteBuffer] to a [ByteArray].
+ */
+@CheckResult
+fun ByteBuffer.toByteArray() = ByteArray(remaining()).also { this.get(it) }
+
+/**
+ * Convert a list of [ByteBuffer]s to a single [ByteArray].
+ */
+@CheckResult
+fun List<ByteBuffer>.toByteArray(): ByteArray {
+    val totalSize = this.sumBy { it.remaining() }
+    var offset = 0
+    return ByteArray(totalSize).apply {
+        this@toByteArray.forEach {
+            val size = it.remaining()
+            it.get(this, offset, size)
+            offset += size
+        }
+    }
+}
+
+/**
+ * Map an array to a new [Array].
+ */
+@CheckResult
+inline fun <T, reified U> Array<T>.mapArray(transform: (T) -> U) = Array(this.size) { transform(this[it]) }
+
+/**
+ * Map an array to a new [IntArray].
+ */
+@CheckResult
+fun <T> Array<T>.mapToIntArray(transform: (T) -> Int) = IntArray(this.size) { transform(this[it]) }

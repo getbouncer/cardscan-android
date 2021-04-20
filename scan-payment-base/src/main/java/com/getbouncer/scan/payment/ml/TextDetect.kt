@@ -10,19 +10,17 @@ import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.FetchedData
 import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.framework.UpdatingModelWebFetcher
+import com.getbouncer.scan.framework.image.MLImage
+import com.getbouncer.scan.framework.image.scale
+import com.getbouncer.scan.framework.image.toMLImage
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.ml.hardNonMaximumSuppression
 import com.getbouncer.scan.framework.ml.ssd.rectForm
-import com.getbouncer.scan.framework.util.maxAspectRatioInSize
-import com.getbouncer.scan.framework.util.scaleAndCenterWithin
-import com.getbouncer.scan.payment.crop
+import com.getbouncer.scan.payment.cropCameraPreviewToSquare
 import com.getbouncer.scan.payment.hasOpenGl31
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
 import com.getbouncer.scan.payment.ml.yolo.processYoloLayer
-import com.getbouncer.scan.payment.scale
-import com.getbouncer.scan.payment.size
-import com.getbouncer.scan.payment.toRGBByteBuffer
 import org.tensorflow.lite.Interpreter
 import java.io.FileNotFoundException
 import java.nio.ByteBuffer
@@ -30,9 +28,7 @@ import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.ln
 import kotlin.math.max
-import kotlin.math.min
 import kotlin.math.pow
-import kotlin.math.roundToInt
 
 private val TRAINED_IMAGE_SIZE = Size(416, 416)
 
@@ -83,79 +79,21 @@ class TextDetect private constructor(interpreter: Interpreter) :
 
     companion object {
         /**
-         * Given a card finder region of a preview image, calculate the associated square.
-         */
-        private fun calculateSquareFromCardFinder(previewImage: Size, cardFinder: Rect): Rect {
-            val squareSize = maxAspectRatioInSize(previewImage, 1F)
-            return Rect(
-                /* left */
-                max(0, cardFinder.centerX() - squareSize.width / 2),
-                /* top */
-                max(0, cardFinder.centerY() - squareSize.height / 2),
-                /* right */
-                min(previewImage.width, cardFinder.centerX() + squareSize.width / 2),
-                /* bottom */
-                min(previewImage.height, cardFinder.centerY() + squareSize.height / 2)
-            )
-        }
-
-        /**
-         * Calculate what portion of the full image should be cropped based on the position of card finder within the
-         * preview image.
-         */
-        private fun calculateCrop(fullImage: Size, previewImage: Size, cardFinder: Rect): Rect {
-            require(
-                cardFinder.left >= 0 &&
-                    cardFinder.right <= previewImage.width &&
-                    cardFinder.top >= 0 &&
-                    cardFinder.bottom <= previewImage.height
-            ) { "Card finder is outside preview image bounds" }
-
-            // Calculate the card detection square based on the card finder, limited by the preview
-            val square = calculateSquareFromCardFinder(previewImage, cardFinder)
-
-            val scaledPreviewImage = previewImage.scaleAndCenterWithin(fullImage)
-            val previewScale = scaledPreviewImage.width().toFloat() / previewImage.width
-
-            // Scale the cardDetectionSquare to match the scaledPreviewImage
-            val scaledSquare = Rect(
-                (square.left * previewScale).roundToInt(),
-                (square.top * previewScale).roundToInt(),
-                (square.right * previewScale).roundToInt(),
-                (square.bottom * previewScale).roundToInt()
-            )
-
-            // Position the scaledCardDetectionSquare on the fullImage
-            return Rect(
-                max(0, scaledSquare.left + scaledPreviewImage.left),
-                max(0, scaledSquare.top + scaledPreviewImage.top),
-                min(fullImage.width, scaledSquare.right + scaledPreviewImage.left),
-                min(fullImage.height, scaledSquare.bottom + scaledPreviewImage.top),
-            )
-        }
-
-        fun cropCameraPreview(
-            cameraPreviewImage: Bitmap,
-            previewSize: Size,
-            cardFinder: Rect,
-        ) = cameraPreviewImage.crop(calculateCrop(cameraPreviewImage.size(), previewSize, cardFinder))
-
-        /**
          * Convert a camera preview image into a CardDetect input
          */
         fun cameraPreviewToInput(
             cameraPreviewImage: TrackedImage<Bitmap>,
-            previewSize: Size,
-            cardFinder: Rect,
+            previewBounds: Rect,
+            viewFinder: Rect,
         ) = Input(
             TrackedImage(
-                cropCameraPreview(
+                cropCameraPreviewToSquare(
                     cameraPreviewImage = cameraPreviewImage.image,
-                    previewSize = previewSize,
-                    cardFinder = cardFinder,
+                    previewBounds = previewBounds,
+                    viewFinder = viewFinder,
                 )
                     .scale(TRAINED_IMAGE_SIZE)
-                    .toRGBByteBuffer()
+                    .toMLImage()
                     .also { cameraPreviewImage.tracker.trackResult("text_detect_image_cropped") },
                 cameraPreviewImage.tracker,
             )
@@ -163,7 +101,7 @@ class TextDetect private constructor(interpreter: Interpreter) :
     }
 
     data class Input(
-        val textDetectImage: TrackedImage<ByteBuffer>,
+        val textDetectImage: TrackedImage<MLImage>,
     )
 
     data class Prediction(
@@ -414,7 +352,7 @@ class TextDetect private constructor(interpreter: Interpreter) :
         return nameWidthScore
     }
 
-    override suspend fun transformData(data: Input): Array<ByteBuffer> = arrayOf(data.textDetectImage.image)
+    override suspend fun transformData(data: Input): Array<ByteBuffer> = arrayOf(data.textDetectImage.image.getData())
 
     override suspend fun executeInference(
         tfInterpreter: Interpreter,

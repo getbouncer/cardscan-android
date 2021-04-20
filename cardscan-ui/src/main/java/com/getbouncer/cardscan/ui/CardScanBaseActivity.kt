@@ -13,8 +13,9 @@ import com.getbouncer.scan.framework.AggregateResultListener
 import com.getbouncer.scan.framework.AnalyzerLoopErrorListener
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.payment.card.formatPan
+import com.getbouncer.scan.payment.cropCameraPreviewToSquare
+import com.getbouncer.scan.payment.cropCameraPreviewToViewFinder
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
-import com.getbouncer.scan.payment.ocr.SSDOcr
 import com.getbouncer.scan.ui.DebugDetectionBox
 import com.getbouncer.scan.ui.ScanResultListener
 import com.getbouncer.scan.ui.SimpleScanActivity
@@ -183,13 +184,27 @@ abstract class CardScanBaseActivity :
             is MainLoopState.Finished -> changeScanState(ScanState.Correct)
         }
 
-        result.analyzerResult.ocr?.detectedBoxes?.let { detectionBoxes ->
-            if (Config.isDebug) {
+        if (Config.isDebug) {
+            result.analyzerResult.ocr?.detectedBoxes?.let { detectionBoxes ->
                 val bitmap = withContext(Dispatchers.Default) {
-                    SSDOcr.cropImage(result.frame.cameraPreviewImage, result.frame.previewSize, result.frame.cardFinder).image
+                    cropCameraPreviewToViewFinder(
+                        result.frame.cameraPreviewImage.image.image,
+                        result.frame.cameraPreviewImage.previewImageBounds,
+                        result.frame.cardFinder
+                    )
                 }
                 debugImageView.setImageBitmap(bitmap)
                 debugOverlayView.setBoxes(detectionBoxes.map { it.forDebug() })
+            } ?: run {
+                val bitmap = withContext(Dispatchers.Default) {
+                    cropCameraPreviewToSquare(
+                        result.frame.cameraPreviewImage.image.image,
+                        result.frame.cameraPreviewImage.previewImageBounds,
+                        result.frame.cardFinder
+                    )
+                }
+                debugImageView.setImageBitmap(bitmap)
+                debugOverlayView.clearBoxes()
             }
         }
     }.let { }
