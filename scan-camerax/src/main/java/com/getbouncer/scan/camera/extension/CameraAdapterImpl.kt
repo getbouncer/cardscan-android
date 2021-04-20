@@ -1,4 +1,4 @@
-package com.getbouncer.scan.camera
+package com.getbouncer.scan.camera.extension
 
 import android.app.Activity
 import android.graphics.Bitmap
@@ -22,6 +22,9 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
+import com.getbouncer.scan.camera.CameraAdapter
+import com.getbouncer.scan.camera.CameraErrorListener
+import com.getbouncer.scan.camera.CameraPreviewImage
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.Stats
 import com.getbouncer.scan.framework.TrackedImage
@@ -37,12 +40,14 @@ import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-class CameraAdapterImpl(
+internal class CameraAdapterImpl(
     private val activity: Activity,
     private val previewView: ViewGroup,
     private val minimumResolution: Size,
     private val cameraErrorListener: CameraErrorListener,
 ) : CameraAdapter<CameraPreviewImage<Bitmap>>() {
+
+    override val implementationName: String = "CameraX"
 
     private var lensFacing: Int = CameraSelector.LENS_FACING_BACK
 

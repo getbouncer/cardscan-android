@@ -23,7 +23,7 @@ import androidx.core.content.ContextCompat
 import com.getbouncer.scan.camera.CameraAdapter
 import com.getbouncer.scan.camera.CameraErrorListener
 import com.getbouncer.scan.camera.CameraPreviewImage
-import com.getbouncer.scan.camera.CameraAdapterImpl
+import com.getbouncer.scan.camera.getCameraAdapter
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.Stats
 import com.getbouncer.scan.framework.StorageFactory
@@ -447,7 +447,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      * Generate a camera adapter
      */
     protected open fun buildCameraAdapter(): CameraAdapter<CameraPreviewImage<Bitmap>> =
-        CameraAdapterImpl(
+        getCameraAdapter(
             activity = this,
             previewView = previewFrame,
             minimumResolution = minimumAnalysisResolution,

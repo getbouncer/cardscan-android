@@ -28,7 +28,7 @@ import com.getbouncer.cardscan.ui.result.CompletionLoopResult;
 import com.getbouncer.cardscan.ui.result.MainLoopAggregator;
 import com.getbouncer.cardscan.ui.result.MainLoopState;
 import com.getbouncer.scan.camera.CameraAdapter;
-import com.getbouncer.scan.camera.CameraAdapterImpl;
+import com.getbouncer.scan.camera.CameraSelectorKt;
 import com.getbouncer.scan.camera.CameraErrorListener;
 import com.getbouncer.scan.camera.CameraPreviewImage;
 import com.getbouncer.scan.framework.AggregateResultListener;
@@ -232,7 +232,7 @@ public class SingleActivityDemo extends AppCompatActivity implements CameraError
             viewFinderBackground.setViewFinderRect(ViewExtensionsKt.asRect(viewFinderWindow));
 
             // Create a camera adapter and bind it to this activity.
-            cameraAdapter = new CameraAdapterImpl(
+            cameraAdapter = CameraSelectorKt.getCameraAdapter(
                 this,
                 cameraPreview,
                 MINIMUM_RESOLUTION,

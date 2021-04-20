@@ -42,12 +42,13 @@ private val MAXIMUM_RESOLUTION = Size(1920, 1080)
 /**
  * A [CameraAdapter] that uses android's Camera 1 APIs to show previews and process images.
  */
-class CameraAdapterImpl(
+internal class Camera1Adapter(
     private val activity: Activity,
     private val previewView: ViewGroup,
     private val minimumResolution: Size,
     private val cameraErrorListener: CameraErrorListener,
 ) : CameraAdapter<CameraPreviewImage<Bitmap>>(), PreviewCallback {
+    override val implementationName: String = "Camera1"
 
     private var mCamera: Camera? = null
     private var cameraPreview: CameraPreview? = null

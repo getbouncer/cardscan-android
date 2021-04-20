@@ -44,6 +44,8 @@ abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
     private val imageChannel = Channel<CameraOutput>(capacity = Channel.RENDEZVOUS)
     private var lifecyclesBound = 0
 
+    abstract val implementationName: String
+
     companion object {
 
         /**

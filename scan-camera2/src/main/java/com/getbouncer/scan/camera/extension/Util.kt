@@ -1,9 +1,20 @@
-package com.getbouncer.scan.camera
+package com.getbouncer.scan.camera.extension
 
 import android.util.Size
 import android.util.SizeF
 import android.view.Surface
 import androidx.annotation.CheckResult
+import com.getbouncer.scan.camera.RotationValue
+
+/**
+ * The maximum resolution width for a preview.
+ */
+private const val MAX_RESOLUTION_WIDTH = 1920
+
+/**
+ * The maximum resolution height for a preview.
+ */
+private const val MAX_RESOLUTION_HEIGHT = 1080
 
 /**
  * Calculate how much an image must scale in X and Y to match a view size.
@@ -80,3 +91,26 @@ internal fun calculateImageRotationDegrees(
         } % 360
         ) + 360
     ) % 360
+
+
+/**
+ * Get the optimal preview resolution from a list of available formats and resolutions.
+ */
+@CheckResult
+internal fun getOptimalPreviewResolution(
+    cameraSizes: Iterable<Pair<Int, Size>>,
+    minimumResolution: Size
+): Pair<Int, Size> {
+    // Only consider camera resolutions larger than the minimum resolution, but smaller than
+    // the maximum resolution.
+    val allowedCameraSizes = cameraSizes.filter {
+        it.second.width <= MAX_RESOLUTION_WIDTH &&
+            it.second.height <= MAX_RESOLUTION_HEIGHT &&
+            it.second.width >= minimumResolution.width &&
+            it.second.height >= minimumResolution.height
+    }
+
+    return allowedCameraSizes.minByOrNull {
+        it.second.width * it.second.height
+    } ?: DEFAULT_IMAGE_FORMAT to Size(MAX_RESOLUTION_WIDTH, MAX_RESOLUTION_HEIGHT)
+}

@@ -37,7 +37,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(":scan-framework")
-    implementation project(":scan-camera-base")
+    implementation project(':scan-camera')
 
     compileOnly project(":scan-camerax")
 

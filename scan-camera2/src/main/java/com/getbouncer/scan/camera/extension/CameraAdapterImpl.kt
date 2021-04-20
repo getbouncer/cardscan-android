@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.getbouncer.scan.camera
+package com.getbouncer.scan.camera.extension
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -47,6 +47,9 @@ import android.view.ViewGroup
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
+import com.getbouncer.scan.camera.CameraAdapter
+import com.getbouncer.scan.camera.CameraErrorListener
+import com.getbouncer.scan.camera.CameraPreviewImage
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.Stats
 import com.getbouncer.scan.framework.TrackedImage
@@ -63,16 +66,6 @@ import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.max
-
-/**
- * The maximum resolution width for a preview.
- */
-private const val MAX_RESOLUTION_WIDTH = 1920
-
-/**
- * The maximum resolution height for a preview.
- */
-private const val MAX_RESOLUTION_HEIGHT = 1080
 
 /**
  * For tap to focus.
@@ -105,35 +98,14 @@ class CameraConfigurationFailedException(val cameraId: String) : Exception() {
 /**
  * A [CameraAdapter] that uses android's Camera 2 APIs to show previews and process images.
  */
-class CameraAdapterImpl(
+internal class CameraAdapterImpl(
     private val activity: Activity,
     private val previewView: ViewGroup,
     private val minimumResolution: Size,
     private val cameraErrorListener: CameraErrorListener,
 ) : CameraAdapter<CameraPreviewImage<Bitmap>>(), LifecycleObserver {
 
-    companion object {
-        /**
-         * Get the optimal preview resolution from a list of available formats and resolutions.
-         */
-        private fun getOptimalPreviewResolution(
-            cameraSizes: Iterable<Pair<Int, Size>>,
-            minimumResolution: Size
-        ): Pair<Int, Size> {
-            // Only consider camera resolutions larger than the minimum resolution, but smaller than
-            // the maximum resolution.
-            val allowedCameraSizes = cameraSizes.filter {
-                it.second.width <= MAX_RESOLUTION_WIDTH &&
-                    it.second.height <= MAX_RESOLUTION_HEIGHT &&
-                    it.second.width >= minimumResolution.width &&
-                    it.second.height >= minimumResolution.height
-            }
-
-            return allowedCameraSizes.minByOrNull {
-                it.second.width * it.second.height
-            } ?: DEFAULT_IMAGE_FORMAT to Size(MAX_RESOLUTION_WIDTH, MAX_RESOLUTION_HEIGHT)
-        }
-    }
+    override val implementationName: String = "Camera2"
 
     private val previewTextureView by lazy { TextureView(activity) }
 

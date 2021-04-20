@@ -1,4 +1,4 @@
-package com.getbouncer.scan.camera
+package com.getbouncer.scan.camera.extension
 
 import android.graphics.ImageFormat
 import android.renderscript.RenderScript

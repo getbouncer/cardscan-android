@@ -1,4 +1,4 @@
-package com.getbouncer.scan.camera
+package com.getbouncer.scan.camera.extension
 
 import android.util.Size
 import kotlin.math.max

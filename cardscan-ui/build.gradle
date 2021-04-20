@@ -38,7 +38,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     api project(":scan-framework")
-    api project(":scan-camera-base")
+    api project(':scan-camera')
     api project(":scan-ui")
     api project(":scan-payment-base")
 
