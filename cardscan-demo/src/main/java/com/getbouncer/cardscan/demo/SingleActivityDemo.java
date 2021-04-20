@@ -28,9 +28,9 @@ import com.getbouncer.cardscan.ui.result.CompletionLoopResult;
 import com.getbouncer.cardscan.ui.result.MainLoopAggregator;
 import com.getbouncer.cardscan.ui.result.MainLoopState;
 import com.getbouncer.scan.camera.CameraAdapter;
-import com.getbouncer.scan.camera.CameraSelectorKt;
 import com.getbouncer.scan.camera.CameraErrorListener;
 import com.getbouncer.scan.camera.CameraPreviewImage;
+import com.getbouncer.scan.camera.CameraSelectorKt;
 import com.getbouncer.scan.framework.AggregateResultListener;
 import com.getbouncer.scan.framework.AnalyzerLoopErrorListener;
 import com.getbouncer.scan.framework.Config;
@@ -46,10 +46,10 @@ import com.getbouncer.scan.payment.card.PaymentCardUtils;
 import com.getbouncer.scan.ui.ViewFinderBackground;
 import com.getbouncer.scan.ui.util.ViewExtensionsKt;
 
-import java.util.Locale;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Locale;
 
 import kotlin.Unit;
 import kotlin.coroutines.CoroutineContext;
