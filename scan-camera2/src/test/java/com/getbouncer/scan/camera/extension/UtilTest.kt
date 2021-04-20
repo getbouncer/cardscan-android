@@ -2,7 +2,6 @@ package com.getbouncer.scan.camera.extension
 
 import android.view.Surface
 import androidx.test.filters.SmallTest
-import com.getbouncer.scan.camera.extension.calculateImageRotationDegrees
 import org.junit.Test
 import kotlin.test.assertEquals
 

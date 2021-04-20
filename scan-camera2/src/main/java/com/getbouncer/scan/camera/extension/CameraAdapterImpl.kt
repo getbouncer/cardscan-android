@@ -652,4 +652,3 @@ internal class CameraAdapterImpl(
         onResume()
     }
 }
-

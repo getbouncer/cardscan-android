@@ -92,7 +92,6 @@ internal fun calculateImageRotationDegrees(
         ) + 360
     ) % 360
 
-
 /**
  * Get the optimal preview resolution from a list of available formats and resolutions.
  */

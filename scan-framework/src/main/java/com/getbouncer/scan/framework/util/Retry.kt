@@ -2,8 +2,6 @@ package com.getbouncer.scan.framework.util
 
 import com.getbouncer.scan.framework.time.Duration
 import kotlinx.coroutines.delay
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
 
 private const val DEFAULT_RETRIES = 3
 
