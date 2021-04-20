@@ -46,10 +46,10 @@ import com.getbouncer.scan.payment.card.PaymentCardUtils;
 import com.getbouncer.scan.ui.ViewFinderBackground;
 import com.getbouncer.scan.ui.util.ViewExtensionsKt;
 
+import java.util.Locale;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Locale;
 
 import kotlin.Unit;
 import kotlin.coroutines.CoroutineContext;
