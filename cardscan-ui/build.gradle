@@ -28,11 +28,6 @@ android {
     lintOptions {
         enable "Interoperability"
     }
-
-    compileOptions {
-        sourceCompatibility 1.8
-        targetCompatibility 1.8
-    }
 }
 
 dependencies {
@@ -41,8 +36,6 @@ dependencies {
     api project(':scan-camera')
     api project(":scan-ui")
     api project(":scan-payment-base")
-
-    compileOnly project(":scan-camerax")
 
     compileOnly project(":scan-payment-ocr")
     compileOnly project(":scan-payment-card-detect")
