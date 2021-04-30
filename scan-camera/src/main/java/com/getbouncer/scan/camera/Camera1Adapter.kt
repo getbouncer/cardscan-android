@@ -54,6 +54,7 @@ internal class Camera1Adapter(
     private var cameraPreview: CameraPreview? = null
     private var mRotation = 0
     private var onCameraAvailableListener: WeakReference<((Camera) -> Unit)?> = WeakReference(null)
+    private var currentCameraId = 0
 
     private val mainThreadHandler = Handler(activity.mainLooper)
     private var cameraThread: HandlerThread? = null
@@ -157,7 +158,7 @@ internal class Camera1Adapter(
             try {
                 var camera: Camera? = null
                 try {
-                    camera = Camera.open()
+                    camera = Camera.open(currentCameraId)
                 } catch (t: Throwable) {
                     cameraErrorListener.onCameraOpenError(t)
                 }
@@ -432,11 +433,17 @@ internal class Camera1Adapter(
     }
 
     override fun withSupportsMultipleCameras(task: (Boolean) -> Unit) {
-        // TODO("Not yet implemented")
-        task(false)
+        task(Camera.getNumberOfCameras() > 1)
     }
 
     override fun changeCamera() {
-        // TODO("Not yet implemented")
+        currentCameraId++
+        if (currentCameraId >= Camera.getNumberOfCameras()) {
+            currentCameraId = 0
+        }
+        onPause()
+        onResume()
     }
+
+    override fun getCurrentCamera(): Int = currentCameraId
 }

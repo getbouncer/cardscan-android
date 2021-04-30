@@ -136,6 +136,11 @@ abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
     abstract fun changeCamera()
 
     /**
+     * Determine which camera is currently in use.
+     */
+    abstract fun getCurrentCamera(): Int
+
+    /**
      * Set the focus on a particular point on the screen.
      */
     abstract fun setFocus(point: PointF)

@@ -24,5 +24,6 @@
     <string name="bouncer_debug_description" description="Accessibility description of the debug preview window">card debug window</string>
     <string name="bouncer_close_button_description" description="Text used to close the scan window">Close</string>
     <string name="bouncer_torch_button_description" description="Text used to turn on the camera torch">Torch</string>
+    <string name="bouncer_swap_camera_button_description" description="Text used to swap the camera">Swap Camera</string>
     <string name="bouncer_card_view_finder_description" description="Accessibility description of the view finder window">card view finder</string>
 </resources>
