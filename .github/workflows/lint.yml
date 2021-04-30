@@ -14,9 +14,6 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2
-        with:
-          token: ${{secrets.SERVICE_PERSONAL_ACCESS_TOKEN}}
-          submodules: recursive
 
       - name: set up JDK 1.8
         uses: actions/setup-java@v1
