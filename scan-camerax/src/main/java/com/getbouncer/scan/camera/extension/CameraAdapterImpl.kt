@@ -105,9 +105,11 @@ internal class CameraAdapterImpl(
                 else -> CameraSelector.LENS_FACING_BACK
             }
 
-            setUpCamera()
+            bindCameraUseCases(it)
         }
     }
+
+    override fun getCurrentCamera(): Int = lensFacing
 
     override fun setFocus(point: PointF) {
         camera?.let { cam ->

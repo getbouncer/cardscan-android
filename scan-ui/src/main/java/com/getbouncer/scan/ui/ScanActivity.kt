@@ -330,6 +330,14 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     }
 
     /**
+     * Toggle between available cameras.
+     */
+    protected open fun toggleCamera() {
+        cameraAdapter.changeCamera()
+        Stats.trackRepeatingTask("swap_camera").trackResult("${cameraAdapter.getCurrentCamera()}")
+    }
+
+    /**
      * Called when the flashlight state has changed.
      */
     protected abstract fun onFlashlightStateChanged(flashlightOn: Boolean)
@@ -417,11 +425,17 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     protected open fun onCameraReady() {
         cameraAdapter.bindToLifecycle(this)
 
-        val stat = Stats.trackTask("torch_supported")
+        val torchStat = Stats.trackTask("torch_supported")
         cameraAdapter.withFlashSupport {
-            stat.trackResult(if (it) "supported" else "unsupported")
+            torchStat.trackResult(if (it) "supported" else "unsupported")
             setFlashlightState(cameraAdapter.isTorchOn())
             onFlashSupported(it)
+        }
+
+        val cameraStat = Stats.trackTask("multiple_cameras_supported")
+        cameraAdapter.withSupportsMultipleCameras {
+            cameraStat.trackResult(if (it) "supported" else "unsupported")
+            onSupportsMultipleCameras(it)
         }
 
         onCameraStreamAvailable(cameraAdapter.getImageStream())
@@ -431,6 +445,11 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      * Perform an action when the flash is supported
      */
     protected abstract fun onFlashSupported(supported: Boolean)
+
+    /**
+     * Perform an action when the camera support is determined
+     */
+    protected abstract fun onSupportsMultipleCameras(supported: Boolean)
 
     protected open fun setFocus(point: PointF) {
         cameraAdapter.setFocus(point)

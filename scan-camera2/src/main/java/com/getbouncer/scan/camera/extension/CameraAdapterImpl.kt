@@ -278,7 +278,7 @@ internal class CameraAdapterImpl(
      */
     private fun setUpCameraOutputs() {
         try {
-            getCurrentCamera()?.also { cameraDetails ->
+            getCurrentCameraDetails()?.also { cameraDetails ->
                 sensorRotation = cameraDetails.sensorRotation
                 autoFocusMode = selectAutoFocusMode(cameraDetails.supportedAutoFocusModes)
 
@@ -361,7 +361,7 @@ internal class CameraAdapterImpl(
         }
     }
 
-    private fun getCurrentCamera(): CameraDetails? = availableCameras.let {
+    private fun getCurrentCameraDetails(): CameraDetails? = availableCameras.let {
         if (currentCameraIndex < 0) {
             currentCameraIndex = if (defaultCameraIndex >= 0) defaultCameraIndex else 0
         }
@@ -651,4 +651,6 @@ internal class CameraAdapterImpl(
 
         onResume()
     }
+
+    override fun getCurrentCamera(): Int = currentCameraIndex
 }

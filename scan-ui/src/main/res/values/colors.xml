@@ -26,8 +26,10 @@
 
     <color name="bouncerCloseButtonDarkColor" description="The color of the close button when the background is a dark color">#FFFFFF</color>
     <color name="bouncerFlashButtonDarkColor" description="The color of the torch button when the background is a dark color">#FFFFFF</color>
+    <color name="bouncerCameraSwapButtonDarkColor" description="The color of the swap camera button when the background is a dark color">#FFFFFF</color>
     <color name="bouncerCloseButtonLightColor" description="The color of the close button when the background is a light color">#000000</color>
     <color name="bouncerFlashButtonLightColor" description="The color of the torch button when the background is a light color">#000000</color>
+    <color name="bouncerCameraSwapButtonLightColor" description="The color of the swap camera button when the background is a light color">#000000</color>
 
     <color name="bouncerDebugHighConfidence" description="When using debug mode, the color of boxes to draw around high confidence text">#00FF00</color>
     <color name="bouncerDebugMediumConfidence" description="When using debug mode, the color of boxes to draw around medium confidence text">#DDDD00</color>

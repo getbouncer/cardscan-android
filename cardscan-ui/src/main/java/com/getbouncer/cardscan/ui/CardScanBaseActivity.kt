@@ -110,7 +110,7 @@ abstract class CardScanBaseActivity :
         super.setupUiConstraints()
 
         enterCardManuallyTextView.layoutParams = ConstraintLayout.LayoutParams(
-            0, // width
+            ConstraintLayout.LayoutParams.WRAP_CONTENT, // width
             ConstraintLayout.LayoutParams.WRAP_CONTENT, // height
         ).apply {
             marginStart = resources.getDimensionPixelSize(R.dimen.bouncerEnterCardManuallyMargin)
