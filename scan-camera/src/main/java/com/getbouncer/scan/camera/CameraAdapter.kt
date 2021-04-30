@@ -53,8 +53,8 @@ abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
          */
         @JvmStatic
         fun isCameraSupported(context: Context): Boolean =
-            context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA).also {
-                if (!it) Log.e(Config.logTag, "System feature 'FEATURE_CAMERA' is unavailable")
+            (context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)).also {
+                if (!it) Log.e(Config.logTag, "System feature 'FEATURE_CAMERA_ANY' is unavailable")
             }
 
         /**

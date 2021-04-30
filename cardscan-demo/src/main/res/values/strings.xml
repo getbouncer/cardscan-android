@@ -2,7 +2,6 @@
     <string name="app_name">CardScan Demo</string>
 
     <string name="scan_card">Scan Card</string>
-    <string name="scan_card_local">Scan Card Local</string>
 
     <string name="scan_canceled">Scan canceled</string>
     <string name="enter_manually">Enter card manually</string>

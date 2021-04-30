@@ -202,7 +202,9 @@ class NameAndExpiryAnalyzer private constructor(
         var currentLetterMaxConfidence = 0f
         var lastSeenLetter = 0.toChar()
 
-        charClusters.forEach { characterPrediction ->
+        // This should be using charClusters.forEach, but doing so seems to require API 24. It's unclear why this won't
+        // use the kotlin.collections version of `forEach`, but it's not during compile.
+        for (characterPrediction in charClusters) {
             if (lastSeenLetter == characterPrediction.character) {
                 currentConsecutiveCount += 1
                 currentLetterMaxConfidence = max(currentLetterMaxConfidence, characterPrediction.confidence)

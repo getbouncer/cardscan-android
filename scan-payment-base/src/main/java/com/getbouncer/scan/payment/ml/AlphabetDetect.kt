@@ -37,7 +37,7 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
         val prediction = mlOutput[0]
         val index = prediction.indexOfMax()
         val character = if (index != null && index > 0) {
-            ('A'.toInt() - 1 + index).toChar()
+            ('A'.code - 1 + index).toChar()
         } else {
             ' '
         }

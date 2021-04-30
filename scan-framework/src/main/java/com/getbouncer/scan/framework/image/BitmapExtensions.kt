@@ -121,9 +121,11 @@ fun Bitmap.rearrangeBySegments(
     val result = Bitmap.createBitmap(newImageSize.width, newImageSize.height, this.config)
     val canvas = Canvas(result)
 
-    segmentMap.forEach { entry ->
-        val from = entry.key
-        val to = entry.value.move(-newImageDimensions.left, -newImageDimensions.top)
+    // This should be using segmentMap.forEach, but doing so seems to require API 24. It's unclear why this won't use
+    // the kotlin.collections version of `forEach`, but it's not during compile.
+    for (it in segmentMap) {
+        val from = it.key
+        val to = it.value.move(-newImageDimensions.left, -newImageDimensions.top)
 
         val segment = this.crop(from).scale(to.size())
         canvas.drawBitmap(

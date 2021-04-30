@@ -147,10 +147,12 @@ fun ByteBuffer.toByteArray() = ByteArray(remaining()).also { this.get(it) }
  */
 @CheckResult
 fun List<ByteBuffer>.toByteArray(): ByteArray {
-    val totalSize = this.sumBy { it.remaining() }
+    val totalSize = this.sumOf { it.remaining() }
     var offset = 0
     return ByteArray(totalSize).apply {
-        this@toByteArray.forEach {
+        // This should be using this@toByteArray.forEach, but doing so seems to require API 24. It's unclear why this
+        // won't use the kotlin.collections version of `forEach`, but it's not during compile.
+        for (it in this@toByteArray) {
             val size = it.remaining()
             it.get(this, offset, size)
             offset += size

@@ -84,9 +84,11 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
         }
 
         workerJob = processingCoroutineScope.launch {
-            analyzerPool.analyzers.forEach { analyzer ->
+            // This should be using analyzerPool.analyzers.forEach, but doing so seems to require API 24. It's unclear
+            // why this won't use the kotlin.collections version of `forEach`, but it's not during compile.
+            for (it in analyzerPool.analyzers) {
                 launch(Dispatchers.Default) {
-                    startWorker(flow, analyzer)
+                    startWorker(flow, it)
                 }
             }
         }

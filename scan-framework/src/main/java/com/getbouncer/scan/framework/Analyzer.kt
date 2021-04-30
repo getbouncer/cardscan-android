@@ -41,6 +41,8 @@ data class AnalyzerPool<DataFrame, State, Output>(
     }
 
     fun closeAllAnalyzers() {
-        analyzers.forEach { if (it is Closeable) it.close() }
+        // This should be using analyzers.forEach, but doing so seems to require API 24. It's unclear why this won't use
+        // the kotlin.collections version of `forEach`, but it's not during compile.
+        for (it in analyzers) { if (it is Closeable) it.close() }
     }
 }
