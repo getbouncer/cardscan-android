@@ -47,7 +47,7 @@ dependencies {
     implementation "androidx.core:core-ktx:1.3.2"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3-native-mt"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.3-native-mt"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.0"
 
     // Allow the user to specify their own version of Tensorflow Lite to include
     runtimeOnly project(":tensorflow-lite")
