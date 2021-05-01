@@ -27,6 +27,10 @@ android {
     lintOptions {
         enable "Interoperability"
     }
+
+    kotlinOptions {
+        jvmTarget = '1.6'
+    }
 }
 
 dependencies {
