@@ -29,8 +29,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility 1.8
-        targetCompatibility 1.8
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
@@ -53,7 +53,7 @@ dependencies {
 dependencies {
     androidTestImplementation "androidx.test.ext:junit:1.1.2"
     androidTestImplementation "androidx.test.espresso:espresso-core:3.3.0"
-    androidTestImplementation "org.jetbrains.kotlin:kotlin-test:1.4.32"
+    androidTestImplementation "org.jetbrains.kotlin:kotlin-test:1.5.0"
 }
 
 apply from: 'deploy.gradle'

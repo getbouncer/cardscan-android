@@ -56,7 +56,9 @@ class DebugOverlay(context: Context, attrs: AttributeSet? = null) : View(context
     }
 
     private fun drawBoxes(canvas: Canvas) {
-        boxes?.forEach {
+        // This should be using boxes?.forEach, but doing so seems to require API 24. It's unclear why this won't
+        // use the kotlin.collections version of `forEach`, but it's not during compile.
+        for (it in boxes ?: emptyList()) {
             paint.color = getPaintColor(it.confidence)
             textPaint.color = getPaintColor(it.confidence)
             val rect = it.rect.scaled(Size(this.width, this.height))
