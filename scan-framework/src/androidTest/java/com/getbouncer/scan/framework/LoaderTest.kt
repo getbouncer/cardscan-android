@@ -38,10 +38,10 @@ class LoaderTest {
 
         // ensure bytes are correct
         byteBuffer.rewind()
-        assertEquals('A', byteBuffer.get().toChar())
-        assertEquals('B', byteBuffer.get().toChar())
-        assertEquals('C', byteBuffer.get().toChar())
-        assertEquals('1', byteBuffer.get().toChar())
+        assertEquals('A', byteBuffer.get().toInt().toChar())
+        assertEquals('B', byteBuffer.get().toInt().toChar())
+        assertEquals('C', byteBuffer.get().toInt().toChar())
+        assertEquals('1', byteBuffer.get().toInt().toChar())
     }
 
     @Test
@@ -78,9 +78,9 @@ class LoaderTest {
 
         // ensure bytes are correct
         byteBuffer.rewind()
-        assertEquals('A', byteBuffer.get().toChar())
-        assertEquals('B', byteBuffer.get().toChar())
-        assertEquals('C', byteBuffer.get().toChar())
-        assertEquals('1', byteBuffer.get().toChar())
+        assertEquals('A', byteBuffer.get().toInt().toChar())
+        assertEquals('B', byteBuffer.get().toInt().toChar())
+        assertEquals('C', byteBuffer.get().toInt().toChar())
+        assertEquals('1', byteBuffer.get().toInt().toChar())
     }
 }
