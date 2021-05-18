@@ -60,7 +60,7 @@ sealed class FetchedData(
                     modelClass = modelClass,
                     modelFrameworkVersion = modelFrameworkVersion,
                     modelVersion = meta.modelVersion,
-                    modelHash = meta.modelFile?.let { runBlocking { calculateHash(it, meta.hashAlgorithm) } },
+                    modelHash = meta.modelFile?.let { runBlocking { try { calculateHash(it, meta.hashAlgorithm) } catch (t: Throwable) { null } } },
                     modelHashAlgorithm = meta.hashAlgorithm,
                     file = meta.modelFile
                 )
@@ -498,13 +498,16 @@ abstract class UpdatingModelWebFetcher(context: Context) : SignedUrlModelWebFetc
      * Delete all files in cache that are not the recently downloaded file.
      */
     override suspend fun cleanUpPostDownload(downloadedFile: File) = withContext(Dispatchers.IO) {
-        getCacheFolder()
-            .listFiles()
-            ?.filter { it != downloadedFile && calculateHash(it, defaultModelHashAlgorithm) != defaultModelHash }
-            ?.sortedByDescending { it.lastModified() }
-            ?.filterIndexed { index, _ -> index > CACHE_MODEL_MAX_COUNT }
-            ?.forEach { it.delete() }
-            .let { }
+        try {
+            getCacheFolder()
+                .listFiles()
+                ?.filter { it != downloadedFile && calculateHash(it, defaultModelHashAlgorithm) != defaultModelHash }
+                ?.sortedByDescending { it.lastModified() }
+                ?.filterIndexed { index, _ -> index > CACHE_MODEL_MAX_COUNT }
+                ?.forEach { it.delete() }
+        } catch (t: Throwable) {
+            Log.e(Config.logTag, "Error cleaning up post download", t)
+        }.let { }
     }
 
     /**
@@ -512,10 +515,15 @@ abstract class UpdatingModelWebFetcher(context: Context) : SignedUrlModelWebFetc
      */
     private suspend fun getMatchingFile(hash: String, hashAlgorithm: String): File? =
         withContext(Dispatchers.IO) {
-            getCacheFolder()
-                .listFiles()
-                ?.sortedByDescending { it.lastModified() }
-                ?.firstOrNull { calculateHash(it, hashAlgorithm) == hash }
+            try {
+                getCacheFolder()
+                    .listFiles()
+                    ?.sortedByDescending { it.lastModified() }
+                    ?.firstOrNull { calculateHash(it, hashAlgorithm) == hash }
+            } catch (t: Throwable) {
+                Log.e(Config.logTag, "Unable to get matching file", t)
+                null
+            }
         }
 
     /**
