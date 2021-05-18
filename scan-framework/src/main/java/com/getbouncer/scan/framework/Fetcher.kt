@@ -654,7 +654,6 @@ abstract class UpdatingResourceFetcher(context: Context) : UpdatingModelWebFetch
 /**
  * Determine if a [File] matches the expected [hash].
  */
-@Throws(IOException::class, NoSuchAlgorithmException::class)
 private suspend fun fileMatchesHash(localFile: File, hash: String, hashAlgorithm: String) = try {
     hash == calculateHash(localFile, hashAlgorithm)
 } catch (t: Throwable) {
