@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.0088](https://github.com/getbouncer/cardscan-android/tree/2.0.0088) (2021-05-18)
+
+**Merged pull requests:**
+
+- Improve error handling around cache calculation [\#377](https://github.com/getbouncer/cardscan-android/pull/377) ([awushensky](https://github.com/awushensky))
+
 ## [2.0.0087](https://github.com/getbouncer/cardscan-android/tree/2.0.0087) (2021-05-13)
 
 ## [2.0.0086](https://github.com/getbouncer/cardscan-android/tree/2.0.0086) (2021-05-13)
@@ -339,7 +345,6 @@
 
 - Support model upgrade delay [\#234](https://github.com/getbouncer/cardscan-android/pull/234) ([awushensky](https://github.com/awushensky))
 - Bump core-ktx from 1.3.1 to 1.3.2 [\#233](https://github.com/getbouncer/cardscan-android/pull/233) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
-- Clean up resources [\#226](https://github.com/getbouncer/cardscan-android/pull/226) ([awushensky](https://github.com/awushensky))
 
 ## [2.0.0041](https://github.com/getbouncer/cardscan-android/tree/2.0.0041) (2020-10-02)
 
@@ -360,6 +365,10 @@
 - Prevent duplicate final results [\#227](https://github.com/getbouncer/cardscan-android/pull/227) ([awushensky](https://github.com/awushensky))
 
 ## [2.0.0038](https://github.com/getbouncer/cardscan-android/tree/2.0.0038) (2020-09-25)
+
+**Merged pull requests:**
+
+- Clean up resources [\#226](https://github.com/getbouncer/cardscan-android/pull/226) ([awushensky](https://github.com/awushensky))
 
 ## [2.0.0037](https://github.com/getbouncer/cardscan-android/tree/2.0.0037) (2020-09-25)
 
@@ -455,13 +464,16 @@
 
 ## [2.0.0025](https://github.com/getbouncer/cardscan-android/tree/2.0.0025) (2020-08-24)
 
+**Merged pull requests:**
+
+- Bump constraintlayout from 1.1.3 to 2.0.0 [\#192](https://github.com/getbouncer/cardscan-android/pull/192) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
+
 ## [2.0.0024](https://github.com/getbouncer/cardscan-android/tree/2.0.0024) (2020-08-21)
 
 ## [2.0.0023](https://github.com/getbouncer/cardscan-android/tree/2.0.0023) (2020-08-21)
 
 **Merged pull requests:**
 
-- Bump constraintlayout from 1.1.3 to 2.0.0 [\#192](https://github.com/getbouncer/cardscan-android/pull/192) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Enable minification on cardscan demo [\#191](https://github.com/getbouncer/cardscan-android/pull/191) ([awushensky](https://github.com/awushensky))
 - Relocate ktlint [\#190](https://github.com/getbouncer/cardscan-android/pull/190) ([awushensky](https://github.com/awushensky))
 - Fix accessibility descriptions [\#189](https://github.com/getbouncer/cardscan-android/pull/189) ([awushensky](https://github.com/awushensky))
@@ -481,7 +493,6 @@
 - Add custom pans [\#183](https://github.com/getbouncer/cardscan-android/pull/183) ([smkuhne](https://github.com/smkuhne))
 - Update dependencies [\#182](https://github.com/getbouncer/cardscan-android/pull/182) ([awushensky](https://github.com/awushensky))
 - Local rules [\#181](https://github.com/getbouncer/cardscan-android/pull/181) ([awushensky](https://github.com/awushensky))
-- Support extracting iin and last4 from utils [\#170](https://github.com/getbouncer/cardscan-android/pull/170) ([awushensky](https://github.com/awushensky))
 
 ## [2.0.0020](https://github.com/getbouncer/cardscan-android/tree/2.0.0020) (2020-08-13)
 
@@ -499,6 +510,7 @@
 **Merged pull requests:**
 
 - Fix display bug [\#171](https://github.com/getbouncer/cardscan-android/pull/171) ([awushensky](https://github.com/awushensky))
+- Support extracting iin and last4 from utils [\#170](https://github.com/getbouncer/cardscan-android/pull/170) ([awushensky](https://github.com/awushensky))
 - Add check result [\#169](https://github.com/getbouncer/cardscan-android/pull/169) ([awushensky](https://github.com/awushensky))
 - Bump appcompat from 1.1.0 to 1.2.0 [\#168](https://github.com/getbouncer/cardscan-android/pull/168) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Add zoomOffset method [\#167](https://github.com/getbouncer/cardscan-android/pull/167) ([smkuhne](https://github.com/smkuhne))
