@@ -31,4 +31,5 @@
     <item name="bouncerIconStrokeWidth" type="integer" description="The width of the lines of the close and torch buttons">2</item>
 
     <dimen name="bouncerDebugWindowWidth" description="The width of the debug window">192dp</dimen>
+    <dimen name="bouncerButtonMargin" description="The amount of margin to place around the buttons">0dp</dimen>
 </resources>

@@ -417,7 +417,12 @@ abstract class SimpleScanActivity : ScanActivity() {
         closeButtonView.layoutParams = ConstraintLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT, // width
             ViewGroup.LayoutParams.WRAP_CONTENT, // height
-        )
+        ).apply {
+            topMargin = resources.getDimensionPixelSize(R.dimen.bouncerButtonMargin)
+            bottomMargin = resources.getDimensionPixelSize(R.dimen.bouncerButtonMargin)
+            marginStart = resources.getDimensionPixelSize(R.dimen.bouncerButtonMargin)
+            marginEnd = resources.getDimensionPixelSize(R.dimen.bouncerButtonMargin)
+        }
 
         closeButtonView.addConstraints {
             connect(it.id, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
@@ -429,7 +434,12 @@ abstract class SimpleScanActivity : ScanActivity() {
         torchButtonView.layoutParams = ConstraintLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT, // width
             ViewGroup.LayoutParams.WRAP_CONTENT, // height
-        )
+        ).apply {
+            topMargin = resources.getDimensionPixelSize(R.dimen.bouncerButtonMargin)
+            bottomMargin = resources.getDimensionPixelSize(R.dimen.bouncerButtonMargin)
+            marginStart = resources.getDimensionPixelSize(R.dimen.bouncerButtonMargin)
+            marginEnd = resources.getDimensionPixelSize(R.dimen.bouncerButtonMargin)
+        }
 
         torchButtonView.addConstraints {
             connect(it.id, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
@@ -441,7 +451,12 @@ abstract class SimpleScanActivity : ScanActivity() {
         swapCameraButtonView.layoutParams = ConstraintLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT, // width
             ViewGroup.LayoutParams.WRAP_CONTENT, // height
-        )
+        ).apply {
+            topMargin = resources.getDimensionPixelSize(R.dimen.bouncerButtonMargin)
+            bottomMargin = resources.getDimensionPixelSize(R.dimen.bouncerButtonMargin)
+            marginStart = resources.getDimensionPixelSize(R.dimen.bouncerButtonMargin)
+            marginEnd = resources.getDimensionPixelSize(R.dimen.bouncerButtonMargin)
+        }
 
         swapCameraButtonView.addConstraints {
             connect(it.id, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
