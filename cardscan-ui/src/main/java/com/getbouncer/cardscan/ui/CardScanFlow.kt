@@ -24,8 +24,8 @@ import com.getbouncer.scan.framework.time.Rate
 import com.getbouncer.scan.payment.FrameDetails
 import com.getbouncer.scan.payment.TextDetectModelManager
 import com.getbouncer.scan.payment.analyzer.NameAndExpiryAnalyzer
-import com.getbouncer.scan.payment.carddetect.CardDetect
-import com.getbouncer.scan.payment.carddetect.CardDetectModelManager
+import com.getbouncer.scan.payment.ocr.CardDetect
+import com.getbouncer.scan.payment.ocr.CardDetectModelManager
 import com.getbouncer.scan.payment.ml.AlphabetDetect
 import com.getbouncer.scan.payment.ml.AlphabetDetectModelManager
 import com.getbouncer.scan.payment.ml.ExpiryDetect

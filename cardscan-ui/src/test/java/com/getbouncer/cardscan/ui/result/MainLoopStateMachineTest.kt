@@ -5,7 +5,7 @@ import com.getbouncer.cardscan.ui.analyzer.MainLoopAnalyzer
 import com.getbouncer.scan.framework.time.delay
 import com.getbouncer.scan.framework.time.milliseconds
 import com.getbouncer.scan.framework.util.ItemTotalCounter
-import com.getbouncer.scan.payment.carddetect.CardDetect
+import com.getbouncer.scan.payment.ocr.CardDetect
 import com.getbouncer.scan.payment.ocr.SSDOcr
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking

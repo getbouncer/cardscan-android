@@ -6,7 +6,7 @@ import com.getbouncer.cardscan.ui.result.MainLoopState
 import com.getbouncer.scan.camera.CameraPreviewImage
 import com.getbouncer.scan.framework.Analyzer
 import com.getbouncer.scan.framework.AnalyzerFactory
-import com.getbouncer.scan.payment.carddetect.CardDetect
+import com.getbouncer.scan.payment.ocr.CardDetect
 import com.getbouncer.scan.payment.ocr.SSDOcr
 
 class MainLoopAnalyzer(
