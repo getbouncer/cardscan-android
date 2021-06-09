@@ -1,7 +1,6 @@
 package com.getbouncer.scan.framework
 
 import android.content.Context
-import android.content.res.AssetManager
 import android.util.Log
 import com.getbouncer.scan.framework.ml.trackModelLoaded
 import kotlinx.coroutines.Dispatchers
@@ -11,7 +10,6 @@ import java.io.FileInputStream
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
-
 
 /**
  * An interface for loading data into a byte buffer.

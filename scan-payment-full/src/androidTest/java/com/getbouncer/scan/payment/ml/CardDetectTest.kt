@@ -41,7 +41,14 @@ class CardDetectTest {
         val model = CardDetect.Factory(appContext, fetchedData).newInstance()
         assertNotNull(model)
 
-        val prediction = model.analyze(CardDetect.cameraPreviewToInput(TrackedImage(bitmap, Stats.trackTask("no_op")), bitmap.size().toRect(), bitmap.size().toRect()), Unit)
+        val prediction = model.analyze(
+            CardDetect.cameraPreviewToInput(
+                TrackedImage(bitmap, Stats.trackTask("no_op")),
+                bitmap.size().toRect(),
+                bitmap.size().toRect(),
+            ),
+            Unit
+        )
         assertNotNull(prediction)
         assertEquals(CardDetect.Prediction.Side.PAN, prediction.side)
     }
@@ -68,7 +75,14 @@ class CardDetectTest {
         val model = CardDetect.Factory(appContext, fetchedData).newInstance()
         assertNotNull(model)
 
-        val prediction = model.analyze(CardDetect.cameraPreviewToInput(TrackedImage(bitmap, Stats.trackTask("no_op")), bitmap.size().toRect(), bitmap.size().toRect()), Unit)
+        val prediction = model.analyze(
+            CardDetect.cameraPreviewToInput(
+                TrackedImage(bitmap, Stats.trackTask("no_op")),
+                bitmap.size().toRect(),
+                bitmap.size().toRect(),
+            ),
+            Unit
+        )
         assertNotNull(prediction)
         assertEquals(CardDetect.Prediction.Side.NO_PAN, prediction.side)
     }
@@ -95,7 +109,14 @@ class CardDetectTest {
         val model = CardDetect.Factory(appContext, fetchedData).newInstance()
         assertNotNull(model)
 
-        val prediction = model.analyze(CardDetect.cameraPreviewToInput(TrackedImage(bitmap, Stats.trackTask("no_op")), bitmap.size().toRect(), bitmap.size().toRect()), Unit)
+        val prediction = model.analyze(
+            CardDetect.cameraPreviewToInput(
+                TrackedImage(bitmap, Stats.trackTask("no_op")),
+                bitmap.size().toRect(),
+                bitmap.size().toRect(),
+            ),
+            Unit
+        )
         assertNotNull(prediction)
         assertEquals(CardDetect.Prediction.Side.NO_CARD, prediction.side)
     }

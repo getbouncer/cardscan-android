@@ -88,11 +88,12 @@ class CardDetectTest {
 
         val prediction = model.analyze(
             CardDetect.cameraPreviewToInput(
-                TrackedImage(
-                    bitmap,
-                    Stats.trackTask("no_op")
-                ), bitmap.size().toRect(), bitmap.size().toRect()
-            ), Unit)
+                TrackedImage(bitmap, Stats.trackTask("no_op")),
+                bitmap.size().toRect(),
+                bitmap.size().toRect(),
+            ),
+            Unit
+        )
         assertNotNull(prediction)
         assertEquals(CardDetect.Prediction.Side.NO_PAN, prediction.side)
     }
@@ -119,11 +120,12 @@ class CardDetectTest {
 
         val prediction = model.analyze(
             CardDetect.cameraPreviewToInput(
-                TrackedImage(
-                    bitmap,
-                    Stats.trackTask("no_op")
-                ), bitmap.size().toRect(), bitmap.size().toRect()
-            ), Unit)
+                TrackedImage(bitmap, Stats.trackTask("no_op")),
+                bitmap.size().toRect(),
+                bitmap.size().toRect(),
+            ),
+            Unit
+        )
         assertNotNull(prediction)
         assertEquals(CardDetect.Prediction.Side.NO_CARD, prediction.side)
     }
