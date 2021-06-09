@@ -257,6 +257,21 @@ open class CardScanActivity :
         @JvmStatic
         fun isScanResult(requestCode: Int) = REQUEST_CODE == requestCode
 
+        /**
+         * Determine if the scan is supported
+         */
+        fun isSupported(context: Context) = CardScanFlow.isSupported(context)
+
+        /**
+         * Determine if the scan models are available (have been warmed up)
+         */
+        fun isScanReady() = CardScanFlow.isScanReady()
+
+        /**
+         * Determine if the optional scan models are available (have been warmed up)
+         */
+        fun isNameAndExpiryScanReady() = CardScanFlow.isNameAndExpiryScanReady()
+
         private fun showNameAndExpiryInitializationError(context: Context) {
             AlertDialog.Builder(context)
                 .setTitle(R.string.bouncer_name_and_expiry_initialization_error)
