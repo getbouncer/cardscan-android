@@ -6,8 +6,8 @@ import com.getbouncer.cardscan.ui.result.MainLoopState
 import com.getbouncer.scan.camera.CameraPreviewImage
 import com.getbouncer.scan.framework.Analyzer
 import com.getbouncer.scan.framework.AnalyzerFactory
-import com.getbouncer.scan.payment.carddetect.CardDetect
-import com.getbouncer.scan.payment.ocr.SSDOcr
+import com.getbouncer.scan.payment.ml.CardDetect
+import com.getbouncer.scan.payment.ml.SSDOcr
 
 class MainLoopAnalyzer(
     private val ssdOcr: Analyzer<SSDOcr.Input, Any, SSDOcr.Prediction>?,

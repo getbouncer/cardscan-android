@@ -109,3 +109,13 @@ private fun readFileToByteBuffer(
     startOffset,
     declaredLength
 )
+
+/**
+ * Determine if an asset file exists
+ */
+fun assetFileExists(context: Context, assetFileName: String) =
+    try {
+        context.assets.openFd(assetFileName).use { it.declaredLength > 0 }
+    } catch (t: Throwable) {
+        false
+    }
