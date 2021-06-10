@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.util.Size
+import androidx.annotation.VisibleForTesting
 import com.getbouncer.scan.framework.FetchedData
 import com.getbouncer.scan.framework.TrackedImage
 import com.getbouncer.scan.framework.image.MLImage
@@ -68,8 +69,10 @@ private const val PROB_THRESHOLD = 0.50f
 private const val IOU_THRESHOLD = 0.50f
 private const val CENTER_VARIANCE = 0.1f
 private const val SIZE_VARIANCE = 0.2f
-private const val VERTICAL_THRESHOLD = 2.0f
 private const val LIMIT = 20
+
+@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+internal const val VERTICAL_THRESHOLD = 2.0f
 
 private val FEATURE_MAP_SIZES =
     OcrFeatureMapSizes(
