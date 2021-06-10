@@ -11,6 +11,7 @@ abstract class ModelManager {
 
     private lateinit var fetcher: Fetcher
     private val fetcherMutex = Mutex()
+    private var successfullyFetched = false
 
     suspend fun fetchModel(context: Context, forImmediateUse: Boolean, isOptional: Boolean = false): FetchedData {
         fetcherMutex.withLock {
@@ -18,8 +19,10 @@ abstract class ModelManager {
                 fetcher = getModelFetcher(context.applicationContext)
             }
         }
-        return fetcher.fetchData(forImmediateUse, isOptional)
+        return fetcher.fetchData(forImmediateUse, isOptional).also { successfullyFetched = it.successfullyFetched }
     }
+
+    fun isReady() = successfullyFetched
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     abstract fun getModelFetcher(context: Context): Fetcher

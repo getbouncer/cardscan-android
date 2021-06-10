@@ -12,6 +12,7 @@ import com.getbouncer.cardscan.ui.result.CompletionLoopListener
 import com.getbouncer.cardscan.ui.result.CompletionLoopResult
 import com.getbouncer.cardscan.ui.result.MainLoopAggregator
 import com.getbouncer.cardscan.ui.result.MainLoopState
+import com.getbouncer.scan.camera.CameraAdapter
 import com.getbouncer.scan.camera.CameraPreviewImage
 import com.getbouncer.scan.framework.AggregateResultListener
 import com.getbouncer.scan.framework.AnalyzerLoopErrorListener
@@ -93,6 +94,21 @@ open class CardScanFlow(
                 GlobalScope.launch(Dispatchers.IO) { ExpiryDetectModelManager.fetchModel(context, forImmediateUse = false) }
             }
         }
+
+        /**
+         * Determine if the scan is supported
+         */
+        fun isSupported(context: Context) = CameraAdapter.isCameraSupported(context)
+
+        /**
+         * Determine if the scan models are available (have been warmed up)
+         */
+        fun isScanReady() = SSDOcrModelManager.isReady() && CardDetectModelManager.isReady()
+
+        /**
+         * Determine if the optional scan models are available (have been warmed up)
+         */
+        fun isNameAndExpiryScanReady() = TextDetectModelManager.isReady() && AlphabetDetectModelManager.isReady() && ExpiryDetectModelManager.isReady()
     }
 
     /**
