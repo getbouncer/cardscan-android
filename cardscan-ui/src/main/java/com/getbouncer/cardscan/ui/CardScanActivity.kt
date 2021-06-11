@@ -260,16 +260,19 @@ open class CardScanActivity :
         /**
          * Determine if the scan is supported
          */
+        @JvmStatic
         fun isSupported(context: Context) = CardScanFlow.isSupported(context)
 
         /**
          * Determine if the scan models are available (have been warmed up)
          */
+        @JvmStatic
         fun isScanReady() = CardScanFlow.isScanReady()
 
         /**
          * Determine if the optional scan models are available (have been warmed up)
          */
+        @JvmStatic
         fun isNameAndExpiryScanReady() = CardScanFlow.isNameAndExpiryScanReady()
 
         private fun showNameAndExpiryInitializationError(context: Context) {
