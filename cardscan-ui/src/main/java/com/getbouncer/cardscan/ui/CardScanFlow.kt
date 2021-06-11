@@ -98,16 +98,19 @@ open class CardScanFlow(
         /**
          * Determine if the scan is supported
          */
+        @JvmStatic
         fun isSupported(context: Context) = CameraAdapter.isCameraSupported(context)
 
         /**
          * Determine if the scan models are available (have been warmed up)
          */
+        @JvmStatic
         fun isScanReady() = SSDOcrModelManager.isReady() && CardDetectModelManager.isReady()
 
         /**
          * Determine if the optional scan models are available (have been warmed up)
          */
+        @JvmStatic
         fun isNameAndExpiryScanReady() = TextDetectModelManager.isReady() && AlphabetDetectModelManager.isReady() && ExpiryDetectModelManager.isReady()
     }
 
