@@ -120,21 +120,17 @@ fun extractPredictions(
 }
 
 /**
- * Determine if the number is displayed horizontally or both horizontally and vertically.
- * We do this by finding the median vertical coordinate center. Now, if the number is
- * displayed horizontally the deviation of all the number boxes and the median
- * center should be minimal since they are laid on roughly the same horizontal line. In this,
- * case we just need to sort from left to right to order the number boxes.
- * Additionally, we also filter out boxes that are outside the same horizontal line.
- * This is done to exclude information such as phone numbers or expiry.
- * On the other hand, if the aggregate deviation of the number box centers from the
- * median center is above a threshold, i.e. the number has both vertical and horizontal components
- * we need to sort from left to right and top to bottom to order the boxes according to the
- * card number.
+ * Determine if the number is displayed horizontally or both horizontally and vertically. We do this
+ * by finding the median vertical coordinate center. If the number is displayed horizontally, the
+ * deviation of all the number boxes and the median center should be minimal since they are laid on
+ * roughly the same horizontal line. In this case we just need to sort from left to right to order
+ * the number boxes. Additionally, we also filter out boxes that are outside the same horizontal
+ * line. This is done to exclude information such as phone numbers or expiry. On the other hand, if
+ * the aggregate deviation of the number box centers from the median center is above a threshold,
+ * i.e. the number has both vertical and horizontal components we need to sort from left to right
+ * and top to bottom to order the boxes according to the card number.
  */
-
 fun determineLayoutAndFilter(detectedBoxes: List<DetectionBox>, verticalOffset: Float): List<DetectionBox> {
-
     if (detectedBoxes.isEmpty()) {
         return detectedBoxes
     }
@@ -147,14 +143,19 @@ fun determineLayoutAndFilter(detectedBoxes: List<DetectionBox>, verticalOffset: 
     val medianHeight = heights.elementAt(heights.size / 2)
     val aggregateDeviation = centers.map { abs(it - medianCenter) }.sum()
 
-    return if (aggregateDeviation > verticalOffset * medianHeight && detectedBoxes.size == QUICK_READ_LENGTH) {
-        detectedBoxes
+    if (aggregateDeviation > verticalOffset * medianHeight && detectedBoxes.size == QUICK_READ_LENGTH) {
+        val quickReadGroups = detectedBoxes
             .sortedBy { it.rect.centerY() }
             .chunked(QUICK_READ_GROUP_LENGTH)
-            .map { it.sortedBy { detectionBox -> detectionBox.rect.left } }.flatten()
-    } else {
-        detectedBoxes
-            .sortedBy { it.rect.left }
-            .filter { abs(it.rect.centerY() - medianCenter) <= medianHeight }
+            .map { it.sortedBy { detectionBox -> detectionBox.rect.left } }
+
+        // Quick read groups should be in vertical blocks. Make sure the blocks are not horizontally laid out
+        if (quickReadGroups[1].first().rect.centerX() < quickReadGroups[0].last().rect.centerX() && quickReadGroups[1].last().rect.centerX() > quickReadGroups[0].first().rect.centerX()) {
+            return quickReadGroups.flatten()
+        }
     }
+
+    return detectedBoxes
+        .sortedBy { it.rect.left }
+        .filter { abs(it.rect.centerY() - medianCenter) <= medianHeight }
 }
