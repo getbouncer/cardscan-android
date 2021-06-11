@@ -15,7 +15,7 @@ class AppDetailsTest {
         assertEquals("com.getbouncer.scan.framework.test", appDetails.appPackageName)
         assertEquals("", appDetails.applicationId)
         assertEquals("com.getbouncer.scan.framework", appDetails.libraryPackageName)
-        assertTrue(appDetails.sdkVersion.startsWith("2.0."), "${appDetails.sdkVersion} does not start with \"2.0.\"")
+        assertTrue(appDetails.sdkVersion.startsWith("2."), "${appDetails.sdkVersion} does not start with \"2.\"")
         assertEquals(-1, appDetails.sdkVersionCode)
         assertTrue(appDetails.sdkFlavor.isNotEmpty())
     }
