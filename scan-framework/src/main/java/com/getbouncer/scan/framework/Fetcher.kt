@@ -420,6 +420,8 @@ abstract class UpdatingModelWebFetcher(context: Context) : SignedUrlModelWebFetc
 
         val nextUpgradeTime = getNextUpgradeTime()
         when {
+            Config.betaModelOptIn ->
+                Log.d(Config.logTag, "Fetcher: Beta opt-in, attempting to upgrade $modelClass")
             nextUpgradeTime.hasPassed() ->
                 Log.d(Config.logTag, "Fetcher: Time to upgrade $modelClass, fetching upgrade details")
             cachedModelHash == null ->
