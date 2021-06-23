@@ -14,6 +14,7 @@ import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.util.indexOfMax
 import com.getbouncer.scan.payment.cropCameraPreviewToSquare
 import com.getbouncer.scan.payment.hasOpenGl31
+import kotlinx.coroutines.runBlocking
 import org.tensorflow.lite.Interpreter
 import java.nio.ByteBuffer
 import kotlin.math.max
@@ -39,7 +40,7 @@ class CardDetect private constructor(interpreter: Interpreter) :
                 cropCameraPreviewToSquare(cameraPreviewImage.image, previewBounds, cardFinder)
                     .scale(TRAINED_IMAGE_SIZE)
                     .toMLImage()
-                    .also { cameraPreviewImage.tracker.trackResult("card_detect_image_cropped") },
+                    .also { runBlocking { cameraPreviewImage.tracker.trackResult("card_detect_image_cropped") } },
                 cameraPreviewImage.tracker,
             )
         )

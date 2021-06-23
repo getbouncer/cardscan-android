@@ -130,7 +130,7 @@ abstract class CardScanBaseActivity :
      * Cancel scanning to enter a card manually
      */
     protected open fun enterCardManually() {
-        scanStat.trackResult("enter_card_manually")
+        launch { scanStat.trackResult("enter_card_manually") }
         resultListener.enterManually()
         closeScanner()
     }

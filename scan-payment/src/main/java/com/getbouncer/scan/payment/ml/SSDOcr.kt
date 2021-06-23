@@ -24,6 +24,7 @@ import com.getbouncer.scan.payment.ml.ssd.combinePriors
 import com.getbouncer.scan.payment.ml.ssd.determineLayoutAndFilter
 import com.getbouncer.scan.payment.ml.ssd.extractPredictions
 import com.getbouncer.scan.payment.ml.ssd.rearrangeOCRArray
+import kotlinx.coroutines.runBlocking
 import org.tensorflow.lite.Interpreter
 import java.nio.ByteBuffer
 
@@ -112,7 +113,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
                 cropCameraPreviewToViewFinder(cameraPreviewImage.image, previewBounds, cardFinder)
                     .scale(Factory.TRAINED_IMAGE_SIZE)
                     .toMLImage(mean = IMAGE_MEAN, std = IMAGE_STD).also {
-                        cameraPreviewImage.tracker.trackResult("ocr_image_transform")
+                        runBlocking { cameraPreviewImage.tracker.trackResult("ocr_image_transform") }
                     },
                 cameraPreviewImage.tracker
             )

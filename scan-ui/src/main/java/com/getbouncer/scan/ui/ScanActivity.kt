@@ -178,7 +178,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      */
     protected open fun ensurePermissionAndStartCamera() = when {
         ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED -> {
-            permissionStat.trackResult("already_granted")
+            launch { permissionStat.trackResult("already_granted") }
             prepareCamera { onCameraReady() }
         }
         ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA) -> showPermissionRationaleDialog()
@@ -200,11 +200,11 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
         if (requestCode == PERMISSION_REQUEST_CODE && grantResults.isNotEmpty()) {
             when (grantResults[0]) {
                 PackageManager.PERMISSION_GRANTED -> {
-                    permissionStat.trackResult("granted")
+                    launch { permissionStat.trackResult("granted") }
                     prepareCamera { onCameraReady() }
                 }
                 else -> {
-                    permissionStat.trackResult("denied")
+                    launch { permissionStat.trackResult("denied") }
                     userCancelScan()
                 }
             }
@@ -326,7 +326,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     protected open fun toggleFlashlight() {
         isFlashlightOn = !isFlashlightOn
         setFlashlightState(isFlashlightOn)
-        Stats.trackRepeatingTask("torch_state").trackResult(if (isFlashlightOn) "on" else "off")
+        launch { Stats.trackRepeatingTask("torch_state").trackResult(if (isFlashlightOn) "on" else "off") }
     }
 
     /**
@@ -334,7 +334,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      */
     protected open fun toggleCamera() {
         cameraAdapter.changeCamera()
-        Stats.trackRepeatingTask("swap_camera").trackResult("${cameraAdapter.getCurrentCamera()}")
+        launch { Stats.trackRepeatingTask("swap_camera").trackResult("${cameraAdapter.getCurrentCamera()}") }
     }
 
     /**
@@ -356,7 +356,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      */
     protected open fun cameraErrorCancelScan(cause: Throwable? = null) {
         Log.e(Config.logTag, "Canceling scan due to camera error", cause)
-        scanStat.trackResult("camera_error")
+        launch { scanStat.trackResult("camera_error") }
         resultListener.cameraError(cause)
         closeScanner()
     }
@@ -365,7 +365,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      * The scan has been cancelled by the user.
      */
     protected open fun userCancelScan() {
-        scanStat.trackResult("user_canceled")
+        launch { scanStat.trackResult("user_canceled") }
         resultListener.userCanceled()
         closeScanner()
     }
@@ -375,7 +375,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      */
     protected open fun analyzerFailureCancelScan(cause: Throwable? = null) {
         Log.e(Config.logTag, "Canceling scan due to analyzer error", cause)
-        scanStat.trackResult("analyzer_failure")
+        launch { scanStat.trackResult("analyzer_failure") }
         resultListener.analyzerFailure(cause)
         closeScanner()
     }
@@ -427,14 +427,14 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
 
         val torchStat = Stats.trackTask("torch_supported")
         cameraAdapter.withFlashSupport {
-            torchStat.trackResult(if (it) "supported" else "unsupported")
+            launch { torchStat.trackResult(if (it) "supported" else "unsupported") }
             setFlashlightState(cameraAdapter.isTorchOn())
             onFlashSupported(it)
         }
 
         val cameraStat = Stats.trackTask("multiple_cameras_supported")
         cameraAdapter.withSupportsMultipleCameras {
-            cameraStat.trackResult(if (it) "supported" else "unsupported")
+            launch { cameraStat.trackResult(if (it) "supported" else "unsupported") }
             onSupportsMultipleCameras(it)
         }
 

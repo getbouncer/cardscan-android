@@ -21,6 +21,7 @@ import com.getbouncer.scan.payment.cropCameraPreviewToSquare
 import com.getbouncer.scan.payment.hasOpenGl31
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
 import com.getbouncer.scan.payment.ml.yolo.processYoloLayer
+import kotlinx.coroutines.runBlocking
 import org.tensorflow.lite.Interpreter
 import java.io.FileNotFoundException
 import java.nio.ByteBuffer
@@ -94,7 +95,7 @@ class TextDetect private constructor(interpreter: Interpreter) :
                 )
                     .scale(TRAINED_IMAGE_SIZE)
                     .toMLImage()
-                    .also { cameraPreviewImage.tracker.trackResult("text_detect_image_cropped") },
+                    .also { runBlocking { cameraPreviewImage.tracker.trackResult("text_detect_image_cropped") } },
                 cameraPreviewImage.tracker,
             )
         )
