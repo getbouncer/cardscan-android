@@ -78,7 +78,7 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
         loopExecutionStatTracker = Stats.trackTask("${this::class.java.simpleName}_execution")
 
         if (analyzerPool.analyzers.isEmpty()) {
-            loopExecutionStatTracker.trackResult("canceled")
+            processingCoroutineScope.launch { loopExecutionStatTracker.trackResult("canceled") }
             analyzerLoopErrorListener.onAnalyzerFailure(NoAnalyzersAvailableException)
             return null
         }
@@ -208,7 +208,7 @@ class FiniteAnalyzerLoop<DataFrame, State, Output>(
 
     fun process(frames: Collection<DataFrame>, processingCoroutineScope: CoroutineScope): Job? {
         val channel = Channel<DataFrame>(capacity = frames.size)
-        framesToProcess = frames.map { channel.offer(it) }.count { it }
+        framesToProcess = frames.map { channel.trySend(it) }.count { it.isSuccess }
         return if (framesToProcess > 0) {
             subscribeToFlow(channel.receiveAsFlow(), processingCoroutineScope)
         } else {
@@ -261,4 +261,4 @@ class FiniteAnalyzerLoop<DataFrame, State, Output>(
  */
 @ExperimentalCoroutinesApi
 suspend fun <T> Flow<T>.backPressureDrop(): Flow<T> =
-    channelFlow { this@backPressureDrop.collect { offer(it) } }.buffer(capacity = Channel.RENDEZVOUS)
+    channelFlow { this@backPressureDrop.collect { trySend(it) } }.buffer(capacity = Channel.RENDEZVOUS)

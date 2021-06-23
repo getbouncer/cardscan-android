@@ -31,40 +31,7 @@ class ImageTest {
 
     @Test
     @SmallTest
-    fun bitmap_toRGBByteBuffer_fromPhoto_isCorrect() {
-        val bitmap = testResources.getDrawable(R.drawable.ocr_card_numbers_clear, null).toBitmap()
-        assertNotNull(bitmap)
-        assertEquals(600, bitmap.width, "Bitmap width is not expected")
-        assertEquals(375, bitmap.height, "Bitmap height is not expected")
-
-        // convert the bitmap to a byte buffer
-        val convertedImage = bitmap.toMLImage(mean = 127.5f, std = 128.5f).getData()
-
-        // read in an expected converted file
-        val rawStream = testResources.openRawResource(R.raw.ocr_card_numbers_clear)
-        val rawBytes = rawStream.readBytes()
-        val rawImage = ByteBuffer.wrap(rawBytes)
-        rawStream.close()
-
-        // check the size of the files
-        assertEquals(rawImage.limit(), convertedImage.limit(), "File size mismatch")
-        rawImage.rewind()
-        convertedImage.rewind()
-
-        // check each byte of the files
-        var encounteredNonZeroByte = false
-        while (convertedImage.position() < convertedImage.limit()) {
-            val rawImageByte = rawImage.get()
-            encounteredNonZeroByte = encounteredNonZeroByte || rawImageByte.toInt() != 0
-            assertEquals(rawImageByte, convertedImage.get(), "Difference at byte ${rawImage.position()}")
-        }
-
-        assertTrue(encounteredNonZeroByte, "Bytes were all zero")
-    }
-
-    @Test
-    @SmallTest
-    fun bitmap_toRGBByteBuffer_generated_isCorrect() {
+    fun bitmap_toRGBByteBuffer_isCorrect() {
         val bitmap = generateSampleBitmap()
         assertNotNull(bitmap)
         assertEquals(100, bitmap.width, "Bitmap width is not expected")
@@ -99,7 +66,7 @@ class ImageTest {
     @SmallTest
     fun bitmap_scale_isCorrect() {
         // read in a sample bitmap file
-        val bitmap = testResources.getDrawable(R.drawable.ocr_card_numbers_clear, null).toBitmap()
+        val bitmap = testResources.getDrawable(R.drawable.ocr_card_numbers, null).toBitmap()
         assertNotNull(bitmap)
         assertEquals(600, bitmap.width, "Bitmap width is not expected")
         assertEquals(375, bitmap.height, "Bitmap height is not expected")
@@ -128,7 +95,7 @@ class ImageTest {
     @Test
     @SmallTest
     fun bitmap_crop_isCorrect() {
-        val bitmap = testResources.getDrawable(R.drawable.ocr_card_numbers_clear, null).toBitmap()
+        val bitmap = testResources.getDrawable(R.drawable.ocr_card_numbers, null).toBitmap()
         assertNotNull(bitmap)
         assertEquals(600, bitmap.width, "Bitmap width is not expected")
         assertEquals(375, bitmap.height, "Bitmap height is not expected")
@@ -167,7 +134,7 @@ class ImageTest {
     @Test
     @SmallTest
     fun bitmap_cropWithFill_isCorrect() {
-        val bitmap = testResources.getDrawable(R.drawable.ocr_card_numbers_clear, null).toBitmap()
+        val bitmap = testResources.getDrawable(R.drawable.ocr_card_numbers, null).toBitmap()
         assertNotNull(bitmap)
         assertEquals(600, bitmap.width, "Bitmap width is not expected")
         assertEquals(375, bitmap.height, "Bitmap height is not expected")
@@ -220,7 +187,7 @@ class ImageTest {
     @Test
     @SmallTest
     fun zoom_isCorrect() {
-        val bitmap = testResources.getDrawable(R.drawable.ocr_card_numbers_clear, null).toBitmap()
+        val bitmap = testResources.getDrawable(R.drawable.ocr_card_numbers, null).toBitmap()
         assertNotNull(bitmap)
         assertEquals(600, bitmap.width, "Bitmap width is not expected")
         assertEquals(375, bitmap.height, "Bitmap height is not expected")

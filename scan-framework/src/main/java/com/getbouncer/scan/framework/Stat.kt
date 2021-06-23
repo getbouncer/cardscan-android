@@ -5,8 +5,8 @@ import androidx.annotation.CheckResult
 import com.getbouncer.scan.framework.time.Clock
 import com.getbouncer.scan.framework.time.ClockMark
 import com.getbouncer.scan.framework.time.Duration
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.supervisorScope
@@ -159,7 +159,7 @@ object Stats {
     /**
      * Track the result of a task.
      */
-    fun <T> trackRepeatingTask(name: String, task: () -> T): T {
+    suspend fun <T> trackRepeatingTask(name: String, task: () -> T): T {
         val tracker = trackRepeatingTask(name)
         val result: T
         try {
@@ -212,17 +212,17 @@ interface StatTracker {
     /**
      * Track the result from a stat.
      */
-    fun trackResult(result: String? = null)
+    suspend fun trackResult(result: String? = null)
 }
 
 private object StatTrackerNoOpImpl : StatTracker {
     override val startedAt = Clock.markNow()
-    override fun trackResult(result: String?) { /* do nothing */ }
+    override suspend fun trackResult(result: String?) { /* do nothing */ }
 }
 
 private class StatTrackerImpl(private val onComplete: suspend (ClockMark, String?) -> Unit) : StatTracker {
     override val startedAt = Clock.markNow()
-    override fun trackResult(result: String?) { GlobalScope.launch { onComplete(startedAt, result) } }
+    override suspend fun trackResult(result: String?) = coroutineScope { launch { onComplete(startedAt, result) } }.let { Unit }
 }
 
 data class TaskStats(

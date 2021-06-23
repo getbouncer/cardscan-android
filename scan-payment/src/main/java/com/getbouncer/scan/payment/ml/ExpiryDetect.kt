@@ -22,6 +22,7 @@ import com.getbouncer.scan.payment.card.isValidExpiry
 import com.getbouncer.scan.payment.card.isValidMonth
 import com.getbouncer.scan.payment.cropCameraPreviewToSquare
 import com.getbouncer.scan.payment.hasOpenGl31
+import kotlinx.coroutines.runBlocking
 import org.tensorflow.lite.Interpreter
 import java.io.FileNotFoundException
 import java.nio.ByteBuffer
@@ -58,7 +59,7 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
                     previewBounds = previewBounds,
                     viewFinder = viewFinder,
                 )
-                    .also { cameraPreviewImage.tracker.trackResult("expiry_detect_image_cropped") },
+                    .also { runBlocking { cameraPreviewImage.tracker.trackResult("expiry_detect_image_cropped") } },
                 cameraPreviewImage.tracker,
             ),
             expiryBox
