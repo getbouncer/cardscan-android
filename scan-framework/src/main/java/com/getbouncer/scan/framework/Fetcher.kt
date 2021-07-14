@@ -21,6 +21,8 @@ import java.lang.Exception
 import java.net.URL
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 private const val CACHE_MODEL_MAX_COUNT = 3
 
@@ -115,6 +117,8 @@ interface Fetcher {
      * @param forImmediateUse: if there is a cached version of the model, return that immediately instead of downloading a new model
      */
     suspend fun fetchData(forImmediateUse: Boolean, isOptional: Boolean): FetchedData
+
+    suspend fun isCached(): Boolean
 }
 
 /**
@@ -135,6 +139,8 @@ abstract class ResourceFetcher : Fetcher {
             modelHashAlgorithm = hashAlgorithm,
             assetFileName = assetFileName,
         )
+
+    override suspend fun isCached(): Boolean = true
 }
 
 /**
@@ -224,6 +230,11 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
             }
             cachedData
         }
+    }
+
+    override suspend fun isCached(): Boolean = when (val meta = tryFetchLatestCachedData()) {
+        is FetchedModelFileMeta -> meta.modelFile != null
+        is FetchedModelResourceMeta -> true
     }
 
     /**
