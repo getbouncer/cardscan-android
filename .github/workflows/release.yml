@@ -13,7 +13,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.release.base.ref }}
+          ref: ${{ github.event.release.target_commitish }}
           token: ${{secrets.SERVICE_PERSONAL_ACCESS_TOKEN}}
           submodules: recursive
 
@@ -40,7 +40,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.release.base.ref }}
+          ref: ${{ github.event.release.target_commitish }}
           token: ${{secrets.SERVICE_PERSONAL_ACCESS_TOKEN}}
           submodules: recursive
 
@@ -83,7 +83,7 @@ jobs:
         id: commit
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          branch: ${{ github.event.release.base.ref }}
+          branch: ${{ github.event.release.target_commitish }}
           commit_message: "Automatic changelog update"
           file_pattern: "gradle.properties CHANGELOG.md"
 
@@ -96,7 +96,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.release.base.ref }}
+          ref: ${{ github.event.release.target_commitish }}
           token: ${{secrets.SERVICE_PERSONAL_ACCESS_TOKEN}}
           submodules: recursive
 
