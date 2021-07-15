@@ -49,13 +49,13 @@ dependencies {
     testImplementation "androidx.test:core:1.4.0"
     testImplementation "androidx.test:runner:1.4.0"
     testImplementation "junit:junit:4.13.2"
-    testImplementation "org.jetbrains.kotlin:kotlin-test:1.5.21"
+    testImplementation "org.jetbrains.kotlin:kotlin-test:1.4.32"
 }
 
 dependencies {
     androidTestImplementation "androidx.test.ext:junit:1.1.3"
     androidTestImplementation "androidx.test.espresso:espresso-core:3.4.0"
-    androidTestImplementation "org.jetbrains.kotlin:kotlin-test:1.5.21"
+    androidTestImplementation "org.jetbrains.kotlin:kotlin-test:1.4.32"
 }
 
 apply from: 'deploy.gradle'
