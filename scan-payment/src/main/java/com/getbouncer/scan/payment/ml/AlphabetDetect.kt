@@ -37,7 +37,9 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
         val prediction = mlOutput[0]
         val index = prediction.indexOfMax()
         val character = if (index != null && index > 0) {
-            ('A'.code - 1 + index).toChar()
+            // TODO: change this back once we support newer gradle versions
+//            ('A'.code - 1 + index).toChar()
+            ('A'.toInt() - 1 + index).toChar()
         } else {
             ' '
         }
