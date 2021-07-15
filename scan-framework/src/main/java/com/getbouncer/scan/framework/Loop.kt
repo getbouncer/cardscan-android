@@ -208,7 +208,9 @@ class FiniteAnalyzerLoop<DataFrame, State, Output>(
 
     fun process(frames: Collection<DataFrame>, processingCoroutineScope: CoroutineScope): Job? {
         val channel = Channel<DataFrame>(capacity = frames.size)
-        framesToProcess = frames.map { channel.trySend(it) }.count { it.isSuccess }
+        // TODO: upgrade this when kotlin libs hit 1.5.0
+//        framesToProcess = frames.map { channel.trySend(it) }.count { it.isSuccess }
+        framesToProcess = frames.map { channel.offer(it) }.count { it }
         return if (framesToProcess > 0) {
             subscribeToFlow(channel.receiveAsFlow(), processingCoroutineScope)
         } else {
@@ -261,4 +263,6 @@ class FiniteAnalyzerLoop<DataFrame, State, Output>(
  */
 @ExperimentalCoroutinesApi
 suspend fun <T> Flow<T>.backPressureDrop(): Flow<T> =
-    channelFlow { this@backPressureDrop.collect { trySend(it) } }.buffer(capacity = Channel.RENDEZVOUS)
+    // TODO: upgrade this when kotlin libs hit 1.5.0
+//    channelFlow { this@backPressureDrop.collect { trySend(it) } }.buffer(capacity = Channel.RENDEZVOUS)
+    channelFlow { this@backPressureDrop.collect { offer(it) } }.buffer(capacity = Channel.RENDEZVOUS)
