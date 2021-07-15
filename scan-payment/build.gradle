@@ -46,7 +46,7 @@ dependencies {
 
     // Allow the user to specify their own version of Tensorflow Lite to include
     runtimeOnly project(":tensorflow-lite")
-    compileOnly "org.tensorflow:tensorflow-lite:2.4.0"
+    compileOnly "org.tensorflow:tensorflow-lite:2.5.0"
 }
 
 dependencies {
