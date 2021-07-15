@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.1.0007](https://github.com/getbouncer/cardscan-android/tree/2.1.0007) (2021-07-15)
+
+**Merged pull requests:**
+
+- Downgrade kotlin gradle plugin [\#422](https://github.com/getbouncer/cardscan-android/pull/422) ([awushensky-stripe](https://github.com/awushensky-stripe))
+
 ## [2.1.0006](https://github.com/getbouncer/cardscan-android/tree/2.1.0006) (2021-07-15)
 
 **Merged pull requests:**
@@ -129,6 +135,7 @@
 **Merged pull requests:**
 
 - Ensure camera error handler runs on main thread [\#349](https://github.com/getbouncer/cardscan-android/pull/349) ([awushensky](https://github.com/awushensky))
+- Bump kotlinx-serialization-json from 1.0.1 to 1.1.0 [\#340](https://github.com/getbouncer/cardscan-android/pull/340) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 
 ## [2.0.0082](https://github.com/getbouncer/cardscan-android/tree/2.0.0082) (2021-03-30)
 
@@ -160,7 +167,6 @@
 
 **Merged pull requests:**
 
-- Bump kotlinx-serialization-json from 1.0.1 to 1.1.0 [\#340](https://github.com/getbouncer/cardscan-android/pull/340) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Fix name and expiry extraction [\#337](https://github.com/getbouncer/cardscan-android/pull/337) ([awushensky](https://github.com/awushensky))
 - Bump kotlin-test from 1.4.31 to 1.4.32 [\#335](https://github.com/getbouncer/cardscan-android/pull/335) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Bump org.jetbrains.kotlin.plugin.serialization from 1.4.31 to 1.4.32 [\#334](https://github.com/getbouncer/cardscan-android/pull/334) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
@@ -272,6 +278,7 @@
 **Merged pull requests:**
 
 - Improve low-end performance [\#300](https://github.com/getbouncer/cardscan-android/pull/300) ([awushensky](https://github.com/awushensky))
+- Update kotlin test [\#298](https://github.com/getbouncer/cardscan-android/pull/298) ([awushensky](https://github.com/awushensky))
 - Make normalizeCardNumber public [\#297](https://github.com/getbouncer/cardscan-android/pull/297) ([awushensky](https://github.com/awushensky))
 - Bump tensorflow-lite from 2.3.0 to 2.4.0 [\#296](https://github.com/getbouncer/cardscan-android/pull/296) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 
@@ -289,7 +296,6 @@
 
 **Merged pull requests:**
 
-- Update kotlin test [\#298](https://github.com/getbouncer/cardscan-android/pull/298) ([awushensky](https://github.com/awushensky))
 - Use app context for network [\#294](https://github.com/getbouncer/cardscan-android/pull/294) ([awushensky](https://github.com/awushensky))
 - Update serializer [\#293](https://github.com/getbouncer/cardscan-android/pull/293) ([awushensky](https://github.com/awushensky))
 - Upgrade kotlin [\#292](https://github.com/getbouncer/cardscan-android/pull/292) ([awushensky](https://github.com/awushensky))
@@ -385,9 +391,9 @@
 - Bump junit from 4.13 to 4.13.1 [\#246](https://github.com/getbouncer/cardscan-android/pull/246) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Bump constraintlayout from 2.0.1 to 2.0.2 [\#241](https://github.com/getbouncer/cardscan-android/pull/241) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 
-## [1.0.5153](https://github.com/getbouncer/cardscan-android/tree/1.0.5153) (2020-10-09)
-
 ## [1.0.5154](https://github.com/getbouncer/cardscan-android/tree/1.0.5154) (2020-10-09)
+
+## [1.0.5153](https://github.com/getbouncer/cardscan-android/tree/1.0.5153) (2020-10-09)
 
 **Merged pull requests:**
 
