@@ -110,8 +110,11 @@ fun getPlatform() = "android"
  * from https://stackoverflow.com/a/27836910/947883
  */
 fun getDeviceName(): String {
-    val manufacturer = Build.MANUFACTURER?.lowercase() ?: ""
-    val model = Build.MODEL?.lowercase() ?: ""
+    // TODO: change this back once we can support newer kotlin versions
+//    val manufacturer = Build.MANUFACTURER?.lowercase() ?: ""
+//    val model = Build.MODEL?.lowercase() ?: ""
+    val manufacturer = Build.MANUFACTURER?.toLowerCase(Locale.ROOT) ?: ""
+    val model = Build.MODEL?.toLowerCase(Locale.ROOT) ?: ""
     return if (model.startsWith(manufacturer)) {
         model
     } else {
