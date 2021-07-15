@@ -17,8 +17,9 @@ import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.TrackedImage
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedSendChannelException
-import kotlinx.coroutines.channels.onClosed
-import kotlinx.coroutines.channels.onFailure
+// TODO: upgrade this when kotlin libs hit 1.5.0
+//import kotlinx.coroutines.channels.onClosed
+//import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.runBlocking
@@ -67,11 +68,13 @@ abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
     }
 
     protected fun sendImageToStream(image: CameraOutput) = try {
-        imageChannel.trySend(image).onClosed {
-            Log.w(Config.logTag, "Attempted to send image to closed channel", it)
-        }.onFailure {
-            Log.w(Config.logTag, "Failure when sending image to channel", it)
-        }
+        // TODO: upgrade this when kotlin libs hit 1.5.0
+//        imageChannel.trySend(image).onClosed {
+//            Log.w(Config.logTag, "Attempted to send image to closed channel", it)
+//        }.onFailure {
+//            Log.w(Config.logTag, "Failure when sending image to channel", it)
+//        }
+        imageChannel.offer(image)
     } catch (e: ClosedSendChannelException) {
         Log.w(Config.logTag, "Attempted to send image to closed channel")
     } catch (t: Throwable) {
