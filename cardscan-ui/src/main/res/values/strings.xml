@@ -3,8 +3,4 @@
     <string name="bouncer_processing_card">Processing, please wait</string>
 
     <string name="bouncer_enter_card_manually" description="Text shown at the bottom of the screen offering for the user to type in card details manually">Enter card manually</string>
-
-    <string name="bouncer_name_and_expiry_initialization_error" description="Title of the dialog shown to the user when attempting to extract name and expiry from a card when models have not been warmed up">Config Problem</string>
-    <string name="bouncer_name_and_expiry_initialization_error_message" description="Message of the dialog shown to the user when attempting to extract name and expiry from a card when models have not been warmed up">Please initialize name/expiry models first in the warmup() function.</string>
-    <string name="bouncer_name_and_expiry_initialization_error_ok" description="Affirmative button shown as part of the name or expiry extraction error dialog">OK</string>
 </resources>
