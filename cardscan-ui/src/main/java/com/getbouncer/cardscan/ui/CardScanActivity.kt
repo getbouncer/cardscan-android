@@ -128,11 +128,26 @@ open class CardScanActivity :
          * speed at which the scan occurs.
          *
          * @param context: A context to use for warming up the analyzers.
+         * @param apiKey: the API key used to warm up the ML models
+         * @param initializeNameAndExpiryExtraction: if true, include name and expiry extraction
+         * @param forImmediateUse: if true, attempt to use cached models instead of downloading by default
          */
         @JvmStatic
-        fun warmUp(context: Context, apiKey: String, initializeNameAndExpiryExtraction: Boolean) {
-            GlobalScope.launch { CardScanFlow.prepareScan(context, apiKey, initializeNameAndExpiryExtraction, false) }
+        fun warmUp(context: Context, apiKey: String, initializeNameAndExpiryExtraction: Boolean, forImmediateUse: Boolean = false) {
+            GlobalScope.launch { prepareScan(context, apiKey, initializeNameAndExpiryExtraction, forImmediateUse) }
         }
+
+        /**
+         * Warm up the analyzers and suspend the thread until it has completed.
+         *
+         * @param context: A context to use for warming up the analyzers.
+         * @param apiKey: the API key used to warm up the ML models
+         * @param initializeNameAndExpiryExtraction: if true, include name and expiry extraction
+         * @param forImmediateUse: if true, attempt to use cached models instead of downloading by default
+         */
+        @JvmStatic
+        suspend fun prepareScan(context: Context, apiKey: String, initializeNameAndExpiryExtraction: Boolean, forImmediateUse: Boolean) =
+            CardScanFlow.prepareScan(context, apiKey, initializeNameAndExpiryExtraction, forImmediateUse)
 
         /**
          * Start the card scanner activity.
