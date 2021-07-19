@@ -71,7 +71,7 @@ public class LaunchActivity extends AppCompatActivity implements CardScanActivit
                 startActivity(new Intent(this, SingleActivityDemo.class))
         );
 
-        CardScanActivity.warmUp(this, API_KEY, true);
+        CardScanActivity.warmUp(this, API_KEY, true, false);
     }
 
     @Override
