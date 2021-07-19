@@ -18,6 +18,7 @@ import com.getbouncer.scan.framework.AggregateResultListener
 import com.getbouncer.scan.framework.AnalyzerLoopErrorListener
 import com.getbouncer.scan.framework.AnalyzerPool
 import com.getbouncer.scan.framework.Config
+import com.getbouncer.scan.framework.FetchedData
 import com.getbouncer.scan.framework.FiniteAnalyzerLoop
 import com.getbouncer.scan.framework.ProcessBoundAnalyzerLoop
 import com.getbouncer.scan.framework.time.Duration
@@ -36,12 +37,15 @@ import com.getbouncer.scan.payment.ml.SSDOcrModelManager
 import com.getbouncer.scan.payment.ml.TextDetect
 import com.getbouncer.scan.ui.ScanFlow
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 data class SavedFrame(
     val pan: String?,
@@ -68,31 +72,31 @@ open class CardScanFlow(
         private const val MAX_COMPLETION_LOOP_FRAMES_SLOW_DEVICE = 5
 
         /**
-         * This field represents whether the flow was initialized with name and expiry enabled.
-         */
-        var attemptedNameAndExpiryInitialization = false
-            private set
-
-        /**
          * Warm up the analyzers for card scanner. This method is optional, but will increase the speed at which the
          * scan occurs.
          *
          * @param context: A context to use for warming up the analyzers.
          */
         @JvmStatic
-        fun warmUp(context: Context, apiKey: String, initializeNameAndExpiryExtraction: Boolean) {
+        suspend fun prepareScan(
+            context: Context,
+            apiKey: String,
+            initializeNameAndExpiryExtraction: Boolean,
+            forImmediateUse: Boolean,
+        ) = withContext(Dispatchers.IO) {
             Config.apiKey = apiKey
+            val deferredFetchers = mutableListOf<Deferred<FetchedData>>()
 
-            // pre-fetch all of the models used by this flow.
-            GlobalScope.launch(Dispatchers.IO) { SSDOcrModelManager.fetchModel(context, forImmediateUse = false) }
-            GlobalScope.launch(Dispatchers.IO) { CardDetectModelManager.fetchModel(context, forImmediateUse = false) }
+            deferredFetchers.add(async { SSDOcrModelManager.fetchModel(context, forImmediateUse) })
+            deferredFetchers.add(async { CardDetectModelManager.fetchModel(context, forImmediateUse) })
 
             if (initializeNameAndExpiryExtraction) {
-                attemptedNameAndExpiryInitialization = true
-                GlobalScope.launch(Dispatchers.IO) { TextDetectModelManager.fetchModel(context, forImmediateUse = false) }
-                GlobalScope.launch(Dispatchers.IO) { AlphabetDetectModelManager.fetchModel(context, forImmediateUse = false) }
-                GlobalScope.launch(Dispatchers.IO) { ExpiryDetectModelManager.fetchModel(context, forImmediateUse = false) }
+                deferredFetchers.add(async { TextDetectModelManager.fetchModel(context, forImmediateUse) })
+                deferredFetchers.add(async { AlphabetDetectModelManager.fetchModel(context, forImmediateUse) })
+                deferredFetchers.add(async { ExpiryDetectModelManager.fetchModel(context, forImmediateUse) })
             }
+
+            deferredFetchers.fold(true) { acc, deferred -> acc && deferred.await().successfullyFetched }
         }
 
         /**
@@ -105,13 +109,7 @@ open class CardScanFlow(
          * Determine if the scan models are available (have been warmed up)
          */
         @JvmStatic
-        fun isScanReady() = SSDOcrModelManager.isReady() && CardDetectModelManager.isReady()
-
-        /**
-         * Determine if the optional scan models are available (have been warmed up)
-         */
-        @JvmStatic
-        fun isNameAndExpiryScanReady() = TextDetectModelManager.isReady() && AlphabetDetectModelManager.isReady() && ExpiryDetectModelManager.isReady()
+        fun isScanReady() = runBlocking { SSDOcrModelManager.isReady() && CardDetectModelManager.isReady() }
     }
 
     /**

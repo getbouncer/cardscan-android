@@ -31,6 +31,7 @@ import com.getbouncer.scan.ui.util.setTextSizeByRes
 import com.getbouncer.scan.ui.util.setVisible
 import com.getbouncer.scan.ui.util.show
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
@@ -130,7 +131,7 @@ open class CardScanActivity :
          */
         @JvmStatic
         fun warmUp(context: Context, apiKey: String, initializeNameAndExpiryExtraction: Boolean) {
-            CardScanFlow.warmUp(context, apiKey, initializeNameAndExpiryExtraction)
+            GlobalScope.launch { CardScanFlow.prepareScan(context, apiKey, initializeNameAndExpiryExtraction, false) }
         }
 
         /**
@@ -157,7 +158,7 @@ open class CardScanActivity :
                 enableEnterCardManually = enableEnterCardManually,
                 enableExpiryExtraction = enableExpiryExtraction,
                 enableNameExtraction = enableNameExtraction,
-            ) ?: return
+            )
 
             activity.startActivityForResult(intent, REQUEST_CODE)
         }
@@ -187,7 +188,7 @@ open class CardScanActivity :
                 enableEnterCardManually = enableEnterCardManually,
                 enableExpiryExtraction = enableExpiryExtraction,
                 enableNameExtraction = enableNameExtraction,
-            ) ?: return
+            )
 
             fragment.startActivityForResult(intent, REQUEST_CODE)
         }
@@ -209,18 +210,8 @@ open class CardScanActivity :
             enableEnterCardManually: Boolean = false,
             enableExpiryExtraction: Boolean = false,
             enableNameExtraction: Boolean = false,
-        ): Intent? {
+        ): Intent {
             Config.apiKey = apiKey
-
-            if (!CardScanFlow.attemptedNameAndExpiryInitialization && (enableExpiryExtraction || enableNameExtraction)) {
-                Log.e(
-                    Config.logTag,
-                    "Attempting to run name and expiry without initializing text detector. " +
-                        "Please invoke the warmup() function with initializeNameAndExpiryExtraction to true."
-                )
-                showNameAndExpiryInitializationError(context)
-                return null
-            }
 
             return Intent(context, CardScanActivity::class.java)
                 .putExtra(PARAM_ENABLE_ENTER_MANUALLY, enableEnterCardManually)
@@ -268,21 +259,6 @@ open class CardScanActivity :
          */
         @JvmStatic
         fun isScanReady() = CardScanFlow.isScanReady()
-
-        /**
-         * Determine if the optional scan models are available (have been warmed up)
-         */
-        @JvmStatic
-        fun isNameAndExpiryScanReady() = CardScanFlow.isNameAndExpiryScanReady()
-
-        private fun showNameAndExpiryInitializationError(context: Context) {
-            AlertDialog.Builder(context)
-                .setTitle(R.string.bouncer_name_and_expiry_initialization_error)
-                .setMessage(R.string.bouncer_name_and_expiry_initialization_error_message)
-                .setPositiveButton(R.string.bouncer_name_and_expiry_initialization_error_ok) { dialog, _ -> dialog.dismiss() }
-                .setCancelable(false)
-                .show()
-        }
     }
 
     /**
