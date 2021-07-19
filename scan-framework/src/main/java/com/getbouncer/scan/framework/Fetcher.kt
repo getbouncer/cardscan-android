@@ -21,8 +21,6 @@ import java.lang.Exception
 import java.net.URL
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 private const val CACHE_MODEL_MAX_COUNT = 3
 
