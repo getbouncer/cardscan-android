@@ -232,16 +232,16 @@ internal class Camera1Adapter(
             // Create our Preview view and set it as the content of our activity.
             cameraPreview = CameraPreview(activity, this).apply {
                 layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-            }
+            }.also { cameraPreview ->
+                mainThreadHandler.post {
+                    onCameraAvailableListener.get()?.let {
+                        it(camera)
+                    }
+                    onCameraAvailableListener.clear()
 
-            mainThreadHandler.post {
-                onCameraAvailableListener.get()?.let {
-                    it(camera)
+                    previewView.removeAllViews()
+                    previewView.addView(cameraPreview)
                 }
-                onCameraAvailableListener.clear()
-
-                previewView.removeAllViews()
-                previewView.addView(cameraPreview)
             }
         }
     }

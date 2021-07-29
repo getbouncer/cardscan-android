@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.util.Log
+import androidx.annotation.RestrictTo
 import androidx.lifecycle.LifecycleOwner
 import com.getbouncer.cardscan.ui.analyzer.CompletionLoopAnalyzer
 import com.getbouncer.cardscan.ui.analyzer.MainLoopAnalyzer
@@ -61,6 +62,7 @@ data class SavedFrameType(
 /**
  * This class contains the logic required for analyzing a credit card for scanning.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 open class CardScanFlow(
     private val enableNameExtraction: Boolean,
     private val enableExpiryExtraction: Boolean,
