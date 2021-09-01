@@ -210,6 +210,7 @@ class FiniteAnalyzerLoop<DataFrame, State, Output>(
         val channel = Channel<DataFrame>(capacity = frames.size)
         // TODO: upgrade this when kotlin libs hit 1.5.0
 //        framesToProcess = frames.map { channel.trySend(it) }.count { it.isSuccess }
+        @Suppress("DEPRECATION")
         framesToProcess = frames.map { channel.offer(it) }.count { it }
         return if (framesToProcess > 0) {
             subscribeToFlow(channel.receiveAsFlow(), processingCoroutineScope)
@@ -265,4 +266,5 @@ class FiniteAnalyzerLoop<DataFrame, State, Output>(
 suspend fun <T> Flow<T>.backPressureDrop(): Flow<T> =
     // TODO: upgrade this when kotlin libs hit 1.5.0
 //    channelFlow { this@backPressureDrop.collect { trySend(it) } }.buffer(capacity = Channel.RENDEZVOUS)
+    @Suppress("DEPRECATION")
     channelFlow { this@backPressureDrop.collect { offer(it) } }.buffer(capacity = Channel.RENDEZVOUS)

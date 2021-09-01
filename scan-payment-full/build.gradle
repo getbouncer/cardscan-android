@@ -41,31 +41,24 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation project(":scan-framework")
-    implementation project(':scan-payment')
+    api project(":scan-framework")
+    api project(":scan-payment")
 
-    implementation "androidx.core:core-ktx:1.6.0"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.3"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2"
-
-    // Allow the user to specify their own version of Tensorflow Lite to include
-    runtimeOnly project(":tensorflow-lite")
-    compileOnly "org.tensorflow:tensorflow-lite:2.4.0"
+    implementation "androidx.core:core-ktx:[1.3.1,1.6.0]"
 }
 
 dependencies {
     testImplementation "androidx.test:core:1.4.0"
     testImplementation "androidx.test:runner:1.4.0"
     testImplementation "junit:junit:4.13.2"
-    testImplementation "org.jetbrains.kotlin:kotlin-test:1.4.32"
+    testImplementation "org.jetbrains.kotlin:kotlin-test:1.5.30"
 }
 
 dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-core:3.4.0"
     androidTestImplementation "androidx.test.ext:junit:1.1.3"
-    androidTestImplementation "org.jetbrains.kotlin:kotlin-test:1.4.32"
-    androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.4.3"
+    androidTestImplementation "org.jetbrains.kotlin:kotlin-test:1.5.30"
+    androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.1"
 }
 
 apply from: "deploy.gradle"
