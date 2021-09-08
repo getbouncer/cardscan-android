@@ -242,6 +242,12 @@ class NV21Image(val width: Int, val height: Int, val nv21Data: ByteArray) {
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         rgbAllocation.copyTo(bitmap)
 
+        // remove allocated objects
+        yuvType.destroy()
+        yuvAllocation.destroy()
+        rgbAllocation.destroy()
+        yuvToRgbScript.destroy()
+
         return bitmap
     }
 }
