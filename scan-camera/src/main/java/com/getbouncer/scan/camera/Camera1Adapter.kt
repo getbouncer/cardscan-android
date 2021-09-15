@@ -108,8 +108,12 @@ internal class Camera1Adapter(
     }
 
     override fun onPreviewFrame(bytes: ByteArray?, camera: Camera) {
-        val imageWidth = camera.parameters.previewSize.width
-        val imageHeight = camera.parameters.previewSize.height
+        // this method may be called after the camera has closed if there was still an image in
+        // flight. In this case, swallow the error. Ideally, we would be able to tell whether the
+        // exception was due to the camera already having been closed or from an error with camera
+        // hardware.
+        val imageWidth = try { camera.parameters.previewSize.width } catch (t: Throwable) { return }
+        val imageHeight = try { camera.parameters.previewSize.height } catch (t: Throwable) { return }
 
         if (bytes != null) {
             try {
