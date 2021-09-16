@@ -213,20 +213,29 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
                 val data = FetchedData.fromFetchedModelMeta(modelClass, modelFrameworkVersion, this)
                 if (data.successfullyFetched) {
                     Log.d(Config.logTag, "Fetcher: $modelClass already has latest version downloaded.")
-                    stat.trackResult("success")
+                    stat.trackResult("success_cached")
                     return@fetchData data
                 }
             }
 
-            downloadData(downloadDetails)
+            downloadData(downloadDetails).also {
+                if (it.successfullyFetched) {
+                    Log.d(Config.logTag, "Fetcher: $modelClass successfully downloaded.")
+                    stat.trackResult("success_downloaded")
+                } else {
+                    Log.d(Config.logTag, "Fetcher: $modelClass failed to download from $downloadDetails.")
+                    stat.trackResult("download_failed")
+                }
+            }
         } catch (t: Throwable) {
             fetchException = t
             if (cachedData.successfullyFetched) {
                 Log.w(Config.logTag, "Fetcher: Failed to download model $modelClass, loaded from local cache", t)
-                stat.trackResult("success")
+                stat.trackResult("success_download_failed_but_cached")
             } else {
                 Log.e(Config.logTag, "Fetcher: Failed to download model $modelClass, no local cache available", t)
                 stat.trackResult(t::class.java.simpleName)
+                stat.trackResult(t.toString())
             }
             cachedData
         }
