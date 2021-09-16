@@ -173,6 +173,7 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
         // if downloading models is not allowed, return an empty fetched data
         if (!Config.downloadModels) {
             Log.d(Config.logTag, "Fetcher: $modelClass cannot be downloaded since downloads are turned off")
+            stat.trackResult("downloads_disabled")
             return FetchedData.fromFetchedModelMeta(
                 modelClass = modelClass,
                 modelFrameworkVersion = modelFrameworkVersion,
@@ -194,6 +195,7 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
         // if no cache is available, this is needed immediately, and this is optional, return a download failure
         if (forImmediateUse && isOptional) {
             Log.d(Config.logTag, "Fetcher: optional $modelClass needed for immediate use, but no cache available.")
+            stat.trackResult("optional_model_not_downloaded")
             return FetchedData.fromFetchedModelMeta(
                 modelClass = modelClass,
                 modelFrameworkVersion = modelFrameworkVersion,
