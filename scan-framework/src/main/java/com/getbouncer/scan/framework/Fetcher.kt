@@ -11,6 +11,7 @@ import com.getbouncer.scan.framework.time.ClockMark
 import com.getbouncer.scan.framework.time.asEpochMillisecondsClockMark
 import com.getbouncer.scan.framework.time.days
 import com.getbouncer.scan.framework.util.memoizeSuspend
+import com.getbouncer.scan.framework.util.sanitizeFileName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -234,8 +235,8 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
                 stat.trackResult("success_download_failed_but_cached")
             } else {
                 Log.e(Config.logTag, "Fetcher: Failed to download model $modelClass, no local cache available", t)
+                stat.trackResult("${t.toString()} ${t.message} ${t.stackTraceToString()}")
                 stat.trackResult(t::class.java.simpleName)
-                stat.trackResult(t.toString())
             }
             cachedData
         }
@@ -430,7 +431,7 @@ abstract class UpdatingModelWebFetcher(context: Context) : SignedUrlModelWebFetc
         getMatchingFile(hash, hashAlgorithm)?.let { FetchedModelFileMeta(it.name, defaultModelHashAlgorithm, it) } ?: FetchedModelFileMeta(defaultModelVersion, defaultModelHashAlgorithm, null)
 
     override suspend fun getDownloadOutputFile(modelVersion: String) =
-        File(getCacheFolder(), modelVersion)
+        File(getCacheFolder(), sanitizeFileName(modelVersion))
 
     override suspend fun getDownloadDetails(
         cachedModelHash: String?,
