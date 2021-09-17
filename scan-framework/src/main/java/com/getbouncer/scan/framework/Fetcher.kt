@@ -675,7 +675,7 @@ abstract class UpdatingResourceFetcher(context: Context) : UpdatingModelWebFetch
 /**
  * Download a file from a given [url] and ensure that it matches the expected [hash].
  */
-@Throws(IOException::class, FileAlreadyExistsException::class, NoSuchAlgorithmException::class, HashMismatchException::class)
+@Throws(IOException::class, NoSuchAlgorithmException::class, HashMismatchException::class)
 private suspend fun downloadAndVerify(
     context: Context,
     url: URL,

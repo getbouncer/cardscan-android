@@ -280,7 +280,7 @@ private fun get(context: Context, path: String): NetworkResult<out String, out S
     }
 }
 
-@Throws(IOException::class, FileAlreadyExistsException::class)
+@Throws(IOException::class)
 suspend fun downloadFileWithRetries(context: Context, url: URL, outputFile: File) = retry(
     NetworkConfig.retryDelay,
     excluding = listOf(FileNotFoundException::class.java)
@@ -291,7 +291,7 @@ suspend fun downloadFileWithRetries(context: Context, url: URL, outputFile: File
 /**
  * Download a file.
  */
-@Throws(IOException::class, FileAlreadyExistsException::class)
+@Throws(IOException::class)
 private fun downloadFile(context: Context, url: URL, outputFile: File) = networkTimer.measure(url.toString()) {
     try {
         with(url.openConnection() as HttpURLConnection) {
