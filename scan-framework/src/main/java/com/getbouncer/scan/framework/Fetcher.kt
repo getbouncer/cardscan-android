@@ -235,7 +235,7 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
                 stat.trackResult("success_download_failed_but_cached")
             } else {
                 Log.e(Config.logTag, "Fetcher: Failed to download model $modelClass, no local cache available", t)
-                stat.trackResult("${t.toString()} ${t.message} ${t.stackTraceToString()}")
+                stat.trackResult("${getDownloadOutputFile(downloadDetails.modelVersion).absoluteFile} $downloadDetails $t ${t.message} ${t.stackTraceToString()}")
                 stat.trackResult(t::class.java.simpleName)
             }
             cachedData
