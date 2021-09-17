@@ -22,6 +22,7 @@ import kotlinx.serialization.Serializable
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
+import java.io.IOException
 import java.io.InputStreamReader
 import java.io.OutputStream
 import java.io.OutputStreamWriter
@@ -279,6 +280,7 @@ private fun get(context: Context, path: String): NetworkResult<out String, out S
     }
 }
 
+@Throws(IOException::class)
 suspend fun downloadFileWithRetries(context: Context, url: URL, outputFile: File) = retry(
     NetworkConfig.retryDelay,
     excluding = listOf(FileNotFoundException::class.java)
@@ -289,6 +291,7 @@ suspend fun downloadFileWithRetries(context: Context, url: URL, outputFile: File
 /**
  * Download a file.
  */
+@Throws(IOException::class)
 private fun downloadFile(context: Context, url: URL, outputFile: File) = networkTimer.measure(url.toString()) {
     try {
         with(url.openConnection() as HttpURLConnection) {
@@ -304,12 +307,8 @@ private fun downloadFile(context: Context, url: URL, outputFile: File) = network
             // Read the response code. This will block until the response has been received.
             val responseCode = this.responseCode
 
-            if (!outputFile.createNewFile()) {
-                throw FileCreationException(outputFile.name)
-            }
-
             inputStream.use { stream ->
-                FileOutputStream(outputFile).use { it.write(stream.readBytes()) }
+                FileOutputStream(outputFile).use { stream.copyTo(it) }
             }
 
             responseCode
@@ -399,10 +398,3 @@ private fun getBaseUrl() = if (NetworkConfig.baseUrl.endsWith("/")) {
  * An exception that should never be thrown, but is required for typing.
  */
 private class RetryNetworkRequestException(val result: NetworkResult<out String, out String>) : Exception()
-
-/**
- * Unable to create a file.
- */
-class FileCreationException(val fileName: String) : java.lang.Exception("Unable to create local file '$fileName'") {
-    override fun toString() = "FileCreationException(fileName='$fileName')"
-}

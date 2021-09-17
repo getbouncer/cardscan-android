@@ -2,7 +2,6 @@ package com.getbouncer.scan.framework
 
 import android.content.Context
 import android.util.Log
-import com.getbouncer.scan.framework.api.FileCreationException
 import com.getbouncer.scan.framework.api.NetworkResult
 import com.getbouncer.scan.framework.api.downloadFileWithRetries
 import com.getbouncer.scan.framework.api.getModelDetails
@@ -10,16 +9,17 @@ import com.getbouncer.scan.framework.api.getModelSignedUrl
 import com.getbouncer.scan.framework.time.ClockMark
 import com.getbouncer.scan.framework.time.asEpochMillisecondsClockMark
 import com.getbouncer.scan.framework.time.days
+import com.getbouncer.scan.framework.util.HashMismatchException
+import com.getbouncer.scan.framework.util.calculateHash
+import com.getbouncer.scan.framework.util.fileMatchesHash
 import com.getbouncer.scan.framework.util.memoizeSuspend
+import com.getbouncer.scan.framework.util.sanitizeFileName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.io.FileInputStream
 import java.io.IOException
-import java.lang.Exception
 import java.net.URL
-import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 
 private const val CACHE_MODEL_MAX_COUNT = 3
@@ -173,6 +173,7 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
         // if downloading models is not allowed, return an empty fetched data
         if (!Config.downloadModels) {
             Log.d(Config.logTag, "Fetcher: $modelClass cannot be downloaded since downloads are turned off")
+            stat.trackResult("downloads_disabled")
             return FetchedData.fromFetchedModelMeta(
                 modelClass = modelClass,
                 modelFrameworkVersion = modelFrameworkVersion,
@@ -194,6 +195,7 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
         // if no cache is available, this is needed immediately, and this is optional, return a download failure
         if (forImmediateUse && isOptional) {
             Log.d(Config.logTag, "Fetcher: optional $modelClass needed for immediate use, but no cache available.")
+            stat.trackResult("optional_model_not_downloaded")
             return FetchedData.fromFetchedModelMeta(
                 modelClass = modelClass,
                 modelFrameworkVersion = modelFrameworkVersion,
@@ -211,17 +213,25 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
                 val data = FetchedData.fromFetchedModelMeta(modelClass, modelFrameworkVersion, this)
                 if (data.successfullyFetched) {
                     Log.d(Config.logTag, "Fetcher: $modelClass already has latest version downloaded.")
-                    stat.trackResult("success")
+                    stat.trackResult("success_cached")
                     return@fetchData data
                 }
             }
 
-            downloadData(downloadDetails)
+            downloadData(downloadDetails).also {
+                if (it.successfullyFetched) {
+                    Log.d(Config.logTag, "Fetcher: $modelClass successfully downloaded.")
+                    stat.trackResult("success_downloaded")
+                } else {
+                    Log.d(Config.logTag, "Fetcher: $modelClass failed to download from $downloadDetails.")
+                    stat.trackResult("download_failed")
+                }
+            }
         } catch (t: Throwable) {
             fetchException = t
             if (cachedData.successfullyFetched) {
                 Log.w(Config.logTag, "Fetcher: Failed to download model $modelClass, loaded from local cache", t)
-                stat.trackResult("success")
+                stat.trackResult("success_download_failed_but_cached")
             } else {
                 Log.e(Config.logTag, "Fetcher: Failed to download model $modelClass, no local cache available", t)
                 stat.trackResult(t::class.java.simpleName)
@@ -338,7 +348,7 @@ abstract class DirectDownloadWebFetcher(context: Context) : WebFetcher(context) 
         FetchedModelFileMeta(modelVersion, hashAlgorithm, null)
 
     override suspend fun getDownloadOutputFile(modelVersion: String) =
-        File(context.cacheDir, localFileName)
+        File(context.cacheDir, sanitizeFileName(localFileName))
 
     override suspend fun getDownloadDetails(
         cachedModelHash: String?,
@@ -367,7 +377,7 @@ abstract class SignedUrlModelWebFetcher(context: Context) : DirectDownloadWebFet
     // this field is not used by this class
     override val url: URL = URL(NetworkConfig.baseUrl)
 
-    override suspend fun getDownloadOutputFile(modelVersion: String) = File(context.cacheDir, localFileName)
+    override suspend fun getDownloadOutputFile(modelVersion: String) = File(context.cacheDir, sanitizeFileName(localFileName))
 
     override suspend fun getDownloadDetails(
         cachedModelHash: String?,
@@ -419,7 +429,7 @@ abstract class UpdatingModelWebFetcher(context: Context) : SignedUrlModelWebFetc
         getMatchingFile(hash, hashAlgorithm)?.let { FetchedModelFileMeta(it.name, defaultModelHashAlgorithm, it) } ?: FetchedModelFileMeta(defaultModelVersion, defaultModelHashAlgorithm, null)
 
     override suspend fun getDownloadOutputFile(modelVersion: String) =
-        File(getCacheFolder(), modelVersion)
+        File(getCacheFolder(), sanitizeFileName("${modelClass}_${modelFrameworkVersion}_$modelVersion"))
 
     override suspend fun getDownloadDetails(
         cachedModelHash: String?,
@@ -663,18 +673,9 @@ abstract class UpdatingResourceFetcher(context: Context) : UpdatingModelWebFetch
 }
 
 /**
- * Determine if a [File] matches the expected [hash].
- */
-private suspend fun fileMatchesHash(localFile: File, hash: String, hashAlgorithm: String) = try {
-    hash == calculateHash(localFile, hashAlgorithm)
-} catch (t: Throwable) {
-    false
-}
-
-/**
  * Download a file from a given [url] and ensure that it matches the expected [hash].
  */
-@Throws(IOException::class, FileCreationException::class, NoSuchAlgorithmException::class, HashMismatchException::class)
+@Throws(IOException::class, NoSuchAlgorithmException::class, HashMismatchException::class)
 private suspend fun downloadAndVerify(
     context: Context,
     url: URL,
@@ -692,35 +693,12 @@ private suspend fun downloadAndVerify(
 }
 
 /**
- * Calculate the hash of a file using the [hashAlgorithm].
- */
-@Throws(IOException::class, NoSuchAlgorithmException::class)
-private suspend fun calculateHash(file: File, hashAlgorithm: String): String? = withContext(Dispatchers.IO) {
-    if (file.exists()) {
-        val digest = MessageDigest.getInstance(hashAlgorithm)
-        FileInputStream(file).use { digest.update(it.readBytes()) }
-        digest.digest().joinToString("") { "%02x".format(it) }
-    } else {
-        null
-    }
-}
-
-/**
  * Download a file from the provided [url] into the provided [outputFile].
  */
-@Throws(IOException::class, FileCreationException::class)
+@Throws(IOException::class, FileAlreadyExistsException::class, NoSuchFileException::class)
 private suspend fun downloadFile(context: Context, url: URL, outputFile: File) = withContext(Dispatchers.IO) {
     if (outputFile.exists()) {
         outputFile.delete()
     }
-
     downloadFileWithRetries(context, url, outputFile)
-}
-
-/**
- * A file does not match the expected hash value.
- */
-class HashMismatchException(val algorithm: String, val expected: String, val actual: String?) :
-    Exception("Invalid hash result for algorithm '$algorithm'. Expected '$expected' but got '$actual'") {
-    override fun toString() = "HashMismatchException(algorithm='$algorithm', expected='$expected', actual='$actual')"
 }
