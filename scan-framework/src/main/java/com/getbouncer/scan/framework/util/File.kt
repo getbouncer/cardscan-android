@@ -1,7 +1,9 @@
 package com.getbouncer.scan.framework.util
 
-// " * / : < > ? \ | + , . ; = []
+private val illegalFileNameCharacters = setOf('"', '*', '/', ':', '<', '>', '?', '\\', '|', '+', ',', '.', ';', '=', '[', ']')
 
-fun sanitizeFileName(unsanitized: String): String {
-    return unsanitized
-}
+/**
+ * Sanitize the name of a file for storage
+ */
+fun sanitizeFileName(unsanitized: String) =
+    unsanitized.map { char -> if (char in illegalFileNameCharacters) "_" else char }.joinToString("")
