@@ -308,7 +308,7 @@ private fun downloadFile(context: Context, url: URL, outputFile: File) = network
             val responseCode = this.responseCode
 
             inputStream.use { stream ->
-                FileOutputStream(outputFile).use { it.write(stream.readBytes()) }
+                FileOutputStream(outputFile).use { stream.copyTo(it) }
             }
 
             responseCode
