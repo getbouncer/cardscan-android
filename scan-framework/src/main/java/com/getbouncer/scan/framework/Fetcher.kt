@@ -2,7 +2,6 @@ package com.getbouncer.scan.framework
 
 import android.content.Context
 import android.util.Log
-import com.getbouncer.scan.framework.api.FileCreationException
 import com.getbouncer.scan.framework.api.NetworkResult
 import com.getbouncer.scan.framework.api.downloadFileWithRetries
 import com.getbouncer.scan.framework.api.getModelDetails
@@ -10,17 +9,17 @@ import com.getbouncer.scan.framework.api.getModelSignedUrl
 import com.getbouncer.scan.framework.time.ClockMark
 import com.getbouncer.scan.framework.time.asEpochMillisecondsClockMark
 import com.getbouncer.scan.framework.time.days
+import com.getbouncer.scan.framework.util.calculateHash
+import com.getbouncer.scan.framework.util.fileMatchesHash
 import com.getbouncer.scan.framework.util.memoizeSuspend
 import com.getbouncer.scan.framework.util.sanitizeFileName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.io.FileInputStream
 import java.io.IOException
 import java.lang.Exception
 import java.net.URL
-import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 
 private const val CACHE_MODEL_MAX_COUNT = 3
@@ -675,18 +674,9 @@ abstract class UpdatingResourceFetcher(context: Context) : UpdatingModelWebFetch
 }
 
 /**
- * Determine if a [File] matches the expected [hash].
- */
-private suspend fun fileMatchesHash(localFile: File, hash: String, hashAlgorithm: String) = try {
-    hash == calculateHash(localFile, hashAlgorithm)
-} catch (t: Throwable) {
-    false
-}
-
-/**
  * Download a file from a given [url] and ensure that it matches the expected [hash].
  */
-@Throws(IOException::class, FileCreationException::class, NoSuchAlgorithmException::class, HashMismatchException::class)
+@Throws(IOException::class, FileAlreadyExistsException::class, NoSuchAlgorithmException::class, HashMismatchException::class)
 private suspend fun downloadAndVerify(
     context: Context,
     url: URL,
@@ -704,29 +694,21 @@ private suspend fun downloadAndVerify(
 }
 
 /**
- * Calculate the hash of a file using the [hashAlgorithm].
- */
-@Throws(IOException::class, NoSuchAlgorithmException::class)
-private suspend fun calculateHash(file: File, hashAlgorithm: String): String? = withContext(Dispatchers.IO) {
-    if (file.exists()) {
-        val digest = MessageDigest.getInstance(hashAlgorithm)
-        FileInputStream(file).use { digest.update(it.readBytes()) }
-        digest.digest().joinToString("") { "%02x".format(it) }
-    } else {
-        null
-    }
-}
-
-/**
  * Download a file from the provided [url] into the provided [outputFile].
  */
-@Throws(IOException::class, FileCreationException::class)
+@Throws(IOException::class, FileAlreadyExistsException::class, NoSuchFileException::class)
 private suspend fun downloadFile(context: Context, url: URL, outputFile: File) = withContext(Dispatchers.IO) {
     if (outputFile.exists()) {
-        outputFile.delete()
+        outputFile.delete().also { deleted: Boolean ->
+            if (deleted) {
+                downloadFileWithRetries(context, url, outputFile)
+            } else {
+                throw NoSuchFileException(outputFile, reason = "Deletion failed");
+            }
+        }
+    } else {
+        downloadFileWithRetries(context, url, outputFile)
     }
-
-    downloadFileWithRetries(context, url, outputFile)
 }
 
 /**
