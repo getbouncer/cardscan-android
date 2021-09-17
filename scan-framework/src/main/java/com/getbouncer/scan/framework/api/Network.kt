@@ -307,10 +307,6 @@ private fun downloadFile(context: Context, url: URL, outputFile: File) = network
             // Read the response code. This will block until the response has been received.
             val responseCode = this.responseCode
 
-            if (!outputFile.createNewFile()) {
-                throw FileAlreadyExistsException(outputFile)
-            }
-
             inputStream.use { stream ->
                 FileOutputStream(outputFile).use { it.write(stream.readBytes()) }
             }

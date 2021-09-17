@@ -5,6 +5,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
+import java.lang.Exception
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 
@@ -39,3 +40,11 @@ suspend fun calculateHash(file: File, hashAlgorithm: String): String? =
             null
         }
     }
+
+/**
+ * A file does not match the expected hash value.
+ */
+class HashMismatchException(val algorithm: String, val expected: String, val actual: String?) :
+    Exception("Invalid hash result for algorithm '$algorithm'. Expected '$expected' but got '$actual'") {
+    override fun toString() = "HashMismatchException(algorithm='$algorithm', expected='$expected', actual='$actual')"
+}

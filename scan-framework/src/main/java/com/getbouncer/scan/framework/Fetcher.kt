@@ -9,6 +9,7 @@ import com.getbouncer.scan.framework.api.getModelSignedUrl
 import com.getbouncer.scan.framework.time.ClockMark
 import com.getbouncer.scan.framework.time.asEpochMillisecondsClockMark
 import com.getbouncer.scan.framework.time.days
+import com.getbouncer.scan.framework.util.HashMismatchException
 import com.getbouncer.scan.framework.util.calculateHash
 import com.getbouncer.scan.framework.util.fileMatchesHash
 import com.getbouncer.scan.framework.util.memoizeSuspend
@@ -18,7 +19,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
-import java.lang.Exception
 import java.net.URL
 import java.security.NoSuchAlgorithmException
 
@@ -349,7 +349,7 @@ abstract class DirectDownloadWebFetcher(context: Context) : WebFetcher(context) 
         FetchedModelFileMeta(modelVersion, hashAlgorithm, null)
 
     override suspend fun getDownloadOutputFile(modelVersion: String) =
-        File(context.cacheDir, localFileName)
+        File(context.cacheDir, sanitizeFileName(localFileName))
 
     override suspend fun getDownloadDetails(
         cachedModelHash: String?,
@@ -378,7 +378,7 @@ abstract class SignedUrlModelWebFetcher(context: Context) : DirectDownloadWebFet
     // this field is not used by this class
     override val url: URL = URL(NetworkConfig.baseUrl)
 
-    override suspend fun getDownloadOutputFile(modelVersion: String) = File(context.cacheDir, localFileName)
+    override suspend fun getDownloadOutputFile(modelVersion: String) = File(context.cacheDir, sanitizeFileName(localFileName))
 
     override suspend fun getDownloadDetails(
         cachedModelHash: String?,
@@ -430,7 +430,7 @@ abstract class UpdatingModelWebFetcher(context: Context) : SignedUrlModelWebFetc
         getMatchingFile(hash, hashAlgorithm)?.let { FetchedModelFileMeta(it.name, defaultModelHashAlgorithm, it) } ?: FetchedModelFileMeta(defaultModelVersion, defaultModelHashAlgorithm, null)
 
     override suspend fun getDownloadOutputFile(modelVersion: String) =
-        File(getCacheFolder(), sanitizeFileName(modelVersion))
+        File(getCacheFolder(), sanitizeFileName("${modelClass}_${modelFrameworkVersion}_$modelVersion"))
 
     override suspend fun getDownloadDetails(
         cachedModelHash: String?,
@@ -699,22 +699,7 @@ private suspend fun downloadAndVerify(
 @Throws(IOException::class, FileAlreadyExistsException::class, NoSuchFileException::class)
 private suspend fun downloadFile(context: Context, url: URL, outputFile: File) = withContext(Dispatchers.IO) {
     if (outputFile.exists()) {
-        outputFile.delete().also { deleted: Boolean ->
-            if (deleted) {
-                downloadFileWithRetries(context, url, outputFile)
-            } else {
-                throw NoSuchFileException(outputFile, reason = "Deletion failed");
-            }
-        }
-    } else {
-        downloadFileWithRetries(context, url, outputFile)
+        outputFile.delete()
     }
-}
-
-/**
- * A file does not match the expected hash value.
- */
-class HashMismatchException(val algorithm: String, val expected: String, val actual: String?) :
-    Exception("Invalid hash result for algorithm '$algorithm'. Expected '$expected' but got '$actual'") {
-    override fun toString() = "HashMismatchException(algorithm='$algorithm', expected='$expected', actual='$actual')"
+    downloadFileWithRetries(context, url, outputFile)
 }
