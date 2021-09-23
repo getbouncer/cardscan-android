@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.1.0014-alpha02](https://github.com/getbouncer/cardscan-android/tree/2.1.0014-alpha02) (2021-09-23)
+
+## [2.1.0014-downgrade-core-ktx01](https://github.com/getbouncer/cardscan-android/tree/2.1.0014-downgrade-core-ktx01) (2021-09-17)
+
+## [2.1.0014-alpha01](https://github.com/getbouncer/cardscan-android/tree/2.1.0014-alpha01) (2021-09-17)
+
 ## [2.1.0013](https://github.com/getbouncer/cardscan-android/tree/2.1.0013) (2021-09-17)
 
 **Closed issues:**
@@ -74,9 +80,11 @@
 - Bump junit from 1.1.2 to 1.1.3 [\#413](https://github.com/getbouncer/cardscan-android/pull/413) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Bump org.jetbrains.dokka from 1.4.32 to 1.5.0 [\#411](https://github.com/getbouncer/cardscan-android/pull/411) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Bump kotlinx-serialization-json from 1.2.1 to 1.2.2 [\#409](https://github.com/getbouncer/cardscan-android/pull/409) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Fix deployment names for scan-payment-full and scan-payment-minimal. [\#408](https://github.com/getbouncer/cardscan-android/pull/408) ([awush-stripe](https://github.com/awush-stripe))
 - Bump camera-view from 1.0.0-alpha25 to 1.0.0-alpha26 [\#405](https://github.com/getbouncer/cardscan-android/pull/405) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Bump espresso-core from 3.3.0 to 3.4.0 [\#404](https://github.com/getbouncer/cardscan-android/pull/404) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Bump runner from 1.3.0 to 1.4.0 [\#403](https://github.com/getbouncer/cardscan-android/pull/403) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump core from 1.3.0 to 1.4.0 [\#402](https://github.com/getbouncer/cardscan-android/pull/402) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Bump gradle from 4.2.1 to 4.2.2 [\#401](https://github.com/getbouncer/cardscan-android/pull/401) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Bump core-ktx from 1.5.0 to 1.6.0 [\#400](https://github.com/getbouncer/cardscan-android/pull/400) ([dependabot[bot]](https://github.com/apps/dependabot))
 
@@ -88,14 +96,12 @@
 
 **Merged pull requests:**
 
-- Fix deployment names for scan-payment-full and scan-payment-minimal. [\#408](https://github.com/getbouncer/cardscan-android/pull/408) ([awush-stripe](https://github.com/awush-stripe))
 - Update card images used for testing [\#396](https://github.com/getbouncer/cardscan-android/pull/396) ([awush-stripe](https://github.com/awush-stripe))
 
 ## [2.1.0003](https://github.com/getbouncer/cardscan-android/tree/2.1.0003) (2021-06-18)
 
 **Merged pull requests:**
 
-- Bump core from 1.3.0 to 1.4.0 [\#402](https://github.com/getbouncer/cardscan-android/pull/402) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Cycle beta versions faster [\#395](https://github.com/getbouncer/cardscan-android/pull/395) ([awush-stripe](https://github.com/awush-stripe))
 - Bump fragment-ktx from 1.3.4 to 1.3.5 [\#394](https://github.com/getbouncer/cardscan-android/pull/394) ([dependabot[bot]](https://github.com/apps/dependabot))
 
@@ -198,7 +204,6 @@
 
 - Update kotlin versions [\#344](https://github.com/getbouncer/cardscan-android/pull/344) ([awushensky](https://github.com/awushensky))
 - Update release names [\#339](https://github.com/getbouncer/cardscan-android/pull/339) ([awushensky](https://github.com/awushensky))
-- Bump kotlin-test from 1.4.31 to 1.4.32 [\#335](https://github.com/getbouncer/cardscan-android/pull/335) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 
 ## [2.0.0079](https://github.com/getbouncer/cardscan-android/tree/2.0.0079) (2021-03-27)
 
@@ -216,6 +221,7 @@
 **Merged pull requests:**
 
 - Fix name and expiry extraction [\#337](https://github.com/getbouncer/cardscan-android/pull/337) ([awushensky](https://github.com/awushensky))
+- Bump kotlin-test from 1.4.31 to 1.4.32 [\#335](https://github.com/getbouncer/cardscan-android/pull/335) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Bump org.jetbrains.kotlin.plugin.serialization from 1.4.31 to 1.4.32 [\#334](https://github.com/getbouncer/cardscan-android/pull/334) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Bump kotlin-gradle-plugin from 1.4.31 to 1.4.32 [\#333](https://github.com/getbouncer/cardscan-android/pull/333) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Bump gradle from 4.1.2 to 4.1.3 [\#330](https://github.com/getbouncer/cardscan-android/pull/330) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
@@ -382,7 +388,6 @@
 **Merged pull requests:**
 
 - Make permissions requests make more sense [\#269](https://github.com/getbouncer/cardscan-android/pull/269) ([awushensky](https://github.com/awushensky))
-- Fix stats concurrent modification [\#253](https://github.com/getbouncer/cardscan-android/pull/253) ([awushensky](https://github.com/awushensky))
 
 ## [2.0.0052](https://github.com/getbouncer/cardscan-android/tree/2.0.0052) (2020-11-13)
 
@@ -413,6 +418,7 @@
 **Merged pull requests:**
 
 - Use latest version in loader [\#254](https://github.com/getbouncer/cardscan-android/pull/254) ([awushensky](https://github.com/awushensky))
+- Fix stats concurrent modification [\#253](https://github.com/getbouncer/cardscan-android/pull/253) ([awushensky](https://github.com/awushensky))
 - Enable delay analysis [\#252](https://github.com/getbouncer/cardscan-android/pull/252) ([awushensky](https://github.com/awushensky))
 
 ## [2.0.0047](https://github.com/getbouncer/cardscan-android/tree/2.0.0047) (2020-10-15)
@@ -569,7 +575,6 @@
 
 - Add proguard rules for tensorflow [\#205](https://github.com/getbouncer/cardscan-android/pull/205) ([awushensky](https://github.com/awushensky))
 - Standardize expiry to strings [\#204](https://github.com/getbouncer/cardscan-android/pull/204) ([awushensky](https://github.com/awushensky))
-- Clean up state machine [\#199](https://github.com/getbouncer/cardscan-android/pull/199) ([awushensky](https://github.com/awushensky))
 
 ## [2.0.0028](https://github.com/getbouncer/cardscan-android/tree/2.0.0028) (2020-09-03)
 
@@ -578,6 +583,10 @@
 - Open up the UI [\#201](https://github.com/getbouncer/cardscan-android/pull/201) ([awushensky](https://github.com/awushensky))
 
 ## [2.0.0027](https://github.com/getbouncer/cardscan-android/tree/2.0.0027) (2020-09-01)
+
+**Merged pull requests:**
+
+- Clean up state machine [\#199](https://github.com/getbouncer/cardscan-android/pull/199) ([awushensky](https://github.com/awushensky))
 
 ## [2.0.0026](https://github.com/getbouncer/cardscan-android/tree/2.0.0026) (2020-08-27)
 
@@ -589,13 +598,9 @@
 - Bump runner from 1.2.0 to 1.3.0 [\#195](https://github.com/getbouncer/cardscan-android/pull/195) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Bump core from 1.2.0 to 1.3.0 [\#194](https://github.com/getbouncer/cardscan-android/pull/194) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Bump constraintlayout from 2.0.0 to 2.0.1 [\#193](https://github.com/getbouncer/cardscan-android/pull/193) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
+- Bump constraintlayout from 1.1.3 to 2.0.0 [\#192](https://github.com/getbouncer/cardscan-android/pull/192) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 
 ## [2.0.0025](https://github.com/getbouncer/cardscan-android/tree/2.0.0025) (2020-08-24)
-
-**Merged pull requests:**
-
-- Bump constraintlayout from 1.1.3 to 2.0.0 [\#192](https://github.com/getbouncer/cardscan-android/pull/192) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
-- Bump kotlinx-serialization-runtime from 1.0-M1-1.4.0-rc to 1.0-M1-1.4.0-rc-218 [\#184](https://github.com/getbouncer/cardscan-android/pull/184) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 
 ## [2.0.0024](https://github.com/getbouncer/cardscan-android/tree/2.0.0024) (2020-08-21)
 
@@ -618,6 +623,7 @@
 **Merged pull requests:**
 
 - Chang custom card issuer [\#185](https://github.com/getbouncer/cardscan-android/pull/185) ([smkuhne](https://github.com/smkuhne))
+- Bump kotlinx-serialization-runtime from 1.0-M1-1.4.0-rc to 1.0-M1-1.4.0-rc-218 [\#184](https://github.com/getbouncer/cardscan-android/pull/184) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Add custom pans [\#183](https://github.com/getbouncer/cardscan-android/pull/183) ([smkuhne](https://github.com/smkuhne))
 - Update dependencies [\#182](https://github.com/getbouncer/cardscan-android/pull/182) ([awushensky](https://github.com/awushensky))
 - Local rules [\#181](https://github.com/getbouncer/cardscan-android/pull/181) ([awushensky](https://github.com/awushensky))
@@ -646,7 +652,6 @@
 - Update expiry timeout, handle new permissions [\#165](https://github.com/getbouncer/cardscan-android/pull/165) ([xsl](https://github.com/xsl))
 - Add documentation [\#164](https://github.com/getbouncer/cardscan-android/pull/164) ([awushensky](https://github.com/awushensky))
 - Bump tensorflow-lite from 2.2.0 to 2.3.0 [\#163](https://github.com/getbouncer/cardscan-android/pull/163) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
-- Bump core-ktx from 1.3.0 to 1.3.1 [\#159](https://github.com/getbouncer/cardscan-android/pull/159) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 
 ## [2.0.0018](https://github.com/getbouncer/cardscan-android/tree/2.0.0018) (2020-07-28)
 
@@ -672,6 +677,7 @@
 
 **Merged pull requests:**
 
+- Bump core-ktx from 1.3.0 to 1.3.1 [\#159](https://github.com/getbouncer/cardscan-android/pull/159) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Bump version to 2.0.0016 [\#154](https://github.com/getbouncer/cardscan-android/pull/154) ([smkuhne](https://github.com/smkuhne))
 - Add readmes [\#153](https://github.com/getbouncer/cardscan-android/pull/153) ([awushensky](https://github.com/awushensky))
 - Rename demo module [\#152](https://github.com/getbouncer/cardscan-android/pull/152) ([awushensky](https://github.com/awushensky))
