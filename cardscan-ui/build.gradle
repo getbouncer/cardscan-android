@@ -1,6 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-parcelize'
+//apply plugin: 'kotlin-parcelize'
 
 android {
     compileSdkVersion 30
@@ -47,9 +47,9 @@ dependencies {
     api project(":scan-ui")
 
     implementation "androidx.appcompat:appcompat:[1.3.0,1.3.1]"
-    implementation "androidx.core:core-ktx:[1.3.1,1.6.0]"
+    implementation "androidx.core:core-ktx:1.3.1"
     implementation 'androidx.constraintlayout:constraintlayout:[2.0.4,2.1.0]'
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:[1.4.0,1.5.1]"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:[1.3.21,1.5.1]"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:[1.1.0,1.2.2]"
 }
 
