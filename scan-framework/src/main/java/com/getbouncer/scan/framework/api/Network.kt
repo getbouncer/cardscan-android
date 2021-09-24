@@ -15,7 +15,6 @@ import com.getbouncer.scan.framework.util.getOsVersion
 import com.getbouncer.scan.framework.util.getPlatform
 import com.getbouncer.scan.framework.util.getSdkFlavor
 import com.getbouncer.scan.framework.util.getSdkVersion
-import com.getbouncer.scan.framework.util.memoize
 import com.getbouncer.scan.framework.util.retry
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -346,7 +345,7 @@ private data class DeviceIdStructure(
     val d: String
 )
 
-private val buildDeviceId = memoize { context: Context ->
+private val buildDeviceId = cacheFirstResult { context: Context ->
     DeviceIds.fromContext(context).run {
         Base64.encodeToString(
             Config.json.encodeToString(
