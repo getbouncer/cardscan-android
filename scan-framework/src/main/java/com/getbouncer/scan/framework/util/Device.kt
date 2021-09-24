@@ -20,7 +20,7 @@ data class Device(
     val platform: String
 ) {
     companion object {
-        private val getDeviceDetails = memoize { context: Context ->
+        private val getDeviceDetails = cacheFirstResult { context: Context ->
             Device(
                 ids = DeviceIds.fromContext(context),
                 name = getDeviceName(),
@@ -44,7 +44,7 @@ data class DeviceIds(
     val androidId: String?
 ) {
     companion object {
-        private val getDeviceIds = memoize { context: Context ->
+        private val getDeviceIds = cacheFirstResult { context: Context ->
             DeviceIds(
                 androidId = getAndroidId(context)
             )

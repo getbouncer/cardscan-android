@@ -346,7 +346,7 @@ private data class DeviceIdStructure(
     val d: String
 )
 
-private val buildDeviceId = memoize { context: Context ->
+private val buildDeviceId = cacheFirstResult { context: Context ->
     DeviceIds.fromContext(context).run {
         Base64.encodeToString(
             Config.json.encodeToString(

@@ -17,9 +17,9 @@ import android.util.Size
 import androidx.annotation.CheckResult
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.exception.ImageTypeNotSupportedException
+import com.getbouncer.scan.framework.util.cacheFirstResult
 import com.getbouncer.scan.framework.util.mapArray
 import com.getbouncer.scan.framework.util.mapToIntArray
-import com.getbouncer.scan.framework.util.memoize
 import com.getbouncer.scan.framework.util.toByteArray
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -30,7 +30,7 @@ import kotlin.experimental.inv
 /**
  * Get the RenderScript instance.
  */
-val getRenderScript = memoize { context: Context -> RenderScript.create(context) }
+val getRenderScript = cacheFirstResult { context: Context -> RenderScript.create(context) }
 
 /**
  * An image made of data in the NV21 format.

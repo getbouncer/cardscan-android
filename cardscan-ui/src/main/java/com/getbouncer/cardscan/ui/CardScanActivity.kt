@@ -424,9 +424,7 @@ open class CardScanActivity :
             frames: Collection<SavedFrame>,
             isFastDevice: Boolean
         ) {
-            cameraAdapter.unbindFromLifecycle(this@CardScanActivity)
             this@CardScanActivity.pan = pan
-
             launch(Dispatchers.Default) {
                 scanFlow.launchCompletionLoop(
                     context = this@CardScanActivity,

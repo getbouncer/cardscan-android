@@ -139,6 +139,8 @@ abstract class CardScanBaseActivity :
      * A final result was received from the aggregator.
      */
     override suspend fun onResult(result: MainLoopAggregator.FinalResult) = launch(Dispatchers.Main) {
+        changeScanState(ScanState.Correct)
+        cameraAdapter.unbindFromLifecycle(this@CardScanBaseActivity)
         resultListener.cardScanned(
             pan = result.pan,
             frames = scanFlow.selectCompletionLoopFrames(result.averageFrameRate, result.savedFrames),
