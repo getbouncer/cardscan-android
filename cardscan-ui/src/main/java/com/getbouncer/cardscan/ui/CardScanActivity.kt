@@ -132,7 +132,7 @@ open class CardScanActivity :
          */
         @JvmStatic
         fun warmUp(context: Context, apiKey: String, initializeNameAndExpiryExtraction: Boolean, forImmediateUse: Boolean = false) {
-            GlobalScope.launch { prepareScan(context, apiKey, initializeNameAndExpiryExtraction, forImmediateUse) }
+            prepareScan(context, apiKey, initializeNameAndExpiryExtraction, forImmediateUse) { /* do nothing on init */ }
         }
 
         /**
@@ -144,8 +144,8 @@ open class CardScanActivity :
          * @param forImmediateUse: if true, attempt to use cached models instead of downloading by default
          */
         @JvmStatic
-        suspend fun prepareScan(context: Context, apiKey: String, initializeNameAndExpiryExtraction: Boolean, forImmediateUse: Boolean) =
-            CardScanFlow.prepareScan(context, apiKey, initializeNameAndExpiryExtraction, forImmediateUse)
+        fun prepareScan(context: Context, apiKey: String, initializeNameAndExpiryExtraction: Boolean, forImmediateUse: Boolean, onPrepared: () -> Unit) =
+            GlobalScope.launch { CardScanFlow.prepareScan(context, apiKey, initializeNameAndExpiryExtraction, forImmediateUse) }.invokeOnCompletion { onPrepared() }
 
         /**
          * Start the card scanner activity.
