@@ -429,7 +429,7 @@ abstract class UpdatingModelWebFetcher(context: Context) : SignedUrlModelWebFetc
         getMatchingFile(hash, hashAlgorithm)?.let { FetchedModelFileMeta(it.name, defaultModelHashAlgorithm, it) } ?: FetchedModelFileMeta(defaultModelVersion, defaultModelHashAlgorithm, null)
 
     override suspend fun getDownloadOutputFile(modelVersion: String) =
-        File(getCacheFolder(), sanitizeFileName("${modelClass}_${modelFrameworkVersion}_$modelVersion"))
+        File(getCacheFolder(), sanitizeFileName(modelVersion))
 
     override suspend fun getDownloadDetails(
         cachedModelHash: String?,
