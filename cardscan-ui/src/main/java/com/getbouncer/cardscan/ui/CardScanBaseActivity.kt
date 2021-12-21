@@ -25,6 +25,7 @@ import com.getbouncer.scan.ui.util.setVisible
 import com.getbouncer.scan.ui.util.show
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -130,7 +131,7 @@ abstract class CardScanBaseActivity :
      * Cancel scanning to enter a card manually
      */
     protected open fun enterCardManually() {
-        launch { scanStat.trackResult("enter_card_manually") }
+        runBlocking { scanStat.trackResult("enter_card_manually") }
         resultListener.enterManually()
         closeScanner()
     }

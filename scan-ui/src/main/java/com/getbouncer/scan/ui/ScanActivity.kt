@@ -40,6 +40,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlin.coroutines.CoroutineContext
 
 const val PERMISSION_RATIONALE_SHOWN = "permission_rationale_shown"
@@ -178,7 +179,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      */
     protected open fun ensurePermissionAndStartCamera() = when {
         ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED -> {
-            launch { permissionStat.trackResult("already_granted") }
+            runBlocking { permissionStat.trackResult("already_granted") }
             prepareCamera { onCameraReady() }
         }
         ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA) -> showPermissionRationaleDialog()
@@ -200,11 +201,11 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
         if (requestCode == PERMISSION_REQUEST_CODE && grantResults.isNotEmpty()) {
             when (grantResults[0]) {
                 PackageManager.PERMISSION_GRANTED -> {
-                    launch { permissionStat.trackResult("granted") }
+                    runBlocking { permissionStat.trackResult("granted") }
                     prepareCamera { onCameraReady() }
                 }
                 else -> {
-                    launch { permissionStat.trackResult("denied") }
+                    runBlocking { permissionStat.trackResult("denied") }
                     userCancelScan()
                 }
             }
@@ -326,7 +327,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     protected open fun toggleFlashlight() {
         isFlashlightOn = !isFlashlightOn
         setFlashlightState(isFlashlightOn)
-        launch { Stats.trackRepeatingTask("torch_state").trackResult(if (isFlashlightOn) "on" else "off") }
+        runBlocking { Stats.trackRepeatingTask("torch_state").trackResult(if (isFlashlightOn) "on" else "off") }
     }
 
     /**
@@ -334,7 +335,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      */
     protected open fun toggleCamera() {
         cameraAdapter.changeCamera()
-        launch { Stats.trackRepeatingTask("swap_camera").trackResult("${cameraAdapter.getCurrentCamera()}") }
+        runBlocking { Stats.trackRepeatingTask("swap_camera").trackResult("${cameraAdapter.getCurrentCamera()}") }
     }
 
     /**
@@ -356,7 +357,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      */
     protected open fun cameraErrorCancelScan(cause: Throwable? = null) {
         Log.e(Config.logTag, "Canceling scan due to camera error", cause)
-        launch { scanStat.trackResult("camera_error") }
+        runBlocking { scanStat.trackResult("camera_error") }
         resultListener.cameraError(cause)
         closeScanner()
     }
@@ -365,7 +366,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      * The scan has been cancelled by the user.
      */
     protected open fun userCancelScan() {
-        launch { scanStat.trackResult("user_canceled") }
+        runBlocking { scanStat.trackResult("user_canceled") }
         resultListener.userCanceled()
         closeScanner()
     }
@@ -375,7 +376,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      */
     protected open fun analyzerFailureCancelScan(cause: Throwable? = null) {
         Log.e(Config.logTag, "Canceling scan due to analyzer error", cause)
-        launch { scanStat.trackResult("analyzer_failure") }
+        runBlocking { scanStat.trackResult("analyzer_failure") }
         resultListener.analyzerFailure(cause)
         closeScanner()
     }
@@ -427,14 +428,14 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
 
         val torchStat = Stats.trackTask("torch_supported")
         cameraAdapter.withFlashSupport {
-            launch { torchStat.trackResult(if (it) "supported" else "unsupported") }
+            runBlocking { torchStat.trackResult(if (it) "supported" else "unsupported") }
             setFlashlightState(cameraAdapter.isTorchOn())
             onFlashSupported(it)
         }
 
         val cameraStat = Stats.trackTask("multiple_cameras_supported")
         cameraAdapter.withSupportsMultipleCameras {
-            launch { cameraStat.trackResult(if (it) "supported" else "unsupported") }
+            runBlocking { cameraStat.trackResult(if (it) "supported" else "unsupported") }
             onSupportsMultipleCameras(it)
         }
 
