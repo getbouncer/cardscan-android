@@ -90,7 +90,7 @@ public class LaunchActivity extends AppCompatActivity {
         return Unit.INSTANCE;
     }
 
-    public void cardScanned(@NotNull final ScannedCard scanResult) {
+    private void cardScanned(@NotNull final ScannedCard scanResult) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         StringBuilder message = new StringBuilder();
         message.append(scanResult.getPan());
@@ -113,7 +113,7 @@ public class LaunchActivity extends AppCompatActivity {
         builder.show();
     }
 
-    public void userCanceled(@NotNull final CancellationReason reason) {
+    private void userCanceled(@NotNull final CancellationReason reason) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         if (reason instanceof CancellationReason.Back) {
             builder.setMessage(R.string.user_pressed_back);
@@ -127,7 +127,7 @@ public class LaunchActivity extends AppCompatActivity {
         builder.show();
     }
 
-    public void analyzerFailure(@NotNull final Throwable reason) {
+    private void analyzerFailure(@NotNull final Throwable reason) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(reason.getMessage());
         builder.show();
