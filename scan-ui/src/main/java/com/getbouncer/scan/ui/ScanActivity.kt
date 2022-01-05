@@ -9,6 +9,7 @@ import android.graphics.PointF
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Parcelable
 import android.provider.Settings
 import android.util.Log
 import android.util.Size
@@ -41,6 +42,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.parcelize.Parcelize
 import kotlin.coroutines.CoroutineContext
 
 const val PERMISSION_RATIONALE_SHOWN = "permission_rationale_shown"
@@ -50,17 +52,27 @@ interface ScanResultListener {
     /**
      * The user canceled the scan.
      */
-    fun userCanceled()
+    fun userCanceled(reason: CancellationReason)
 
     /**
-     * The scan failed because of a camera error.
+     * The scan failed because of an error.
      */
-    fun cameraError(cause: Throwable?)
+    fun failed(cause: Throwable?)
+}
 
-    /**
-     * The scan failed to analyze images from the camera.
-     */
-    fun analyzerFailure(cause: Throwable?)
+sealed interface CancellationReason : Parcelable {
+
+    @Parcelize
+    object Closed : CancellationReason
+
+    @Parcelize
+    object Back : CancellationReason
+
+    @Parcelize
+    object UserCannotScan : CancellationReason
+
+    @Parcelize
+    object CameraPermissionDenied : CancellationReason
 }
 
 /**
@@ -206,7 +218,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
                 }
                 else -> {
                     runBlocking { permissionStat.trackResult("denied") }
-                    userCancelScan()
+                    cameraPermissionDenied()
                 }
             }
         }
@@ -245,7 +257,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
                 storage.storeValue(PERMISSION_RATIONALE_SHOWN, false)
                 openAppSettings()
             }
-            .setNegativeButton(R.string.bouncer_camera_permission_denied_cancel) { _, _ -> userCancelScan() }
+            .setNegativeButton(R.string.bouncer_camera_permission_denied_cancel) { _, _ -> cameraPermissionDenied() }
         builder.show()
     }
 
@@ -358,7 +370,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     protected open fun cameraErrorCancelScan(cause: Throwable? = null) {
         Log.e(Config.logTag, "Canceling scan due to camera error", cause)
         runBlocking { scanStat.trackResult("camera_error") }
-        resultListener.cameraError(cause)
+        resultListener.failed(cause)
         closeScanner()
     }
 
@@ -367,7 +379,13 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      */
     protected open fun userCancelScan() {
         runBlocking { scanStat.trackResult("user_canceled") }
-        resultListener.userCanceled()
+        resultListener.userCanceled(CancellationReason.Closed)
+        closeScanner()
+    }
+
+    protected open fun cameraPermissionDenied() {
+        runBlocking { scanStat.trackResult("user_canceled") }
+        resultListener.userCanceled(CancellationReason.CameraPermissionDenied)
         closeScanner()
     }
 
@@ -377,7 +395,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     protected open fun analyzerFailureCancelScan(cause: Throwable? = null) {
         Log.e(Config.logTag, "Canceling scan due to analyzer error", cause)
         runBlocking { scanStat.trackResult("analyzer_failure") }
-        resultListener.analyzerFailure(cause)
+        resultListener.failed(cause)
         closeScanner()
     }
 
@@ -460,7 +478,9 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      * Cancel the scan when the user presses back.
      */
     override fun onBackPressed() {
-        userCancelScan()
+        runBlocking { scanStat.trackResult("user_canceled") }
+        resultListener.userCanceled(CancellationReason.Back)
+        closeScanner()
     }
 
     /**
