@@ -144,8 +144,8 @@ class CardScanSheet private constructor(private val apiKey: String) {
         enableEnterManually: Boolean,
         enableNameExtraction: Boolean,
         enableExpiryExtraction: Boolean,
-        onFinished: (cardScanSheetResult: CardScanSheetResult,
-    ) -> Unit) {
+        onFinished: (cardScanSheetResult: CardScanSheetResult) -> Unit
+    ) {
         this.onFinished = onFinished
         launcher.launch(
             CardScanSheetParams(

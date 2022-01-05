@@ -10,7 +10,7 @@ data class PaymentCard(
     val issuer: CardIssuer?,
     val cvc: String?,
     val legalName: String?
-)  : Parcelable
+) : Parcelable
 
 @Parcelize
 data class PaymentCardExpiry(val day: String?, val month: String, val year: String) : Parcelable
