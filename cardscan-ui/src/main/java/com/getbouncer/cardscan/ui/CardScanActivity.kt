@@ -1,8 +1,8 @@
 package com.getbouncer.cardscan.ui
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import android.os.Parcelable
 import android.view.Gravity
 import android.view.View
@@ -11,63 +11,30 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.fragment.app.Fragment
 import com.getbouncer.cardscan.ui.analyzer.CompletionLoopAnalyzer
+import com.getbouncer.cardscan.ui.exception.UnknownScanException
 import com.getbouncer.cardscan.ui.result.CompletionLoopListener
 import com.getbouncer.cardscan.ui.result.CompletionLoopResult
 import com.getbouncer.cardscan.ui.result.MainLoopAggregator
 import com.getbouncer.scan.framework.AggregateResultListener
 import com.getbouncer.scan.framework.AnalyzerLoopErrorListener
 import com.getbouncer.scan.framework.Config
-import com.getbouncer.scan.framework.Stats
 import com.getbouncer.scan.payment.card.getCardIssuer
 import com.getbouncer.scan.payment.card.isValidExpiry
 import com.getbouncer.scan.payment.cropCameraPreviewToSquare
+import com.getbouncer.scan.ui.CancellationReason
 import com.getbouncer.scan.ui.util.getColorByRes
 import com.getbouncer.scan.ui.util.hide
 import com.getbouncer.scan.ui.util.setTextSizeByRes
 import com.getbouncer.scan.ui.util.setVisible
 import com.getbouncer.scan.ui.util.show
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
 
-interface CardScanActivityResultHandler {
-    /**
-     * A payment card was successfully scanned.
-     */
-    fun cardScanned(scanId: String?, scanResult: CardScanActivityResult)
-
-    /**
-     * The user requested to enter payment card details manually.
-     */
-    fun enterManually(scanId: String?)
-
-    /**
-     * The user canceled the scan.
-     */
-    fun userCanceled(scanId: String?)
-
-    /**
-     * The scan failed because of a camera error.
-     */
-    fun cameraError(scanId: String?)
-
-    /**
-     * The scan failed to analyze images from the camera.
-     */
-    fun analyzerFailure(scanId: String?)
-
-    /**
-     * The scan was canceled due to unknown reasons.
-     */
-    fun canceledUnknown(scanId: String?)
-}
-
 @Parcelize
-data class CardScanActivityResult(
+data class ScannedCard(
     val pan: String?,
     val expiryDay: String?,
     val expiryMonth: String?,
@@ -83,196 +50,17 @@ interface CardProcessedResultListener : CardScanResultListener {
     /**
      * A payment card was successfully scanned.
      */
-    fun cardProcessed(scanResult: CardScanActivityResult)
+    fun cardProcessed(scannedCard: ScannedCard)
 }
+
+internal const val INTENT_PARAM_REQUEST = "request"
+internal const val INTENT_PARAM_RESULT = "result"
 
 open class CardScanActivity :
     CardScanBaseActivity(),
     AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult>,
     CompletionLoopListener,
     AnalyzerLoopErrorListener {
-
-    companion object {
-        const val REQUEST_CODE = 21521 // "bou"
-
-        const val PARAM_ENABLE_ENTER_MANUALLY = "enableEnterManually"
-        const val PARAM_ENABLE_EXPIRY_EXTRACTION = "enableExpiryExtraction"
-        const val PARAM_ENABLE_NAME_EXTRACTION = "enableNameExtraction"
-
-        const val RESULT_INSTANCE_ID = "instanceId"
-        const val RESULT_SCAN_ID = "scanId"
-
-        const val RESULT_SCANNED_CARD = "scannedCard"
-
-        const val RESULT_CANCELED_REASON = "canceledReason"
-        const val CANCELED_REASON_USER = -1
-        const val CANCELED_REASON_CAMERA_ERROR = -2
-        const val CANCELED_REASON_ANALYZER_FAILURE = -3
-        const val CANCELED_REASON_ENTER_MANUALLY = -4
-
-        private fun getCanceledReason(data: Intent?): Int =
-            data?.getIntExtra(RESULT_CANCELED_REASON, Int.MIN_VALUE) ?: Int.MIN_VALUE
-
-        private fun Intent?.isUserCanceled(): Boolean = getCanceledReason(this) == CANCELED_REASON_USER
-        private fun Intent?.isCameraError(): Boolean = getCanceledReason(this) == CANCELED_REASON_CAMERA_ERROR
-        private fun Intent?.isAnalyzerFailure(): Boolean = getCanceledReason(this) == CANCELED_REASON_ANALYZER_FAILURE
-        private fun Intent?.isEnterCardManually(): Boolean = getCanceledReason(this) == CANCELED_REASON_ENTER_MANUALLY
-
-        private fun Intent?.instanceId(): String? = this?.getStringExtra(RESULT_INSTANCE_ID)
-        private fun Intent?.scanId(): String? = this?.getStringExtra(RESULT_SCAN_ID)
-
-        /**
-         * Warm up the analyzers for card scanner. This method is optional, but will increase the
-         * speed at which the scan occurs.
-         *
-         * @param context: A context to use for warming up the analyzers.
-         * @param apiKey: the API key used to warm up the ML models
-         * @param initializeNameAndExpiryExtraction: if true, include name and expiry extraction
-         * @param forImmediateUse: if true, attempt to use cached models instead of downloading by default
-         */
-        @JvmStatic
-        fun warmUp(context: Context, apiKey: String, initializeNameAndExpiryExtraction: Boolean, forImmediateUse: Boolean = false) {
-            prepareScan(context, apiKey, initializeNameAndExpiryExtraction, forImmediateUse) { /* do nothing on init */ }
-        }
-
-        /**
-         * Warm up the analyzers and suspend the thread until it has completed.
-         *
-         * @param context: A context to use for warming up the analyzers.
-         * @param apiKey: the API key used to warm up the ML models
-         * @param initializeNameAndExpiryExtraction: if true, include name and expiry extraction
-         * @param forImmediateUse: if true, attempt to use cached models instead of downloading by default
-         */
-        @JvmStatic
-        fun prepareScan(context: Context, apiKey: String, initializeNameAndExpiryExtraction: Boolean, forImmediateUse: Boolean, onPrepared: () -> Unit) =
-            GlobalScope.launch { CardScanFlow.prepareScan(context, apiKey, initializeNameAndExpiryExtraction, forImmediateUse) }.invokeOnCompletion { onPrepared() }
-
-        /**
-         * Start the card scanner activity.
-         *
-         * @param activity: The activity launching card scan.
-         * @param apiKey: The bouncer API key used to run scanning.
-         * @param enableEnterCardManually: If true, show a button to enter the card manually.
-         * @param enableExpiryExtraction: If true, attempt to extract the card expiry.
-         * @param enableNameExtraction: If true, attempt to extract the cardholder name.
-         */
-        @JvmStatic
-        @JvmOverloads
-        fun start(
-            activity: Activity,
-            apiKey: String,
-            enableEnterCardManually: Boolean = false,
-            enableExpiryExtraction: Boolean = false,
-            enableNameExtraction: Boolean = false,
-        ) {
-            val intent = buildIntent(
-                context = activity,
-                apiKey = apiKey,
-                enableEnterCardManually = enableEnterCardManually,
-                enableExpiryExtraction = enableExpiryExtraction,
-                enableNameExtraction = enableNameExtraction,
-            )
-
-            activity.startActivityForResult(intent, REQUEST_CODE)
-        }
-
-        /**
-         * Start the card scanner activity.
-         *
-         * @param fragment: The fragment launching card scan.
-         * @param apiKey: The bouncer API key used to run scanning.
-         * @param enableEnterCardManually: If true, show a button to enter the card manually.
-         * @param enableExpiryExtraction: If true, attempt to extract the card expiry.
-         * @param enableNameExtraction: If true, attempt to extract the cardholder name.
-         */
-        @JvmStatic
-        @JvmOverloads
-        fun start(
-            fragment: Fragment,
-            apiKey: String,
-            enableEnterCardManually: Boolean = false,
-            enableExpiryExtraction: Boolean = false,
-            enableNameExtraction: Boolean = false,
-        ) {
-            val context = fragment.context ?: return
-            val intent = buildIntent(
-                context = context,
-                apiKey = apiKey,
-                enableEnterCardManually = enableEnterCardManually,
-                enableExpiryExtraction = enableExpiryExtraction,
-                enableNameExtraction = enableNameExtraction,
-            )
-
-            fragment.startActivityForResult(intent, REQUEST_CODE)
-        }
-
-        /**
-         * Build an intent that can be used to start the card scanner activity.
-         *
-         * @param context: The activity used to build the intent.
-         * @param apiKey: The bouncer API key used to run scanning.
-         * @param enableEnterCardManually: If true, show a button to enter the card manually.
-         * @param enableExpiryExtraction: If true, attempt to extract the card expiry.
-         * @param enableNameExtraction: If true, attempt to extract the cardholder name.
-         */
-        @JvmStatic
-        @JvmOverloads
-        fun buildIntent(
-            context: Context,
-            apiKey: String,
-            enableEnterCardManually: Boolean = false,
-            enableExpiryExtraction: Boolean = false,
-            enableNameExtraction: Boolean = false,
-        ): Intent {
-            Config.apiKey = apiKey
-
-            return Intent(context, CardScanActivity::class.java)
-                .putExtra(PARAM_ENABLE_ENTER_MANUALLY, enableEnterCardManually)
-                .putExtra(PARAM_ENABLE_EXPIRY_EXTRACTION, enableExpiryExtraction)
-                .putExtra(PARAM_ENABLE_NAME_EXTRACTION, enableNameExtraction)
-        }
-
-        @JvmStatic
-        fun parseScanResult(
-            resultCode: Int,
-            data: Intent?,
-            handler: CardScanActivityResultHandler
-        ) {
-            if (resultCode == Activity.RESULT_OK && data != null) {
-                val scanResult: CardScanActivityResult? = data.getParcelableExtra(RESULT_SCANNED_CARD)
-                if (scanResult != null) {
-                    handler.cardScanned(data.scanId(), scanResult)
-                } else {
-                    handler.canceledUnknown(data.scanId())
-                }
-            } else if (resultCode == Activity.RESULT_CANCELED) {
-                when {
-                    data.isUserCanceled() -> handler.userCanceled(data.scanId())
-                    data.isCameraError() -> handler.cameraError(data.scanId())
-                    data.isAnalyzerFailure() -> handler.analyzerFailure(data.scanId())
-                    data.isEnterCardManually() -> handler.enterManually(data.scanId())
-                }
-            }
-        }
-
-        /**
-         * A helper method to determine if an activity result came from card scan.
-         */
-        @JvmStatic
-        fun isScanResult(requestCode: Int) = REQUEST_CODE == requestCode
-
-        /**
-         * Determine if the scan is supported
-         */
-        @JvmStatic
-        fun isSupported(context: Context) = CardScanFlow.isSupported(context)
-
-        /**
-         * Determine if the scan models are available (have been warmed up)
-         */
-        @JvmStatic
-        fun isScanReady() = CardScanFlow.isScanReady()
-    }
 
     /**
      * And overlay to darken the screen during result processing.
@@ -396,27 +184,38 @@ open class CardScanActivity :
         CardScanFlow(enableNameExtraction, enableExpiryExtraction, this, this)
     }
 
-    override val enableEnterCardManually: Boolean by lazy {
-        intent.getBooleanExtra(PARAM_ENABLE_ENTER_MANUALLY, false)
+    private val params: CardScanSheetParams by lazy {
+        intent.getParcelableExtra(INTENT_PARAM_REQUEST)
+            ?: CardScanSheetParams(
+                apiKey = "",
+                enableEnterManually = true,
+                enableNameExtraction = false,
+                enableExpiryExtraction = false,
+            )
     }
 
-    override val enableNameExtraction: Boolean by lazy {
-        intent.getBooleanExtra(PARAM_ENABLE_NAME_EXTRACTION, false)
-    }
+    override val enableEnterCardManually: Boolean by lazy { params.enableEnterManually }
 
-    override val enableExpiryExtraction: Boolean by lazy {
-        intent.getBooleanExtra(PARAM_ENABLE_EXPIRY_EXTRACTION, false)
-    }
+    override val enableNameExtraction: Boolean by lazy { params.enableNameExtraction }
+
+    override val enableExpiryExtraction: Boolean by lazy { params.enableExpiryExtraction }
 
     private var pan: String? = null
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Config.apiKey = params.apiKey
+    }
+
     override val resultListener = object : CardProcessedResultListener {
-        override fun cardProcessed(scanResult: CardScanActivityResult) {
+        override fun cardProcessed(scannedCard: ScannedCard) {
             val intent = Intent()
-                .putExtra(RESULT_SCANNED_CARD, scanResult)
-                .putExtra(RESULT_INSTANCE_ID, Stats.instanceId)
-                .putExtra(RESULT_SCAN_ID, Stats.scanId)
+                .putExtra(
+                    INTENT_PARAM_RESULT,
+                    CardScanSheetResult.Completed(scannedCard)
+                )
             setResult(Activity.RESULT_OK, intent)
+            closeScanner()
         }
 
         override fun cardScanned(
@@ -436,35 +235,21 @@ open class CardScanActivity :
             }
         }
 
-        override fun enterManually() {
+        override fun userCanceled(reason: CancellationReason) {
             val intent = Intent()
-                .putExtra(RESULT_CANCELED_REASON, CANCELED_REASON_ENTER_MANUALLY)
-                .putExtra(RESULT_INSTANCE_ID, Stats.instanceId)
-                .putExtra(RESULT_SCAN_ID, Stats.scanId)
+                .putExtra(
+                    INTENT_PARAM_RESULT,
+                    CardScanSheetResult.Canceled(reason),
+                )
             setResult(Activity.RESULT_CANCELED, intent)
         }
 
-        override fun userCanceled() {
+        override fun failed(cause: Throwable?) {
             val intent = Intent()
-                .putExtra(RESULT_CANCELED_REASON, CANCELED_REASON_USER)
-                .putExtra(RESULT_INSTANCE_ID, Stats.instanceId)
-                .putExtra(RESULT_SCAN_ID, Stats.scanId)
-            setResult(Activity.RESULT_CANCELED, intent)
-        }
-
-        override fun cameraError(cause: Throwable?) {
-            val intent = Intent()
-                .putExtra(RESULT_CANCELED_REASON, CANCELED_REASON_CAMERA_ERROR)
-                .putExtra(RESULT_INSTANCE_ID, Stats.instanceId)
-                .putExtra(RESULT_SCAN_ID, Stats.scanId)
-            setResult(Activity.RESULT_CANCELED, intent)
-        }
-
-        override fun analyzerFailure(cause: Throwable?) {
-            val intent = Intent()
-                .putExtra(RESULT_CANCELED_REASON, CANCELED_REASON_ANALYZER_FAILURE)
-                .putExtra(RESULT_INSTANCE_ID, Stats.instanceId)
-                .putExtra(RESULT_SCAN_ID, Stats.scanId)
+                .putExtra(
+                    INTENT_PARAM_RESULT,
+                    CardScanSheetResult.Failed(cause ?: UnknownScanException()),
+                )
             setResult(Activity.RESULT_CANCELED, intent)
         }
     }
@@ -480,7 +265,7 @@ open class CardScanActivity :
         }
 
         resultListener.cardProcessed(
-            scanResult = CardScanActivityResult(
+            scannedCard = ScannedCard(
                 pan = pan,
                 expiryDay = null,
                 expiryMonth = expiryMonth,
@@ -491,8 +276,6 @@ open class CardScanActivity :
                 errorString = result.errorString,
             )
         )
-
-        closeScanner()
     }.let { }
 
     override fun onCompletionLoopFrameProcessed(

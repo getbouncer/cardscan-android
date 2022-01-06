@@ -3,11 +3,10 @@
 
     <string name="scan_card">Scan Card</string>
 
+    <string name="user_pressed_back">User pressed back</string>
     <string name="scan_canceled">Scan canceled</string>
     <string name="enter_manually">Enter card manually</string>
-    <string name="camera_error">Camera error</string>
-    <string name="analyzer_error">Analyzer error</string>
-    <string name="unknown_reason">Unknown reason</string>
+    <string name="permission_denied">Camera permission denied</string>
     <string name="single_activity_demo">Single Activity Demo</string>
 
     <string name="enableDebug">Enable Debug</string>

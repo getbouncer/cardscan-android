@@ -9,16 +9,19 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.getbouncer.cardscan.ui.CardScanActivity;
-import com.getbouncer.cardscan.ui.CardScanActivityResult;
-import com.getbouncer.cardscan.ui.CardScanActivityResultHandler;
+import com.getbouncer.cardscan.ui.CardScanSheet;
+import com.getbouncer.cardscan.ui.CardScanSheetResult;
+import com.getbouncer.cardscan.ui.ScannedCard;
 import com.getbouncer.scan.framework.Config;
 import com.getbouncer.scan.framework.Scan;
+import com.getbouncer.scan.ui.CancellationReason;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class LaunchActivity extends AppCompatActivity implements CardScanActivityResultHandler {
+import kotlin.Unit;
+
+public class LaunchActivity extends AppCompatActivity {
 
     private static final String API_KEY = "qOJ_fF-WLDMbG05iBq5wvwiTNTmM2qIn";
 
@@ -26,6 +29,8 @@ public class LaunchActivity extends AppCompatActivity implements CardScanActivit
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launch);
+
+        final CardScanSheet sheet = CardScanSheet.create(this, API_KEY);
 
         // Because this activity displays card numbers, disallow screenshots.
         getWindow().setFlags(
@@ -44,12 +49,11 @@ public class LaunchActivity extends AppCompatActivity implements CardScanActivit
             final boolean enableEnterCardManually =
                 ((CheckBox) findViewById(R.id.enableEnterCardManuallyCheckbox)).isChecked();
 
-            CardScanActivity.start(
-                /* activity */ LaunchActivity.this,
-                /* apiKey */ API_KEY,
+            sheet.present(
                 /* enableEnterCardManually */ enableEnterCardManually,
                 /* enableExpiryExtraction */ enableExpiryExtraction,
-                /* enableNameExtraction */ enableNameExtraction
+                /* enableNameExtraction */ enableNameExtraction,
+                this::handleScanResult
             );
         });
 
@@ -71,20 +75,22 @@ public class LaunchActivity extends AppCompatActivity implements CardScanActivit
                 startActivity(new Intent(this, SingleActivityDemo.class))
         );
 
-        CardScanActivity.warmUp(this, API_KEY, true, false);
+        CardScanSheet.prepareScan(this, API_KEY, true, () -> null);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (CardScanActivity.isScanResult(requestCode)) {
-            CardScanActivity.parseScanResult(resultCode, data, this);
+    private Unit handleScanResult(final CardScanSheetResult result) {
+        if (result instanceof CardScanSheetResult.Completed) {
+            cardScanned(((CardScanSheetResult.Completed) result).getScannedCard());
+        } else if (result instanceof CardScanSheetResult.Canceled) {
+            userCanceled(((CardScanSheetResult.Canceled) result).getReason());
+        } else if (result instanceof CardScanSheetResult.Failed) {
+            analyzerFailure(((CardScanSheetResult.Failed) result).getError());
         }
+
+        return Unit.INSTANCE;
     }
 
-    @Override
-    public void cardScanned(@Nullable String scanId, @NotNull CardScanActivityResult scanResult) {
+    private void cardScanned(@NotNull final ScannedCard scanResult) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         StringBuilder message = new StringBuilder();
         message.append(scanResult.getPan());
@@ -107,38 +113,23 @@ public class LaunchActivity extends AppCompatActivity implements CardScanActivit
         builder.show();
     }
 
-    @Override
-    public void enterManually(@Nullable String scanId) {
+    private void userCanceled(@NotNull final CancellationReason reason) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(R.string.enter_manually);
+        if (reason instanceof CancellationReason.Back) {
+            builder.setMessage(R.string.user_pressed_back);
+        } else if (reason instanceof CancellationReason.Closed) {
+            builder.setMessage(R.string.scan_canceled);
+        } else if (reason instanceof CancellationReason.CameraPermissionDenied) {
+            builder.setMessage(R.string.permission_denied);
+        } else if (reason instanceof CancellationReason.UserCannotScan) {
+            builder.setMessage(R.string.enter_manually);
+        }
         builder.show();
     }
 
-    @Override
-    public void userCanceled(@Nullable String scanId) {
+    private void analyzerFailure(@NotNull final Throwable reason) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(R.string.scan_canceled);
-        builder.show();
-    }
-
-    @Override
-    public void cameraError(@Nullable String scanId) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(R.string.camera_error);
-        builder.show();
-    }
-
-    @Override
-    public void analyzerFailure(@Nullable String scanId) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(R.string.analyzer_error);
-        builder.show();
-    }
-
-    @Override
-    public void canceledUnknown(@Nullable String scanId) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(R.string.unknown_reason);
+        builder.setMessage(reason.getMessage());
         builder.show();
     }
 }

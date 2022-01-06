@@ -16,6 +16,7 @@ import com.getbouncer.scan.payment.card.formatPan
 import com.getbouncer.scan.payment.cropCameraPreviewToSquare
 import com.getbouncer.scan.payment.cropCameraPreviewToViewFinder
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
+import com.getbouncer.scan.ui.CancellationReason
 import com.getbouncer.scan.ui.DebugDetectionBox
 import com.getbouncer.scan.ui.ScanResultListener
 import com.getbouncer.scan.ui.SimpleScanActivity
@@ -39,11 +40,6 @@ interface CardScanResultListener : ScanResultListener {
         frames: Collection<SavedFrame>,
         isFastDevice: Boolean,
     )
-
-    /**
-     * The user requested to enter payment card details manually.
-     */
-    fun enterManually()
 }
 
 private val MINIMUM_RESOLUTION = Size(1067, 600) // minimum size of screen detect
@@ -132,7 +128,7 @@ abstract class CardScanBaseActivity :
      */
     protected open fun enterCardManually() {
         runBlocking { scanStat.trackResult("enter_card_manually") }
-        resultListener.enterManually()
+        resultListener.userCanceled(CancellationReason.UserCannotScan)
         closeScanner()
     }
 
