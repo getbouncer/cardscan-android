@@ -99,26 +99,6 @@ class BouncerApiTest {
      */
     @Test
     @LargeTest
-    fun validateApiKey() = runBlocking {
-        when (val result = validateApiKey(appContext)) {
-            is NetworkResult.Success -> {
-                assertEquals(200, result.responseCode)
-                assertTrue(result.body.isApiKeyValid)
-                assertNull(result.body.keyInvalidReason)
-            }
-            else -> fail("network result was not success: $result")
-        }
-    }
-
-    /**
-     * TODO: this method should use runBlockingTest instead of runBlocking. However, an issue with
-     * runBlockingTest currently fails when functions under test use withContext(Dispatchers.IO) or
-     * withContext(Dispatchers.Default).
-     *
-     * See https://github.com/Kotlin/kotlinx.coroutines/issues/1204 for details.
-     */
-    @Test
-    @LargeTest
     fun getModelSignedUrl() = runBlocking {
         when (
             val result = getModelSignedUrl(

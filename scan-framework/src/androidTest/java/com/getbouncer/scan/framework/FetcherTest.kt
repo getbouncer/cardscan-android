@@ -138,30 +138,6 @@ class FetcherTest {
 
     @Test
     @LargeTest
-    fun fetchModelFromWebSignedUrl_getSignedUrlFail() = runBlocking {
-        Config.apiKey = "__INTEGRATION_TEST_INVALID_KEY__"
-
-        class FetcherImpl : SignedUrlModelWebFetcher(testContext) {
-            override val modelClass = "four_recognize"
-            override val modelFrameworkVersion = 1
-            override val modelVersion = "0.0.1.16"
-            override val modelFileName = "fourrecognize.tflite"
-            override val hash = "55eea0d57239a7e92904fb15209963f7236bd06919275bdeb0a765a94b559c97"
-            override val hashAlgorithm = "SHA-256"
-        }
-
-        // force downloading the model for this test
-        val fetcher = FetcherImpl()
-        fetcher.clearCache()
-
-        val fetchedModel = fetcher.fetchData(forImmediateUse = false, isOptional = false)
-        assertTrue { fetchedModel is FetchedFile }
-
-        assertNull((fetchedModel as FetchedFile).file)
-    }
-
-    @Test
-    @LargeTest
     fun fetchUpgradableModelFromWeb_success() = runBlocking {
         class FetcherImpl : UpdatingModelWebFetcher(testContext) {
             override val modelClass = "four_recognize"
