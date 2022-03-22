@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.fragment.app.Fragment
 import com.getbouncer.cardscan.ui.exception.UnknownScanException
@@ -52,47 +53,38 @@ class CardScanSheet private constructor(private val apiKey: String) {
          * is created (in the onCreate method).
          */
         @JvmStatic
-        fun create(from: ComponentActivity, apiKey: String) =
-            CardScanSheet(apiKey).apply {
-                launcher = from.registerForActivityResult(
-                    object : ActivityResultContract<
-                        CardScanSheetParams,
-                        CardScanSheetResult
-                        >() {
-                        override fun createIntent(
-                            context: Context,
-                            input: CardScanSheetParams,
-                        ) = this@Companion.createIntent(context, input)
-
-                        override fun parseResult(
-                            resultCode: Int,
-                            intent: Intent?,
-                        ) = this@Companion.parseResult(requireNotNull(intent))
-                    },
-                    ::onResult,
-                )
-            }
+        fun create(
+            from: ComponentActivity,
+            apiKey: String,
+            registry: ActivityResultRegistry = from.activityResultRegistry,
+        ) = CardScanSheet(apiKey).apply {
+            launcher = from.registerForActivityResult(activityResultContract, registry, ::onResult)
+        }
 
         @JvmStatic
-        fun create(from: Fragment, apiKey: String) =
-            CardScanSheet(apiKey).apply {
-                launcher = from.registerForActivityResult(
-                    object : ActivityResultContract<
-                        CardScanSheetParams,
-                        CardScanSheetResult,
-                        >() {
-                        override fun createIntent(
-                            context: Context,
-                            input: CardScanSheetParams,
-                        ) = this@Companion.createIntent(context, input)
+        fun create(
+            from: Fragment,
+            apiKey: String,
+            registry: ActivityResultRegistry? = null,
+        ) = CardScanSheet(apiKey).apply {
+            launcher = if (registry != null) {
+                from.registerForActivityResult(activityResultContract, registry, ::onResult)
+            } else {
+                from.registerForActivityResult(activityResultContract, ::onResult)
+            }
+        }
 
-                        override fun parseResult(
-                            resultCode: Int,
-                            intent: Intent?,
-                        ) = this@Companion.parseResult(requireNotNull(intent))
-                    },
-                    ::onResult,
-                )
+        private val activityResultContract =
+            object : ActivityResultContract<CardScanSheetParams, CardScanSheetResult>() {
+                override fun createIntent(
+                    context: Context,
+                    input: CardScanSheetParams,
+                ) = this@Companion.createIntent(context, input)
+
+                override fun parseResult(
+                    resultCode: Int,
+                    intent: Intent?,
+                ) = this@Companion.parseResult(requireNotNull(intent))
             }
 
         private fun createIntent(context: Context, input: CardScanSheetParams) =
