@@ -53,6 +53,7 @@ class CardScanSheet private constructor(private val apiKey: String) {
          * is created (in the onCreate method).
          */
         @JvmStatic
+        @JvmOverloads
         fun create(
             from: ComponentActivity,
             apiKey: String,
@@ -62,6 +63,7 @@ class CardScanSheet private constructor(private val apiKey: String) {
         }
 
         @JvmStatic
+        @JvmOverloads
         fun create(
             from: Fragment,
             apiKey: String,
