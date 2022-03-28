@@ -40,9 +40,14 @@ sealed interface CardScanSheetResult : Parcelable {
 
 class CardScanSheet private constructor(private val apiKey: String) {
 
-    private var onFinished:
-        ((cardScanSheetResult: CardScanSheetResult) -> Unit)? = null
     private lateinit var launcher: ActivityResultLauncher<CardScanSheetParams>
+
+    /**
+     * Callback to notify when scanning finishes and a result is available.
+     */
+    fun interface CardScanResultCallback {
+        fun onCardScanSheetResult(cardScanSheetResult: CardScanSheetResult)
+    }
 
     companion object {
         /**
@@ -57,9 +62,14 @@ class CardScanSheet private constructor(private val apiKey: String) {
         fun create(
             from: ComponentActivity,
             apiKey: String,
+            cardScanResultCallback: CardScanResultCallback,
             registry: ActivityResultRegistry = from.activityResultRegistry,
         ) = CardScanSheet(apiKey).apply {
-            launcher = from.registerForActivityResult(activityResultContract, registry, ::onResult)
+            launcher = from.registerForActivityResult(
+                activityResultContract,
+                registry,
+                cardScanResultCallback::onCardScanSheetResult,
+            )
         }
 
         @JvmStatic
@@ -67,12 +77,20 @@ class CardScanSheet private constructor(private val apiKey: String) {
         fun create(
             from: Fragment,
             apiKey: String,
+            cardScanResultCallback: CardScanResultCallback,
             registry: ActivityResultRegistry? = null,
         ) = CardScanSheet(apiKey).apply {
             launcher = if (registry != null) {
-                from.registerForActivityResult(activityResultContract, registry, ::onResult)
+                from.registerForActivityResult(
+                    activityResultContract,
+                    registry,
+                    cardScanResultCallback::onCardScanSheetResult,
+                )
             } else {
-                from.registerForActivityResult(activityResultContract, ::onResult)
+                from.registerForActivityResult(
+                    activityResultContract,
+                    cardScanResultCallback::onCardScanSheetResult,
+                )
             }
         }
 
@@ -138,9 +156,7 @@ class CardScanSheet private constructor(private val apiKey: String) {
         enableEnterManually: Boolean,
         enableNameExtraction: Boolean,
         enableExpiryExtraction: Boolean,
-        onFinished: (cardScanSheetResult: CardScanSheetResult) -> Unit
     ) {
-        this.onFinished = onFinished
         launcher.launch(
             CardScanSheetParams(
                 apiKey = apiKey,
@@ -149,12 +165,5 @@ class CardScanSheet private constructor(private val apiKey: String) {
                 enableExpiryExtraction = enableExpiryExtraction,
             )
         )
-    }
-
-    /**
-     * When a result is available from the activity, call [onFinished] if it's available.
-     */
-    private fun onResult(cardScanSheetResult: CardScanSheetResult) {
-        onFinished?.let { it(cardScanSheetResult) }
     }
 }
