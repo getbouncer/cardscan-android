@@ -30,7 +30,7 @@ public class LaunchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launch);
 
-        final CardScanSheet sheet = CardScanSheet.create(this, API_KEY);
+        final CardScanSheet sheet = CardScanSheet.create(this, API_KEY, this::handleScanResult);
 
         // Because this activity displays card numbers, disallow screenshots.
         getWindow().setFlags(
@@ -52,8 +52,7 @@ public class LaunchActivity extends AppCompatActivity {
             sheet.present(
                 /* enableEnterCardManually */ enableEnterCardManually,
                 /* enableExpiryExtraction */ enableExpiryExtraction,
-                /* enableNameExtraction */ enableNameExtraction,
-                this::handleScanResult
+                /* enableNameExtraction */ enableNameExtraction
             );
         });
 
