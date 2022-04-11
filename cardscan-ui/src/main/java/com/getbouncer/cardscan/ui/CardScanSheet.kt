@@ -104,15 +104,15 @@ class CardScanSheet private constructor(private val apiKey: String) {
                 override fun parseResult(
                     resultCode: Int,
                     intent: Intent?,
-                ) = this@Companion.parseResult(requireNotNull(intent))
+                ) = this@Companion.parseResult(intent)
             }
 
         private fun createIntent(context: Context, input: CardScanSheetParams) =
             Intent(context, CardScanActivity::class.java)
                 .putExtra(INTENT_PARAM_REQUEST, input)
 
-        private fun parseResult(intent: Intent): CardScanSheetResult =
-            intent.getParcelableExtra(INTENT_PARAM_RESULT)
+        private fun parseResult(intent: Intent?): CardScanSheetResult =
+            intent?.getParcelableExtra(INTENT_PARAM_RESULT)
                 ?: CardScanSheetResult.Failed(
                     UnknownScanException("No data in the result intent")
                 )
