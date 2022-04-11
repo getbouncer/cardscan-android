@@ -24,7 +24,7 @@ ext {
 
     developerId = 'getbouncer'
     developerName = 'Bouncer Technologies'
-    developerEmail = 'contact@getbouncer.com'
+    developerEmail = 'bouncer-support@stripe.com'
 
     publishGroupId = 'com.getbouncer'
     publishArtifactId = 'tensorflow-lite-arm-only'
