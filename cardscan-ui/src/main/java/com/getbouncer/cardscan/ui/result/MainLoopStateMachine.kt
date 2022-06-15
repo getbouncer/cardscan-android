@@ -54,11 +54,13 @@ sealed class MainLoopState(
         private fun isCardSatisfied() = visibleCardCount >= DESIRED_SIDE_COUNT
         private fun isPanSatisfied() =
             (panCounter.getHighestCountItem()?.first ?: 0) >= DESIRED_PAN_AGREEMENT ||
+                (
                     (
-                            (panCounter.getHighestCountItem()?.first
-                                ?: 0) >= MINIMUM_PAN_AGREEMENT &&
-                                    reachedStateAt.elapsedSince() > PAN_SEARCH_DURATION
-                            )
+                        panCounter.getHighestCountItem()?.first
+                            ?: 0
+                        ) >= MINIMUM_PAN_AGREEMENT &&
+                        reachedStateAt.elapsedSince() > PAN_SEARCH_DURATION
+                    )
 
         override suspend fun consumeTransition(
             transition: MainLoopAnalyzer.Prediction,
