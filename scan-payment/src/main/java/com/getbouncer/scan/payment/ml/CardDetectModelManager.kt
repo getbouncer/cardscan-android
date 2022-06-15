@@ -12,6 +12,10 @@ import com.getbouncer.scan.payment.ModelManager
 private const val CARD_DETECT_ASSET_FULL = "ux_0_5_23_16.tflite"
 private const val CARD_DETECT_ASSET_MINIMAL = "UX.0.25.106.8.tflite"
 
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 object CardDetectModelManager : ModelManager() {
     override fun getModelFetcher(context: Context): Fetcher = when {
         assetFileExists(context, CARD_DETECT_ASSET_FULL) -> {

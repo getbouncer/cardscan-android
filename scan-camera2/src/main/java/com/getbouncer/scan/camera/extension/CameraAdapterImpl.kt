@@ -80,6 +80,7 @@ const val DEFAULT_IMAGE_FORMAT = ImageFormat.YUV_420_888
 /**
  * Unable to open the camera.
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 class CameraDeviceCallbackOpenException(val cameraId: String, val errorCode: Int) : Exception() {
     override fun toString(): String {
         return "CameraDeviceCallbackOpenException(cameraId='$cameraId', errorCode=$errorCode)"
@@ -89,6 +90,7 @@ class CameraDeviceCallbackOpenException(val cameraId: String, val errorCode: Int
 /**
  * Unable to configure the camera.
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 class CameraConfigurationFailedException(val cameraId: String) : Exception() {
     override fun toString(): String {
         return "CameraConfigurationFailedException(cameraId='$cameraId')"

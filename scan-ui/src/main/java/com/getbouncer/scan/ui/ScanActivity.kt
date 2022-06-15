@@ -45,8 +45,16 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.parcelize.Parcelize
 import kotlin.coroutines.CoroutineContext
 
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 const val PERMISSION_RATIONALE_SHOWN = "permission_rationale_shown"
 
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 interface ScanResultListener {
 
     /**
@@ -60,6 +68,10 @@ interface ScanResultListener {
     fun failed(cause: Throwable?)
 }
 
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 sealed interface CancellationReason : Parcelable {
 
     @Parcelize
@@ -78,6 +90,10 @@ sealed interface CancellationReason : Parcelable {
 /**
  * A basic implementation that displays error messages when there is a problem with the camera.
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 open class CameraErrorListenerImpl(
     protected val context: Context,
     protected val callback: (Throwable?) -> Unit
@@ -104,6 +120,10 @@ open class CameraErrorListenerImpl(
     }
 }
 
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     companion object {
         const val PERMISSION_REQUEST_CODE = 1200

@@ -30,11 +30,19 @@ import kotlin.experimental.inv
 /**
  * Get the RenderScript instance.
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 val getRenderScript = cacheFirstResult { context: Context -> RenderScript.create(context) }
 
 /**
  * An image made of data in the NV21 format.
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 class NV21Image(val width: Int, val height: Int, val nv21Data: ByteArray) {
 
     @Throws(ImageTypeNotSupportedException::class)
@@ -213,6 +221,10 @@ class NV21Image(val width: Int, val height: Int, val nv21Data: ByteArray) {
      * Convert to a [YuvImage].
      */
     @CheckResult
+    @Deprecated(
+        message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+        replaceWith = ReplaceWith("StripeCardScan"),
+    )
     fun toYuvImage() = YuvImage(
         nv21Data,
         ImageFormat.NV21,
@@ -224,6 +236,10 @@ class NV21Image(val width: Int, val height: Int, val nv21Data: ByteArray) {
     /**
      * https://github.com/silvaren/easyrs/blob/c8eed0f0b713bbb1eb375aca23d615677e8adb3c/easyrs/src/main/java/io/github/silvaren/easyrs/tools/YuvToRgb.java
      */
+    @Deprecated(
+        message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+        replaceWith = ReplaceWith("StripeCardScan"),
+    )
     fun toBitmap(renderScript: RenderScript): Bitmap {
         val yuvTypeBuilder: Type.Builder = Type.Builder(renderScript, Element.U8(renderScript)).setX(nv21Data.size)
         val yuvType: Type = yuvTypeBuilder.create()
@@ -256,6 +272,10 @@ class NV21Image(val width: Int, val height: Int, val nv21Data: ByteArray) {
  * Convert YUV420_888 image into NV21
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 private fun Image.yuvToNV21Bytes() = yuvPlanesToNV21Fast(
     width = width,
     height = height,
@@ -272,6 +292,10 @@ private fun Image.yuvToNV21Bytes() = yuvPlanesToNV21Fast(
  * On Revvl2, average performance is ~27ms
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun yuvPlanesToNV21Compat(
     width: Int,
     height: Int,
@@ -345,6 +369,10 @@ fun yuvPlanesToNV21Compat(
  * On Revvl2, average performance is ~60ms
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun yuvPlanesToNV21Slow(planeBuffers: Array<ByteBuffer>): ByteArray {
     val rez: ByteArray
     val buffer0 = planeBuffers[0]
@@ -383,6 +411,10 @@ fun yuvPlanesToNV21Slow(planeBuffers: Array<ByteBuffer>): ByteArray {
  *
  * On Revvl2, average performance is ~5ms
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun yuvPlanesToNV21Fast(
     width: Int,
     height: Int,
@@ -452,6 +484,10 @@ fun yuvPlanesToNV21Fast(
 /**
  * https://stackoverflow.com/questions/33542708/camera2-api-convert-yuv420-to-rgb-green-out
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun yuvPlanesToBitmap(
     width: Int,
     height: Int,

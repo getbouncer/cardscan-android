@@ -21,6 +21,10 @@ import kotlin.math.min
  * source [Bitmap].
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun Bitmap.crop(crop: Rect): Bitmap {
     require(crop.left < crop.right && crop.top < crop.bottom) { "Cannot use negative crop" }
     require(crop.left >= 0 && crop.top >= 0 && crop.bottom <= this.height && crop.right <= this.width) {
@@ -33,6 +37,10 @@ fun Bitmap.crop(crop: Rect): Bitmap {
  * Rotate a [Bitmap] by the given [rotationDegrees].
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun Bitmap.rotate(rotationDegrees: Float): Bitmap = if (rotationDegrees != 0F) {
     val matrix = Matrix()
     matrix.postRotate(rotationDegrees)
@@ -45,6 +53,10 @@ fun Bitmap.rotate(rotationDegrees: Float): Bitmap = if (rotationDegrees != 0F) {
  * Scale a [Bitmap] by a given [percentage].
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun Bitmap.scale(percentage: Float, filter: Boolean = false): Bitmap = if (percentage == 1F) {
     this
 } else {
@@ -60,12 +72,20 @@ fun Bitmap.scale(percentage: Float, filter: Boolean = false): Bitmap = if (perce
  * Get the size of a [Bitmap].
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun Bitmap.size() = Size(this.width, this.height)
 
 /**
  * Scale the [Bitmap] to circumscribe the given [Size], then crop the excess.
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun Bitmap.scaleAndCrop(size: Size, filter: Boolean = false): Bitmap =
     if (size.width == width && size.height == height) {
         this
@@ -80,6 +100,10 @@ fun Bitmap.scaleAndCrop(size: Size, filter: Boolean = false): Bitmap =
  * gray for the best results
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun Bitmap.cropWithFill(cropRegion: Rect): Bitmap {
     val intersectionRegion = this.size().toRect().intersectionWith(cropRegion)
     val result = Bitmap.createBitmap(cropRegion.width(), cropRegion.height(), this.config)
@@ -103,6 +127,10 @@ fun Bitmap.cropWithFill(cropRegion: Rect): Bitmap {
  * Fragments the [Bitmap] into multiple segments and places them in new segments.
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun Bitmap.rearrangeBySegments(
     segmentMap: Map<Rect, Rect>
 ): Bitmap {
@@ -144,6 +172,10 @@ fun Bitmap.rearrangeBySegments(
  * [Bitmap] into a border. See [resizeRegion] and [rearrangeBySegments].
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun Bitmap.zoom(
     originalRegion: Rect,
     newRegion: Rect,
@@ -166,10 +198,18 @@ fun Bitmap.scale(size: Size, filter: Boolean = false): Bitmap =
  * Convert a [Bitmap] to an [MLImage] for use in ML models.
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun Bitmap.toMLImage(mean: Float = 0F, std: Float = 255F) = MLImage(this, mean, std)
 
 /**
  * Convert a [Bitmap] to an [MLImage] for use in ML models.
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun Bitmap.toMLImage(mean: ImageTransformValues, std: ImageTransformValues) = MLImage(this, mean, std)

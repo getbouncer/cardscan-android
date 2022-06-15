@@ -1,5 +1,16 @@
+# Deprecation Notice
+Hello from the Stripe (formerly Bouncer) team!
+
+We're excited to provide an update on the state and future of the [Card Scan OCR](https://github.com/stripe/stripe-android/tree/master/stripecardscan) product! As we continue to build into Stripe's ecosystem, we'll be supporting the mission to continuously improve the end customer experience in many of Stripe's core checkout products.
+
+If you are not currently a Stripe user, and interested in learning more about improving checkout experience through Stripe, please let us know and we can connect you with the team.
+
+If you are not currently a Stripe user, and want to continue using the existing SDK, you can do so free of charge. Starting January 1, 2022, we will no longer be charging for use of the existing Bouncer Card Scan OCR SDK. For product support on [Android](https://github.com/stripe/stripe-android/issues) and [iOS](https://github.com/stripe/stripe-ios/issues). For billing support, please email [bouncer-support@stripe.com](mailto:bouncer-support@stripe.com).
+
+For the new product, please visit the [stripe github repository](https://github.com/stripe/stripe-android/tree/master/stripecardscan).
+
 # Scan Framework
-This repository contains the framework needed to quickly and accurately scan items (payment cards, IDs, etc.). [CardScan](https://cardscan.io/) is a relatively small library that provides fast and accurate payment card scanning.
+This repository contains the legacy, deprecated open source framework needed to quickly and accurately scan items (payment cards, IDs, etc.). [CardScan](https://cardscan.io/) is a relatively small library that provides fast and accurate payment card scanning.
 
 Note this library does not contain any user interfaces or ML models. Other libraries [Scan Payment](https://github.com/getbouncer/scan-payment-android) and [Scan UI](https://github.com/getbouncer/scan-ui-android) build upon this and add ML models and simple user interfaces. 
 
@@ -179,26 +190,4 @@ See the [development docs](https://docs.getbouncer.com/card-scan/android-integra
 Adam Wushensky, Sam King, and Zain ul Abi Din
 
 ## License
-This library is available under paid and free licenses. See the [LICENSE](../LICENSE) file for the full license text.
-
-### Quick summary
-In short, this library will remain free forever for non-commercial applications, but use by commercial applications is limited to 90 days, after which time a licensing agreement is required. We're also adding some legal liability protections.
-
-After this period commercial applications need to convert to a licensing agreement to continue to use this library.
-* Details of licensing (pricing, etc) are available at [https://cardscan.io/pricing](https://cardscan.io/pricing), or you can contact us at [bouncer-support@stripe.com](mailto:bouncer-support@stripe.com).
-
-### More detailed summary
-What's allowed under the license:
-* Free use for any app for 90 days (for demos, evaluations, hackathons, etc).
-* Contributions (contributors must agree to the [Contributor License Agreement](../Contributor%20License%20Agreement))
-* Any modifications as needed to work in your app
-
-What's not allowed under the license:
-* Commercial applications using the license for longer than 90 days without a license agreement. 
-* Using us now in a commercial app today? No worries! Just email [bouncer-support@stripe.com](mailto:bouncer-support@stripe.com) and we’ll get you set up.
-* Redistribution under a different license
-* Removing attribution
-* Modifying logos
-* Indemnification: using this free software is ‘at your own risk’, so you can’t sue Bouncer Technologies, Inc. for problems caused by this library
-
-Questions? Concerns? Please email us at [bouncer-support@stripe.com](mailto:bouncer-support@stripe.com) or ask us on [slack](https://getbouncer.slack.com).
+This library is available under the MIT license. See the [LICENSE](../LICENSE) file for the full license text.

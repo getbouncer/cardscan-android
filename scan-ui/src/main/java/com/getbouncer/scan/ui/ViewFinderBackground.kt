@@ -15,6 +15,10 @@ import kotlin.math.roundToInt
 /**
  * This class draws a background with a hole in the middle of it.
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 class ViewFinderBackground(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
     private var viewFinderRect: Rect? = null
     private var onDrawListener: (() -> Unit)? = null

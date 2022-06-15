@@ -29,13 +29,17 @@ private const val PURPOSE_MODEL_UPGRADE = "model_upgrade"
 /**
  * Fetched data metadata.
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 sealed class FetchedModelMeta(open val modelVersion: String, open val hashAlgorithm: String)
+
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 data class FetchedModelFileMeta(
     override val modelVersion: String,
     override val hashAlgorithm: String,
     val modelFile: File?,
 ) : FetchedModelMeta(modelVersion, hashAlgorithm)
 
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 data class FetchedModelResourceMeta(
     override val modelVersion: String,
     override val hashAlgorithm: String,
@@ -46,6 +50,7 @@ data class FetchedModelResourceMeta(
 /**
  * Fetched data information.
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 sealed class FetchedData(
     open val modelClass: String,
     open val modelFrameworkVersion: Int,
@@ -54,6 +59,7 @@ sealed class FetchedData(
     open val modelHashAlgorithm: String?,
 ) {
     companion object {
+        @Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
         fun fromFetchedModelMeta(modelClass: String, modelFrameworkVersion: Int, meta: FetchedModelMeta) = when (meta) {
             is FetchedModelFileMeta ->
                 FetchedFile(
@@ -79,6 +85,7 @@ sealed class FetchedData(
     abstract val successfullyFetched: Boolean
 }
 
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 data class FetchedResource(
     override val modelClass: String,
     override val modelFrameworkVersion: Int,
@@ -90,6 +97,7 @@ data class FetchedResource(
     override val successfullyFetched: Boolean = assetFileName != null
 }
 
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 data class FetchedFile(
     override val modelClass: String,
     override val modelFrameworkVersion: Int,
@@ -104,6 +112,7 @@ data class FetchedFile(
 /**
  * An interface for getting data ready to be loaded into memory.
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 interface Fetcher {
     val modelClass: String
     val modelFrameworkVersion: Int
@@ -122,6 +131,7 @@ interface Fetcher {
 /**
  * A [Fetcher] that gets data from android resources.
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 abstract class ResourceFetcher : Fetcher {
     protected abstract val modelVersion: String
     protected abstract val hash: String
@@ -144,6 +154,7 @@ abstract class ResourceFetcher : Fetcher {
 /**
  * A [Fetcher] that downloads data from the web.
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 sealed class WebFetcher(protected val context: Context) : Fetcher {
     protected data class DownloadDetails(val url: URL, val hash: String, val hashAlgorithm: String, val modelVersion: String)
 
@@ -327,6 +338,7 @@ sealed class WebFetcher(protected val context: Context) : Fetcher {
 /**
  * A [WebFetcher] that directly downloads a model.
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 abstract class DirectDownloadWebFetcher(context: Context) : WebFetcher(context) {
     abstract val url: URL
     abstract val hash: String
@@ -369,6 +381,7 @@ abstract class DirectDownloadWebFetcher(context: Context) : WebFetcher(context) 
 /**
  * A [WebFetcher] that uses the signed URL server endpoints to download data.
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 abstract class SignedUrlModelWebFetcher(context: Context) : DirectDownloadWebFetcher(context) {
     abstract val modelFileName: String
 
@@ -405,6 +418,7 @@ abstract class SignedUrlModelWebFetcher(context: Context) : DirectDownloadWebFet
  * A [WebFetcher] that queries Bouncer servers for updated data. If a new version is found, download it. If the data
  * details match what is cached, return the cached version instead.
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 abstract class UpdatingModelWebFetcher(context: Context) : SignedUrlModelWebFetcher(context) {
     abstract val defaultModelVersion: String
     abstract val defaultModelFileName: String
@@ -563,6 +577,7 @@ abstract class UpdatingModelWebFetcher(context: Context) : SignedUrlModelWebFetc
             ?.second ?: files?.maxByOrNull { it.lastModified() }
     }
 
+    @Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
     data class ModelVersion(
         val versioningVersion: Int,
         val frameworkVersion: Int,
@@ -631,6 +646,7 @@ abstract class UpdatingModelWebFetcher(context: Context) : SignedUrlModelWebFetc
  * A [WebFetcher] that queries Bouncer servers for updated data. If a new version is found, download it. If the data
  * details match what is cached, return the cached version instead.
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 abstract class UpdatingResourceFetcher(context: Context) : UpdatingModelWebFetcher(context) {
     protected abstract val assetFileName: String
     protected abstract val resourceModelVersion: String

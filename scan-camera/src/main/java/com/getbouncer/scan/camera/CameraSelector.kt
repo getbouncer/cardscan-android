@@ -12,6 +12,7 @@ import com.getbouncer.scan.framework.Config
  * Get the appropriate camera adapter. If the customer has provided an additional camera adapter, use that in place of
  * camera 1.
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 fun getCameraAdapter(
     activity: Activity,
     previewView: ViewGroup,

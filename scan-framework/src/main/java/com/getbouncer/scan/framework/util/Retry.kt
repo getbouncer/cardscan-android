@@ -16,6 +16,7 @@ private const val DEFAULT_RETRIES = 3
  *
  * TODO: use contracts when they're no longer experimental
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 suspend fun <T> retry(
     retryDelay: Duration,
     times: Int = DEFAULT_RETRIES,
@@ -56,6 +57,7 @@ suspend fun <T> retry(
  *
  * TODO: use contracts when they're no longer experimental
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 fun <T> retrySync(
     times: Int = DEFAULT_RETRIES,
     excluding: List<Class<out Throwable>> = emptyList(),

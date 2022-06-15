@@ -4,6 +4,7 @@ import android.util.Log
 import com.getbouncer.scan.framework.time.Clock
 import com.getbouncer.scan.framework.time.ClockMark
 
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 abstract class MachineState {
 
     /**

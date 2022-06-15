@@ -3,6 +3,10 @@ package com.getbouncer.scan.framework.util
 import android.content.Context
 import com.getbouncer.scan.framework.BuildConfig
 
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 data class AppDetails(
     val appPackageName: String?,
     val applicationId: String,
@@ -26,16 +30,32 @@ data class AppDetails(
     }
 }
 
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun getAppPackageName(context: Context): String? = context.applicationContext.packageName
 
 private fun getApplicationId(): String = "" // no longer available in later versions of gradle.
 
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun getLibraryPackageName(): String = BuildConfig.LIBRARY_PACKAGE_NAME
 
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun getSdkVersion(): String = BuildConfig.SDK_VERSION_STRING
 
 private fun getSdkVersionCode(): Int = -1 // no longer available in later versions of gradle.
 
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun getSdkFlavor(): String = BuildConfig.BUILD_TYPE
 
 private fun isDebugBuild(): Boolean = BuildConfig.DEBUG

@@ -3,9 +3,21 @@ package com.getbouncer.scan.payment.card
 /**
  * A class that provides a method to determine if a PAN is valid.
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 interface PanValidator {
+    @Deprecated(
+        message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+        replaceWith = ReplaceWith("StripeCardScan"),
+    )
     fun isValidPan(pan: String): Boolean
 
+    @Deprecated(
+        message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+        replaceWith = ReplaceWith("StripeCardScan"),
+    )
     operator fun plus(other: PanValidator): PanValidator = CompositePanValidator(this, other)
 }
 

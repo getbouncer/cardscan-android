@@ -22,6 +22,10 @@ private val TRAINED_IMAGE_SIZE = Size(48, 48)
  * model returns whether or not there is a screen present
  */
 private const val NUM_CLASS = 27
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 class AlphabetDetect private constructor(interpreter: Interpreter) :
     TensorFlowLiteAnalyzer<
         AlphabetDetect.Input,
@@ -29,8 +33,16 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
         AlphabetDetect.Prediction,
         Array<FloatArray>>(interpreter) {
 
+    @Deprecated(
+        message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+        replaceWith = ReplaceWith("StripeCardScan"),
+    )
     data class Input(val alphabetDetectImage: TrackedImage<Bitmap>)
 
+    @Deprecated(
+        message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+        replaceWith = ReplaceWith("StripeCardScan"),
+    )
     data class Prediction(val character: Char, val confidence: Float)
 
     override suspend fun interpretMLOutput(data: Input, mlOutput: Array<FloatArray>): Prediction {
@@ -75,6 +87,10 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
      * A factory for creating instances of this analyzer. This downloads the model from the web. If unable to download
      * from the web, this will throw a [FileNotFoundException].
      */
+    @Deprecated(
+        message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+        replaceWith = ReplaceWith("StripeCardScan"),
+    )
     class Factory(
         context: Context,
         fetchedModel: FetchedData,
@@ -96,6 +112,10 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
     /**
      * A fetcher for downloading model data.
      */
+    @Deprecated(
+        message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+        replaceWith = ReplaceWith("StripeCardScan"),
+    )
     class ModelFetcher(context: Context) : UpdatingModelWebFetcher(context) {
         override val defaultModelVersion: String = "4.147.0.94.16"
         override val defaultModelHash: String = "0693bf1962715e32f8d85ffefd8be9971d84ed554f25f4060aca2ca1f82c955b"

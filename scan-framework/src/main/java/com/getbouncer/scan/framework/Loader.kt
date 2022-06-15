@@ -14,11 +14,13 @@ import java.nio.channels.FileChannel
 /**
  * An interface for loading data into a byte buffer.
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 class Loader(private val context: Context) {
 
     /**
      * Load previously fetched data into memory.
      */
+    @Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
     suspend fun loadData(fetchedData: FetchedData): ByteBuffer? = when (fetchedData) {
         is FetchedResource -> loadResourceData(fetchedData)
         is FetchedFile -> loadFileData(fetchedData)
@@ -113,6 +115,7 @@ private fun readFileToByteBuffer(
 /**
  * Determine if an asset file exists
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 fun assetFileExists(context: Context, assetFileName: String) =
     try {
         context.assets.openFd(assetFileName).use { it.declaredLength > 0 }

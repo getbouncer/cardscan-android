@@ -7,12 +7,20 @@ import com.getbouncer.scan.framework.util.indexOfMax
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
 import kotlin.math.exp
 
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun sigmoid(x: Float): Float = (1.0f / (1.0f + exp((-x))))
 
 /**
  * Takes a layer from the raw YOLO model output and performs post-processing on it,
  * returning a List<DetectionBox>
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun processYoloLayer(
     layer: Array<Array<FloatArray>>,
     anchors: Array<Pair<Int, Int>>,

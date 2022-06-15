@@ -7,6 +7,7 @@ import android.provider.Settings
 import android.telephony.TelephonyManager
 import java.util.Locale
 
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 data class Device(
     val ids: DeviceIds,
     val name: String,
@@ -40,6 +41,7 @@ data class Device(
     }
 }
 
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 data class DeviceIds(
     val androidId: String?
 ) {
@@ -102,13 +104,25 @@ private fun getDevicePhoneCount(context: Context) =
 private fun getNetworkOperator(context: Context) =
     (context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?)?.networkOperator
 
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun getOsVersion() = Build.VERSION.SDK_INT
 
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun getPlatform() = "android"
 
 /**
  * from https://stackoverflow.com/a/27836910/947883
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun getDeviceName(): String {
     // TODO: change this back once we can support newer kotlin versions
 //    val manufacturer = Build.MANUFACTURER?.lowercase() ?: ""

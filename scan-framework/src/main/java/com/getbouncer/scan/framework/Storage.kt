@@ -6,77 +6,92 @@ import android.util.Log
 
 private const val STORAGE_FILE_NAME = "bouncer_shared_prefs"
 
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 interface Storage {
 
     /**
      * Store a String in app storage by a [key].
      */
+    @Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
     fun storeValue(key: String, value: String): Boolean
 
     /**
      * Store a Long in app storage by a [key].
      */
+    @Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
     fun storeValue(key: String, value: Long): Boolean
 
     /**
      * Store an Int in app storage by a [key].
      */
+    @Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
     fun storeValue(key: String, value: Int): Boolean
 
     /**
      * Store a Float in app storage by a [key].
      */
+    @Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
     fun storeValue(key: String, value: Float): Boolean
 
     /**
      * Store a Boolean in app storage by a [key].
      */
+    @Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
     fun storeValue(key: String, value: Boolean): Boolean
 
     /**
      * Retrieve a String from app storage by a [key].
      */
+    @Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
     fun getString(key: String, defaultValue: String): String
 
     /**
      * Retrieve a Long from app storage by a [key].
      */
+    @Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
     fun getLong(key: String, defaultValue: Long): Long
 
     /**
      * Retrieve an Int from app storage by a [key].
      */
+    @Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
     fun getInt(key: String, defaultValue: Int): Int
 
     /**
      * Retrieve a Float from app storage by a [key].
      */
+    @Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
     fun getFloat(key: String, defaultValue: Float): Float
 
     /**
      * Retrieve a Boolean from app storage by a [key].
      */
+    @Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
     fun getBoolean(key: String, defaultValue: Boolean): Boolean
 
     /**
      * Clears out a single value from storage.
      */
+    @Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
     fun remove(key: String): Boolean
 
     /**
      * Clear out all values from storage.
      */
+    @Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
     fun clear(): Boolean
 }
 
 /**
  * A class that handles access to storage.
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 object StorageFactory {
     fun getStorageInstance(context: Context, purpose: String): Storage =
         SharedPreferencesStorage(context.applicationContext, purpose)
 }
 
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 class SharedPreferencesStorage(private val context: Context, private val purpose: String) : Storage {
     private val sharedPrefs: SharedPreferences? by lazy {
         context.getSharedPreferences(STORAGE_FILE_NAME, Context.MODE_PRIVATE)

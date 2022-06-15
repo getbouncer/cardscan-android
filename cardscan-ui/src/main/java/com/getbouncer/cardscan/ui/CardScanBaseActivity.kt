@@ -30,6 +30,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicBoolean
 
+@Deprecated("Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 interface CardScanResultListener : ScanResultListener {
 
     /**
@@ -46,6 +47,7 @@ private val MINIMUM_RESOLUTION = Size(1067, 600) // minimum size of screen detec
 
 private fun DetectionBox.forDebug() = DebugDetectionBox(rect, confidence, label.toString())
 
+@Deprecated("Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 abstract class CardScanBaseActivity :
     SimpleScanActivity(),
     AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult>,

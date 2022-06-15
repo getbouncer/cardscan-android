@@ -8,6 +8,10 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 data class StatsPayload(
     @SerialName("instance_id") val instanceId: String,
     @SerialName("scan_id") val scanId: String?,
@@ -19,6 +23,10 @@ data class StatsPayload(
 )
 
 @Serializable
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 data class ScanStatistics(
     @SerialName("tasks") val tasks: Map<String, List<TaskStatistics>>,
     @SerialName("repeating_tasks") val repeatingTasks: Map<String, List<RepeatingTaskStatistics>>
@@ -42,6 +50,10 @@ data class ScanStatistics(
 }
 
 @Serializable
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 data class ModelVersion(
     @SerialName("name") val name: String,
     @SerialName("version") val version: String,
@@ -59,6 +71,10 @@ data class ModelVersion(
 }
 
 @Serializable
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 data class TaskStatistics(
     @SerialName("started_at_ms") val startedAtMs: Long,
     @SerialName("duration_ms") val durationMs: Long,
@@ -75,6 +91,10 @@ data class TaskStatistics(
 }
 
 @Serializable
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 data class RepeatingTaskStatistics(
     @SerialName("result") val result: String,
     @SerialName("executions") val executions: Int,

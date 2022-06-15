@@ -13,6 +13,7 @@ import kotlinx.coroutines.withContext
 /**
  * A result handler for data processing. This is called when results are available from an [Analyzer].
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 interface ResultHandler<Input, Output, Verdict> {
     suspend fun onResult(result: Output, data: Input): Verdict
 }
@@ -20,6 +21,7 @@ interface ResultHandler<Input, Output, Verdict> {
 /**
  * A specialized result handler that has some form of state.
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 abstract class StatefulResultHandler<Input, State, Output, Verdict>(
     private var initialState: State
 ) : ResultHandler<Input, Output, Verdict> {
@@ -39,6 +41,7 @@ abstract class StatefulResultHandler<Input, State, Output, Verdict>(
 /**
  * A result handler with a method that notifies when all data has been processed.
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 abstract class TerminatingResultHandler<Input, State, Output>(
     initialState: State
 ) : StatefulResultHandler<Input, State, Output, Unit>(initialState) {
@@ -53,6 +56,7 @@ abstract class TerminatingResultHandler<Input, State, Output>(
     abstract suspend fun onTerminatedEarly()
 }
 
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 interface AggregateResultListener<InterimResult, FinalResult> {
 
     /**
@@ -80,6 +84,7 @@ interface AggregateResultListener<InterimResult, FinalResult> {
  * The [ResultAggregator] processes results from analyzers until a condition is met. That condition is part of the
  * aggregator's logic.
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 abstract class ResultAggregator<DataFrame, State, AnalyzerResult, InterimResult, FinalResult>(
     private val listener: AggregateResultListener<InterimResult, FinalResult>,
     private val initialState: State
@@ -171,5 +176,6 @@ abstract class ResultAggregator<DataFrame, State, AnalyzerResult, InterimResult,
      *
      * @param result: The result to aggregate
      */
+    @Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
     abstract suspend fun aggregateResult(frame: DataFrame, result: AnalyzerResult): Pair<InterimResult, FinalResult?>
 }

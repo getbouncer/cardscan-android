@@ -36,6 +36,10 @@ private fun getVisiblePreview(previewBounds: Rect) = Size(
  *    cameraPreviewImage's fields of view are smaller than or the same size as the previewBounds's
  * 3. the previewBounds and the cameraPreviewImage have the same orientation
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun cropCameraPreviewToViewFinder(
     cameraPreviewImage: Bitmap,
     previewBounds: Rect,
@@ -69,6 +73,10 @@ fun cropCameraPreviewToViewFinder(
  *    cameraPreviewImage's fields of view are smaller than or the same size as the previewBounds's
  * 3. the previewBounds and the cameraPreviewImage have the same orientation
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun cropCameraPreviewToSquare(
     cameraPreviewImage: Bitmap,
     previewBounds: Rect,
@@ -96,6 +104,10 @@ fun cropCameraPreviewToSquare(
  * Determine if the device supports OpenGL version 3.1.
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun hasOpenGl31(context: Context): Boolean {
     val openGlVersion = 0x00030001
     val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager

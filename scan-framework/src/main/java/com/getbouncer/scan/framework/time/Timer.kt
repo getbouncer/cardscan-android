@@ -4,9 +4,17 @@ import android.util.Log
 import com.getbouncer.scan.framework.Config
 import kotlinx.coroutines.runBlocking
 
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 sealed class Timer {
 
     companion object {
+        @Deprecated(
+            message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+            replaceWith = ReplaceWith("StripeCardScan"),
+        )
         fun newInstance(
             tag: String,
             name: String,
