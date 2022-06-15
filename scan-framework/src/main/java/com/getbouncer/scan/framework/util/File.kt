@@ -14,12 +14,14 @@ private val illegalFileNameCharacters = setOf('"', '*', '/', ':', '<', '>', '?',
 /**
  * Sanitize the name of a file for storage
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 fun sanitizeFileName(unsanitized: String) =
     unsanitized.map { char -> if (char in illegalFileNameCharacters) "_" else char }.joinToString("")
 
 /**
  * Determine if a [File] matches the expected [hash].
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 suspend fun fileMatchesHash(localFile: File, hash: String, hashAlgorithm: String) = try {
     hash == calculateHash(localFile, hashAlgorithm)
 } catch (t: Throwable) {
@@ -30,6 +32,7 @@ suspend fun fileMatchesHash(localFile: File, hash: String, hashAlgorithm: String
  * Calculate the hash of a file using the [hashAlgorithm].
  */
 @Throws(IOException::class, NoSuchAlgorithmException::class)
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 suspend fun calculateHash(file: File, hashAlgorithm: String): String? =
     withContext(Dispatchers.IO) {
         if (file.exists()) {
@@ -44,6 +47,7 @@ suspend fun calculateHash(file: File, hashAlgorithm: String): String? =
 /**
  * A file does not match the expected hash value.
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 class HashMismatchException(val algorithm: String, val expected: String, val actual: String?) :
     Exception("Invalid hash result for algorithm '$algorithm'. Expected '$expected' but got '$actual'") {
     override fun toString() = "HashMismatchException(algorithm='$algorithm', expected='$expected', actual='$actual')"

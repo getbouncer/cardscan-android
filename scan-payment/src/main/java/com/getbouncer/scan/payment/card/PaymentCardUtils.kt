@@ -84,7 +84,15 @@ import kotlinx.coroutines.withContext
 
 private const val IIN_LENGTH = 6
 private const val LAST_FOUR_LENGTH = 4
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 const val QUICK_READ_LENGTH = 16
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 const val QUICK_READ_GROUP_LENGTH = 4
 /**
  * The Jaccard similarity threshold for determining if two numbers are possibly the same.
@@ -139,6 +147,10 @@ private var CUSTOM_ISSUER_TABLE: MutableList<IssuerData> = mutableListOf()
  * Get an issuer from a complete or partial card number. If the pan is null, return an unknown issuer.
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun getCardIssuer(pan: String?): CardIssuer = normalizeCardNumber(pan).let { normalizedPan ->
     getIssuerData(normalizedPan)?.issuer ?: CardIssuer.Unknown
 }
@@ -147,6 +159,10 @@ fun getCardIssuer(pan: String?): CardIssuer = normalizeCardNumber(pan).let { nor
  * Get the type of card from a complete or partial card number. If the pan is null, return an unknown type.
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 suspend fun getCardType(context: Context, pan: String?): CardType = withContext(Dispatchers.IO) {
     normalizeCardNumber(pan).let { normalizedPan ->
         val iin = normalizedPan.iin().toIntOrNull() ?: -1
@@ -163,6 +179,10 @@ suspend fun getCardType(context: Context, pan: String?): CardType = withContext(
  * ```
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun isValidPan(pan: String?): Boolean {
     // contract { returns(true) implies (pan != null) }
     return normalizeCardNumber(pan).let { normalizedPan ->
@@ -175,6 +195,10 @@ fun isValidPan(pan: String?): Boolean {
  * Determine if an IIN is valid.
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun isValidIin(iin: String?): Boolean {
     // contract { returns(true) implies (iin != null) }
     return normalizeCardNumber(iin).let { normalizedPan ->
@@ -186,6 +210,10 @@ fun isValidIin(iin: String?): Boolean {
  * Determine if a CVC is valid based on an issuer.
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun isValidCvc(cvc: String?, issuer: CardIssuer?): Boolean {
     // contract { returns(true) implies (cvc != null) }
     return normalizeCardNumber(cvc).let { cvcNumber ->
@@ -202,6 +230,10 @@ fun isValidCvc(cvc: String?, issuer: CardIssuer?): Boolean {
  * Determine if the provided last four digits are valid.
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun isValidPanLastFour(panLastFour: String?): Boolean {
     // contract { returns(true) implies (panLastFour != null) }
     return normalizeCardNumber(panLastFour).length == LAST_FOUR_LENGTH
@@ -211,6 +243,10 @@ fun isValidPanLastFour(panLastFour: String?): Boolean {
  * Get an IIN for a given PAN.
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun iinFromPan(pan: String): String =
     if (pan.length < IIN_LENGTH) {
         pan.padEnd(IIN_LENGTH, '0')
@@ -222,12 +258,20 @@ fun iinFromPan(pan: String): String =
  * Format a string as an IIN.
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun String.iin(): String = iinFromPan(this)
 
 /**
  * Get the last four digits from a given PAN.
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun lastFourFromPan(pan: String): String =
     if (pan.length < LAST_FOUR_LENGTH) {
         pan
@@ -239,6 +283,10 @@ fun lastFourFromPan(pan: String): String =
  * Format a string as a payment card last four digits.
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun String.lastFour(): String = lastFourFromPan(this)
 
 /**
@@ -259,6 +307,10 @@ private fun getIssuerData(issuer: CardIssuer): List<IssuerData> =
  * Adds support for a new [CardIssuer]
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun supportCardIssuer(
     iins: IntRange,
     cardIssuer: CardIssuer,
@@ -271,12 +323,20 @@ fun supportCardIssuer(
  * Normalize a PAN by removing all non-numeric characters.
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun normalizeCardNumber(cardNumber: String?) = cardNumber?.filter { it.isDigit() } ?: ""
 
 /**
  * Determine if the pan is valid or close to valid.
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun isPossiblyValidPan(pan: String?): Boolean {
     // contract { returns(true) implies (pan != null) }
     return pan != null && pan.isDigitsOnly() && pan.length >= 7
@@ -286,6 +346,10 @@ fun isPossiblyValidPan(pan: String?): Boolean {
  * Determine if the pan is not close to being valid.
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun isNotPossiblyValidPan(pan: String?): Boolean {
     // contract { returns(false) implies (pan != null) }
     return pan == null || !pan.isDigitsOnly() || pan.length < 10
@@ -297,6 +361,10 @@ fun isNotPossiblyValidPan(pan: String?): Boolean {
  * compared to another IIN. This method will not correctly compare different values, such as an IIN to a PAN.
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun numberPossiblyMatches(scanned: String?, required: String?): Boolean =
     scanned == required || (
         scanned != null && scanned.isDigitsOnly() &&
@@ -307,6 +375,10 @@ fun numberPossiblyMatches(scanned: String?, required: String?): Boolean =
  * Determine if a given [pan] matches a required IIN and Last4
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun panMatches(
     requiredIin: String?,
     requiredLastFour: String?,

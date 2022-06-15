@@ -9,11 +9,19 @@ import kotlin.math.roundToInt
 private const val DIM_PIXEL_SIZE = 3
 private const val NUM_BYTES_PER_CHANNEL = 4 // Float.size / Byte.size
 
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 data class ImageTransformValues(val red: Float, val green: Float, val blue: Float)
 
 /**
  * An image in the required ML input format (array of floats, 3 floats per pixel in R, G, B format).
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 class MLImage(val width: Int, val height: Int, private val imageData: ByteBuffer) {
 
     constructor(bitmap: Bitmap, mean: Float = 0F, std: Float = 255F) : this(

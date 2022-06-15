@@ -8,6 +8,10 @@ import kotlin.math.sqrt
 
 private const val NUMBER_OF_PRIORS = 3
 
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun combinePriors(trainedImageSize: Size): Array<SizeAndCenter> {
     val priorsOne: Array<SizeAndCenter> =
         generatePriors(

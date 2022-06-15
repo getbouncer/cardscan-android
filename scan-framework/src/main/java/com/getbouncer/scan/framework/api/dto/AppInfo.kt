@@ -7,6 +7,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 data class AppInfo(
     @SerialName("app_package_name") val appPackageName: String?,
     @SerialName("application_id") val applicationId: String,
@@ -17,6 +21,10 @@ data class AppInfo(
     @SerialName("is_debug_build") val isDebugBuild: Boolean
 ) {
     companion object {
+        @Deprecated(
+            message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+            replaceWith = ReplaceWith("StripeCardScan"),
+        )
         fun fromAppDetails(appDetails: AppDetails): AppInfo = AppInfo(
             appPackageName = appDetails.appPackageName,
             applicationId = appDetails.applicationId,

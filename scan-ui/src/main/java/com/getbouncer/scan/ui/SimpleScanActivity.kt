@@ -34,12 +34,20 @@ import kotlinx.coroutines.flow.Flow
 import kotlin.math.min
 import kotlin.math.roundToInt
 
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 abstract class SimpleScanActivity : ScanActivity() {
 
     /**
      * The state of the scan flow. This can be expanded if [displayState] is overridden to handle
      * the added states.
      */
+    @Deprecated(
+        message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+        replaceWith = ReplaceWith("StripeCardScan"),
+    )
     abstract class ScanState(val isFinal: Boolean) {
         object NotFound : ScanState(isFinal = false)
         object FoundShort : ScanState(isFinal = false)

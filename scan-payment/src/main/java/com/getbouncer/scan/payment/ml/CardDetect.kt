@@ -24,6 +24,10 @@ private val TRAINED_IMAGE_SIZE = Size(224, 224)
 /** model returns whether or not there is a card present */
 private const val NUM_CLASS = 3
 
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 class CardDetect private constructor(interpreter: Interpreter) :
     TensorFlowLiteAnalyzer<CardDetect.Input, ByteBuffer, CardDetect.Prediction, Array<FloatArray>>(interpreter) {
 
@@ -46,11 +50,19 @@ class CardDetect private constructor(interpreter: Interpreter) :
         )
     }
 
+    @Deprecated(
+        message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+        replaceWith = ReplaceWith("StripeCardScan"),
+    )
     data class Input(val cardDetectImage: TrackedImage<MLImage>)
 
     /**
      * A prediction returned by this analyzer.
      */
+    @Deprecated(
+        message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+        replaceWith = ReplaceWith("StripeCardScan"),
+    )
     data class Prediction(
         val side: Side,
         val noCardProbability: Float,

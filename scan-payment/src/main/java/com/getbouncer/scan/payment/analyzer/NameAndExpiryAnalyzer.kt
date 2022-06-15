@@ -33,6 +33,10 @@ private const val NAME_BOX_Y_SCALE_RATIO = 1.4F
 private const val EXPIRY_BOX_X_SCALE_RATIO = 1.1F
 private const val EXPIRY_BOX_Y_SCALE_RATIO = 1.2F
 
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 class NameAndExpiryAnalyzer private constructor(
     private val textDetect: TextDetect?,
     private val alphabetDetect: AlphabetDetect?,
@@ -41,20 +45,36 @@ class NameAndExpiryAnalyzer private constructor(
     val runExpiryExtraction: Boolean,
 ) : Analyzer<NameAndExpiryAnalyzer.Input, Any, NameAndExpiryAnalyzer.Prediction> {
 
+    @Deprecated(
+        message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+        replaceWith = ReplaceWith("StripeCardScan"),
+    )
     data class Input(
         val cameraPreviewImage: TrackedImage<Bitmap>,
         val previewBounds: Rect,
         val cardFinder: Rect,
     )
 
+    @Deprecated(
+        message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+        replaceWith = ReplaceWith("StripeCardScan"),
+    )
     data class Prediction(
         val name: String?,
         val boxes: List<DetectionBox>?,
         val expiry: ExpiryDetect.Expiry?
     )
 
+    @Deprecated(
+        message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+        replaceWith = ReplaceWith("StripeCardScan"),
+    )
     fun isExpiryDetectorAvailable() = textDetect != null && expiryDetect != null
 
+    @Deprecated(
+        message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+        replaceWith = ReplaceWith("StripeCardScan"),
+    )
     fun isNameDetectorAvailable() = textDetect != null && alphabetDetect != null
 
     override suspend fun analyze(
@@ -308,6 +328,10 @@ class NameAndExpiryAnalyzer private constructor(
         return word.toString().trim { it <= ' ' }
     }
 
+    @Deprecated(
+        message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+        replaceWith = ReplaceWith("StripeCardScan"),
+    )
     class Factory(
         private val textDetectFactory: TextDetect.Factory,
         private val alphabetDetectFactory: AlphabetDetect.Factory? = null,

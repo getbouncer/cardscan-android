@@ -71,6 +71,10 @@ private val DIM_Z = (NUM_CLASS + 5) * 3
 private const val BOX_TOP_DELTA_THRESHOLD = 0.4F
 private const val HEIGHT_RATIO_THRESHOLD = 0.3F
 
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 class TextDetect private constructor(interpreter: Interpreter) :
     TensorFlowLiteAnalyzer<
         TextDetect.Input,
@@ -101,10 +105,18 @@ class TextDetect private constructor(interpreter: Interpreter) :
         )
     }
 
+    @Deprecated(
+        message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+        replaceWith = ReplaceWith("StripeCardScan"),
+    )
     data class Input(
         val textDetectImage: TrackedImage<MLImage>,
     )
 
+    @Deprecated(
+        message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+        replaceWith = ReplaceWith("StripeCardScan"),
+    )
     data class Prediction(
         val allObjects: List<DetectionBox>,
         val nameBoxes: List<DetectionBox>,
@@ -384,6 +396,10 @@ class TextDetect private constructor(interpreter: Interpreter) :
      * A factory for creating instances of this analyzer. This downloads the model from the web. If unable to download
      * from the web, this will throw a [FileNotFoundException].
      */
+    @Deprecated(
+        message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+        replaceWith = ReplaceWith("StripeCardScan"),
+    )
     class Factory(
         context: Context,
         fetchedModel: FetchedData,
@@ -405,6 +421,10 @@ class TextDetect private constructor(interpreter: Interpreter) :
     /**
      * A fetcher for downloading model data.
      */
+    @Deprecated(
+        message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+        replaceWith = ReplaceWith("StripeCardScan"),
+    )
     class ModelFetcher(context: Context) : UpdatingModelWebFetcher(context) {
         override val modelClass: String = "text_detection"
         override val modelFrameworkVersion: Int = 1

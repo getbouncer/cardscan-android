@@ -8,6 +8,7 @@ import java.util.LinkedList
 /**
  * Save data frames for later retrieval.
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 abstract class FrameSaver<Identifier, Frame, MetaData> {
 
     private val saveFrameMutex = Mutex()

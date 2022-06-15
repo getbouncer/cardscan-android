@@ -9,16 +9,19 @@ import com.getbouncer.scan.framework.AnalyzerFactory
 import com.getbouncer.scan.payment.ml.CardDetect
 import com.getbouncer.scan.payment.ml.SSDOcr
 
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 class MainLoopAnalyzer(
     private val ssdOcr: Analyzer<SSDOcr.Input, Any, SSDOcr.Prediction>?,
     private val cardDetect: Analyzer<CardDetect.Input, Any, CardDetect.Prediction>?,
 ) : Analyzer<MainLoopAnalyzer.Input, MainLoopState, MainLoopAnalyzer.Prediction> {
 
+    @Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
     data class Input(
         val cameraPreviewImage: CameraPreviewImage<Bitmap>,
         val cardFinder: Rect,
     )
 
+    @Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
     class Prediction(
         val ocr: SSDOcr.Prediction?,
         val card: CardDetect.Prediction?,
@@ -36,6 +39,7 @@ class MainLoopAnalyzer(
         )
     }
 
+    @Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
     class Factory(
         private val ssdOcrFactory: AnalyzerFactory<SSDOcr.Input, out Any, SSDOcr.Prediction, out Analyzer<SSDOcr.Input, Any, SSDOcr.Prediction>>,
         private val cardDetectFactory: AnalyzerFactory<CardDetect.Input, out Any, CardDetect.Prediction, out Analyzer<CardDetect.Input, Any, CardDetect.Prediction>>,

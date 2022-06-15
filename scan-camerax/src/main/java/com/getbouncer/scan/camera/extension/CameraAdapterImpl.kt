@@ -196,19 +196,21 @@ internal class CameraAdapterImpl(
             .build()
             .also { analysis ->
                 analysis.setAnalyzer(
-                    cameraExecutor,
-                    { image ->
-                        val bitmap = image.toBitmap(getRenderScript(activity))
-                            .rotate(image.imageInfo.rotationDegrees.toFloat())
-                        image.close()
-                        sendImageToStream(
-                            CameraPreviewImage(
-                                TrackedImage(bitmap, Stats.trackRepeatingTask("image_analysis")),
-                                minAspectRatioSurroundingSize(previewView.size(), bitmap.size().aspectRatio()).centerOn(displaySize.toRect())
-                            )
+                    cameraExecutor
+                ) { image ->
+                    val bitmap = image.toBitmap(getRenderScript(activity))
+                        .rotate(image.imageInfo.rotationDegrees.toFloat())
+                    image.close()
+                    sendImageToStream(
+                        CameraPreviewImage(
+                            TrackedImage(bitmap, Stats.trackRepeatingTask("image_analysis")),
+                            minAspectRatioSurroundingSize(
+                                previewView.size(),
+                                bitmap.size().aspectRatio()
+                            ).centerOn(displaySize.toRect())
                         )
-                    }
-                )
+                    )
+                }
             }
 
         cameraProvider.unbindAll()

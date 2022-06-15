@@ -23,6 +23,7 @@ private const val MAX_SAVED_FRAMES_PER_TYPE = 6
  * This aggregator is a state machine. The full list of possible states are subclasses of [MainLoopState]. This was
  * written referencing this article: https://thoughtbot.com/blog/finite-state-machines-android-kotlin-good-times
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 class MainLoopAggregator(
     listener: AggregateResultListener<InterimResult, FinalResult>,
 ) : ResultAggregator<MainLoopAnalyzer.Input, MainLoopState, MainLoopAnalyzer.Prediction, MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult>(
@@ -31,6 +32,7 @@ class MainLoopAggregator(
 ) {
 
     @Keep
+    @Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
     data class FinalResult(
         val pan: String,
         val savedFrames: Map<SavedFrameType, List<SavedFrame>>,
@@ -38,6 +40,7 @@ class MainLoopAggregator(
     )
 
     @Keep
+    @Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
     data class InterimResult(
         val analyzerResult: MainLoopAnalyzer.Prediction,
         val frame: MainLoopAnalyzer.Input,

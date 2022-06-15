@@ -21,22 +21,27 @@ import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 object NoAnalyzersAvailableException : Exception()
 
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 object AlreadySubscribedException : Exception()
 
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 interface AnalyzerLoopErrorListener {
 
     /**
      * A failure occurred during frame analysis. If this returns true, the loop will terminate. If this returns false,
      * the loop will continue to execute on new data.
      */
+    @Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
     fun onAnalyzerFailure(t: Throwable): Boolean
 
     /**
      * A failure occurred while collecting the result of frame analysis. If this returns true, the loop will terminate.
      * If this returns false, the loop will continue to execute on new data.
      */
+    @Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
     fun onResultFailure(t: Throwable): Boolean
 }
 
@@ -53,6 +58,7 @@ interface AnalyzerLoopErrorListener {
  * @param analyzerPool: A pool of analyzers to use in this loop.
  * @param analyzerLoopErrorListener: An error handler for this loop
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 sealed class AnalyzerLoop<DataFrame, State, Output>(
     private val analyzerPool: AnalyzerPool<DataFrame, in State, Output>,
     private val analyzerLoopErrorListener: AnalyzerLoopErrorListener,
@@ -143,6 +149,7 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
         if (withContext(Dispatchers.Main) { analyzerLoopErrorListener.onResultFailure(t) }) { unsubscribeFromFlow() }
     }
 
+    @Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
     abstract fun getState(): State
 }
 
@@ -160,6 +167,7 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
  * @param resultHandler: A result handler that will be called with the results from the analyzers in this loop.
  * @param analyzerLoopErrorListener: An error handler for this loop
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 class ProcessBoundAnalyzerLoop<DataFrame, State, Output>(
     private val analyzerPool: AnalyzerPool<DataFrame, in State, Output>,
     private val resultHandler: StatefulResultHandler<DataFrame, out State, Output, Boolean>,
@@ -194,6 +202,7 @@ class ProcessBoundAnalyzerLoop<DataFrame, State, Output>(
  * @param timeLimit: If specified, this is the maximum allowed time for the loop to run. If the loop
  *     exceeds this duration, the loop will terminate
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 class FiniteAnalyzerLoop<DataFrame, State, Output>(
     private val analyzerPool: AnalyzerPool<DataFrame, in State, Output>,
     private val resultHandler: TerminatingResultHandler<DataFrame, out State, Output>,
@@ -263,6 +272,7 @@ class FiniteAnalyzerLoop<DataFrame, State, Output>(
  * @return a flow that only emits elements when the downstream [Flow.collect] is waiting for the next element
  */
 @ExperimentalCoroutinesApi
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 suspend fun <T> Flow<T>.backPressureDrop(): Flow<T> =
     // TODO: upgrade this when kotlin libs hit 1.5.0
 //    channelFlow { this@backPressureDrop.collect { trySend(it) } }.buffer(capacity = Channel.RENDEZVOUS)

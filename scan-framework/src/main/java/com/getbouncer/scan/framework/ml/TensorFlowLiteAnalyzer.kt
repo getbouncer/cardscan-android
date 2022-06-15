@@ -18,6 +18,10 @@ import java.nio.ByteBuffer
 /**
  * A TensorFlowLite analyzer uses an [Interpreter] to analyze data.
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 abstract class TensorFlowLiteAnalyzer<Input, MLInput, Output, MLOutput>(
     private val tfInterpreter: Interpreter,
     private val delegate: NnApiDelegate? = null,
@@ -56,6 +60,10 @@ abstract class TensorFlowLiteAnalyzer<Input, MLInput, Output, MLOutput>(
 /**
  * A factory that creates tensorflow models as analyzers.
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 abstract class TFLAnalyzerFactory<Input, Output, AnalyzerType : Analyzer<Input, Any, Output>>(
     private val context: Context,
     private val fetchedModel: FetchedData,

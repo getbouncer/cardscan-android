@@ -7,6 +7,10 @@ import com.getbouncer.scan.framework.Fetcher
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 abstract class ModelManager {
     private lateinit var fetcher: Fetcher
     private val fetcherMutex = Mutex()

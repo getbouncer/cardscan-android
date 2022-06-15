@@ -48,12 +48,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
+@Deprecated("Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 data class SavedFrame(
     val pan: String?,
     val frame: MainLoopAnalyzer.Input,
     val details: FrameDetails,
 )
 
+@Deprecated("Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 data class SavedFrameType(
     val hasCard: Boolean,
     val hasPan: Boolean,
@@ -63,6 +65,7 @@ data class SavedFrameType(
  * This class contains the logic required for analyzing a credit card for scanning.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Deprecated("Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 open class CardScanFlow(
     private val enableNameExtraction: Boolean,
     private val enableExpiryExtraction: Boolean,
@@ -80,6 +83,7 @@ open class CardScanFlow(
          * @param context: A context to use for warming up the analyzers.
          */
         @JvmStatic
+        @Deprecated("Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
         suspend fun prepareScan(
             context: Context,
             apiKey: String,
@@ -105,12 +109,20 @@ open class CardScanFlow(
          * Determine if the scan is supported
          */
         @JvmStatic
+        @Deprecated(
+            message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+            replaceWith = ReplaceWith("StripeCardScan")
+        )
         fun isSupported(context: Context) = CameraAdapter.isCameraSupported(context)
 
         /**
          * Determine if the scan models are available (have been warmed up)
          */
         @JvmStatic
+        @Deprecated(
+            message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+            replaceWith = ReplaceWith("StripeCardScan")
+        )
         fun isScanReady() = runBlocking { SSDOcrModelManager.isReady() && CardDetectModelManager.isReady() }
     }
 
@@ -134,6 +146,10 @@ open class CardScanFlow(
      * @param context: The context used to download analyzers if needed
      * @param imageStream: The flow of images to process
      */
+    @Deprecated(
+        message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+        replaceWith = ReplaceWith("StripeCardScan")
+    )
     override fun startFlow(
         context: Context,
         imageStream: Flow<CameraPreviewImage<Bitmap>>,
@@ -204,6 +220,10 @@ open class CardScanFlow(
     /**
      * In the event that the scan cannot complete, halt the flow to halt analyzers and free up CPU and memory.
      */
+    @Deprecated(
+        message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+        replaceWith = ReplaceWith("StripeCardScan")
+    )
     override fun cancelFlow() {
         canceled = true
 
@@ -303,6 +323,10 @@ open class CardScanFlow(
     /**
      * Select which frames to use in the completion loop.
      */
+    @Deprecated(
+        message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+        replaceWith = ReplaceWith("StripeCardScan")
+    )
     open fun <SavedFrame> selectCompletionLoopFrames(
         frameRate: Rate,
         frames: Map<SavedFrameType, List<SavedFrame>>,

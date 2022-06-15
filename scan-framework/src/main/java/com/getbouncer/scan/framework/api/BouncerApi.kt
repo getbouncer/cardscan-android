@@ -27,11 +27,19 @@ private const val API_KEY_VALIDATION_PATH = "/v1/api_key/validate"
 private const val MODEL_SIGNED_URL_PATH = "/v1/signed_url/model/%s/%s/android/%s"
 private const val MODEL_DETAILS_PATH = "/v2/model_details"
 
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 const val ERROR_CODE_NOT_AUTHENTICATED = "not_authenticated"
 
 /**
  * Upload stats data to bouncer servers.
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun uploadScanStats(
     context: Context,
     instanceId: String,
@@ -58,6 +66,10 @@ fun uploadScanStats(
 /**
  * Validate an API key.
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 suspend fun validateApiKey(context: Context): NetworkResult<out ValidateApiKeyResponse, out BouncerErrorResponse> =
     withContext(Dispatchers.IO) {
         getForResult(
@@ -71,6 +83,10 @@ suspend fun validateApiKey(context: Context): NetworkResult<out ValidateApiKeyRe
 /**
  * Get a signed URL for a model.
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 suspend fun getModelSignedUrl(
     context: Context,
     modelClass: String,
@@ -89,6 +105,10 @@ suspend fun getModelSignedUrl(
 /**
  * Get details about a model.
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 suspend fun getModelDetails(
     context: Context,
     modelClass: String,

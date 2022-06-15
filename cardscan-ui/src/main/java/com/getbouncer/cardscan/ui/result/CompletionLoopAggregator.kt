@@ -14,6 +14,7 @@ private const val MINIMUM_EXPIRY_AGREEMENT = 2
 
 private const val INSUFFICIENT_PERMISSIONS_PREFIX = "Insufficient API key permissions - "
 
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 interface CompletionLoopListener {
     fun onCompletionLoopDone(result: CompletionLoopResult)
 
@@ -23,6 +24,7 @@ interface CompletionLoopListener {
     )
 }
 
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 data class CompletionLoopResult(
     val name: String? = null,
     val expiryMonth: String? = null,
@@ -34,6 +36,7 @@ data class CompletionLoopResult(
  * Collect the results from executing the completion loop across multiple saved images. Send the
  * collected results to the [listener].
  */
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 class CompletionLoopAggregator(
     private val listener: CompletionLoopListener,
 ) : TerminatingResultHandler<SavedFrame, Unit, CompletionLoopAnalyzer.Prediction>(Unit) {

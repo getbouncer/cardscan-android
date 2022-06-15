@@ -2,19 +2,35 @@ package com.getbouncer.scan.framework.time
 
 import androidx.annotation.CheckResult
 
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 object Clock {
     @JvmStatic
+    @Deprecated(
+        message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+        replaceWith = ReplaceWith("StripeCardScan"),
+    )
     fun markNow(): ClockMark = PreciseClockMark(System.nanoTime())
 }
 
 /**
  * Convert a milliseconds since epoch timestamp to a clock mark.
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun Long.asEpochMillisecondsClockMark(): ClockMark = AbsoluteClockMark(this)
 
 /**
  * A marked point in time.
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 sealed class ClockMark {
     abstract fun elapsedSince(): Duration
 
@@ -114,6 +130,10 @@ private class PreciseClockMark(private val originMarkNanoseconds: Long) : ClockM
  * TODO: use contracts when they are no longer experimental
  */
 @CheckResult
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 inline fun <T> measureTime(block: () -> T): Pair<Duration, T> {
     // contract { callsInPlace(block, EXACTLY_ONCE) }
     val mark = Clock.markNow()

@@ -12,6 +12,10 @@ import com.getbouncer.scan.payment.ModelManager
 private const val OCR_ASSET_FULL = "darknite_1_1_1_16.tflite"
 private const val OCR_ASSET_MINIMAL = "mb2_brex_metal_synthetic_svhnextra_epoch_3_5_98_8.tflite"
 
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 object SSDOcrModelManager : ModelManager() {
     override fun getModelFetcher(context: Context): Fetcher = when {
         assetFileExists(context, OCR_ASSET_FULL) -> {

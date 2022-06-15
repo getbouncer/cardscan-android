@@ -34,13 +34,16 @@ import kotlinx.coroutines.runBlocking
     Surface.ROTATION_270
 )
 @Retention(AnnotationRetention.SOURCE)
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 annotation class RotationValue
 
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 data class CameraPreviewImage<ImageBase>(
     val image: TrackedImage<ImageBase>,
     val previewImageBounds: Rect,
 )
 
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
 
     // TODO: change this to be a channelFlow once it's no longer experimental, add some capacity and use a backpressure drop strategy
@@ -161,6 +164,7 @@ abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
     fun getImageStream(): Flow<CameraOutput> = imageChannel.receiveAsFlow()
 }
 
+@Deprecated(message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan")
 interface CameraErrorListener {
 
     @MainThread

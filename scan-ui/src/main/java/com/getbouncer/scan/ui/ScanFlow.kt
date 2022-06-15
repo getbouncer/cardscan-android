@@ -11,6 +11,10 @@ import kotlinx.coroutines.flow.Flow
 /**
  * A flow for scanning something. This manages the callbacks and lifecycle of the flow.
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 interface ScanFlow {
 
     /**

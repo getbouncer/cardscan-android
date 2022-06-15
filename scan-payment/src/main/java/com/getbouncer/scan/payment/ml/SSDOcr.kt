@@ -91,13 +91,25 @@ private val PRIORS = combinePriors(SSDOcr.Factory.TRAINED_IMAGE_SIZE)
 /**
  * This model performs SSD OCR recognition on a card.
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 class SSDOcr private constructor(interpreter: Interpreter) :
     TensorFlowLiteAnalyzer<SSDOcr.Input, Array<ByteBuffer>, SSDOcr.Prediction, Map<Int, Array<FloatArray>>>(
         interpreter
     ) {
 
+    @Deprecated(
+        message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+        replaceWith = ReplaceWith("StripeCardScan"),
+    )
     data class Input(val ssdOcrImage: TrackedImage<MLImage>)
 
+    @Deprecated(
+        message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+        replaceWith = ReplaceWith("StripeCardScan"),
+    )
     data class Prediction(val pan: String, val detectedBoxes: List<DetectionBox>)
 
     companion object {
@@ -184,6 +196,10 @@ class SSDOcr private constructor(interpreter: Interpreter) :
     /**
      * A factory for creating instances of this analyzer.
      */
+    @Deprecated(
+        message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+        replaceWith = ReplaceWith("StripeCardScan"),
+    )
     class Factory(
         context: Context,
         fetchedModel: FetchedData,

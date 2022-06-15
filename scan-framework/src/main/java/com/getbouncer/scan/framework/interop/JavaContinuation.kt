@@ -13,6 +13,10 @@ import kotlin.coroutines.resumeWithException
 /**
  * A utility class for calling suspend functions from java. This allows listening to a suspend function with callbacks.
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 abstract class JavaContinuation<in T> @JvmOverloads constructor(
     runOn: CoroutineContext = Dispatchers.Default,
     private val listenOn: CoroutineContext = Dispatchers.Main
@@ -37,6 +41,10 @@ abstract class JavaContinuation<in T> @JvmOverloads constructor(
 /**
  * An empty continuation for ignoring results.
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 class EmptyJavaContinuation<in T> : JavaContinuation<T>() {
     override fun onComplete(value: T) { }
     override fun onException(exception: Throwable) {
@@ -47,9 +55,17 @@ class EmptyJavaContinuation<in T> : JavaContinuation<T>() {
 /**
  * Resume a continuation with a value.
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun <T> Continuation<T>.resumeJava(value: T) = this.resume(value)
 
 /**
  * Resume a continuation with an exception.
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun <T> Continuation<T>.resumeWithExceptionJava(exception: Throwable) = this.resumeWithException(exception)

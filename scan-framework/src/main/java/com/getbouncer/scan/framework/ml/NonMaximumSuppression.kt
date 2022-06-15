@@ -18,6 +18,10 @@ import java.util.ArrayList
  *
  * @return pickedIndices: a list of indexes of the kept boxes
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun hardNonMaximumSuppression(
     boxes: Array<FloatArray>,
     probabilities: FloatArray,
@@ -73,6 +77,10 @@ private fun intersectionOverUnionOf(currentBox: RectForm, nextBox: RectForm): Fl
  *   [confidence]:     [0.1,    0.2,    0.4,    0.3,    0.5,   0.3]
  *   Output:           [BACKGROUND, BACKGROUND, LABEL0, BACKGROUND, LABEL, BACKGROUND]
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun <Input> greedyNonMaxSuppression(
     rawPredictions: Array<Input>,
     confidence: FloatArray,

@@ -12,6 +12,10 @@ import java.util.Calendar
  * 3. If the month is the same as the current month, determine if the day is after the current day.
  *    If after or the current day, return true.
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun isValidExpiry(day: String?, month: String, year: String): Boolean {
     val calendar = Calendar.getInstance()
 
@@ -50,6 +54,10 @@ fun isValidExpiry(day: String?, month: String, year: String): Boolean {
 /**
  * Format the card expiry as a human readable format.
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun formatExpiry(day: String?, month: String, year: String): String {
     val formattedDay = if (day != null) "${formatExpiryDay(day)}/" else ""
     return "$formattedDay${formatExpiryMonth(month)}/${formatExpiryYear(year)}"
@@ -58,11 +66,19 @@ fun formatExpiry(day: String?, month: String, year: String): String {
 /**
  * Determine if a month string is valid.
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun isValidMonth(month: String) = month.toIntOrNull()?.let { isValidMonth(it) } ?: false
 
 /**
  * Determine if a month integer is valid.
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun isValidMonth(month: Int) = month in 1..12
 
 /**

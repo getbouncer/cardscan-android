@@ -11,6 +11,10 @@ import com.getbouncer.scan.payment.card.QUICK_READ_GROUP_LENGTH
 import com.getbouncer.scan.payment.card.QUICK_READ_LENGTH
 import kotlin.math.abs
 
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 data class OcrFeatureMapSizes(
     val layerOneWidth: Int,
     val layerOneHeight: Int,
@@ -27,6 +31,10 @@ data class OcrFeatureMapSizes(
  *
  * TODO: simplify this
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun rearrangeOCRArray(
     locations: Array<FloatArray>,
     featureMapSizes: OcrFeatureMapSizes,
@@ -77,6 +85,10 @@ fun rearrangeOCRArray(
  * Applies non-maximum suppression to each class. Picks out the remaining boxes, the class
  * probabilities for classes that are kept, and composes all the information.
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun extractPredictions(
     scores: Array<ClassifierScores>,
     boxes: Array<RectForm>,
@@ -130,6 +142,10 @@ fun extractPredictions(
  * i.e. the number has both vertical and horizontal components we need to sort from left to right
  * and top to bottom to order the boxes according to the card number.
  */
+@Deprecated(
+    message = "Replaced by stripe card scan. See https://github.com/stripe/stripe-android/tree/master/stripecardscan",
+    replaceWith = ReplaceWith("StripeCardScan"),
+)
 fun determineLayoutAndFilter(detectedBoxes: List<DetectionBox>, verticalOffset: Float): List<DetectionBox> {
     if (detectedBoxes.isEmpty()) {
         return detectedBoxes
