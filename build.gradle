@@ -35,7 +35,7 @@ allprojects {
     }
 
     dependencies {
-        kotlinlint("com.pinterest:ktlint:0.41.0") {
+        kotlinlint("com.pinterest:ktlint:0.46.1") {
             attributes {
                 attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling, Bundling.EXTERNAL))
             }
